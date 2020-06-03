@@ -1,0 +1,28 @@
+{
+  "name": "svelthree",
+  "svelte": "src/index.js",
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.0",
+    "@rollup/plugin-node-resolve": "^8.0.0",
+    "rollup": "^2.12.0",
+    "rollup-plugin-svelte": "^5.2.2",
+    "rollup-plugin-terser": "^6.1.0",
+    "svelte": "^3.23.0",
+    "svelte-preprocess": "^3.7.4",
+    "three": "^0.117.1",
+    "typescript": "^3.9.3"
+  },
+  "keywords": [
+    "svelte"
+  ],
+  "files": [
+    "src",
+    "dist"
+  ]
+}
