@@ -4,13 +4,8 @@ Svelte components library for declarative construction of reactive and reusable 
 
 ***
 
-<div style="display:flex; justify-content: center">
-    <iframe src="https://cream.gmbh/svelthree/preview" title="svelthree eraly demo" style="width:600px; height:900px"></iframe>
-</div>
+<iframe src="https://cream.gmbh/svelthree/preview" title="svelthree early demo" style="width:600px; height:900px"></iframe>
 
 ***
 
 ### 😎 stay tuned, coming June 2020 ... 🚀
-
-
-
