@@ -20,7 +20,7 @@ const useTerser = true;
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
-	input: 'src/index.js',
+	input: 'src/svelthree.js',
 	treeshake: { moduleSideEffects: false },
 	output: [
 		{ file: pkg.module, 'format': 'es' },
