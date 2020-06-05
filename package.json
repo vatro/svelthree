@@ -1,8 +1,10 @@
 {
   "name": "svelthree",
-  "svelte": "src/index.js",
-  "module": "dist/index.mjs",
-  "main": "dist/index.js",
+  "version": "0.0.1",
+  "description": "Svelte components library (incl. Threejs library) for declarative construction of reactive and reusable Threejs scene graphs utilizing nothing but Svelte and Threejs.",
+  "svelte": "src/svelthree.js",
+  "module": "dist/svelthree.mjs",
+  "main": "dist/svelthree.js",
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
@@ -18,11 +20,19 @@
     "three": "^0.117.1",
     "typescript": "^3.9.3"
   },
-  "keywords": [
-    "svelte"
-  ],
   "files": [
     "src",
     "dist"
-  ]
+  ],
+   "keywords": [
+    "svelte",
+    "threejs",
+    "three"
+  ],
+  "author": "Vatroslav Vrbanic",
+  "license": "MIT",
+   "bugs": {
+    "url": "https://github.com/vatro/svelthree/issues"
+  },
+  "homepage": "https://github.com/vatro/svelthree#readme"
 }
