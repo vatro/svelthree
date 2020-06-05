@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Svelte components library (incl. Threejs library) for declarative construction of reactive and reusable Threejs scene graphs utilizing nothing but Svelte and Threejs.",
   "svelte": "src/svelthree.js",
   "module": "dist/svelthree.mjs",
