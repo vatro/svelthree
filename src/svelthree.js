@@ -1,1 +1,1 @@
-// Nothing here yet, thanks for your interest. First release is planed for June 2020. Thank you! :)
+// Nothing here yet, thanks for your interest. First release was rescheduled for July 2020 (previously June). Thank you! :)
