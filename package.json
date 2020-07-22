@@ -1,0 +1,49 @@
+{
+  "name": "svelthree",
+  "version": "0.118.0",
+  "description": "Svelte powered three.js development",
+  "svelte": "src/svelthree.js",
+  "types": "src/svelthree.d.ts",
+  "module": "dist/svelthree.mjs",
+  "main": "dist/svelthree.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "svelte-check": "svelte-check",
+    "local-tsc": "tsc",
+    "test": "echo 'Error: no test specified' && exit 1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-typescript": "^5.0.2",
+    "prettier": "^2.0.5",
+    "rollup": "^2.22.2",
+    "rollup-plugin-svelte": "^5.2.3",
+    "rollup-plugin-terser": "^6.1.0",
+    "svelte": "^3.24.0",
+    "svelte-check": "^0.1.55",
+    "svelte-preprocess": "^4.0.8",
+    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#118",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "keywords": [
+    "svelte",
+    "svelte.js",
+    "three",
+    "three.js",
+    "svelthree"
+  ],
+  "author": "Vatroslav Vrbanic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vatro/svelthree/issues"
+  },
+  "homepage": "https://github.com/vatro/svelthree#readme",
+  "dependencies": {}
+}
