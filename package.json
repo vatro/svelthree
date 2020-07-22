@@ -28,10 +28,6 @@
     "tslib": "^2.0.0",
     "typescript": "^3.9.7"
   },
-  "files": [
-    "src",
-    "dist"
-  ],
   "keywords": [
     "svelte",
     "svelte.js",
