@@ -10,11 +10,6 @@ import pkg from "./package.json"
 import preprocess from "svelte-preprocess"
 import typescript from "@rollup/plugin-typescript"
 
-const name = pkg.name
-    .replace(/^(@\S+\/)?(svelte-)?(\S+)/, "$3")
-    .replace(/^\w/, (m) => m.toUpperCase())
-    .replace(/-\w/g, (m) => m[1].toUpperCase())
-
 const devMode = false
 const production = !process.env.ROLLUP_WATCH
 const bannerString = "/**\n" +
@@ -51,7 +46,7 @@ export default {
 		*/
 
         { banner: bannerString, file: pkg.module, format: "es", sourcemap: devMode },
-        { banner: bannerString, file: pkg.main, format: "umd", name, sourcemap: devMode}
+        { banner: bannerString, file: pkg.main, format: "umd", name:"svelthree", sourcemap: devMode}
     ],
     plugins: [
         svelte({
