@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.118.0",
+  "version": "0.118.0-1",
   "description": "Svelte powered three.js development",
   "svelte": "src/svelthree.js",
   "types": "src/svelthree.d.ts",
@@ -41,5 +41,7 @@
     "url": "https://github.com/vatro/svelthree/issues"
   },
   "homepage": "https://github.com/vatro/svelthree#readme",
-  "dependencies": {}
+  "dependencies": {
+    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#118"
+  }
 }
