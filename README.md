@@ -18,7 +18,7 @@ npm i svelthree --save-dev
 
 
 #### Quickstart
-Svelthree components' code is written in **TypeScript**. You can set up a **[new Svelte TypeScript project (official)](https://svelte.dev/blog/svelte-and-typescript)** like this:
+Svelthree components' code is written in TypeScript. You can set up a [new Svelte TypeScript project (official)](https://svelte.dev/blog/svelte-and-typescript) like this:
 
 ```
 npx degit sveltejs/template svelte-typescript-app
@@ -31,12 +31,25 @@ After that install svelthree by executing `npm i svelthree --save-dev ` in your 
 
 
 
+#### General Usage
 
-#### Usage
+Visit [svelthree.dev](https://svelthree.dev/) for usage examples, API *coming soon*, FAQ and a REPL playground! 😎 
 
-Visit [**svelthree.dev**](https://svelthree.dev/) (*new website will be live few hours after 0.118.0 release*) for various usage examples, API, FAQ and a REPL playground! 😎
 
-##### Code Example
+
+#### REPL Usage
+
+You can try out svelthree without installing anything in a Svelte REPL environment:
+
+see [svelte.dev REPL](https://svelte.dev/repl/c574fbeea12740a5a33017448f68bf6b?version=3.24.0)
+
+see [svelthree.dev REPL](https://svelthree.dev/repl/76272e38334347e8a4c900e5bd58b56a?version=3.24.0)
+
+☝️ but here you have to import  `from "https://unpkg.com/svelthree@latest/dist/svelthree.mjs" ` 
+
+
+
+#### Usage Example
 
 ```html
 <!-- HelloCube.svelte -->
@@ -52,7 +65,7 @@ Visit [**svelthree.dev**](https://svelthree.dev/) (*new website will be live few
     Mesh,
     MeshStandardMaterial,
     WebGLRenderer,
-  } from "svelthree";
+  } from "svelthree"; // or from "https://unpkg.com/svelthree@latest/dist/svelthree.mjs" in REPL
 
   let cubeGeometry = new BoxBufferGeometry(1, 1, 1);
   let cubeMaterial = new MeshStandardMaterial();
