@@ -6,7 +6,7 @@
     import { OrthographicCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropLookAt } from "../utils/Sv3Types.svelte"
+    import type { PropPos, PropRot, PropLookAt } from "../utils/Sv3Types.svelte"
 
     export let scene: Scene
     export let id: string = undefined
@@ -23,7 +23,7 @@
     export let aniauto = false
 
     export let pos: PropPos = undefined
-    export let rot: PropPos = undefined
+    export let rot: PropRot = undefined
     export let lookAt: PropLookAt = undefined
     export let frustumSize = 1000 //default frustum size
     export let aspect = 1 //default aspect
@@ -121,24 +121,19 @@
      * type SvelteComponent = import('*.svelte').default
      * */
 
-    // TODO  do I have to write an Interface by myself or wtf?
+    // TODO  do I have to write an Interface by myself?
     let camera: Camera // typeof = 'object'
 
     export function getCamera(): Camera {
-        //return camera["getCamera"]()
-        // TODO  this compiles without errors, so wtf?: Property 'getCamera' does not exist on type 'default'.
+        // TODO  keep an eye on it / fix. compiles without errors, so leave it.
         return camera.getCamera()
     }
 
     export function getIndexInCameras(): number {
-        //return camera["getIndexInCameras"]()
-        // TODO  this compiles without errors, so wtf?: Property 'getIndexInCameras' does not exist on type 'default'.
         return camera.getIndexInCameras()
     }
 
     export function getSTI(): number {
-        //return camera["getSTI"]()
-        // TODO  this compiles without errors, so wtf?: Property 'getSTI' does not exist on type 'default'.
         return camera.getSTI()
     }
 </script>
