@@ -4,6 +4,7 @@
     import { Object3D, Scene } from "svelthree-three"
     import { AnimationProp } from "../utils/AnimationProp.svelte"
 
+    export let animationEnabled: boolean = undefined
     export let animation: any = undefined
     export let aniauto: boolean = undefined
     export let obj: Object3D = undefined
@@ -16,7 +17,7 @@
     //$: aniauto || animation ? createAnimationManager() : null
 
     let aniManager: SvelthreeAnimationManager
-    $: animation ? createAnimationManager() : null
+    $: animation && animationEnabled ? createAnimationManager() : null
 
     function createAnimationManager() {
         //console.warn("SVELTHREE > createAnimationManager!")
@@ -79,7 +80,7 @@
         //console.warn("SVELTHREE > onMount : SvelthreeAnimation")
 
         return () => {
-            //console.warn("SVELTHREE > onDestroy : SvelthreeAnimation")
+            console.info("SVELTHREE > onDestroy : SvelthreeAnimation")
             destroyAnimation()
         }
     })
