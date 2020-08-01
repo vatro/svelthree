@@ -7,31 +7,64 @@
     import { onMount } from "svelte"
     import { Vector3, Raycaster, Object3D } from "svelthree-three"
 
+    export let interactionEnabled: boolean
     export let parent: SvelteComponent
     export let sti: number
     export let obj: Object3D
     //export let recursive: boolean
 
-    let raycaster: Raycaster = $svelthreeStores[sti].raycaster
+    let raycaster: Raycaster
+    $: $svelthreeStores[sti].raycaster
+        ? (raycaster = $svelthreeStores[sti].raycaster)
+        : null
 
     export let dispatch: (type: string, detail?: any) => void
 
     /**
      * Canvas-DOM-Element listens to 'pointermove' the whole time in order to trigger over/out enter/leave events
      */
-    let c = $svelthreeStores[sti].canvas.dom
+    let c: HTMLElement
+    $: $svelthreeStores[sti].canvas.dom
+        ? (c = $svelthreeStores[sti].canvas.dom)
+        : null
+
+    $: if (c) {
+        if (interactionEnabled && obj && !obj.userData.interact) {
+            addListeners()
+            obj.userData.interact = true
+        } else if (!interactionEnabled && obj && obj.userData.interact) {
+            removeListeners()
+            obj.userData.interact = false
+        }
+    }
 
     // Use single pointermove from canvas via store
     let lastPointerMoveEvent: PointerEvent
-    $: $svelthreeStores[sti].pointer.event !== lastPointerMoveEvent
-        ? ((lastPointerMoveEvent = $svelthreeStores[sti].pointer.event),
-          checkOverOut(lastPointerMoveEvent),
-          tryDispatch(lastPointerMoveEvent))
-        : null
 
-    c.addEventListener("click", tryDispatch, false)
-    c.addEventListener("pointerup", tryDispatch, false)
-    c.addEventListener("pointerdown", tryDispatch, false)
+    $: if (interactionEnabled) {
+        if (obj && raycaster) {
+            if ($svelthreeStores[sti].pointer.event !== lastPointerMoveEvent) {
+                lastPointerMoveEvent = $svelthreeStores[sti].pointer.event
+                checkOverOut(lastPointerMoveEvent)
+                tryDispatch(lastPointerMoveEvent)
+            }
+        }
+    } else if (obj && obj.userData.interact) {
+        obj.userData.interact = false
+        removeListeners()
+    }
+
+    function addListeners() {
+        c.addEventListener("click", tryDispatch, false)
+        c.addEventListener("pointerup", tryDispatch, false)
+        c.addEventListener("pointerdown", tryDispatch, false)
+    }
+
+    function removeListeners() {
+        c.removeEventListener("click", tryDispatch)
+        c.removeEventListener("pointerup", tryDispatch)
+        c.removeEventListener("pointerdown", tryDispatch)
+    }
 
     let checks = {
         click: { check: dispatchOnIntersect },
@@ -48,17 +81,18 @@
 
     onMount(() => {
         console.info("SVELTHREE > onMount : SvelthreeInteraction")
-        obj.userData.interact = true
 
         return () => {
             console.info("SVELTHREE > onDestroy : SvelthreeInteraction")
-
-            c.removeEventListener("pointermove", checkOverOut)
-            c.addEventListener("click", tryDispatch)
-            c.addEventListener("pointerup", tryDispatch)
-            c.addEventListener("pointerdown", tryDispatch)
-            c.addEventListener("pointermove", tryDispatch)
             obj.userData.interact = false
+
+            if (c) {
+                c.removeEventListener("pointermove", checkOverOut)
+                c.removeEventListener("click", tryDispatch)
+                c.removeEventListener("pointerup", tryDispatch)
+                c.removeEventListener("pointerdown", tryDispatch)
+                c.removeEventListener("pointermove", tryDispatch)
+            }
         }
     })
 
