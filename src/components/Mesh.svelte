@@ -313,8 +313,13 @@
     $: currentSceneActive =
         $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive
 
-    let animate = false
-    $: animation ? (animate = true) : null
+    let animationEnabled = false
+    $: animation ? (animationEnabled = true) : null
+
+    let interactionEnabled: boolean = undefined
+    $: interactive && interact
+        ? (interactionEnabled = true)
+        : (interactionEnabled = false)
 
     // -----------------------------------
 
@@ -461,21 +466,23 @@
 
 <svelte:options accessors={true} />
 <!-- cool!: we can override parent passed on init by setting parent here to something else! -->
-<!-- wait for parentForSlot in order to render slot. parentForSlot is initally not available if mesh has to be generated first -->
-{#if parentForSlot}
-    <slot {scene} parent={parentForSlot} />
-{/if}
 
-{#if animate}
-    <SvelthreeAnimation
-        bind:this={ani}
-        bind:currentSceneActive
-        {animation}
-        {aniauto}
-        obj={mesh}
-        {scene} />
-{/if}
+<slot {scene} parent={parentForSlot}></slot>
 
-{#if interactive && interact && mesh}
-    <SvelthreeInteraction {sti} {dispatch} obj={mesh} parent={self} />
-{/if}
+<SvelthreeAnimation
+    bind:this={ani}
+    bind:currentSceneActive
+    {animationEnabled}
+    {animation}
+    {aniauto}
+    obj={mesh}
+    {scene} />
+    
+
+<SvelthreeInteraction
+    {sti}
+    {dispatch}
+    obj={mesh}
+    parent={self}
+    {interactionEnabled} />
+
