@@ -172,8 +172,8 @@
     $: currentSceneActive =
         $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive
 
-    let animate = false
-    $: animation ? (animate = true) : null
+    let animationEnabled = false
+    $: animation ? (animationEnabled = true) : null
 
     // -----------------------------------
 
@@ -212,12 +212,11 @@
     // TODO : Add ability to add Camera to an Interaction-Dummy (Mesh) like with Lights
 </script>
 
-{#if animate}
-    <SvelthreeAnimation
-        bind:this={ani}
-        bind:currentSceneActive
-        {animation}
-        {aniauto}
-        obj={cam}
-        {scene} />
-{/if}
+<SvelthreeAnimation
+    bind:this={ani}
+    bind:currentSceneActive
+    {animationEnabled}
+    {animation}
+    {aniauto}
+    obj={cam}
+    {scene} />
