@@ -165,8 +165,8 @@
     $: currentSceneActive =
         $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive
 
-    let animate = false
-    $: animation ? (animate = true) : null
+    let animationEnabled = false
+    $: animation ? (animationEnabled = true) : null
 
     // -----------------------------------
 
@@ -234,16 +234,13 @@
     }
 </script>
 
-{#if parentForSlot}
-    <slot {scene} parent={parentForSlot} />
-{/if}
+<slot {scene} parent={parentForSlot} />
 
-{#if animate}
-    <SvelthreeAnimation
-        bind:this={ani}
-        bind:currentSceneActive
-        {animation}
-        {aniauto}
-        obj={empty}
-        {scene} />
-{/if}
+<SvelthreeAnimation
+    bind:this={ani}
+    bind:currentSceneActive
+    {animationEnabled}
+    {animation}
+    {aniauto}
+    obj={empty}
+    {scene} />
