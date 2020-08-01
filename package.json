@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.118.0-4",
+  "version": "0.118.0-5",
   "description": "Svelte powered three.js development",
   "svelte": "src/svelthree.js",
   "types": "src/svelthree.d.ts",
