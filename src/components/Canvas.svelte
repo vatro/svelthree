@@ -79,7 +79,7 @@
     $svelthreeStores = [...$svelthreeStores, svelthreeStoreBody]
     sti = $svelthreeStores.length - 1
 
-    let c: HTMLCanvasElement
+    let c: HTMLElement
     $: c ? addCanvasToStore() : null
 
     function addCanvasToStore(): void {
