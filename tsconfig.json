@@ -35,9 +35,13 @@
         */
         
         // @see https://stackoverflow.com/questions/43874096/difference-in-the-lib-property-in-tsconfig-json-between-es6-and-es2017/43892665#43892665
-        "lib": [
+        
+        // commented out trying to fix bundle bug 
+        /*"lib": [
+            //trying to fix bundle bug (importing from .mjs)
             "es2017", "DOM"
-        ],
+        ],*/
+
         "types": [
             "svelte"
         ],
