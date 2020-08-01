@@ -122,20 +122,15 @@
     let camera: Camera // typeof = 'object'
 
     export function getCamera(): Camera {
-        //return camera["getCamera"]()
-        // TODO  this compiles without errors, so leave it. IDE-Error ( TODO : report bug?): Property 'getCamera' does not exist on type 'Camera__SvelteComponent_'.
+        // TODO  keep an eye on it / fix. compiles without errors, so leave it.
         return camera.getCamera()
     }
 
     export function getIndexInCameras(): number {
-        //return camera["getIndexInCameras"]()
-        // TODO  this compiles without errors, so leave it. IDE-Error ( TODO : report bug?): Property 'getCamera' does not exist on type 'Camera__SvelteComponent_'.
         return camera.getIndexInCameras()
     }
 
     export function getSTI(): number {
-        //return camera["getSTI"]()
-        // TODO  this compiles without errors, so leave it. IDE-Error ( TODO : report bug?): Property 'getCamera' does not exist on type 'Camera__SvelteComponent_'.
         return camera.getSTI()
     }
 </script>
