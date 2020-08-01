@@ -58,10 +58,12 @@
         if (aniManager) {
             aniManager.destroyAnimation()
         } else {
-            console.error(
-                "SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
-                { aniManager: aniManager }
-            )
+            if(animation && animationEnabled) {
+                console.error(
+                    "SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
+                    { aniManager: aniManager }
+                )
+            }
         }
     }
 
