@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.118.0-5",
+  "version": "0.119.0-5",
   "description": "Svelte powered three.js development",
   "svelte": "src/svelthree.js",
   "types": "src/svelthree.d.ts",
@@ -24,12 +24,11 @@
     "svelte": "^3.24.0",
     "svelte-check": "^0.1.55",
     "svelte-preprocess": "^4.0.8",
-    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#118",
     "tslib": "^2.0.0",
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#118"
+    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#119"
   },
   "author": "Vatroslav Vrbanic",
   "repository": {
