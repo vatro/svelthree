@@ -102,7 +102,7 @@
                             : p === "color"
                             ? this.checkSetColor(p)
                             : p === "target" &&
-                              this.objTypeStr === "DirectionalLight"
+                              (this.objTypeStr === "DirectionalLight" || this.objTypeStr === "SpotLight")
                             ? this.checkSetDlTarget(p)
                             : //standard 1:1
                               (this.obj[p] = this.props[p])
