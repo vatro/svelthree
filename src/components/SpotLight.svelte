@@ -6,7 +6,8 @@
     import {
         SpotLight,
         SpotLightHelper,
-        Scene
+        Scene,
+        Object3D
     } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
@@ -27,6 +28,11 @@
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
+    export let parent: Object3D = undefined
+    export let name: string = undefined
+    export let animation: any = undefined
+    export let aniauto: boolean = undefined
+
     export let pos: PropPos = undefined
     export let color: PropColor = undefined
     export let intensity: number = undefined
@@ -36,6 +42,7 @@
     export let scene: Scene
 
     let light: SpotLight = new SpotLight()
+    light.name = name
 
     export function getLight(): SpotLight {
         return light
@@ -97,6 +104,7 @@
 
 <Light
     {scene}
+    {parent}
     {light}
     {props}
     {pos}
@@ -104,4 +112,6 @@
     {intensity}
     {shadowMapSize}
     {shadowBias}
-    {castShadow} />
+    {castShadow}
+    {animation}
+    {aniauto} />
