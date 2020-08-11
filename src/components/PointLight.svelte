@@ -40,7 +40,7 @@
     function createHelper() {
         lightHelper = new PointLightHelper(light, 0.1, "aqua")
         scene.add(lightHelper)
-        lightHelper.visible = true
+        lightHelper.visible = false
         console.info("SVELTHREE > " + light.type + " : HELPER added!", {
             lightHelper: lightHelper,
             scene: scene,
