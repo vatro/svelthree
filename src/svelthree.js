@@ -7,6 +7,7 @@ export { default as DirectionalLight } from "./components/DirectionalLight.svelt
 export { default as SpotLight } from "./components/SpotLight.svelte"
 export { default as RectAreaLight } from "./components/RectAreaLight.svelte"
 export { default as AmbientLight } from "./components/AmbientLight.svelte"
+export { default as HemisphereLight } from "./components/HemisphereLight.svelte"
 export { default as PointLight } from "./components/PointLight.svelte"
 export { default as Scene } from "./components/Scene.svelte"
 export { default as LoadedGLTF } from "./components/LoadedGLTF.svelte"

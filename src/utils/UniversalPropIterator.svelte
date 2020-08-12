@@ -99,7 +99,7 @@
                         //TODO: Does Three check if props are equal and not change / set them if? Are there any serious drawbacks at all (performance) if no equality check?
                         p === "scale" || p === "position" || p === "rotation"
                             ? this.setFromVector3OrArray(p)
-                            : p === "color"
+                            : p === "color" || p === "groundColor"
                             ? this.checkSetColor(p)
                             : p === "target" &&
                               (this.objTypeStr === "DirectionalLight" || this.objTypeStr === "SpotLight")
