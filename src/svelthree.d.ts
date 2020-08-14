@@ -22,5 +22,6 @@ The attempt to generate WebGLRenderer.d.ts from WebGLRenderer.svelte component's
 export { default as WebGLRenderer } from "./components/WebGLRenderer.svelte"
 export { default as SvelthreeInteraction } from "./components/SvelthreeInteraction.svelte"
 export { default as OrbitControls } from "./components/OrbitControls.svelte"
+export { default as SessionXR } from "./components/SessionXR.svelte"
 export { svelthreeStores } from "./stores.js"
 export * from "svelthree-three"
