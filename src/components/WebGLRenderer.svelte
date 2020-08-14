@@ -16,6 +16,10 @@
         Object3D
     } from "svelthree-three"
     import type { ShadowMapType } from "svelthree-three"
+    import WebXR from "./WebXR.svelte"
+    import { createEventDispatcher } from "svelte"
+
+    let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
     let renderer: WebGLRenderer
     let rendererPropIterator: UniversalPropIterator
@@ -94,6 +98,13 @@
                     : null
                 : null
             : null
+        : null
+
+    export let xr: boolean = undefined
+    $: renderer
+        ? xr
+            ? (renderer.xr.enabled = true)
+            : (renderer.xr.enabled = false)
         : null
 
     $: !currentScene && sceneToRenderId
@@ -415,7 +426,18 @@
 
     let toTest: Object3D[]
 
-    function animate() {
+    function animate(): void {
+        if (renderer.xr.enabled === false) {
+            render()
+        } else {
+            renderer.setAnimationLoop(render)
+        }
+    }
+
+    let webxr: WebXR
+
+    // TODO : timestamp and frame types? timestamp / time unused. --> see onAnimationFrame() in WebXRManager.js
+    function render(timestamp: any = undefined, frame: any = undefined): void {
         if (doAnimate) {
             if (logOnce) {
                 logOnce = false
@@ -451,8 +473,54 @@
                 ? $svelthreeStores[sti].orbitcontrols.update()
                 : null
 
+            // XR hit-test
+            if (renderer.xr.enabled === true) {
+                renderXR(timestamp, frame)
+            }
+
             renderer.render(currentScene, currentCam)
-            rAF = requestAnimationFrame(animate)
+            if (renderer.xr.enabled === false) {
+                rAF = requestAnimationFrame(animate)
+            }
+        }
+    }
+
+    function renderXR(
+        timestamp: any = undefined,
+        frame: any = undefined
+    ): void {
+        if (frame) {
+            switch ($svelthreeStores[sti].xr.sessionMode) {
+                case "inline":
+                    console.error(
+                        "SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'inline' is not yet implemented!"
+                    )
+                    break
+                case "immersive-ar":
+                    renderAR(timestamp, frame)
+                    break
+                case "immersive-vr":
+                    console.error(
+                        "SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'immersive-vr' is not yet implemented!"
+                    )
+                    break
+                default:
+                    break
+            }
+        }
+    }
+
+    function renderAR(
+        timestamp: any = undefined,
+        frame: any = undefined
+    ): void {
+        let referenceSpace = renderer.xr.getReferenceSpace()
+        let session = renderer.xr.getSession()
+
+        if (
+            $svelthreeStores[sti].xr.requiredFeatures.indexOf("hit-test") > -1
+        ) {
+            webxr.performHitTest(referenceSpace, session, timestamp, frame)
         }
     }
 
@@ -474,3 +542,5 @@
         camToRenderId = parameters.camId
     }
 </script>
+
+<WebXR bind:this={webxr} {sti} />

@@ -39,6 +39,8 @@
     // construction
 
     export let name: string = undefined
+    export let arReticle: boolean = false
+    export let arReticleAuto: boolean = false
 
     export let parent: Object3D = undefined
     export let parentForSlot: Object3D = undefined
@@ -364,17 +366,22 @@
     function tryAddingMesh(): void {
         if (!parentForUs) {
             if (mesh.parent !== scene) {
-                scene.add(mesh)
-                console.info(
-                    "SVELTHREE > Mesh : " +
-                        geometry.type +
-                        " was added to scene!",
-                    {
-                        mesh: mesh,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                    scene.add(mesh)
+                    console.info(
+                        "SVELTHREE > Mesh : " +
+                            geometry.type +
+                            " was added to scene!",
+                        {
+                            mesh: mesh,
+                            scene: scene,
+                            total: scene.children.length
+                        }
+                    )
+                }
+
+                if (arReticle || arReticleAuto) {
+                    $svelthreeStores[sti].xr.reticle = mesh
+                }
             }
         } else {
             if (mesh.parent !== parentForUs) {
@@ -390,6 +397,9 @@
                         total: scene.children.length
                     }
                 )
+                if (arReticle || arReticleAuto) {
+                    $svelthreeStores[sti].xr.reticle = mesh
+                }
             }
         }
     }
@@ -422,6 +432,65 @@
         console.error(
             "SVELTHREE > Mesh : updating Matrix is not yet implemented!"
         )
+    }
+
+    // --- AR Reticle basic auto display and positioning -------
+
+    $: if (arReticle || arReticleAuto) {
+        if ($svelthreeStores[sti].xr.hitTestResults) {
+            handleHitTestResults()
+        }
+    }
+
+    function handleHitTestResults() {
+        if ($svelthreeStores[sti].xr.hitTestResults.length > 0) {
+            let hit = $svelthreeStores[sti].xr.hitTestResults[0]
+            let referenceSpace = $svelthreeStores[
+                sti
+            ].renderer.xr.getReferenceSpace()
+
+            console.log({ hit: hit, referenceSpace: referenceSpace })
+
+            if ($svelthreeStores[sti].xr.reticle) {
+                if (arReticleAuto) {
+                    showReticle()
+                    poseReticle(hit, referenceSpace)
+                } else {
+                    dispatch("hit", {
+                        reticle: mesh,
+                        hitPose: hit.getPose(referenceSpace).transform.matrix
+                    })
+                }
+            }
+        } else {
+            if ($svelthreeStores[sti].xr.reticle) {
+                if (arReticleAuto) {
+                    if ($svelthreeStores[sti].xr.reticle.visible) {
+                        hideReticle()
+                    }
+                } else {
+                    dispatch("nohit", {
+                        reticle: mesh
+                    })
+                }
+            }
+        }
+    }
+
+    function showReticle(): void {
+        mesh.visible = true
+    }
+
+    function hideReticle(): void {
+        mesh.visible = false
+    }
+
+    function poseReticle(
+        hit: any = undefined,
+        referenceSpace: any = undefined
+    ): void {
+        console.log("poseReticle!", $svelthreeStores[sti].xr.reticle)
+        mesh.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
     }
 
     // --- Public methods ---
@@ -467,7 +536,7 @@
 <svelte:options accessors={true} />
 <!-- cool!: we can override parent passed on init by setting parent here to something else! -->
 
-<slot {scene} parent={parentForSlot}></slot>
+<slot {scene} parent={parentForSlot} />
 
 <SvelthreeAnimation
     bind:this={ani}
@@ -477,7 +546,6 @@
     {aniauto}
     obj={mesh}
     {scene} />
-    
 
 <SvelthreeInteraction
     {sti}
@@ -485,4 +553,3 @@
     obj={mesh}
     parent={self}
     {interactionEnabled} />
-

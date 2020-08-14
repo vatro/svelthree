@@ -12,7 +12,9 @@
         Raycaster,
         Vector2,
         Vector3,
-        OrbitControls
+        OrbitControls,
+        Mesh,
+        Group
     } from "svelthree-three"
 
     export let w: number
@@ -21,19 +23,6 @@
     export let style: string = undefined
     let clazz: string = undefined
     export { clazz as class }
-
-    interface StoreBody {
-        id: number
-        canvas: StoreCanvas
-        scenes: Scene[]
-        cameras: Camera[]
-        activeCamera: Camera
-        renderer: WebGLRenderer
-        raycaster: Raycaster
-        allIntersections: []
-        pointer: StorePointer
-        orbitcontrols: OrbitControls
-    }
 
     interface StoreCanvas {
         dom: HTMLCanvasElement
@@ -46,6 +35,32 @@
         event: PointerEvent
         isOverCanvas: boolean
         unprojected: Vector3
+    }
+
+    interface XR {
+        sessionMode: string
+        controller: Group
+        requiredFeatures: string[]
+        optionalFeatures: string[]
+        domOverlay: HTMLDivElement
+        hitTestSource: any
+        hitTestSourceRequested: boolean
+        hitTestResults: any[]
+        reticle: Mesh
+    }
+
+    interface StoreBody {
+        id: number
+        canvas: StoreCanvas
+        scenes: Scene[]
+        cameras: Camera[]
+        activeCamera: Camera
+        renderer: WebGLRenderer
+        raycaster: Raycaster
+        allIntersections: []
+        pointer: StorePointer
+        orbitcontrols: OrbitControls
+        xr: XR
     }
 
     const svelthreeStoreBody: StoreBody = {
@@ -67,7 +82,18 @@
             isOverCanvas: false,
             unprojected: new Vector3()
         },
-        orbitcontrols: undefined
+        orbitcontrols: undefined,
+        xr: {
+            sessionMode: undefined,
+            controller: undefined,
+            requiredFeatures: [],
+            optionalFeatures: [],
+            domOverlay: undefined,
+            hitTestSource: null,
+            hitTestSourceRequested: false,
+            hitTestResults: undefined,
+            reticle: undefined
+        }
     }
 
     svelthreeStoreBody.canvas.dim.w = w
