@@ -96,14 +96,20 @@
     }
 
     // Set xr controller
-    $: $svelthreeStores[sti].renderer
-        ? ($svelthreeStores[sti].xr.controller = $svelthreeStores[
-              sti
-          ].renderer.xr.getController(0))
-        : null
+    $: if (
+        $svelthreeStores[sti].renderer &&
+        !$svelthreeStores[sti].xr.controller
+    ) {
+        $svelthreeStores[sti].xr.controller = $svelthreeStores[
+            sti
+        ].renderer.xr.getController(0)
+    }
 
     // Add controller listeners based on required features
-    $: if ($svelthreeStores[sti].xr.controller) {
+    $: if (
+        $svelthreeStores[sti].xr.controller &&
+        !$svelthreeStores[sti].xr.controller._listeners
+    ) {
         $svelthreeStores[sti].xr.controller.addEventListener("select", onSelect)
 
         $svelthreeStores[sti].xr.controller.addEventListener(
