@@ -520,7 +520,12 @@
         if (
             $svelthreeStores[sti].xr.requiredFeatures.indexOf("hit-test") > -1
         ) {
-            webxr.performHitTest(referenceSpace, session, timestamp, frame)
+            webxr.performRealWorldHitTest(
+                referenceSpace,
+                session,
+                timestamp,
+                frame
+            )
         }
     }
 
