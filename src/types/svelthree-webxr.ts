@@ -17,6 +17,9 @@ declare type Constructor<T = object> = {
   declare interface XRPresentationContext {
     readonly canvas: HTMLCanvasElement;
   }
+
+  //added by svelthree
+  declare type XRHitTestMode = "realworld" | "virtual"
   
   declare interface XRHitTestSource {
     cancel(): void;

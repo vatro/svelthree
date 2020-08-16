@@ -43,6 +43,7 @@
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
+        hitTestMode:XRHitTestMode
         hitTestSource: any
         hitTestSourceRequested: boolean
         hitTestResults: any[]
@@ -89,6 +90,7 @@
             requiredFeatures: [],
             optionalFeatures: [],
             domOverlay: undefined,
+            hitTestMode: undefined,
             hitTestSource: null,
             hitTestSourceRequested: false,
             hitTestResults: undefined,
