@@ -24,7 +24,7 @@
         PropRot,
         PropScale,
         PropMatrix4
-    } from "../utils/Sv3Types.svelte"
+    } from "../utils/SvelthreeTypes"
     import {
         isValidArray3Prop,
         isValidMatrix4
@@ -366,18 +366,17 @@
     function tryAddingMesh(): void {
         if (!parentForUs) {
             if (mesh.parent !== scene) {
-                    scene.add(mesh)
-                    console.info(
-                        "SVELTHREE > Mesh : " +
-                            geometry.type +
-                            " was added to scene!",
-                        {
-                            mesh: mesh,
-                            scene: scene,
-                            total: scene.children.length
-                        }
-                    )
-                }
+                scene.add(mesh)
+                console.info(
+                    "SVELTHREE > Mesh : " +
+                        geometry.type +
+                        " was added to scene!",
+                    {
+                        mesh: mesh,
+                        scene: scene,
+                        total: scene.children.length
+                    }
+                )
 
                 if (arReticle || arReticleAuto) {
                     $svelthreeStores[sti].xr.reticle = mesh

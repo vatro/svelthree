@@ -6,7 +6,7 @@
     import { OrthographicCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropRot, PropLookAt } from "../utils/Sv3Types.svelte"
+    import type { PropPos, PropRot, PropLookAt } from "../utils/SvelthreeTypes"
 
     export let scene: Scene
     export let id: string = undefined

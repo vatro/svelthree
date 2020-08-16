@@ -10,7 +10,7 @@
     } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropColor } from "../utils/Sv3Types.svelte"
+    import type { PropPos, PropColor } from "../utils/SvelthreeTypes"
 
     /**
      *  TODO  keep an eye on the issue:
