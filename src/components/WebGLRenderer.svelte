@@ -13,7 +13,10 @@
         OrthographicCamera,
         PerspectiveCamera,
         Raycaster,
-        Object3D
+        Object3D,
+        Vector3,
+        Quaternion,
+        Matrix4
     } from "svelthree-three"
     import type { ShadowMapType } from "svelthree-three"
     import WebXR from "./WebXR.svelte"
@@ -335,6 +338,8 @@
                 currentScene.userData.indexInScenes
             ].isActive = true
 
+            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
+
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
             $svelthreeStores = $svelthreeStores
@@ -346,6 +351,8 @@
             $svelthreeStores[sti].scenes[
                 currentScene.userData.indexInScenes
             ].isActive = true
+
+            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
 
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
@@ -437,7 +444,10 @@
     let webxr: WebXR
 
     // TODO : timestamp and frame types? timestamp / time unused. --> see onAnimationFrame() in WebXRManager.js
-    function render(timestamp: any = undefined, frame: any = undefined): void {
+    function render(
+        timestamp: any = undefined,
+        frame: XRFrame = undefined
+    ): void {
         if (doAnimate) {
             if (logOnce) {
                 logOnce = false
@@ -449,31 +459,33 @@
                 )
             }
 
-            isInteractive
-                ? (raycaster.setFromCamera(
-                      $svelthreeStores[sti].pointer.pos,
-                      currentCam
-                  ),
-                  (toTest = currentScene.children.filter(
-                      (child) => child.type === "Mesh"
-                  )),
-                  ($svelthreeStores[
-                      sti
-                  ].allIntersections = raycaster.intersectObjects(
-                      toTest,
-                      true
-                  )))
-                : null
+            // Intersections / Raycaster using Camera and pointer.pos (NonXR)
+            if (renderer.xr.enabled === false) {
+                isInteractive
+                    ? (raycaster.setFromCamera(
+                          $svelthreeStores[sti].pointer.pos,
+                          currentCam
+                      ),
+                      (toTest = currentScene.children.filter(
+                          (child) => child.type === "Mesh"
+                      )),
+                      ($svelthreeStores[
+                          sti
+                      ].allIntersections = raycaster.intersectObjects(
+                          toTest,
+                          true
+                      )))
+                    : null
 
-            isInteractive ? checkCursor() : null
+                isInteractive ? checkCursor() : null
 
-            // OrbitControls
-            // required if controls.enableDamping or controls.autoRotate are set to true
-            $svelthreeStores[sti].orbitcontrols
-                ? $svelthreeStores[sti].orbitcontrols.update()
-                : null
+                // OrbitControls (NonXR)
+                // required if controls.enableDamping or controls.autoRotate are set to true
+                $svelthreeStores[sti].orbitcontrols
+                    ? $svelthreeStores[sti].orbitcontrols.update()
+                    : null
+            }
 
-            // XR hit-test
             if (renderer.xr.enabled === true) {
                 renderXR(timestamp, frame)
             }
@@ -487,7 +499,7 @@
 
     function renderXR(
         timestamp: any = undefined,
-        frame: any = undefined
+        frame: XRFrame = undefined
     ): void {
         if (frame) {
             switch ($svelthreeStores[sti].xr.sessionMode) {
@@ -512,20 +524,20 @@
 
     function renderAR(
         timestamp: any = undefined,
-        frame: any = undefined
+        frame: XRFrame = undefined
     ): void {
-        let referenceSpace = renderer.xr.getReferenceSpace()
-        let session = renderer.xr.getSession()
+        let referenceSpace: XRReferenceSpace = renderer.xr.getReferenceSpace() as XRReferenceSpace
+        let session: XRSession = renderer.xr.getSession() as XRSession
 
-        if (
-            $svelthreeStores[sti].xr.requiredFeatures.indexOf("hit-test") > -1
-        ) {
+        if ($svelthreeStores[sti].xr.hitTestMode === "realworld") {
             webxr.performRealWorldHitTest(
                 referenceSpace,
                 session,
                 timestamp,
                 frame
             )
+        } else if($svelthreeStores[sti].xr.hitTestResults !== undefined) {
+            $svelthreeStores[sti].xr.hitTestResults = undefined
         }
     }
 
