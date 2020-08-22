@@ -43,7 +43,8 @@
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
-        hitTestMode:XRHitTestMode
+        hitTestModeInitial: XRHitTestMode
+        hitTestMode: XRHitTestMode
         hitTestSource: any
         hitTestSourceRequested: boolean
         hitTestResults: any[]
@@ -54,6 +55,9 @@
         id: number
         canvas: StoreCanvas
         scenes: Scene[]
+        // this will always be +1 real index, because index '0' means 'false',
+        // so change from 'undefined' to '0' will not be triggered.
+        currentSceneIndex: number
         cameras: Camera[]
         activeCamera: Camera
         renderer: WebGLRenderer
@@ -72,6 +76,9 @@
             interactive: false
         },
         scenes: [],
+        // this will always be +1 real index, because index '0' means 'false',
+        // so change from 'undefined' to '0' will not be triggered.
+        currentSceneIndex: undefined,
         cameras: [],
         activeCamera: undefined,
         renderer: undefined,
@@ -90,6 +97,7 @@
             requiredFeatures: [],
             optionalFeatures: [],
             domOverlay: undefined,
+            hitTestModeInitial: undefined,
             hitTestMode: undefined,
             hitTestSource: null,
             hitTestSourceRequested: false,
@@ -121,28 +129,36 @@
     let raycaster: Raycaster
 
     // reactive create raycaster
-    $: isInteractive && !raycaster && c
-        ? ((raycaster = new Raycaster()),
-          ($svelthreeStores[sti].raycaster = raycaster),
-          ($svelthreeStores[sti].canvas.interactive = true),
-          startUpdatingPointer(),
-          console.info(
-              "SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
-              $svelthreeStores[sti]
-          ))
-        : null
+    $: if (isInteractive && !raycaster && c && $svelthreeStores[sti].renderer) {
+        raycaster = new Raycaster()
+        $svelthreeStores[sti].raycaster = raycaster
+        $svelthreeStores[sti].canvas.interactive = true
+
+        if ($svelthreeStores[sti].renderer.xr.enabled === false) {
+            startUpdatingPointer()
+        }
+
+        console.info(
+            "SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
+            $svelthreeStores[sti]
+        )
+    }
 
     // reactive remove raycaster
-    $: !isInteractive && raycaster
-        ? (($svelthreeStores[sti].canvas.interactive = false),
-          ($svelthreeStores[sti].raycaster = undefined),
-          (raycaster = null),
-          stopUpdatingPointer(),
-          console.info(
-              "SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ",
-              $svelthreeStores[sti]
-          ))
-        : null
+    $: if (!isInteractive && raycaster && $svelthreeStores[sti].renderer) {
+        $svelthreeStores[sti].canvas.interactive = false
+        $svelthreeStores[sti].raycaster = undefined
+        raycaster = null
+
+        if ($svelthreeStores[sti].renderer.xr.enabled === false) {
+            stopUpdatingPointer()
+        }
+
+        console.info(
+            "SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ",
+            $svelthreeStores[sti]
+        )
+    }
 
     let didMount: boolean
 
@@ -204,6 +220,11 @@
         return () => {
             console.info("SVELTHREE > onDestroy : Canvas")
             stopUpdatingPointer()
+            // if canvas is being removed set the the whole store to 'null'
+            // this way we don't have to handle anything, other store 'sti' will remain valid
+            // any newly added canvas will create a new store at the next highest index
+            // the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
+            $svelthreeStores[sti] = null
         }
     })
 
