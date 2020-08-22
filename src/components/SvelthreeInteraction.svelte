@@ -6,9 +6,10 @@
     import { svelthreeStores } from "../stores.js"
     import { onMount } from "svelte"
     import { Vector3, Raycaster, Object3D } from "svelthree-three"
+    import { SvelteComponentDev } from "svelte/internal";
 
     export let interactionEnabled: boolean
-    export let parent: SvelteComponent
+    export let parent: SvelteComponentDev
     export let sti: number
     export let obj: Object3D
     //export let recursive: boolean
