@@ -16,7 +16,7 @@
      * mathematical ray (half-line) intersects with real world as understood by the underlying
      * Augmented Reality hardware & software. Ray intersections against virtual objects created
      * by the application consuming the API are explicitly out of scope of the hit test API."
-     * 
+     *
      * adapted from:
      * @see https://threejs.org/examples/?q=xr#webxr_ar_hittest
      */
@@ -27,12 +27,14 @@
         timestamp: any = undefined,
         frame: any = undefined
     ): void {
+        /*
         console.info(
-            "SVELTHREE > WebXR > performHitTest!",
+            "SVELTHREE > WebXR > performRealWorldHitTest!",
             referenceSpace,
             session,
             frame
         )
+        */
 
         // request hit-test source
         if ($svelthreeStores[sti].xr.hitTestSourceRequested === false) {
@@ -43,7 +45,7 @@
         /**
          * obtaining and storing hit-test results
          * @see https://immersive-web.github.io/hit-test/#obtaining-hit-test-results
-        */
+         */
 
         if ($svelthreeStores[sti].xr.hitTestSource) {
             let results = frame.getHitTestResults(
@@ -51,17 +53,19 @@
             )
 
             $svelthreeStores[sti].xr.hitTestResults = results
+            /*
             console.info(
-                "SVELTHREE > WebXR > performHitTest! $svelthreeStores[sti].xr.hitTestResults:",
+                "SVELTHREE > WebXR > performRealWorldHitTest! $svelthreeStores[sti].xr.hitTestResults:",
                 $svelthreeStores[sti].xr.hitTestResults
             )
+            */
         }
     }
 
     /**
-     * Requesting hitTest 
+     * Requesting hitTest
      * @see https://immersive-web.github.io/hit-test/#requesting-hit-test
-    */
+     */
 
     function reqHitTestSource(
         referenceSpace: any = undefined,
@@ -69,7 +73,8 @@
     ): void {
         /**
          * @see https://immersive-web.github.io/webxr/#xrreferencespace-interface
-         */ 
+         */
+
         session.requestReferenceSpace("viewer").then(function (referenceSpace) {
             session
                 .requestHitTestSource({
@@ -89,6 +94,4 @@
         $svelthreeStores[sti].xr.hitTestSourceRequested = false
         $svelthreeStores[sti].xr.hitTestSource = null
     }
-
-    // --------------------------------------------------------------
 </script>
