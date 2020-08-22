@@ -30,6 +30,7 @@
         isValidMatrix4
     } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
+    import SvelthreeInteractionXR from "./SvelthreeInteractionXR.svelte"
     import { createEventDispatcher } from "svelte"
 
     let ani: any
@@ -448,18 +449,18 @@
                 sti
             ].renderer.xr.getReferenceSpace()
 
-            console.log({ hit: hit, referenceSpace: referenceSpace })
+            //console.log({ hit: hit, referenceSpace: referenceSpace })
 
             if ($svelthreeStores[sti].xr.reticle) {
                 if (arReticleAuto) {
                     showReticle()
                     poseReticle(hit, referenceSpace)
-                } else {
-                    dispatch("hit", {
-                        reticle: mesh,
-                        hitPose: hit.getPose(referenceSpace).transform.matrix
-                    })
                 }
+
+                dispatch("hit", {
+                    reticle: mesh,
+                    hitPose: hit.getPose(referenceSpace).transform.matrix
+                })
             }
         } else {
             if ($svelthreeStores[sti].xr.reticle) {
@@ -467,11 +468,11 @@
                     if ($svelthreeStores[sti].xr.reticle.visible) {
                         hideReticle()
                     }
-                } else {
-                    dispatch("nohit", {
-                        reticle: mesh
-                    })
                 }
+
+                dispatch("nohit", {
+                    reticle: mesh
+                })
             }
         }
     }
@@ -488,7 +489,7 @@
         hit: any = undefined,
         referenceSpace: any = undefined
     ): void {
-        console.log("poseReticle!", $svelthreeStores[sti].xr.reticle)
+        //console.info("poseReticle!", $svelthreeStores[sti].xr.reticle)
         mesh.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
     }
 
@@ -530,6 +531,11 @@
     export let onPointerEnter: (e?: CustomEvent) => void = undefined
     export let onPointerLeave: (e?: CustomEvent) => void = undefined
     export let onPointerMove: (e?: CustomEvent) => void = undefined
+
+    //XR
+    export let onSelect: (e?: CustomEvent) => void = undefined
+    export let onSelectStart: (e?: CustomEvent) => void = undefined
+    export let onSelectEnd: (e?: CustomEvent) => void = undefined
 </script>
 
 <svelte:options accessors={true} />
@@ -537,18 +543,31 @@
 
 <slot {scene} parent={parentForSlot} />
 
-<SvelthreeAnimation
-    bind:this={ani}
-    bind:currentSceneActive
-    {animationEnabled}
-    {animation}
-    {aniauto}
-    obj={mesh}
-    {scene} />
+{#if animation}
+    <SvelthreeAnimation
+        bind:this={ani}
+        bind:currentSceneActive
+        {animationEnabled}
+        {animation}
+        {aniauto}
+        obj={mesh}
+        {scene} />
+{/if}
 
-<SvelthreeInteraction
-    {sti}
-    {dispatch}
-    obj={mesh}
-    parent={self}
-    {interactionEnabled} />
+{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
+    <SvelthreeInteraction
+        {sti}
+        {dispatch}
+        obj={mesh}
+        parent={self}
+        {interactionEnabled} />
+{/if}
+
+{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
+    <SvelthreeInteractionXR
+        {sti}
+        {dispatch}
+        obj={mesh}
+        parent={self}
+        {interactionEnabled} />
+{/if}
