@@ -39,7 +39,8 @@
 
     interface XR {
         sessionMode: string
-        controller: Group
+        controller: Group // AR
+        controllers: Group[], //VR
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
@@ -94,6 +95,7 @@
         xr: {
             sessionMode: undefined,
             controller: undefined,
+            controllers: [],
             requiredFeatures: [],
             optionalFeatures: [],
             domOverlay: undefined,
