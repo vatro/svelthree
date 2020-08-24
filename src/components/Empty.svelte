@@ -162,8 +162,11 @@
 
     let currentSceneActive = false
 
-    $: currentSceneActive =
-        $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive
+    $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
+        ? (currentSceneActive =
+              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
+                  .isActive)
+        : null
 
     let animationEnabled = false
     $: animation ? (animationEnabled = true) : null
