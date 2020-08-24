@@ -30,7 +30,8 @@
         isValidMatrix4
     } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
-    import SvelthreeInteractionXR from "./SvelthreeInteractionXR.svelte"
+    import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
+    import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
     import { createEventDispatcher } from "svelte"
 
     let ani: any
@@ -312,9 +313,11 @@
     // reactive animation handling (has to be enabled as last, so that initial animation state overrides props)
 
     let currentSceneActive = false
-
-    $: currentSceneActive =
-        $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive
+    $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
+        ? (currentSceneActive =
+              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
+                  .isActive)
+        : null
 
     let animationEnabled = false
     $: animation ? (animationEnabled = true) : null
@@ -533,9 +536,18 @@
     export let onPointerMove: (e?: CustomEvent) => void = undefined
 
     //XR
+
+    let currentSessionMode: string = undefined
+    $: $svelthreeStores[sti].xr.sessionMode
+        ? (currentSessionMode = $svelthreeStores[sti].xr.sessionMode)
+        : null
+
     export let onSelect: (e?: CustomEvent) => void = undefined
     export let onSelectStart: (e?: CustomEvent) => void = undefined
     export let onSelectEnd: (e?: CustomEvent) => void = undefined
+    export let onSqueeze: (e?: CustomEvent) => void = undefined
+    export let onSqueezeStart: (e?: CustomEvent) => void = undefined
+    export let onSqueezeEnd: (e?: CustomEvent) => void = undefined
 </script>
 
 <svelte:options accessors={true} />
@@ -564,10 +576,21 @@
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
-    <SvelthreeInteractionXR
-        {sti}
-        {dispatch}
-        obj={mesh}
-        parent={self}
-        {interactionEnabled} />
+    {#if currentSessionMode === 'immersive-ar'}
+        <SvelthreeInteractionAR
+            {sti}
+            {dispatch}
+            obj={mesh}
+            parent={self}
+            {interactionEnabled} />
+    {/if}
+
+    {#if currentSessionMode === 'immersive-vr'}
+        <SvelthreeInteractionVR
+            {sti}
+            {dispatch}
+            obj={mesh}
+            parent={self}
+            {interactionEnabled} />
+    {/if}
 {/if}
