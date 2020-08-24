@@ -28,8 +28,6 @@
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
-    let store = $svelthreeStores[sti]
-
     const sessionMode: XRSessionMode = "immersive-ar"
     export let requiredFeatures: string[] = undefined
     export let hitTestMode: XRHitTestMode = "virtual" // default is "virtual", meaning no real world testing
@@ -41,8 +39,8 @@
     $: requiredFeatures ? updateRequiredFeatures() : null
 
     function updateRequiredFeatures(): void {
-        store.xr.requiredFeatures = [...requiredFeatures]
-        //console.warn("SVELTHREE > SessionAR > updateRequiredFeatures:",store.xr.requiredFeatures)
+        $svelthreeStores[sti].xr.requiredFeatures = [...requiredFeatures]
+        //console.warn("SVELTHREE > SessionAR > updateRequiredFeatures:",$svelthreeStores[sti].xr.requiredFeatures)
     }
 
     $: hitTestMode ? updateHitTestMode() : null
@@ -50,7 +48,7 @@
     function updateHitTestMode(): void {
         if (hitTestMode === "realworld") {
             if (requiredFeatures.indexOf("hit-test") > -1) {
-                store.xr.hitTestMode = hitTestMode
+                $svelthreeStores[sti].xr.hitTestMode = hitTestMode
             } else {
                 console.warn(
                     "SVELTHREE > SessionAR : You need to add feature descriptor 'hit-test' to requiredFeatures in order to use 'realworld' hit-test mode",
@@ -61,110 +59,104 @@
                 throw new Error("SVELTHREE Exception (see warning above)")
             }
         } else {
-            store.xr.hitTestMode = hitTestMode
+            $svelthreeStores[sti].xr.hitTestMode = hitTestMode
         }
 
-        if (!store.xr.hitTestModeInitial) {
-            store.xr.hitTestModeInitial = store.xr.hitTestMode
+        if (!$svelthreeStores[sti].xr.hitTestModeInitial) {
+            $svelthreeStores[sti].xr.hitTestModeInitial =
+                $svelthreeStores[sti].xr.hitTestMode
         }
     }
 
     $: optionalFeatures ? updateOptionalFeatures() : null
 
     function updateOptionalFeatures(): void {
-        store.xr.optionalFeatures = [...optionalFeatures]
-        //console.warn("SVELTHREE > SessionAR > updateOptionalFeatures:", store.xr.optionalFeatures)
+        $svelthreeStores[sti].xr.optionalFeatures = [...optionalFeatures]
+        //console.warn("SVELTHREE > SessionAR > updateOptionalFeatures:", $svelthreeStores[sti].xr.optionalFeatures)
     }
 
     $: domOverlay ? updateDomOverlay() : null
 
     function updateDomOverlay(): void {
-        store.xr.domOverlay = domOverlay
-        //console.warn("SVELTHREE > SessionAR > updateDomOverlay:", store.xr.domOverlay)
+        $svelthreeStores[sti].xr.domOverlay = domOverlay
+        //console.warn("SVELTHREE > SessionAR > updateDomOverlay:", $svelthreeStores[sti].xr.domOverlay)
     }
 
     let currentSession: XRSession
     let button: HTMLButtonElement
     let arButtonAdded: boolean = false
 
-    $: if (store.canvas.dom && !arButtonAdded) {
+    $: if ($svelthreeStores[sti].canvas.dom && !arButtonAdded && domOverlay) {
         createButton()
-        store.xr.sessionMode = sessionMode
+        $svelthreeStores[sti].xr.sessionMode = sessionMode
         arButtonAdded = true
     }
 
-    $: if (store.renderer && currentSession && !store.xr.controller) {
-        store.xr.controller = store.renderer.xr.getController(0)
+    let controllerAvailable: boolean = false
+    $: $svelthreeStores[sti].xr.controller ? (controllerAvailable = true) : null
+
+    $: if (
+        $svelthreeStores[sti].renderer &&
+        currentSession &&
+        !$svelthreeStores[sti].xr.controller
+    ) {
+        $svelthreeStores[sti].xr.controller = $svelthreeStores[
+            sti
+        ].renderer.xr.getController(0)
         addControllerListeners()
     }
 
     function addControllerListeners() {
-        store.xr.controller.addEventListener("select", onSelect)
-        store.xr.controller.addEventListener("selectstart", onSelectStart)
-        store.xr.controller.addEventListener("selectend", onSelectEnd)
-        // TODO: put in SessionVR and delete here
-        //store.xr.controller.addEventListener("squeeze", onSelect)
-        //store.xr.controller.addEventListener("squeezestart", onSelect)
-        //store.xr.controller.addEventListener("squeezeend", onSelect)
+        $svelthreeStores[sti].xr.controller.addEventListener("select", onSelect)
+        $svelthreeStores[sti].xr.controller.addEventListener(
+            "selectstart",
+            onSelectStart
+        )
+        $svelthreeStores[sti].xr.controller.addEventListener(
+            "selectend",
+            onSelectEnd
+        )
     }
 
     function onSelect(): void {
         /**
          *  AR (VR(?)) session with a reticle defined.
          */
-        if (store.xr.reticle && hitTestMode === "realworld") {
-            if (store.xr.reticle.visible) {
+        if ($svelthreeStores[sti].xr.reticle && hitTestMode === "realworld") {
+            if ($svelthreeStores[sti].xr.reticle.visible) {
                 dispatch("select", {
-                    reticleMatrix: store.xr.reticle.matrix
+                    reticleMatrix: $svelthreeStores[sti].xr.reticle.matrix
                 })
             }
         } else {
             // this is performant: it happens only on select, not on every frame or similar
-            if (store.raycaster && store.xr.controller) {
+            if (
+                $svelthreeStores[sti].raycaster &&
+                $svelthreeStores[sti].xr.controller
+            ) {
                 performVirtualHitTest()
             }
 
             dispatch("select", {
-                controllerMatrixWorld: store.xr.controller.matrixWorld
+                controllerMatrixWorld:
+                    $svelthreeStores[sti].xr.controller.matrixWorld
             })
         }
     }
 
     function onSelectStart(): void {
         dispatch("selectstart", {
-            controllerMatrixWorld: store.xr.controller.matrixWorld
+            controllerMatrixWorld:
+                $svelthreeStores[sti].xr.controller.matrixWorld
         })
     }
 
     function onSelectEnd(): void {
         dispatch("selectend", {
-            controllerMatrixWorld: store.xr.controller.matrixWorld
-        })
-    }
-
-    // TODO: put these handlers in SessionVR and delete here
-    /*
-    function onSqueeze(): void {
-        dispatch("squeeze", {
             controllerMatrixWorld:
-               store.xr.controller.matrixWorld
+                $svelthreeStores[sti].xr.controller.matrixWorld
         })
     }
-
-    function onSqueezeStart(): void {
-        dispatch("squeezestart", {
-            controllerMatrixWorld:
-               store.xr.controller.matrixWorld
-        })
-    }
-
-    function onSqueezeEnd(): void {
-        dispatch("squeezeend", {
-            controllerMatrixWorld:
-               store.xr.controller.matrixWorld
-        })
-    }
-    */
 
     /**
      * We have to add the AR controller to the scene BEFORE hit test in order for it
@@ -174,25 +166,31 @@
     // TODO : apply this kind of "hack" everywhere if needed
 
     //BAD practice
-    //$: hitTestMode === "virtual" && store.currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
+    //$: hitTestMode === "virtual" && $svelthreeStores[sti].currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
 
     // GOOD practice (prevent unnecessary function calls)
 
     let currentSceneIndex = undefined
-    $: if (store.currentSceneIndex) {
-        currentSceneIndex = store.currentSceneIndex
+    $: if ($svelthreeStores[sti].currentSceneIndex) {
+        currentSceneIndex = $svelthreeStores[sti].currentSceneIndex
     }
 
-    $: if (hitTestMode === "virtual" && currentSceneIndex) {
+    $: if (
+        hitTestMode === "virtual" &&
+        currentSceneIndex &&
+        controllerAvailable
+    ) {
         tryAddingControllerToScene()
     }
 
     function tryAddingControllerToScene() {
-        debugger
-        let currentScene = store.scenes[store.currentSceneIndex - 1].scene
+        let currentScene =
+            $svelthreeStores[sti].scenes[
+                $svelthreeStores[sti].currentSceneIndex - 1
+            ].scene
 
-        if (store.xr.controller.parent !== currentScene) {
-            currentScene.add(store.xr.controller)
+        if ($svelthreeStores[sti].xr.controller.parent !== currentScene) {
+            currentScene.add($svelthreeStores[sti].xr.controller)
         }
     }
 
@@ -201,24 +199,33 @@
     function performVirtualHitTest(): void {
         console.warn("SessionAR performVirtualHitTest!")
 
-        let currentScene = store.scenes[store.currentSceneIndex - 1].scene
+        let currentScene =
+            $svelthreeStores[sti].scenes[
+                $svelthreeStores[sti].currentSceneIndex - 1
+            ].scene
 
         let originXR: Vector3 = new Vector3(0, 0, 0)
         let directionXR: Vector3 = new Vector3(0, 0, -1)
         let quaternion: Quaternion = new Quaternion()
         let scale: Vector3 = new Vector3(1, 1, 1)
 
-        store.xr.controller.matrixWorld.decompose(originXR, quaternion, scale)
+        $svelthreeStores[sti].xr.controller.matrixWorld.decompose(
+            originXR,
+            quaternion,
+            scale
+        )
 
         directionXR.applyQuaternion(quaternion).normalize()
 
-        store.raycaster.set(originXR, directionXR)
+        $svelthreeStores[sti].raycaster.set(originXR, directionXR)
 
         let toTest = currentScene.children.filter(
             (child: Object3D) => child.type === "Mesh"
         )
 
-        store.allIntersections = store.raycaster.intersectObjects(toTest, true)
+        $svelthreeStores[sti].allIntersections = $svelthreeStores[
+            sti
+        ].raycaster.intersectObjects(toTest, true)
     }
 
     // AR/VR Button creation
@@ -273,7 +280,7 @@
                  * concerning domOverlay:
                  * session.domOverlayState.type is now set if supported,
                  * or is null if the feature is not supported.
-                */
+                 */
 
                 // TODO : understand why this is here (original three.js comment)
                 /*
@@ -283,8 +290,8 @@
                 */
 
                 session.addEventListener("end", onSessionEnded)
-                store.renderer.xr.setReferenceSpaceType("local")
-                store.renderer.xr.setSession(session)
+                $svelthreeStores[sti].renderer.xr.setReferenceSpaceType("local")
+                $svelthreeStores[sti].renderer.xr.setSession(session)
                 button.textContent = btnTxt.stop ? btnTxt.stop : "STOP AR"
 
                 currentSession = session
@@ -297,26 +304,29 @@
                 button.textContent = btnTxt.start ? btnTxt.start : "START AR"
 
                 //reset store
-                store.renderer.xr.setSession(null)
-                store.allIntersections = undefined
+                $svelthreeStores[sti].renderer.xr.setSession(null)
+                $svelthreeStores[sti].allIntersections = undefined
 
-                store.renderer = undefined
-                //store.raycaster = undefined // reuse initally created raycaster (Canvas)
+                $svelthreeStores[sti].renderer = undefined
+                //$svelthreeStores[sti].raycaster = undefined // reuse initally created raycaster (Canvas)
 
-                store.scenes = []
-                store.currentSceneIndex = undefined
-                store.cameras = []
-                store.activeCamera = undefined
+                $svelthreeStores[sti].scenes = []
+                $svelthreeStores[sti].currentSceneIndex = undefined
+                $svelthreeStores[sti].cameras = []
+                $svelthreeStores[sti].activeCamera = undefined
 
-                store.xr.controller = undefined
-                store.xr.hitTestSource = null
-                store.xr.hitTestSourceRequested = false
-                store.xr.hitTestResults = undefined
-                store.xr.reticle = undefined
+                $svelthreeStores[sti].xr.controller = undefined
+                controllerAvailable = false
 
-                hitTestMode = store.xr.hitTestModeInitial
+                $svelthreeStores[sti].xr.hitTestSource = null
+                $svelthreeStores[sti].xr.hitTestSourceRequested = false
+                $svelthreeStores[sti].xr.hitTestResults = undefined
+                $svelthreeStores[sti].xr.reticle = undefined
+
+                hitTestMode = $svelthreeStores[sti].xr.hitTestModeInitial
                 currentSession = null
                 currentSceneIndex = undefined
+
                 dispatch("ended")
             }
 
@@ -353,7 +363,7 @@
             }
 
             function tryOnSessionStarted(session: XRSession): void {
-                if (store.renderer) {
+                if ($svelthreeStores[sti].renderer) {
                     onSessionStarted(session)
                 } else {
                     setTimeout(() => {
