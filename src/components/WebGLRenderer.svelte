@@ -512,9 +512,6 @@
                     renderAR(timestamp, frame)
                     break
                 case "immersive-vr":
-                    console.error(
-                        "SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'immersive-vr' is not yet implemented!"
-                    )
                     break
                 default:
                     break
