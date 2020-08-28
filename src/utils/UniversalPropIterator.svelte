@@ -9,18 +9,19 @@
         Object3D,
         Material,
         WebGLRenderer,
+        WebGLCubeRenderTarget,
         OrbitControls
     } from "svelthree-three"
     import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
 
     export class UniversalPropIterator {
-        obj: Object3D | Material | Material[] | WebGLRenderer | OrbitControls
+        obj: Object3D | Material | Material[] | WebGLRenderer | WebGLCubeRenderTarget | OrbitControls
         objTypeStr: string
         dlTarget: Object3D
         props: object
 
         //TODO: implement proper handling of type Material[]
-        constructor(obj: Object3D | Material | Material[] | WebGLRenderer) {
+        constructor(obj: Object3D | Material | Material[] | WebGLRenderer | WebGLCubeRenderTarget | OrbitControls) {
             this.obj = obj
             obj["type"]
                 ? (this.objTypeStr = obj["type"])
