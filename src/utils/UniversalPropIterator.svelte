@@ -9,27 +9,59 @@
         Object3D,
         Material,
         WebGLRenderer,
-        WebGLCubeRenderTarget,
-        OrbitControls
+        //WebGLCubeRenderTarget,
+        OrbitControls,
+        CubeCamera
     } from "svelthree-three"
     import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
 
     export class UniversalPropIterator {
-        obj: Object3D | Material | Material[] | WebGLRenderer | WebGLCubeRenderTarget | OrbitControls
+        obj:
+            | Object3D
+            | Material
+            | Material[]
+            | WebGLRenderer
+            //| WebGLCubeRenderTarget
+            | OrbitControls
+            | CubeCamera
         objTypeStr: string
         dlTarget: Object3D
         props: object
 
         //TODO: implement proper handling of type Material[]
-        constructor(obj: Object3D | Material | Material[] | WebGLRenderer | WebGLCubeRenderTarget | OrbitControls) {
+        constructor(
+            obj:
+                | Object3D
+                | Material
+                | Material[]
+                | WebGLRenderer
+                //| WebGLCubeRenderTarget
+                | OrbitControls
+                | CubeCamera
+        ) {
             this.obj = obj
-            obj["type"]
-                ? (this.objTypeStr = obj["type"])
-                : ((this.objTypeStr = ""),
-                  console.info(
-                      "SVELTHREE TODO > UniversalPropIterator > constructor : obj has no 'type' property, probably of type 'Material[]' or WebGLRenderer",
-                      obj
-                  ))
+
+            if (obj["type"]) {
+                this.objTypeStr = obj["type"]
+            } else {
+                switch (this.obj.constructor.name) {
+                    /**
+                     * TODO : Updating WebGLCubeRenderTarget is not working as initally expected,
+                     * but we'll keep this code here (does no harm), in case we missed something
+                     * @see CubeCamera.svelte
+                     */
+                    case "WebGLCubeRenderTarget":
+                        this.objTypeStr = "WebGLCubeRenderTarget"
+                        break
+                    default:
+                        this.objTypeStr = ""
+                        console.info(
+                            "SVELTHREE TODO > UniversalPropIterator > constructor : obj has no 'type' property, probably of type 'Material[]' or WebGLRenderer",
+                            obj
+                        )
+                        break
+                }
+            }
             this.dlTarget = undefined
         }
 
@@ -69,11 +101,11 @@
          */
         checkSetDlTarget(p: string): void {
             this.props[p] === undefined
-                // TODO : Check why this is undefined on init! Not severe problem, but still to be checked.
-                ? null //console.warn("SVELTHREE > UniversalPropIterator > checkSetDlTarget : " + this.objTypeStr + " : target in 'props' but undefined!")
-                : ( // TODO : Check why this being called twice on init! Not severe problem, but still to be checked.
-                    //console.warn("SVELTHREE > UniversalPropIterator > checkSetDlTarget : " + this.objTypeStr + " : target in 'props' now defined!!"),
-                    this.obj[p] = this.props[p].getEmpty())
+                ? // TODO : Check why this is undefined on init! Not severe problem, but still to be checked.
+                  null //console.warn("SVELTHREE > UniversalPropIterator > checkSetDlTarget : " + this.objTypeStr + " : target in 'props' but undefined!")
+                : // TODO : Check why this being called twice on init! Not severe problem, but still to be checked.
+                  //console.warn("SVELTHREE > UniversalPropIterator > checkSetDlTarget : " + this.objTypeStr + " : target in 'props' now defined!!"),
+                  (this.obj[p] = this.props[p].getEmpty())
         }
 
         tryPropsUpdate(props: object): void {
@@ -95,7 +127,14 @@
                     //console.info("SVELTHREE > " + this.objTypeStr + " : tryPropsUpdate, this.props[p]: ", this.props[p])
 
                     if (this.obj.hasOwnProperty(p)) {
-                        //console.info("SVELTHREE > " + this.objTypeStr + " : properties provided via 'props' will override other shorthand props!")
+                        /*
+                        console.info(
+                            "SVELTHREE > " +
+                                this.objTypeStr +
+                                " : properties provided via 'props' will override other shorthand props!, p:",
+                            p
+                        )
+                        */
 
                         //TODO: Does Three check if props are equal and not change / set them if? Are there any serious drawbacks at all (performance) if no equality check?
                         p === "scale" || p === "position" || p === "rotation"
@@ -103,7 +142,8 @@
                             : p === "color" || p === "groundColor"
                             ? this.checkSetColor(p)
                             : p === "target" &&
-                              (this.objTypeStr === "DirectionalLight" || this.objTypeStr === "SpotLight")
+                              (this.objTypeStr === "DirectionalLight" ||
+                                  this.objTypeStr === "SpotLight")
                             ? this.checkSetDlTarget(p)
                             : //standard 1:1
                               (this.obj[p] = this.props[p])
@@ -121,14 +161,34 @@
                                 : null
                             : null
                     } else {
-                        console.error(
-                            "SVELTHREE > " +
-                                this.objTypeStr +
-                                " : No such property in " +
-                                this.objTypeStr +
-                                "! : " +
-                                p.toString()
-                        )
+                        /**
+                         * TODO : Updating WebGLCubeRenderTarget is not working as initally expected,
+                         * but we'll keep this code here (does no harm), in case we missed something
+                         * @see CubeCamera.svelte
+                         */
+                        if (
+                            this.obj.constructor.name ===
+                            "WebGLCubeRenderTarget"
+                        ) {
+                            /*
+                            console.info(
+                                "SVELTHREE > " +
+                                    this.objTypeStr +
+                                    " : properties provided via 'props' will override other shorthand props!, p:",
+                                p
+                            )
+                            */
+                            this.obj["texture"][p] = this.props[p]
+                        } else {
+                            console.error(
+                                "SVELTHREE > " +
+                                    this.objTypeStr +
+                                    " : No such property in " +
+                                    this.objTypeStr +
+                                    "! : " +
+                                    p.toString()
+                            )
+                        }
                     }
                 }
             }
