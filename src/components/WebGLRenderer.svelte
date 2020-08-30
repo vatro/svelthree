@@ -21,6 +21,7 @@
     import type { ShadowMapType } from "svelthree-three"
     import WebXR from "./WebXR.svelte"
     import { createEventDispatcher } from "svelte"
+    import { SvelteComponentDev } from "svelte/internal"
 
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -338,7 +339,8 @@
                 currentScene.userData.indexInScenes
             ].isActive = true
 
-            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
+            $svelthreeStores[sti].currentSceneIndex =
+                currentScene.userData.indexInScenes + 1
 
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
@@ -352,7 +354,8 @@
                 currentScene.userData.indexInScenes
             ].isActive = true
 
-            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
+            $svelthreeStores[sti].currentSceneIndex =
+                currentScene.userData.indexInScenes + 1
 
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
@@ -486,6 +489,19 @@
                     : null
             }
 
+            //update cube cameras
+            if ($svelthreeStores[sti].cubeCameras.length > 0) {
+                for (
+                    let i = 0;
+                    i < $svelthreeStores[sti].cubeCameras.length;
+                    i++
+                ) {
+                    let cubeCamComponent: SvelteComponentDev =
+                        $svelthreeStores[sti].cubeCameras[i]
+                    cubeCamComponent.doUpdate()
+                }
+            }
+
             if (renderer.xr.enabled === true) {
                 renderXR(timestamp, frame)
             }
@@ -533,7 +549,7 @@
                 timestamp,
                 frame
             )
-        } else if($svelthreeStores[sti].xr.hitTestResults !== undefined) {
+        } else if ($svelthreeStores[sti].xr.hitTestResults !== undefined) {
             $svelthreeStores[sti].xr.hitTestResults = undefined
         }
     }

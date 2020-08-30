@@ -16,6 +16,7 @@
         Mesh,
         Group
     } from "svelthree-three"
+    import { SvelteComponentDev } from "svelte/internal"
 
     export let w: number
     export let h: number
@@ -40,7 +41,7 @@
     interface XR {
         sessionMode: string
         controller: Group // AR
-        controllers: Group[], //VR
+        controllers: Group[] //VR
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
@@ -60,6 +61,7 @@
         // so change from 'undefined' to '0' will not be triggered.
         currentSceneIndex: number
         cameras: Camera[]
+        cubeCameras: SvelteComponentDev[]
         activeCamera: Camera
         renderer: WebGLRenderer
         raycaster: Raycaster
@@ -81,6 +83,7 @@
         // so change from 'undefined' to '0' will not be triggered.
         currentSceneIndex: undefined,
         cameras: [],
+        cubeCameras: [],
         activeCamera: undefined,
         renderer: undefined,
         raycaster: undefined,
