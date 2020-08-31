@@ -1,7 +1,12 @@
 <script lang="typescript">
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
-    import { WebGLCubeRenderTarget, CubeCamera, Mesh } from "svelthree-three"
+    import {
+        WebGLCubeRenderTarget,
+        CubeCamera,
+        Mesh,
+        Vector3
+    } from "svelthree-three"
     //import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
 
@@ -111,7 +116,9 @@
     export function doUpdate() {
         if ($svelthreeStores[sti].currentSceneIndex) {
             parent.visible = false
-            cubeCamera.position.copy(parent.position)
+            let wp: Vector3 = new Vector3()
+            parent.getWorldPosition(wp)
+            cubeCamera.position.copy(wp)
             let renderer = $svelthreeStores[sti].renderer
             let scene =
                 $svelthreeStores[sti].scenes[
