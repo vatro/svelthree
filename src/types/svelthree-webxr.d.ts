@@ -5,9 +5,81 @@
  */
 
  // ------------------ added by svelthree ---------------------
-declare type XRHitTestMode = "realworld" | "virtual"
 
-interface XRSessionEvent extends Event {
+declare type XRHitTestMode = "realworld" | "virtual"
+declare type SessionVRInputType = "controller" | "hand"
+
+declare type XRHandPinchMode = "remote" | "touch" | "hybrid"
+
+declare type LineDashedMaterial = import('svelthree-three').LineDashedMaterial
+declare type LineBasicMaterial = import('svelthree-three').LineBasicMaterial
+
+declare type XRHandPinchRayMaterial = LineDashedMaterial | LineBasicMaterial
+
+
+declare type Scene = import('svelthree-three').Scene
+declare type Raycaster = import('svelthree-three').Raycaster
+
+declare interface XRTouchRayUpdateParams {
+    handProfile: XRHandProfile
+    lerpFactor: number
+    raycaster: Raycaster
+    enabledJoints: number[]
+    xrFrameDelta:number
+}
+
+declare interface XRTouchSphereUpdateParams {
+    handProfile: XRHandProfile
+    lerpFactor: number
+    raycaster: Raycaster
+    enabledJoints: number[]
+    xrFrameDelta:number
+}
+
+
+//{hand: "left", mode:"hybrid",  distance: {remote: 2, touch: 0.01}, materials: {remote: pinchRemoteLineMat, touch: pinchTouchLineMat}, colors: {remote: 0xffffff, touch: 0xff0000}},
+declare interface XRHandPinchConfigItem {
+    hand:XRHandTouchEnabled, mode:XRHandPinchMode, distance?: {remote?:number, touch?:number}, materials?: {remote?:XRHandPinchRayMaterial, touch?:XRHandPinchRayMaterial }, colors?: {remote?: number, remoteHit?: number, touch?: number, touchHit?: number,}
+}
+
+declare interface XRHandPinchConfig extends Array<XRHandPinchConfigItem> { }
+
+declare type XRHandProfile = "boxes" | "spheres" | "oculus"
+declare type XRHandTouchEnabled = "left" | "right" | "both"
+
+declare interface XRHandTouchConfigHandsItem {
+    hand:XRHandTouchEnabled, index:number[]
+}
+
+declare interface XRHandTouchConfigHands extends Array<XRHandTouchConfigHandsItem> { }
+
+declare type XRHandTouchTestMode = "ray" | "sphere"
+
+declare interface XRHandTouchConfig {
+    mode?: XRHandTouchTestMode,
+    debug?: boolean,
+    hands: XRHandTouchConfigHands
+}
+
+declare interface XRHandTouchXIndexItem {
+    left:number[], right:number[] | number[]
+}
+
+declare interface XRHandTouchXIndexPairs extends Array<XRHandTouchXIndexItem>{}
+
+declare interface XRHandTouchXConfigItem {
+    hand:XRHandTouchEnabled, name:string, distance?:number, touchtime?:number, indexPairs:XRHandTouchXIndexPairs
+}
+
+declare interface XRHandTouchXConfig extends Array<XRHandTouchXConfigItem> { }
+
+declare interface XRHandTouchEventsItem {
+    name:string, hand:XRHandTouchEnabled, distance?:number, touchtime?:number, index:number[]
+}
+
+declare interface XRHandTouchEvents extends Array<XRHandTouchEventsItem> { }
+
+declare interface XRSessionEvent extends Event {
     readonly session: XRSession
 }
 
