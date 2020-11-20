@@ -16,6 +16,7 @@
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
+    // TODO: Fix / complete processing Scene props (atm only background, see onMount)!
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
