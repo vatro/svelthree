@@ -162,7 +162,9 @@
         }
 
         getAnimation(): any {
-            return this.animation
+            if (this.animationInitiated()) {
+                 return this.animation
+            }
         }
     }
 </script>
