@@ -22,7 +22,8 @@
 
     $: if (controllersTotal) {
         if (interactionEnabled && obj && !obj.userData.interact) {
-            requestAnimationFrame(() => addListeners())
+            //requestAnimationFrame(() => addListeners())
+            addListeners()
             obj.userData.interact = true
         } else if (!interactionEnabled && obj && obj.userData.interact) {
             removeListeners()
@@ -33,6 +34,7 @@
     function addListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
             let controller = $svelthreeStores[sti].xr.controllers[i]
+            //grips
             controller.addEventListener("select", tryDispatch)
             controller.addEventListener("selectstart", tryDispatch)
             controller.addEventListener("selectend", tryDispatch)
@@ -45,6 +47,7 @@
     function removeListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
             let controller = $svelthreeStores[sti].xr.controllers[i]
+            //grips
             controller.removeEventListener("select", tryDispatch)
             controller.removeEventListener("selectstart", tryDispatch)
             controller.removeEventListener("selectend", tryDispatch)
@@ -73,10 +76,10 @@
     }
 
     onMount(() => {
-        console.info("SVELTHREE > onMount : SvelthreeInteractionVR")
+        console.info("SVELTHREE > onMount : SvelthreeInteractionVRController")
 
         return () => {
-            console.info("SVELTHREE > onDestroy : SvelthreeInteractionVR")
+            console.info("SVELTHREE > onDestroy : SvelthreeInteractionVRController")
             obj.userData.interact = false
             removeListeners()
         }
@@ -108,11 +111,14 @@
     //function doDispatch(e: XRInputSourceEvent, fireInternal: boolean): void {
     //e : {type, target}
     function doDispatch(e, fireInternal: boolean): void {
+       
         mDispatch(
             e.type,
             {
                 type: e.type,
-                target: obj
+                obj: obj,
+                target: e.target,
+                handedness: e.target.userData.handedness
                 //frame: e.frame,
                 //inputSource: e.inputSource
             },
@@ -176,68 +182,68 @@
 
     function onSelectAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSelectAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectAction!"
         )
         typeof parent.onSelect === "function"
             ? parent.onSelect(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSelect' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSelect' object is not a valid function!"
               )
     }
 
     function onSelectStartAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSelectStartAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectStartAction!"
         )
         typeof parent.onSelectStart === "function"
             ? parent.onSelectStart(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSelectStart' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSelectStart' object is not a valid function!"
               )
     }
 
     function onSelectEndAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSelectEndAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectEndAction!"
         )
         typeof parent.onSelectEnd === "function"
             ? parent.onSelectEnd(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSelectEnd' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSelectEnd' object is not a valid function!"
               )
     }
 
     // VR
     function onSqueezeAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSqueezeAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeAction!"
         )
         typeof parent.onSqueeze === "function"
             ? parent.onSqueeze(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSqueeze' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSqueeze' object is not a valid function!"
               )
     }
 
     function onSqueezeStartAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSqueezeStartAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeStartAction!"
         )
         typeof parent.onSqueezeStart === "function"
             ? parent.onSqueezeStart(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSqueezeStart' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSqueezeStart' object is not a valid function!"
               )
     }
 
     function onSqueezeEndAction(e: CustomEvent): void {
         console.info(
-            "SVELTHREE > SvelthreeInteractionVR :internal onSqueezeEndAction!"
+            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeEndAction!"
         )
         typeof parent.onSqueezeEnd === "function"
             ? parent.onSqueezeEnd(e)
             : console.error(
-                  "SVELTHREE > SvelthreeInteractionVR : provided 'onSqueezeEnd' object is not a valid function!"
+                  "SVELTHREE > SvelthreeInteractionVRController : provided 'onSqueezeEnd' object is not a valid function!"
               )
     }
 </script>
