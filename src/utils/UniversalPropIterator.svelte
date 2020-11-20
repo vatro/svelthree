@@ -11,19 +11,21 @@
         WebGLRenderer,
         //WebGLCubeRenderTarget,
         OrbitControls,
-        CubeCamera
+        CubeCamera,
+        Scene
     } from "svelthree-three"
     import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
 
     export class UniversalPropIterator {
         obj:
+            | Scene
             | Object3D
             | Material
             | Material[]
             | WebGLRenderer
-            //| WebGLCubeRenderTarget
             | OrbitControls
             | CubeCamera
+        //| WebGLCubeRenderTarget
         objTypeStr: string
         dlTarget: Object3D
         props: object
