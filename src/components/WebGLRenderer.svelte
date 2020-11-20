@@ -4,6 +4,7 @@
      */
 
     import { onMount } from "svelte"
+    import { get_current_component } from "svelte/internal"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
     import {
@@ -26,6 +27,7 @@
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
     let renderer: WebGLRenderer
+    let self = get_current_component()
     let rendererPropIterator: UniversalPropIterator
 
     export let config: { [key: string]: any } = undefined
@@ -80,7 +82,8 @@
               })),
               (canvas = $svelthreeStores[sti].canvas.dom),
               (rendererPropIterator = new UniversalPropIterator(renderer)),
-              ($svelthreeStores[sti].renderer = renderer))
+              ($svelthreeStores[sti].renderer = renderer),
+              ($svelthreeStores[sti].rendererComponent = self))
             : null
         : null
 
@@ -167,10 +170,10 @@
     $: (devCanvasDimW || devCanvasDimH) && canvas ? updateCanvasDimInStore() : null // triggers above
     */
 
+    $: renderer ? startAnimating() : null
+
     onMount(() => {
         console.info("SVELTHREE > onMount : WebGLRenderer")
-
-        startAnimating()
 
         return () => {
             console.info("SVELTHREE > onDestroy : WebGLRenderer")
@@ -368,8 +371,9 @@
     let rAF: number = undefined
 
     function startAnimating(): void {
+        console.info("SVELTHREE > WebGLRenderer > startAnimating!")
         doAnimate = true
-        rAF = requestAnimationFrame(animate)
+        animate()
     }
 
     //called internally 'onDestroy'
@@ -437,6 +441,7 @@
     let toTest: Object3D[]
 
     function animate(): void {
+        //console.info("SVELTHREE > WebGLRenderer > animate!")
         if (renderer.xr.enabled === false) {
             render()
         } else {
@@ -506,18 +511,44 @@
                 renderXR(timestamp, frame)
             }
 
+            dispatch("render", { timestamp: timestamp })
             renderer.render(currentScene, currentCam)
+
             if (renderer.xr.enabled === false) {
                 rAF = requestAnimationFrame(animate)
             }
         }
     }
 
+    let lastTimeStamp
+
     function renderXR(
-        timestamp: any = undefined,
+        timestamp: number = undefined,
         frame: XRFrame = undefined
     ): void {
         if (frame) {
+            let delta: number
+
+            if (lastTimeStamp) {
+                delta = timestamp - lastTimeStamp
+                lastTimeStamp = timestamp
+            } else {
+                lastTimeStamp = timestamp
+                delta = 0
+            }
+
+            $svelthreeStores[sti].xr.currentFrame = {
+                timestamp: timestamp,
+                delta: delta,
+                frame: frame
+            }
+
+            dispatch("xrframe", {
+                timestamp: timestamp,
+                delta: delta,
+                frame: frame
+            })
+
             switch ($svelthreeStores[sti].xr.sessionMode) {
                 case "inline":
                     console.error(
@@ -536,7 +567,7 @@
     }
 
     function renderAR(
-        timestamp: any = undefined,
+        timestamp: number = undefined,
         frame: XRFrame = undefined
     ): void {
         let referenceSpace: XRReferenceSpace = renderer.xr.getReferenceSpace() as XRReferenceSpace
