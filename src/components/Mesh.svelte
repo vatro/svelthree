@@ -24,14 +24,16 @@
         PropRot,
         PropScale,
         PropMatrix4
-    } from "../utils/SvelthreeTypes"
+    } from "../utils/SvelthreeTypes.svelte"
     import {
         isValidArray3Prop,
         isValidMatrix4
     } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
     import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
-    import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
+    //import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
+    import SvelthreeInteractionVRController from "./SvelthreeInteractionVRController.svelte"
+    import SvelthreeInteractionVRHands from "./SvelthreeInteractionVRHands.svelte"
     import { createEventDispatcher } from "svelte"
 
     let ani: any
@@ -52,6 +54,30 @@
     export let aniauto: boolean = undefined
     export let interact: boolean = undefined
     //export let recursive: boolean = undefined
+
+    //interaction XR
+    //pinch
+    export let pinchRemote:boolean = undefined
+    export let pinchTouch:boolean = undefined
+    export let pinchHybrid:boolean = undefined
+
+    export let xrHandTouch:boolean = undefined
+
+    export function pinchRemoteEnabled():boolean {
+        return pinchRemote
+    }
+
+    export function pinchTouchEnabled():boolean {
+        return pinchTouch
+    }
+
+    export function pinchHybridEnabled():boolean {
+        return pinchHybrid
+    }
+
+    export function xrHandTouchEnabled():boolean {
+        return xrHandTouch
+    }
 
     let sti: number
 
@@ -188,7 +214,8 @@
     $: geometry && material && !mesh && generate
         ? ((mesh = new Mesh(geometry, material)),
           (mesh.name = name),
-          (mesh.userData.initScale = mesh.scale.x),
+          (mesh.userData.initScale = mesh.scale.x,
+          mesh.userData.svelthreeComponent = self),
           console.info("SVELTHREE > Mesh : " + geometry.type + " created!", {
               mesh: mesh
           }),
@@ -286,6 +313,45 @@
           ),
           tryMatrixUpdate())
         : null
+
+    let useBVH:boolean = false    
+    $: $svelthreeStores[sti].useBVH === true ?  useBVH = true : useBVH = false
+    $: if(useBVH === true) {
+
+          
+            //use BVH if enabled
+            //if($svelthreeStores[sti].useBVH) {
+                    // Using pre-made functions, see https://github.com/gkjohnson/three-mesh-bvh
+                    console.warn("SVELTHREE > Mesh : Using BVH!")
+                    if(mesh.geometry["computeBoundsTree"]) {
+                        console.log("SVELTHREE > Mesh : Using BVH, mesh.matrixWorld: ", mesh.matrixWorld)
+                        mesh.geometry.applyMatrix4(mesh.matrixWorld)
+                        mesh.geometry["computeBoundsTree"]()
+                        console.log("SVELTHREE > Mesh : computeBoundsTree finished, mesh: ", console.log(mesh))
+                    }
+                    else {
+                        console.error("SVELTHREE > Mesh : mesh.geometry.computeBoundsTree not available!")
+                    }
+                //}
+
+                // use BVH per default, if object is interactive and touchable, even if useBVH is not enabled
+                // BVH is being enabled globally (Canvas / store)
+                /*
+                if(interact && xrHandTouch && !useBVH) { 
+                    
+                }
+                */
+        
+    } else {
+        if(mesh.geometry['boundsTree']) {
+            console.warn("SVELTHREE > Mesh : dispose boundsTree!")
+            if(mesh.geometry["disposeBoundsTree"]) {
+                    mesh.geometry["disposeBoundsTree"]()
+            } else {
+                        console.error("SVELTHREE > Mesh : mesh.geometry.disposeBoundsTree not available!")
+                    }
+        }
+    }
 
     $: castShadow ? tryCastShadowUpdate() : null
     $: receiveShadow ? tryReceiveShadowUpdate() : null
@@ -537,17 +603,31 @@
 
     //XR
 
-    let currentSessionMode: string = undefined
+    let currentXRSessionMode: string = undefined
     $: $svelthreeStores[sti].xr.sessionMode
-        ? (currentSessionMode = $svelthreeStores[sti].xr.sessionMode)
+        ? (currentXRSessionMode = $svelthreeStores[sti].xr.sessionMode)
         : null
 
+    let currentXRInputType: string = undefined
+    $: $svelthreeStores[sti].xr.inputType
+        ? (currentXRInputType = $svelthreeStores[sti].xr.inputType)
+        : null
+
+    //controller
     export let onSelect: (e?: CustomEvent) => void = undefined
     export let onSelectStart: (e?: CustomEvent) => void = undefined
     export let onSelectEnd: (e?: CustomEvent) => void = undefined
     export let onSqueeze: (e?: CustomEvent) => void = undefined
     export let onSqueezeStart: (e?: CustomEvent) => void = undefined
     export let onSqueezeEnd: (e?: CustomEvent) => void = undefined
+
+    //hands
+    export let onPinchStart: (e?: CustomEvent) => void = undefined
+    export let onPinchEnd: (e?: CustomEvent) => void = undefined
+    export let onPinchRemoteStart: (e?: CustomEvent) => void = undefined
+    export let onPinchRemoteEnd: (e?: CustomEvent) => void = undefined
+    export let onPinchTouchStart: (e?: CustomEvent) => void = undefined
+    export let onPinchTouchEnd: (e?: CustomEvent) => void = undefined
 </script>
 
 <svelte:options accessors={true} />
@@ -576,7 +656,7 @@
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
-    {#if currentSessionMode === 'immersive-ar'}
+    {#if currentXRSessionMode === 'immersive-ar'}
         <SvelthreeInteractionAR
             {sti}
             {dispatch}
@@ -585,12 +665,27 @@
             {interactionEnabled} />
     {/if}
 
-    {#if currentSessionMode === 'immersive-vr'}
-        <SvelthreeInteractionVR
-            {sti}
-            {dispatch}
-            obj={mesh}
-            parent={self}
-            {interactionEnabled} />
+    {#if currentXRSessionMode === 'immersive-vr'}
+        {#if currentXRInputType === 'controller'}
+            <SvelthreeInteractionVRController
+                {sti}
+                {dispatch}
+                obj={mesh}
+                parent={self}
+                {interactionEnabled} />
+        {/if}
+        {#if currentXRInputType === 'hand'}
+            <SvelthreeInteractionVRHands
+                {sti}
+                {dispatch}
+                obj={mesh}
+                parent={self}
+                {interactionEnabled}
+                {pinchRemote}
+                {pinchTouch}
+                {pinchHybrid}
+                {xrHandTouch}
+                />
+        {/if}
     {/if}
 {/if}

@@ -14,8 +14,15 @@
         Vector3,
         OrbitControls,
         Mesh,
-        Group
+        Group,
+        BufferGeometry
     } from "svelthree-three"
+
+    import type { Intersection } from "svelthree-three"
+
+    //BVH
+    import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from "../../node_modules/three-mesh-bvh/src"
+
     import { SvelteComponentDev } from "svelte/internal"
 
     export let w: number
@@ -38,10 +45,28 @@
         unprojected: Vector3
     }
 
+    interface SvelthreeXRFrame {
+        timestamp: number
+        delta: number
+        frame: XRFrame
+    }
+
     interface XR {
         sessionMode: string
+        inputType: SessionVRInputType
         controller: Group // AR
         controllers: Group[] //VR
+        enablePinch: XRHandPinchConfig,
+        handProfile: XRHandProfile
+        enableTouch: XRHandTouchConfig
+        touchEvents: XRHandTouchEvents
+        enableTouchX: XRHandTouchXConfig
+        leftHandTouchEnabled: boolean
+        leftHandTouchEnabledJoints: number[]
+        rightHandTouchEnabled: boolean
+        rightHandTouchEnabledJoints: number[]
+        leftHandPinchEnabled: boolean
+        rightHandPinchEnabled: boolean
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
@@ -51,6 +76,7 @@
         hitTestSourceRequested: boolean
         hitTestResults: any[]
         reticle: Mesh
+        currentFrame: SvelthreeXRFrame
     }
 
     interface StoreBody {
@@ -64,11 +90,13 @@
         cubeCameras: SvelteComponentDev[]
         activeCamera: Camera
         renderer: WebGLRenderer
+        rendererComponent: SvelteComponentDev
         raycaster: Raycaster
-        allIntersections: []
+        allIntersections: any[]
         pointer: StorePointer
         orbitcontrols: OrbitControls
         xr: XR
+        useBVH: boolean
     }
 
     const svelthreeStoreBody: StoreBody = {
@@ -86,6 +114,7 @@
         cubeCameras: [],
         activeCamera: undefined,
         renderer: undefined,
+        rendererComponent: undefined,
         raycaster: undefined,
         allIntersections: undefined,
         pointer: {
@@ -97,8 +126,20 @@
         orbitcontrols: undefined,
         xr: {
             sessionMode: undefined,
+            inputType: undefined,
             controller: undefined,
             controllers: [],
+            enablePinch: undefined,
+            handProfile: undefined,
+            enableTouch: undefined,
+            touchEvents: undefined,
+            enableTouchX: undefined,
+            leftHandTouchEnabled: undefined,
+            leftHandTouchEnabledJoints: undefined,
+            rightHandTouchEnabled: undefined,
+            rightHandTouchEnabledJoints: undefined,
+            leftHandPinchEnabled: undefined,
+            rightHandPinchEnabled: undefined,
             requiredFeatures: [],
             optionalFeatures: [],
             domOverlay: undefined,
@@ -107,8 +148,14 @@
             hitTestSource: null,
             hitTestSourceRequested: false,
             hitTestResults: undefined,
-            reticle: undefined
-        }
+            reticle: undefined,
+            currentFrame: {
+                timestamp: 0,
+                delta: 0,
+                frame: undefined
+            }
+        },
+        useBVH: false
     }
 
     svelthreeStoreBody.canvas.dim.w = w
@@ -129,7 +176,34 @@
             : null
     }
 
-    export let interactive = false
+    let originalThreeRaycastFunction: ( raycaster: Raycaster, intersects: Intersection[] ) => void
+    export let useBVH: boolean
+    $: if(useBVH) {
+        $svelthreeStores[sti].useBVH = useBVH
+
+        if(!BufferGeometry.prototype["computeBoundsTree"]) {
+            //backup original raycast function
+            originalThreeRaycastFunction = Mesh.prototype.raycast
+
+            BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree;
+            BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree;
+            Mesh.prototype.raycast = acceleratedRaycast;
+        }
+    }
+    else {
+        $svelthreeStores[sti].useBVH = useBVH
+
+        if(BufferGeometry.prototype["computeBoundsTree"]) {
+            BufferGeometry.prototype["computeBoundsTree"] = undefined;
+            BufferGeometry.prototype["disposeBoundsTree"] = undefined;
+
+            //restore original raycast function
+            Mesh.prototype.raycast = originalThreeRaycastFunction;
+        }
+    }
+
+
+    export let interactive:boolean
     let isInteractive = false
     let raycaster: Raycaster
 
