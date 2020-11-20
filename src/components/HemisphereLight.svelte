@@ -11,7 +11,7 @@
         Object3D
     } from "svelthree-three"
     import Light from "./Light.svelte"
-    import type { PropColor } from "../utils/SvelthreeTypes"
+    import type { PropColor } from "../utils/SvelthreeTypes.svelte"
 
     export let props: { [key: string]: any } = undefined
 

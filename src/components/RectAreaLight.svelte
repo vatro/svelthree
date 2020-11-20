@@ -11,7 +11,7 @@
     } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropColor } from "../utils/SvelthreeTypes"
+    import type { PropPos, PropColor } from "../utils/SvelthreeTypes.svelte"
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined

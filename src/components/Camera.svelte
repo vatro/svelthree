@@ -14,7 +14,7 @@
         PropRot,
         PropLookAt,
         PropMatrix4
-    } from "../utils/SvelthreeTypes"
+    } from "../utils/SvelthreeTypes.svelte"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
     let ani: any

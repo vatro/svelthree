@@ -13,7 +13,7 @@
         PropRot,
         PropScale,
         PropMatrix4
-    } from "../utils/SvelthreeTypes"
+    } from "../utils/SvelthreeTypes.svelte"
     import {
         isValidArray3Prop,
         isValidMatrix4

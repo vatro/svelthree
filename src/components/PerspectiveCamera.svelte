@@ -11,7 +11,7 @@
         PropRot,
         PropLookAt,
         PropMatrix4
-    } from "../utils/SvelthreeTypes"
+    } from "../utils/SvelthreeTypes.svelte"
 
     export let scene: Scene
     export let id: string = undefined
