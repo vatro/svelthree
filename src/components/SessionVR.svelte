@@ -14,8 +14,8 @@
     import { createEventDispatcher } from "svelte"
     import { SvelthreeHelpersXR } from "../utils/SvelthreeHelpersXR"
     import { XRHandHitTester } from "../utils/XRHandHitTester"
-    import { XRHandTouchRay } from "../utils/XRHandTouchRay"
-    import { XRHandTouchSphere } from "../utils/XRHandTouchSphere"
+    import { XRHandTouchRayExt } from "../utils/XRHandTouchRayExt"
+    import { XRHandTouchSphereExt } from "../utils/XRHandTouchSphereExt"
     import {
         Vector3,
         Quaternion,
@@ -31,6 +31,8 @@
         LineBasicMaterial,
         LineDashedMaterial, MeshStandardMaterial
     } from "svelthree-three"
+
+    import XRHandTouchTestModes from "../utils/XRHandTouchTestModes"
 
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -76,8 +78,8 @@
 
     let xrHelpers: SvelthreeHelpersXR = new SvelthreeHelpersXR()
     let xrHandHitTester: XRHandHitTester = new XRHandHitTester()
-    let xrHandTouchRay: XRHandTouchRay = new XRHandTouchRay()
-    let xrHandTouchSphere: XRHandTouchSphere = new XRHandTouchSphere()
+    let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt()
+    let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt()
 
     $: requiredFeatures ? updateRequiredFeatures() : null
 
@@ -326,8 +328,8 @@
                     hand.addEventListener("touchstart", dispatchHandTouchEvent)
                     hand.addEventListener("touchend", dispatchHandTouchEvent)
                 
-                    xrHandTouchRay.leftHand = leftHand
-                    xrHandTouchRay.rightHand = rightHand
+                    xrHandTouchRay.setLeftHand(leftHand)
+                    xrHandTouchRay.setRightHand(rightHand)
                 
                     doUpdateXRTouch = true
             }
@@ -477,7 +479,6 @@
                         break
                 }
             }
-            
         }
     }
     
@@ -556,7 +557,20 @@
         xrHandTouchRay.updateToTest(currentScene)
         xrHandTouchRay.updateBVH($svelthreeStores[sti].useBVH)
         xrHandTouchRay.updateTouchDistance(touchDistance)
-        enableTouch.debug ? xrHandTouchRay.updateDebug(true) : xrHandTouchRay.updateDebug(false)
+        // TODO: implement NEW debugging
+        // enableTouch.debug ? xrHandTouchRay.updateDebug(true) : xrHandTouchRay.updateDebug(false)
+       
+        if(enableTouch.debug === true) {
+            if(!xrHandTouchRay.debuggerInitiated) {
+                xrHandTouchRay.setDebugger({
+                    debugConfig: enableTouch.debugConfig,
+                    hightlightJoints: enableTouch.hightlightJoints,
+                    colorTouchedFaces: enableTouch.colorTouchedFaces
+                })
+            }
+            xrHandTouchRay.updateDebug(enableTouch.debug)
+        }
+     
         //console.timeEnd("updateXRTouchRay updates")
 
         //console.time("updateXRTouchRay update params")
@@ -570,7 +584,7 @@
         }
         //console.timeEnd("updateXRTouchRay update params")
 
-        console.time("updateXRTouchRay hands update")
+        //console.time("updateXRTouchRay hands update")
         // 0.09 - 0.4 (TOUCH AND TOUCH INSIDE) - 1.74 ms (FAST TOUCH CHECK)
         if (leftHand && $svelthreeStores[sti].xr.leftHandTouchEnabled === true) {
             //console.log("updateXRTouchRay left!")
@@ -581,7 +595,7 @@
             //console.log("updateXRTouchRay right!")
             xrHandTouchRay.update(rightHand, params)
         }
-        console.timeEnd("updateXRTouchRay hands update")
+        //console.timeEnd("updateXRTouchRay hands update")
     }
 
     function updateXRTouchSphere() :void {
@@ -591,7 +605,20 @@
         xrHandTouchSphere.updateToTest(currentScene)
         xrHandTouchSphere.updateBVH($svelthreeStores[sti].useBVH)
         xrHandTouchSphere.updateTouchDistance(touchDistance)
-        enableTouch.debug ? xrHandTouchSphere.updateDebug(true) : xrHandTouchSphere.updateDebug(false)
+        // TODO: implement NEW debugging
+        //enableTouch.debug ? xrHandTouchSphere.updateDebug(true) : xrHandTouchSphere.updateDebug(false)
+
+        if(enableTouch.debug === true) {
+            if(!xrHandTouchSphere.debuggerInitiated) {
+                xrHandTouchSphere.setDebugger({
+                    debugConfig: enableTouch.debugConfig,
+                    hightlightJoints: enableTouch.hightlightJoints,
+                    colorTouchedFaces: enableTouch.colorTouchedFaces
+                })
+            }
+            xrHandTouchSphere.updateDebug(enableTouch.debug)
+        }
+
         //console.timeEnd("updateXRTouchSphere updates")
 
         //console.time("updateXRTouchSphere update params")
@@ -604,7 +631,7 @@
         }
         //console.timeEnd("updateXRTouchRay update params")
 
-        console.time("updateXRTouchSphere hands update")
+        //console.time("updateXRTouchSphere hands update")
         // 0.09 - 0.4 (TOUCH AND TOUCH INSIDE) - 1.74 ms (FAST TOUCH CHECK)
         if (leftHand && $svelthreeStores[sti].xr.leftHandTouchEnabled === true) {
             //console.log("updateXRTouchRay left!")
@@ -615,7 +642,7 @@
             //console.log("updateXRTouchRay right!")
             xrHandTouchSphere.update(rightHand, params)
         }
-        console.timeEnd("updateXRTouchSphere hands update")
+        //console.timeEnd("updateXRTouchSphere hands update")
     }
 
     function dispatchHandPinchEvent(e) {

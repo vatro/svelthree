@@ -5,47 +5,20 @@ import {
     Object3D,
     Scene,
     Raycaster,
-    Line,
-    LineBasicMaterial,
-    BufferGeometry,
-    MeshStandardMaterial,
-    MeshBasicMaterial,
-    Mesh,
     Matrix3,
-    Matrix4,
-    Color,
-    Plane,
-    OctahedronBufferGeometry
 } from "svelthree-three"
 
-export class XRHandTouchRay {
-    tentacleMat: LineBasicMaterial
-    tentacleTouchMat: LineBasicMaterial
-    tentacleNormalRayMat: LineBasicMaterial
-    tentacleTouchingRayMat: LineBasicMaterial
-    tentacleTestRayMat: LineBasicMaterial
-    //tentacleScale = 0.025
-    tentacleDirScale = 0.02
-    tentacleTouchingRayScale = this.tentacleDirScale * 3
-    jointMat: MeshStandardMaterial
-
-    drawTentacles: boolean = true
-    drawTouchDebuggers: boolean = true
-    highlightJoint: boolean = false
-
+export class XRHandTouchRayClean {
     tip: number[]
     distal: number[]
     intermediate: number[]
     proximal: number[]
     metacarpal: number[]
+
     joints: number[]
     allJoints: number[]
 
     enabledJoints: number[]
-
-    //debugPoint:Mesh
-    //debugPointCurrent:Mesh
-
     currentScene: Scene
 
     leftHand: Group = undefined
@@ -54,49 +27,9 @@ export class XRHandTouchRay {
     toTest: Object3D[]
     useBVH: boolean = false
 
-    //debugPointGeom:OctahedronBufferGeometry
-    //debugPointsMesh:Mesh
-    //debugPointMeshGeom:BufferGeometry
-    //debugPointsMeshMat:MeshBasicMaterial
-    //debugPointsCounter:number = 0
-    //debugMeshesAdded:boolean = false
-
     touchDistance: number = 0.008
 
     constructor() {
-        this.tentacleMat = new LineBasicMaterial({
-            color: 0x4299e1,
-            linewidth: 2
-        })
-
-        this.tentacleTouchMat = new LineBasicMaterial({
-            color: 0xff0000,
-            linewidth: 2
-        })
-
-        this.tentacleNormalRayMat = new LineBasicMaterial({
-            color: 0xffff00,
-            linewidth: 2
-        })
-
-        this.tentacleTouchingRayMat = new LineBasicMaterial({
-            color: 0xffff00, // yellow thick
-            linewidth: 2
-        })
-
-        this.tentacleTestRayMat = new LineBasicMaterial({
-            color: 0xff00bf, // fuchsia thin
-            linewidth: 1
-        })
-
-        this.jointMat = new MeshStandardMaterial({
-            color: 0x4299e1,
-            roughness: 0.5,
-            metalness: 0.5
-        })
-
-        //this.debugPointsMeshMat = new MeshBasicMaterial({color: 0xff0000})
-
         this.tip = [4, 9, 14, 19, 24]
         this.distal = [3, 8, 13, 18, 23]
         this.intermediate = [7, 12, 17, 22]
@@ -105,47 +38,18 @@ export class XRHandTouchRay {
 
         this.joints = this.distal.concat(this.intermediate, this.proximal, this.metacarpal)
         this.allJoints = this.tip.concat(this.distal, this.intermediate, this.proximal, this.metacarpal)
-
-        //this.debugPointGeom = new OctahedronBufferGeometry(0.002, 0)
-        //this.debugPoint.name = "debugPoint"
-        //this.debugPointCurrent.name = "debugPointCurrent"
-
-        //this.debugLinesMesh = new Mesh()
-
     }
 
     // which world objects to test, have to updated on at least every frame...)
     updateToTest(currentScene: Scene) {
 
         this.currentScene = currentScene
-
-        /*
-        if(this.debugMeshesAdded === false && this.drawTouchDebuggers) {
-            let MAX_POINTS = 100000;
-
-            this.debugPointMeshGeom = new BufferGeometry()
-            let positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-            this.debugPointMeshGeom.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
-
-            this.debugPointsMesh = new Mesh( this.debugPointMeshGeom, this.debugPointsMeshMat)
-            //this.debugPointsMesh.name = "debugMesh"
-            this.currentScene.add(this.debugPointsMesh)
-            
-            //this.debugLinesMesh.layers.enable( 1 )
-            this.debugPointsMesh.layers.enable( 1 )
-            //this.debugPointsCounter = 0
-            this.debugMeshesAdded = true
-        }
-        */
-
         this.toTest = currentScene.children.filter(
             (child: Object3D) =>
                 //all Meshes except the hand joints themselves
                 child.type === "Mesh" &&
                 child.parent !== this.leftHand &&
                 child.parent !== this.rightHand
-            //child.name !== "debugMesh" 
-            //child.name !== "debugPointCurrent"
         )
     }
 
@@ -155,17 +59,6 @@ export class XRHandTouchRay {
 
     updateTouchDistance(touchDistance: number) {
         this.touchDistance = touchDistance
-    }
-
-    updateDebug(debug: boolean) {
-        if (debug) {
-            this.drawTentacles = true
-            this.drawTouchDebuggers = true
-        }
-        else {
-            this.drawTentacles = false
-            this.drawTouchDebuggers = false
-        }
     }
 
     /**
@@ -183,9 +76,6 @@ export class XRHandTouchRay {
 
             let jointIndex: number = this.enabledJoints[i]
             let joint: Group = hand.children[jointIndex] as Group
-
-            let jointMesh: Mesh
-            if (this.highlightJoint) { jointMesh = this.getJointMesh(hand, joint, i) }
 
             if (joint.userData.origin !== undefined) {
                 joint.userData.lastOrigin = joint.userData.origin
@@ -206,11 +96,6 @@ export class XRHandTouchRay {
             if (joint.userData.touch === undefined) { joint.userData.touch = false }
             if (joint.userData.touchInside === undefined) { joint.userData.touchInside = false }
 
-            if (this.drawTentacles === true) {
-                this.tentacleDirScale = this.touchDistance * joint.userData.speedFac
-                this.tentacleTouchingRayScale = this.touchDistance * 3
-            }
-
             // intersections of the joint-direction-ray 
             let intersectionsPhase1
 
@@ -218,30 +103,20 @@ export class XRHandTouchRay {
             switch (joint.userData.touch) {
                 case false:
 
-                    this.drawTentacles ? this.showDirectionTentacle(joint, joint.userData.origin) : null
-                    this.highlightJoint && jointMesh ? jointMesh.material["emissive"].setHex(0x000000) : null
-
                     /**
                      * intersectionsPhase1
                      * Cast a ray from joint's origin in its'direction (lerped).
                      * The raycaster ray's ray is limited to touchDistance*joint.userData.speedFac
                      */
-                    intersectionsPhase1 = this.doRaycast(params.raycaster, joint.userData.origin, joint.userData.direction, 0, this.touchDistance * joint.userData.speedFac)
-
+                    intersectionsPhase1 = this.intersectionsPhase1Raycast(params, joint)
 
                     /**
                      * If the intersectionsPhase1 intersects an object...
                      */
                     if (intersectionsPhase1.length > 0) {
 
-                        /**
-                         * TOUCH
-                         * ... if the distiance to the intersection point is <= touchDistance
-                         * Color the intersected face and DISPATCH a TOUCH EVENT
-                         * else
-                         * save the intersected object inside joint.userData.lastIntersect
-                        */
-                        if (intersectionsPhase1[0].distance <= this.touchDistance) {
+
+                        if (this.isInTouchDistance(intersectionsPhase1)) {
 
                             // atm this has an effect on the next frame, 
                             joint.userData.touch = true
@@ -251,12 +126,10 @@ export class XRHandTouchRay {
                             joint.userData.lastTouchPoint = intersectionsPhase1[0].point
                             joint.userData.lastIntersect = undefined
 
-                            this.colorFace(intersectionsPhase1[0], this.hlColTouch, null)
-
                             this.addJointToTouchingArray(hand, i)
                             this.dispatchTouch(hand, joint, i, intersectionsPhase1[0])
 
-                            this.touchingOutsideCheck(joint, i, params.raycaster, hand, jointMesh)
+                            this.touchingOutsideCheck(joint, i, params.raycaster, hand)
                         }
                         else {
                             //  save target
@@ -294,13 +167,6 @@ export class XRHandTouchRay {
                                 let untouchTestRaycasterLength: number = joint.userData.origin.distanceTo(joint.userData.lastIntersect.point)
                                 let untouchTestRaycast = this.doRaycastObject(params.raycaster, joint.userData.origin, untouchTestRaycasterDir, joint.userData.lastIntersect.object, 0, untouchTestRaycasterLength * 0.99)
 
-                                // visual debugging
-                                if (this.drawTouchDebuggers) {
-                                    let lineGeom = new BufferGeometry().setFromPoints([joint.userData.origin, joint.userData.lastIntersect.point])
-                                    let line = new Line(lineGeom, this.tentacleTouchingRayMat)
-                                    this.currentScene.add(line)
-                                }
-
                                 // 2. intersection / no intersection
 
                                 // intersection
@@ -309,11 +175,6 @@ export class XRHandTouchRay {
                                     // c) we're OUTSIDE the object (on the other side) 
 
                                     console.time("TOUCHTHROUGH - CONDITIONAL BLOCK")
-
-                                    this.colorFace(joint.userData.lastIntersect, this.hlColTouch2, "TOUCHTHROUGH ENTER!") // yellow
-                                    this.colorFace(untouchTestRaycast[0], this.hlColUnTouch2, "TOUCHTHROUGH EXIT!") // fuchsia
-
-                                    this.drawTentacles ? this.removeAllTentacles(joint) : null
 
                                     joint.userData.touch = false
                                     joint.userData.touchInside = false
@@ -341,8 +202,6 @@ export class XRHandTouchRay {
 
                                         console.time("FAST TOUCH ENTER (no exit & immediate inside check) - CONDITIONAL BLOCK")
                                         // dispatch "touch" (entered but not exited)
-                                        this.colorFace(joint.userData.lastIntersect, this.hlColTouch2, "FAST TOUCH ENTER!") // yellow
-
                                         joint.userData.touch = true
                                         joint.userData.touchInside = true
                                         joint.userData.touchObj = joint.userData.lastIntersect.object
@@ -353,20 +212,15 @@ export class XRHandTouchRay {
                                         joint.userData.lastIntersect = undefined
 
                                         // continue immediately with touching inside check ...
-                                        this.touchingInsideCheck(joint, i, params.raycaster, hand, jointMesh)
+                                        this.touchingInsideCheck(joint, i, params.raycaster, hand)
 
                                         console.timeEnd("FAST TOUCH ENTER (no exit & immediate inside check) - CONDITIONAL BLOCK")
-
                                     }
                                     else if (dotProd < 0) {
                                         // b) we're OUTSIDE the object (in front of the face, dotProd < 0 --> facing)
                                         {
                                             // TODO  Scratch happens too often even at low speed (shadow gentle touch)
                                             console.time("SCRATCH - CONDITIONAL BLOCK")
-
-                                            this.colorFace(joint.userData.lastIntersect, this.hlColScratch, "SCRATCH!") // yellow
-
-                                            this.drawTentacles ? this.removeAllTentacles(joint) : null
 
                                             joint.userData.touch = false
                                             joint.userData.touchInside = false
@@ -406,11 +260,11 @@ export class XRHandTouchRay {
                     switch (joint.userData.touchInside) {
 
                         case false:
-                            this.touchingOutsideCheck(joint, i, params.raycaster, hand, jointMesh)
+                            this.touchingOutsideCheck(joint, i, params.raycaster, hand)
                             break
 
                         case true:
-                            this.touchingInsideCheck(joint, i, params.raycaster, hand, jointMesh)
+                            this.touchingInsideCheck(joint, i, params.raycaster, hand)
                             break
 
                     }
@@ -421,7 +275,7 @@ export class XRHandTouchRay {
 
     }
 
-    touchingOutsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group, jointMesh: Mesh): void {
+    touchingOutsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group): void {
 
         // intersections of normal-direction-ray (when touching)
         let intersectionsPhase2
@@ -436,45 +290,28 @@ export class XRHandTouchRay {
         }
 
         intersectionsPhase2 = this.doRaycast(raycaster, joint.userData.origin, joint.userData.raycasterTouchingDir)
-        this.drawTentacles ? this.removeRaycasterTestTentacle(joint) : null
-        this.drawTentacles ? this.removeDirectionTentacle(joint) : null
-        //this.showDirectionTentacle(joint, origin)
-        this.drawTentacles ? this.showRaycasterTouchingTentacle(joint, joint.userData.origin) : null
 
         if (intersectionsPhase2.length > 0) {
-            this.highlightJoint && jointMesh ? jointMesh.material["emissive"].setHex(0x00ff00) : null
-
             joint.userData.lastTouchPoint = intersectionsPhase2[0].point
 
             // if we're hitting the same object and same face
             if (intersectionsPhase2[0].object === joint.userData.touchObj && intersectionsPhase2[0].faceIndex === joint.userData.touchFaceIndex) {
-                this.checkUntouchOutside(hand, joint, i, raycaster, joint.userData.origin, intersectionsPhase2[0], "UNTOUCH - OUT OF RANGE - SAME OBJECT, SAME FACE : ")
+                this.checkUntouchOutside(hand, joint, i, intersectionsPhase2[0], "UNTOUCH - OUT OF RANGE - SAME OBJECT, SAME FACE : ", raycaster, joint.userData.origin)
             }
             // if we're hitting the same object but another face
             else if (intersectionsPhase2[0].object === joint.userData.touchObj && intersectionsPhase2[0].faceIndex !== joint.userData.touchFaceIndex) {
-                this.checkUntouchOutside(hand, joint, i, raycaster, joint.userData.origin, intersectionsPhase2[0], "UNTOUCH - OUT OF RANGE - SAME OBJECT, NEW FACE : ")
+                this.checkUntouchOutside(hand, joint, i, intersectionsPhase2[0], "UNTOUCH - OUT OF RANGE - SAME OBJECT, NEW FACE : ", raycaster, joint.userData.origin)
             }
             // if we're hitting another object    
-            else if (intersectionsPhase2[0].object !== joint.userData.touchObj) {
-                // current bug: if we're hitting another object during the touch phase and the object is too far away we should NOT trigger untouch!
-                // if the object IS inside touch range we just switch the userData!
-                // there is NO untouch in this case
-                // WAIT!!! we could prevent this by setting the far of raycaster to lower value!
-                // HEUREKA! IT WORKS!
-                // this.checkUntouchOutside(hand, joint, i, raycaster, origin, toTest, touchDistance, intersectionsPhase2[0], "UNTOUCH - OUT OF RANGE - NEW OBJECT, NEW FACE : ")
-            }
+            else if (intersectionsPhase2[0].object !== joint.userData.touchObj) { /* TODO: ? currently nothing */ }
         }
         else {
             // we're inside
-            this.touchingInsideCheck(joint, i, raycaster, hand, jointMesh)
+            this.touchingInsideCheck(joint, i, raycaster, hand)
         }
     }
 
-    touchingInsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group, jointMesh: Mesh): void {
-
-        this.highlightJoint && jointMesh ? jointMesh.material["emissive"].setHex(0xff0000) : null
-
-        this.drawTentacles ? this.removeAllTentacles(joint) : null
+    touchingInsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group): void {
 
         let testRaycasterDir: Vector3
         let testRaycasterLength: number
@@ -490,45 +327,6 @@ export class XRHandTouchRay {
 
         let testRaycast = this.doRaycastObject(raycaster, joint.userData.origin, testRaycasterDir, joint.userData.touchObj, 0, testRaycasterLength)
 
-        if (this.drawTouchDebuggers) {
-
-            //let p1Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
-            //let p2Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
-
-            let lineGeom: BufferGeometry
-            //let p3:Mesh = this.debugPointCurrent.clone()
-            //joint.userData.lastTouchPoint ?  p1.position.copy(joint.userData.lastTouchPoint) : p1.position.copy(joint.userData.lastOrigin)
-
-            if (joint.userData.lastTouchPoint) {
-                //p1Geom.translate(joint.userData.lastTouchPoint.x, joint.userData.lastTouchPoint.y, joint.userData.lastTouchPoint.z)
-                lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastTouchPoint, joint.userData.origin])
-            }
-            else {
-                //p1Geom.translate(joint.userData.lastOrigin.x, joint.userData.lastOrigin.y, joint.userData.lastOrigin.z)
-                lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastOrigin, joint.userData.origin])
-            }
-
-            //p2Geom.translate(joint.userData.origin.x, joint.userData.origin.y, joint.userData.origin.z)
-
-            //p2.position.copy(joint.userData.origin)
-            //p3.position.copy(currentOrigin)
-
-            let line = new Line(lineGeom, this.tentacleTouchingRayMat)
-
-            /*
-            //somehow doesn't work --> ???
-            this.debugPointMeshGeom.merge(p1Geom, 0)
-            this.debugPointMeshGeom.merge(p1Geom, this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
-            console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
-            this.debugPointMeshGeom.merge(p2Geom, this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
-            console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
-            */
-            this.currentScene.add(line)
-            //this.debugPointsCounter +=2
-
-            debugger
-        }
-
         joint.userData.lastTouchPoint = undefined
 
         if (testRaycast.length > 0) {
@@ -536,10 +334,6 @@ export class XRHandTouchRay {
             if (testRaycast[0].point.distanceTo(joint.userData.origin) > this.touchDistance || joint.userData.speedFac > 1.1) {
                 //dispatch untouch!
                 console.log("TOUCH AND TOUCH INSIDE TRUE --> OBJECT EXITED (ray between origins intersected a face!)")
-                this.colorFace(testRaycast[0], this.hlColUnTouch, "TOUCH AND TOUCH INSIDE TRUE --> OBJECT EXITED!")
-
-                this.drawTentacles ? this.removeAllTentacles(joint) : null
-
                 this.removeJointFromTouchingArray(hand, i)
                 this.dispatchUntouch(hand, joint, i, testRaycast[0])
                 this.resetJointTouchData(joint)
@@ -548,72 +342,6 @@ export class XRHandTouchRay {
                 joint.userData.touchInside = false
             }
 
-        }
-    }
-
-    showDirectionTentacle(joint: Group, origin: Vector3) {
-        if (joint.userData.tentacleDir) {
-            this.currentScene.remove(joint.userData.tentacleDir)
-            joint.userData.tentacleDir.geometry.dispose()
-            joint.userData.tentacleDir = undefined
-        }
-
-        let target = origin.clone().add(joint.userData.direction.clone().multiplyScalar(this.tentacleDirScale))
-        let lineGeom = new BufferGeometry().setFromPoints([origin, target])
-        joint.userData.tentacleDir = new Line(lineGeom, this.tentacleMat)
-
-        this.currentScene.add(joint.userData.tentacleDir)
-    }
-
-    showRaycasterTouchingTentacle(joint: Group, origin: Vector3) {
-        if (joint.userData.tentacleTouchingRay) {
-            this.currentScene.remove(joint.userData.tentacleTouchingRay)
-            joint.userData.tentacleTouchingRay.geometry.dispose()
-            joint.userData.tentacleTouchingRay = undefined
-        }
-
-        let target = origin.clone().add(joint.userData.raycasterTouchingDir.clone().multiplyScalar(this.tentacleTouchingRayScale))
-        let lineGeom = new BufferGeometry().setFromPoints([origin, target])
-        joint.userData.tentacleTouchingRay = new Line(lineGeom, this.tentacleTouchingRayMat)
-
-        this.currentScene.add(joint.userData.tentacleTouchingRay)
-    }
-
-    showRaycasterTestTentacle(joint: Group, origin: Vector3, direction: Vector3) {
-        if (joint.userData.tentacleTestRay) {
-            this.currentScene.remove(joint.userData.tentacleTestRay)
-            joint.userData.tentacleTestRay.geometry.dispose()
-            joint.userData.tentacleTestRay = undefined
-        }
-
-        let target = origin.clone().add(direction.clone().multiplyScalar(this.tentacleTouchingRayScale))
-        let lineGeom = new BufferGeometry().setFromPoints([origin, target])
-        joint.userData.tentacleTestRay = new Line(lineGeom, this.tentacleTestRayMat)
-
-        this.currentScene.add(joint.userData.tentacleTestRay)
-    }
-
-    removeDirectionTentacle(joint: Group) {
-        if (joint.userData.tentacleDir) {
-            this.currentScene.remove(joint.userData.tentacleDir)
-            joint.userData.tentacleDir.geometry.dispose()
-            joint.userData.tentacleDir = undefined
-        }
-    }
-
-    removeRaycasterTouchingTentacle(joint: Group) {
-        if (joint.userData.tentacleTouchingRay) {
-            this.currentScene.remove(joint.userData.tentacleTouchingRay)
-            joint.userData.tentacleTouchingRay.geometry.dispose()
-            joint.userData.tentacleTouchingRay = undefined
-        }
-    }
-
-    removeRaycasterTestTentacle(joint: Group) {
-        if (joint.userData.tentacleTestRay) {
-            this.currentScene.remove(joint.userData.tentacleTestRay)
-            joint.userData.tentacleTestRay.geometry.dispose()
-            joint.userData.tentacleTestRay = undefined
         }
     }
 
@@ -628,7 +356,7 @@ export class XRHandTouchRay {
      *  Checks distance to intersected face / objects and dispatches the untouch event if needed.
      *  Changes 'joint.userData.raycasterTouchingDir' accordingly
      */
-    checkUntouchOutside(hand: Group, joint: Group, i: number, raycaster: Raycaster, origin: Vector3, intersectObj: { [key: string]: any }, logMessage: String) {
+    checkUntouchOutside(hand: Group, joint: Group, i: number, intersectObj: { [key: string]: any }, logMessage: String, raycaster?: Raycaster, origin?: Vector3) {
 
         if (intersectObj.distance < this.touchDistance) {
             // don't dispatch untouch!
@@ -645,9 +373,6 @@ export class XRHandTouchRay {
                 // negative normal raycast hits the same face means we can safely update raycasterTouchingDir
                 joint.userData.raycasterTouchingDir = nnRayHitDirection
             }
-            this.colorFace(intersectObj, this.hlColTouch, null)
-            //intersectObj.face.color.setHex(0x00ff00)
-            //intersectObj.object.geometry.colorsNeedUpdate = true   
         } else {
             // we're outside of touch range, but before dispatching untouch check if maybe the negative normal ray ist inside touch range
             let nnRayIsInsideTouchDir: Vector3 = this.nnRayIntersectsFaceAndIsInTouchRange(joint, raycaster, origin, intersectObj)
@@ -660,46 +385,15 @@ export class XRHandTouchRay {
 
                 // ... we can also safely update raycasterTouchingDir
                 joint.userData.raycasterTouchingDir = nnRayIsInsideTouchDir
-                this.colorFace(intersectObj, this.hlColTouch, null)
-                //intersectObj.face.color.setHex(0x00ff00)
-                //intersectObj.object.geometry.colorsNeedUpdate = true
             }
             else {
                 //dispatch untouch!
                 console.log(logMessage, intersectObj.distance)
-                this.colorFace(intersectObj, this.hlColUnTouch, null)
-                //intersectObj.face.color.setHex(0x0000ff)
-                //intersectObj.object.geometry.colorsNeedUpdate = true
-                this.drawTentacles ? this.removeAllTentacles(joint) : null
                 this.resetJointTouchData(joint)
                 this.removeJointFromTouchingArray(hand, i)
                 this.dispatchUntouch(hand, joint, i, intersectObj)
             }
         }
-    }
-
-    hlColTouch: Color = new Color(0x00ff00)
-    hlColTouch2: Color = new Color(0xffff00)
-    hlColUnTouch: Color = new Color(0x0000ff)
-    hlColUnTouch2: Color = new Color(0xff00ff)
-    hlColScratch: Color = new Color(0xc7c7c7)
-
-    colorFace(intersected: { [key: string]: any }, color: Color, message: string) {
-        console.log("XRHandTouch : colorFace! " + message)
-        try {
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.a, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.b, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.c, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.needsUpdate = true;
-        } catch {
-            debugger
-        }
-    }
-
-    removeAllTentacles(joint: Group) {
-        this.removeRaycasterTestTentacle(joint)
-        this.removeRaycasterTouchingTentacle(joint)
-        this.removeDirectionTentacle(joint)
     }
 
     /**
@@ -713,7 +407,6 @@ export class XRHandTouchRay {
         let testRaycasterDir: Vector3 = intersectObj.face.normal.clone().applyMatrix3(intersectedObjectNormalMatrixWorld).normalize().negate()
 
         let testRaycast = this.doRaycast(raycaster, origin, testRaycasterDir)
-        this.drawTentacles ? this.showRaycasterTestTentacle(joint, origin, testRaycasterDir) : null
 
         if (testRaycast.length > 0 &&
             testRaycast[0].object === intersectObj.object &&
@@ -730,13 +423,9 @@ export class XRHandTouchRay {
         let intersectedObjectNormalMatrixWorld: Matrix3 = new Matrix3().getNormalMatrix(intersectObj.object.matrixWorld)
         let testRaycasterDir: Vector3 = intersectObj.face.normal.clone().applyMatrix3(intersectedObjectNormalMatrixWorld).normalize().negate()
 
-        let testRaycast = this.doRaycast(raycaster, origin, testRaycasterDir)
-        this.drawTentacles ? this.showRaycasterTestTentacle(joint, origin, testRaycasterDir) : null
+        let testRaycast: any[] = this.doRaycast(raycaster, origin, testRaycasterDir)
 
-        if (testRaycast.length > 0 &&
-            testRaycast[0].object === intersectObj.object &&
-            testRaycast[0].faceIndex === intersectObj.faceIndex &&
-            testRaycast[0].distance < this.touchDistance) {
+        if (this.nnRayIntersectsFaceAndIsInTouchRangeCheck(testRaycast, intersectObj)) {
             return testRaycasterDir
         }
 
@@ -751,12 +440,7 @@ export class XRHandTouchRay {
         if (this.useBVH) {
             raycaster["firstHitOnly"] = true
         }
-
-        raycaster.layers.set(0)
-
         raycaster.set(origin, direction)
-
-
         raycaster.near = near
         raycaster.far = far
 
@@ -827,90 +511,6 @@ export class XRHandTouchRay {
         console.warn("HAND EVENT: scratch!")
     }
 
-    removeTentacle(joint: Group, currentScene: Scene) {
-        if (joint.userData.tentacle) {
-            currentScene.remove(joint.userData.tentacle)
-            joint.userData.tentacle.geometry.dispose()
-            joint.userData.tentacle = undefined
-        }
-    }
-
-    removeHandRayTentacle(hand: Group, currentScene: Scene) {
-        if (hand.userData.tentacle) {
-            currentScene.remove(hand.userData.tentacle)
-            hand.userData.tentacle.geometry.dispose()
-            hand.userData.tentacle = undefined
-        }
-    }
-
-    addTentacle(
-        joint: Group,
-        origin: Vector3,
-        target: Vector3,
-        currentScene: Scene,
-        touching: boolean,
-        isNormalRay: boolean = false
-    ) {
-        let lineGeom = new BufferGeometry().setFromPoints([origin, target])
-
-        if (!touching) {
-            joint.userData.tentacle = new Line(lineGeom, this.tentacleMat)
-        } else {
-            if (!isNormalRay) {
-                joint.userData.tentacle = new Line(
-                    lineGeom,
-                    this.tentacleTouchMat
-                )
-            } else {
-                joint.userData.tentacle = new Line(
-                    lineGeom,
-                    this.tentacleNormalRayMat
-                )
-            }
-        }
-
-        if (joint.userData.tentacle.parent !== currentScene) {
-            currentScene.add(joint.userData.tentacle)
-        }
-    }
-
-    addHandRayTentacle(
-        hand: Group,
-        origin: Vector3,
-        target: Vector3,
-        currentScene: Scene
-    ) {
-        let lineGeom = new BufferGeometry().setFromPoints([origin, target])
-        hand.userData.tentacle = new Line(lineGeom, this.tentacleMat)
-
-        if (hand.userData.tentacle.parent !== currentScene) {
-            currentScene.add(hand.userData.tentacle)
-        }
-    }
-
-    getJointMesh(hand: Group, joint: Group, i: number): Mesh {
-        let jointMesh: Mesh
-
-        if (hand.children[25].children.length > 0) {
-
-            if (hand.children[25].children[0].children.length > 2) {
-
-                jointMesh = hand.children[25].children[0].children[this.tip[i]] as Mesh
-
-                /*
-                if (!joint.userData.hasDebugMaterial) {
-                    joint.userData.hasDebugMaterial = true
-                    jointMesh.material = this.jointMat.clone()
-                }
-                */
-
-                return jointMesh
-            }
-        }
-
-        return undefined
-    }
-
     getTipOriginOffset(handedness: string): number {
         let tipOriginOffset: number = 0
 
@@ -968,24 +568,21 @@ export class XRHandTouchRay {
         return speedFac
     }
 
-    // deprectated
-
-    /*
-    getHandDirection(hand:Group) {
-        let handDirOrigin1: Vector3 = new Vector3().setFromMatrixPosition(
-            hand.children[10].matrixWorld
-        )
-
-        let handDirOrigin2: Vector3 = new Vector3().setFromMatrixPosition(
-            hand.children[11].matrixWorld
-        )
-
-        return new Vector3().lerpVectors(
-            handDirOrigin1,
-            handDirOrigin2,
-            0.5
-        )
+    intersectionsPhase1Raycast(params: XRTouchRayUpdateParams, joint: Group): any {
+        return this.doRaycast(params.raycaster, joint.userData.origin, joint.userData.direction, 0, this.touchDistance * joint.userData.speedFac)
     }
-    */
 
+    isInTouchDistance(intersections: any[]): boolean {
+        return intersections[0].distance <= this.touchDistance
+    }
+
+    nnRayIntersectsFaceAndIsInTouchRangeCheck(testRaycast: any[], intersectObj: { [key: string]: any }): boolean {
+        if (testRaycast.length > 0 &&
+            testRaycast[0].object === intersectObj.object &&
+            testRaycast[0].faceIndex === intersectObj.faceIndex &&
+            this.isInTouchDistance(testRaycast)) {
+            return true
+        }
+        return false
+    }
 }

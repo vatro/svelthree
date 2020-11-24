@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the 'License')
  */
 
- // ------------------ added by svelthree ---------------------
+// ------------------ added by svelthree ---------------------
 
 declare type XRHitTestMode = "realworld" | "virtual"
 declare type SessionVRInputType = "controller" | "hand"
@@ -25,7 +25,7 @@ declare interface XRTouchRayUpdateParams {
     lerpFactor: number
     raycaster: Raycaster
     enabledJoints: number[]
-    xrFrameDelta:number
+    xrFrameDelta: number
 }
 
 declare interface XRTouchSphereUpdateParams {
@@ -33,13 +33,13 @@ declare interface XRTouchSphereUpdateParams {
     lerpFactor: number
     raycaster: Raycaster
     enabledJoints: number[]
-    xrFrameDelta:number
+    xrFrameDelta: number
 }
 
 
 //{hand: "left", mode:"hybrid",  distance: {remote: 2, touch: 0.01}, materials: {remote: pinchRemoteLineMat, touch: pinchTouchLineMat}, colors: {remote: 0xffffff, touch: 0xff0000}},
 declare interface XRHandPinchConfigItem {
-    hand:XRHandTouchEnabled, mode:XRHandPinchMode, distance?: {remote?:number, touch?:number}, materials?: {remote?:XRHandPinchRayMaterial, touch?:XRHandPinchRayMaterial }, colors?: {remote?: number, remoteHit?: number, touch?: number, touchHit?: number,}
+    hand: XRHandTouchEnabled, mode: XRHandPinchMode, distance?: { remote?: number, touch?: number }, materials?: { remote?: XRHandPinchRayMaterial, touch?: XRHandPinchRayMaterial }, colors?: { remote?: number, remoteHit?: number, touch?: number, touchHit?: number, }
 }
 
 declare interface XRHandPinchConfig extends Array<XRHandPinchConfigItem> { }
@@ -48,33 +48,62 @@ declare type XRHandProfile = "boxes" | "spheres" | "oculus"
 declare type XRHandTouchEnabled = "left" | "right" | "both"
 
 declare interface XRHandTouchConfigHandsItem {
-    hand:XRHandTouchEnabled, index:number[]
+    hand: XRHandTouchEnabled, index: number[]
 }
 
 declare interface XRHandTouchConfigHands extends Array<XRHandTouchConfigHandsItem> { }
 
 declare type XRHandTouchTestMode = "ray" | "sphere"
 
+
+declare interface XRHandTouchRayDebuggerConfig {
+    drawTentacles: boolean,
+    // TODO: Rename this
+    drawTouchDebuggers: boolean
+}
+
+declare interface XRHandTouchSphereDebuggerConfig {
+    widthSegments: number,
+    heightSegments: number,
+    mat: { [key: string]: any }
+}
+
+declare interface XRHandTouchDebugConfigItem {
+    mode: XRHandTouchTestMode,
+    config: XRHandTouchRayDebuggerConfig | XRHandTouchSphereDebuggerConfig
+}
+
+declare interface XRHandTouchDebugConfig extends Array<XRHandTouchDebugConfigItem> { }
+
+declare interface XRHandTouchDebuggerConfig {
+    debugConfig?: XRHandTouchDebugConfig,
+    hightlightJoints?: boolean,
+    colorTouchedFaces?: boolean
+}
+
 declare interface XRHandTouchConfig {
     mode?: XRHandTouchTestMode,
     debug?: boolean,
+    debugConfig?: XRHandTouchDebugConfig,
+    hightlightJoints?: boolean,
+    colorTouchedFaces?: boolean,
     hands: XRHandTouchConfigHands
 }
 
 declare interface XRHandTouchXIndexItem {
-    left:number[], right:number[] | number[]
+    left: number[], right: number[] | number[]
 }
 
-declare interface XRHandTouchXIndexPairs extends Array<XRHandTouchXIndexItem>{}
+declare interface XRHandTouchXIndexPairs extends Array<XRHandTouchXIndexItem> { }
 
 declare interface XRHandTouchXConfigItem {
-    hand:XRHandTouchEnabled, name:string, distance?:number, touchtime?:number, indexPairs:XRHandTouchXIndexPairs
+    hand: XRHandTouchEnabled, name: string, distance?: number, touchtime?: number, indexPairs: XRHandTouchXIndexPairs
 }
 
 declare interface XRHandTouchXConfig extends Array<XRHandTouchXConfigItem> { }
 
 declare interface XRHandTouchEventsItem {
-    name:string, hand:XRHandTouchEnabled, distance?:number, touchtime?:number, index:number[]
+    name: string, hand: XRHandTouchEnabled, distance?: number, touchtime?: number, index: number[]
 }
 
 declare interface XRHandTouchEvents extends Array<XRHandTouchEventsItem> { }
@@ -85,22 +114,22 @@ declare interface XRSessionEvent extends Event {
 
 //@see https://github.com/BabylonJS/Babylon.js/blob/master/src/LibDeclarations/webxr.d.ts
 declare type XREventType =
-| "devicechange"
-| "visibilitychange"
-| "end"
-| "inputsourceschange"
-| "select"
-| "selectstart"
-| "selectend"
-| "squeeze"
-| "squeezestart"
-| "squeezeend"
-| "reset";
+    | "devicechange"
+    | "visibilitychange"
+    | "end"
+    | "inputsourceschange"
+    | "select"
+    | "selectstart"
+    | "selectend"
+    | "squeeze"
+    | "squeezestart"
+    | "squeezeend"
+    | "reset";
 
 //------------------------------------------------------------
 
 declare type Constructor<T = object> = {
-    new (...args: any[]): T
+    new(...args: any[]): T
     prototype: T
 }
 
@@ -146,7 +175,7 @@ declare interface XRRigidTransform {
     readonly inverse: XRRigidTransform
 }
 
-declare interface XRSpace extends EventTarget {}
+declare interface XRSpace extends EventTarget { }
 
 declare interface XRReferenceSpace extends XRSpace {
     getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace
@@ -262,7 +291,7 @@ declare interface XRViewport {
     readonly height: number
 }
 
-declare interface XRLayer {}
+declare interface XRLayer { }
 
 declare interface XRWebGLLayerInit {
     antialias?: boolean
