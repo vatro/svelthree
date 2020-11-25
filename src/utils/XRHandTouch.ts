@@ -675,8 +675,8 @@ export class XRHandTouch {
         let tipOriginOffset: number = 0
 
         // set tips offset for oculus hands to feel more natural
-        handedness === "left" ? tipOriginOffset = 0.005 * -1 : null
-        handedness === "right" ? tipOriginOffset = 0.005 : null
+        handedness === "left" ? tipOriginOffset = 0.005 : null
+        handedness === "right" ? tipOriginOffset = 0.005 * -1 : null
 
         return tipOriginOffset
     }
