@@ -514,7 +514,7 @@ export class XRHandTouch {
 
         let testRaycast = this.doRaycastObject(raycaster, joint.userData.origin, testRaycasterDir, joint.userData.touchObj, 0, testRaycasterLength)
 
-        if (this.debug && this.debuggerRay && this.debuggerRay.drawTentacles) {
+        if (this.debug && this.debuggerRay && this.debuggerRay.drawTouchDebuggers) {
             this.debuggerRay.addTouchDebugLineInside(joint)
         }
 
