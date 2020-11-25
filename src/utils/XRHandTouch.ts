@@ -218,7 +218,6 @@ export class XRHandTouch {
 
             if (joint.userData.origin !== undefined) {
                 joint.userData.lastOrigin = joint.userData.origin
-                //if (this.debug && joint.userData.debugSphere) { this.debuggerSphere.updateDebugSpherePosition(joint) }
             }
 
             let currentOrigin: Vector3 = this.getJointOrigin(joint, jointIndex, params.handProfile, hand.userData.handedness)
