@@ -1,6 +1,7 @@
 import {
     Mesh,
-    Group
+    Group,
+    MeshStandardMaterial
 } from "svelthree-three"
 
 import XRHandJointindices from "../XRHandJointIndices"
@@ -8,6 +9,12 @@ import XRHandJointindices from "../XRHandJointIndices"
 export class XRHandTouchJointDebugger {
     currentScene: Scene
     jointMesh: Mesh
+
+    jointMat = new MeshStandardMaterial({
+        color: 0x4299e1,
+        roughness: 0.5,
+        metalness: 0.5
+    })
 
     constructor() { }
 
@@ -28,13 +35,11 @@ export class XRHandTouchJointDebugger {
             if (hand.children[25].children[0].children.length > 2) {
 
                 jointMesh = hand.children[25].children[0].children[XRHandJointindices.TIP[i]] as Mesh
-
-                /*
+                
                 if (!joint.userData.hasDebugMaterial) {
                     joint.userData.hasDebugMaterial = true
                     jointMesh.material = this.jointMat.clone()
                 }
-                */
 
                 return jointMesh
             }

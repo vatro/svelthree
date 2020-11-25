@@ -38,12 +38,6 @@ export class XRHandTouchRayDebugger {
         linewidth: 1
     })
 
-    jointMat = new MeshStandardMaterial({
-        color: 0x4299e1,
-        roughness: 0.5,
-        metalness: 0.5
-    })
-
     drawTentacles = false
     drawTouchDebuggers = false
 
