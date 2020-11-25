@@ -275,7 +275,7 @@ export class XRHandTouch {
                             joint.userData.lastTouchPoint = intersectionsPhase1[0].point
                             joint.userData.lastIntersect = undefined
 
-                            if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectionsPhase1[0]) }
+                            if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectionsPhase1[0], null) }
 
                             this.addJointToTouchingArray(hand, i)
                             this.dispatchTouch(hand, joint, i, intersectionsPhase1[0])
@@ -473,6 +473,7 @@ export class XRHandTouch {
         }
 
         if (intersectionsPhase2.length > 0) {
+            if (this.debug && this.jointDebugger) { this.jointDebugger.highlightJoint() }
             joint.userData.lastTouchPoint = intersectionsPhase2[0].point
 
             // if we're hitting the same object and same face

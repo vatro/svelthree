@@ -10,8 +10,8 @@ export class XRHandTouchFaceDebugger {
 
     constructor() { }
 
-    colorTouchedFace(intersected: { [key: string]: any }) {
-        this.colorFace(intersected, this.hlColTouch, null)
+    colorTouchedFace(intersected: { [key: string]: any },  message: string) {
+        this.colorFace(intersected, this.hlColTouch, message)
     }
 
     colorTouchThroughEnter(intersected: { [key: string]: any },  message: string) {
