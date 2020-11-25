@@ -48,6 +48,6 @@ export class XRHandTouchJointDebugger {
     }
 
     highlightJoint() {
-        if (this.jointMesh) { this.jointMesh.material["emissive"].setHex(0xff0000) }
+        if (this.jointMesh) { this.jointMesh.material["emissive"].setHex(0x00ff00) }
     }
 }
