@@ -25,6 +25,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
                 // negative normal raycast hits the same face means we can safely update raycasterTouchingDir
                 joint.userData.raycasterTouchingDir = nnRayHitDirection
             }
+            if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectObj, null) }
         } else {
             // we're outside of touch range, but before dispatching untouch check if maybe the negative normal ray ist inside touch range
             let nnRayIsInsideTouchDir: Vector3 = this.nnRayIntersectsFaceAndIsInTouchRange(joint, raycaster, origin, intersectObj)
@@ -37,6 +38,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
 
                 // ... we can also safely update raycasterTouchingDir
                 joint.userData.raycasterTouchingDir = nnRayIsInsideTouchDir
+                if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectObj, null) }
             }
             else {
                 //dispatch untouch!
