@@ -41,6 +41,10 @@ export class XRHandTouchRayExt extends XRHandTouch {
             else {
                 //dispatch untouch!
                 console.log(logMessage, intersectObj.distance)
+                if (this.debug) {
+                    if (this.faceDebugger) { this.faceDebugger.colorUnTouch(intersectObj, null) }
+                    if (this.debuggerRay && this.debuggerRay.drawTentacles) { this.debuggerRay.removeAllTentacles(joint) }
+                }
                 this.resetJointTouchData(joint)
                 this.removeJointFromTouchingArray(hand, i)
                 this.dispatchUntouch(hand, joint, i, intersectObj)
