@@ -103,7 +103,7 @@ export class XRHandTouch {
     }
     */
 
-    debuggerInitiated:boolean = false
+    debuggerInitiated: boolean = false
 
     /**
      * We can up to two 
@@ -209,16 +209,16 @@ export class XRHandTouch {
 
             let jointIndex: number = params.enabledJoints[i]
             let joint: Group = hand.children[jointIndex] as Group
-
-            // TODO: Check --> this sets only fingertip joints!
+           
             if (this.debug) {
+                 // TODO: Check --> this sets only fingertip joints!
                 if (this.jointDebugger) { this.jointDebugger.setJointMesh(hand, joint, i) }
                 if (this.debuggerSphere && !joint.userData.debugSphere) { this.debuggerSphere.createDebugSphere(joint) }
             }
 
             if (joint.userData.origin !== undefined) {
                 joint.userData.lastOrigin = joint.userData.origin
-                if (this.debug && joint.userData.debugSphere) { this.debuggerSphere.updateDebugSpherePosition(joint) }
+                //if (this.debug && joint.userData.debugSphere) { this.debuggerSphere.updateDebugSpherePosition(joint) }
             }
 
             let currentOrigin: Vector3 = this.getJointOrigin(joint, jointIndex, params.handProfile, hand.userData.handedness)
@@ -236,8 +236,9 @@ export class XRHandTouch {
             if (joint.userData.touch === undefined) { joint.userData.touch = false }
             if (joint.userData.touchInside === undefined) { joint.userData.touchInside = false }
 
-            if (this.debug && this.debuggerRay && this.debuggerRay.drawTentacles) {
-                this.debuggerRay.setTentacleScales(joint.userData.speedFac)
+            if (this.debug) {
+                if (joint.userData.debugSphere) { this.debuggerSphere.updateDebugSpherePosition(joint) }
+                if (this.debuggerRay && this.debuggerRay.drawTentacles) { this.debuggerRay.setTentacleScales(joint.userData.speedFac) }
             }
 
             // intersections of the joint-direction-ray 
