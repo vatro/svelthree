@@ -1,6 +1,5 @@
 import {
     LineBasicMaterial,
-    MeshStandardMaterial,
     Scene,
     Group,
     Vector3,
@@ -8,48 +7,56 @@ import {
     Line
 } from "svelthree-three"
 
+import XRHandTouchDefaults from "../XRHandTouchDefaults"
+
 export class XRHandTouchRayDebugger {
 
     currentScene: Scene
-    touchDistance: number = 0.008 // default
+    touchDistance: number
 
     tentacleMat = new LineBasicMaterial({
-        color: 0x4299e1,
-        linewidth: 2
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_BASE_COL,
+        linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_STD
     })
 
     tentacleTouchMat = new LineBasicMaterial({
-        color: 0xff0000,
-        linewidth: 2
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_TOUCH_COL,
+        linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_STD
     })
 
     tentacleNormalRayMat = new LineBasicMaterial({
-        color: 0xffff00,
-        linewidth: 2
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_NRAY_COL,
+        linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_STD
     })
 
     tentacleTouchingRayMat = new LineBasicMaterial({
-        color: 0xffff00, // yellow thick
-        linewidth: 2
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_TOCHING_COL, 
+        linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_STD
     })
 
     tentacleTestRayMat = new LineBasicMaterial({
-        color: 0xff00bf, // fuchsia thin
-        linewidth: 1
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_TESTRAY_COL,
+        linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_TESTRAY
     })
 
     drawTentacles = false
     drawTouchDebuggers = false
 
-    tentacleDirScale = 0.02
-    tentacleTouchingRayScale = this.tentacleDirScale * 3
+    tentacleDirScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_DIRSCALE
+    tentacleTouchingRayScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_TOUCHINGRAY_SCALE
 
     constructor(config:XRHandTouchRayDebuggerConfig) {
-        this.drawTentacles = config.drawTentacles
-        this.drawTouchDebuggers = config.drawTouchDebuggers
+        if(config) {
+            this.drawTentacles = config.drawTentacles === true ? true : false
+            this.drawTouchDebuggers = config.drawTouchDebuggers === true ? true : false
+        }
+        else {
+            this.drawTentacles = true
+            this.drawTouchDebuggers = true
+        }
     }
 
-    initialize(currentScene:Scene, touchDistance:number) {
+    initialize(currentScene:Scene, touchDistance:number = XRHandTouchDefaults.TOUCH_DISTANCE) {
         this.currentScene = currentScene
         this.touchDistance = touchDistance
     }

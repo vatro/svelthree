@@ -1,10 +1,14 @@
 import { XRHandTouch } from "./XRHandTouch"
 import { Group, Vector3 } from "svelthree-three"
-import { XRHandTouchRayDebugger } from "./debuggers/XRHandTouchRayDebugger"
+import XRHandTouchDefaults from "./XRHandTouchDefaults"
 
 export class XRHandTouchRayExt extends XRHandTouch {
-    constructor() {
+    constructor(
+        lerpFactor: number = XRHandTouchDefaults.LERP_FACTOR,
+        touchDistance: number = XRHandTouchDefaults.TOUCH_DISTANCE) {
         super()
+        this.lerpFactor = lerpFactor
+        this.touchDistance = touchDistance
     }
 
     // override

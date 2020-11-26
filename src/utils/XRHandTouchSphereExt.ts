@@ -1,15 +1,20 @@
 import { sphereIntersectTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/MathUtilities"
 import { XRHandTouch } from "./XRHandTouch"
 import { Mesh, Sphere, Group, Vector3, Color } from "svelthree-three"
+import XRHandTouchDefaults from "./XRHandTouchDefaults"
 
 export class XRHandTouchSphereExt extends XRHandTouch {
     touchSphere: Sphere
     // override
     touchSphereRadius: number
-    spherePaintTouchColor:Color = new Color(0x00ff00)
 
-    constructor(sphereRadius:number = 0.008) {
+    constructor(
+        lerpFactor: number = XRHandTouchDefaults.LERP_FACTOR,
+        touchDistance:number = XRHandTouchDefaults.TOUCH_DISTANCE,
+        sphereRadius:number = XRHandTouchDefaults.MODE_SPHERE_RADIUS) {
         super()
+        this.lerpFactor = lerpFactor
+        this.touchDistance = touchDistance
         this.touchSphereRadius = sphereRadius
     }
 
@@ -24,6 +29,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
             joint.userData.touchFaceNormal = intersectObj.face.normal
             joint.userData.touchFaceIndex = intersectObj.faceIndex
 
+            // should always paint touched faces in debug mode (behaviour not configurable)
             if (this.debug && this.debuggerSphere) {
                 this.debuggerSphere.colorSphereTouch(intersectObj.object, indices)
             }

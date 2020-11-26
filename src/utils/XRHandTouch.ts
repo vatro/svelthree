@@ -16,7 +16,6 @@ import XRHandJointindices from "./XRHandJointIndices"
 import XRHandTouchTestModes from "./XRHandTouchTestModes"
 
 export class XRHandTouch {
-    enabledJoints: number[]
     currentScene: Scene
 
     leftHand: Group = undefined
@@ -25,7 +24,8 @@ export class XRHandTouch {
     toTest: Object3D[]
     useBVH: boolean = false
 
-    touchDistance: number = 0.008
+    lerpFactor:number
+    touchDistance: number
 
     //overridden
     touchSphereRadius: number
@@ -69,10 +69,6 @@ export class XRHandTouch {
         this.useBVH = useBVH
     }
 
-    updateTouchDistance(touchDistance: number) {
-        this.touchDistance = touchDistance
-    }
-
     //dynamic import: we don't want to import any debugger per default
     /*
     async setDebugger(params:XRHandTouchDebuggerParams) {
@@ -112,7 +108,7 @@ export class XRHandTouch {
      */
     setDebugger(params: XRHandTouchDebugParams): void {
 
-        if (params.debugConfig !== undefined) {
+        if (params.debugConfig) {
             if (params.debugConfig.length > 0 && params.debugConfig.length <= 2) {
                 if (params.debugConfig.length === 1) {
                     this.createDebugger(params.debugConfig[0].mode, params.debugConfig[0].config)
@@ -131,6 +127,9 @@ export class XRHandTouch {
                     console.error("SVELTHREE > XRHandTouch > setDebugger : Only up to two debug modes allowed!")
                 }
             }
+        }
+        else {
+            // RECONSIDER: currently intended --> if there is no debug config debugger will not be created at all
         }
 
         /*
@@ -152,12 +151,12 @@ export class XRHandTouch {
         }
         */
 
-        if (params.hightlightJoints.enabled === true && !this.faceDebugger) {
+        if (params.hightlightJoints && params.hightlightJoints.enabled === true && !this.faceDebugger) {
             this.jointDebugger = new XRHandTouchJointDebugger()
             this.jointDebugger.initialize(this.currentScene, params.hightlightJoints.colors)
         }
 
-        if (params.colorFaces.enabled === true && !this.faceDebugger) {
+        if (params.colorFaces && params.colorFaces.enabled === true && !this.faceDebugger) {
             this.faceDebugger = new XRHandTouchFaceDebugger()
             this.faceDebugger.initialize(params.colorFaces.colors)
         }
@@ -201,17 +200,18 @@ export class XRHandTouch {
      */
     update(
         hand: Group,
-        params: XRTouchRayUpdateParams
+        params: XRTouchRayUpdateParams,
+        enabledJoints:number[]
     ): void {
         // run for all enabled hand-joints...
-        for (let i = 0; i < params.enabledJoints.length; i++) {
+        for (let i = 0; i < enabledJoints.length; i++) {
 
-            let jointIndex: number = params.enabledJoints[i]
+            let jointIndex: number = enabledJoints[i]
             let joint: Group = hand.children[jointIndex] as Group
            
             if (this.debug) {
                  // TODO: Check --> this sets only fingertip joints!
-                if (this.jointDebugger) { this.jointDebugger.setJointMesh(hand, joint, i) }
+                if (this.jointDebugger) { this.jointDebugger.setJointMesh(hand, joint, jointIndex) }
                 if (this.debuggerSphere && !joint.userData.debugSphere) { this.debuggerSphere.createDebugSphere(joint) }
             }
 
@@ -222,7 +222,7 @@ export class XRHandTouch {
             let currentOrigin: Vector3 = this.getJointOrigin(joint, jointIndex, params.handProfile, hand.userData.handedness)
 
             if (joint.userData.origin && joint.userData.direction) {
-                joint.userData.direction = this.getJointDirection(joint, currentOrigin, params.lerpFactor)
+                joint.userData.direction = this.getJointDirection(joint, currentOrigin)
                 joint.userData.speedFac = this.calculateSpeedFac(joint, currentOrigin, params.xrFrameDelta)
                 joint.userData.origin = currentOrigin
             } else {
@@ -692,15 +692,15 @@ export class XRHandTouch {
         return origin
     }
 
-    getJointDirection(joint: Group, currentOrigin: Vector3, lerpFactor: number = 0): Vector3 {
+    getJointDirection(joint: Group, currentOrigin: Vector3): Vector3 {
 
         let realDir = new Vector3().subVectors(currentOrigin, joint.userData.origin).normalize()
 
-        if (lerpFactor > 0) {
+        if (this.lerpFactor > 0) {
             let lerpedDir = new Vector3().lerpVectors(
                 joint.userData.direction,
                 realDir,
-                lerpFactor
+                this.lerpFactor
             ).normalize()
 
             return lerpedDir

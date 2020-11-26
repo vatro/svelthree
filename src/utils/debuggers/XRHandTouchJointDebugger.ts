@@ -5,12 +5,13 @@ import {
 } from "svelthree-three"
 
 import XRHandJointindices from "../XRHandJointIndices"
+import XRHandTouchDefaults from "../XRHandTouchDefaults"
 
 export class XRHandTouchJointDebugger {
     currentScene: Scene
     jointMesh: Mesh
-    normalCol:number = 0x4299e1
-    touchCol:number = 0x00ff00
+    normalCol:number = XRHandTouchDefaults.DBG_JOINT_NORMAL_COL
+    touchCol:number = XRHandTouchDefaults.DBG_JOINT_TOUCH_COL
 
     jointMat = new MeshBasicMaterial({
         color: this.normalCol
@@ -21,16 +22,18 @@ export class XRHandTouchJointDebugger {
     initialize(currentScene: Scene, colors:{[key:string]: number}) {
         this.currentScene = currentScene
 
-        for (const [key, value] of Object.entries(colors)) {
-            value !== undefined ? this[`${key}Col`] = value : null
-          }
+        if(colors) {
+            for (const [key, value] of Object.entries(colors)) {
+                value !== undefined ? this[`${key}Col`] = value : null
+            }
+        }
+        
     }
 
     setJointMesh(hand: Group, joint: Group, i: number) {
         this.jointMesh = this.getJointMesh(hand, joint, i)
     }
 
-    // TODO: Check --> this returns only fingertip joints!
     getJointMesh(hand: Group, joint: Group, i: number): Mesh {
         let jointMesh: Mesh
 
@@ -38,7 +41,7 @@ export class XRHandTouchJointDebugger {
 
             if (hand.children[25].children[0].children.length > 2) {
 
-                jointMesh = hand.children[25].children[0].children[XRHandJointindices.TIP[i]] as Mesh
+                jointMesh = hand.children[25].children[0].children[i] as Mesh
                 
                 if (!joint.userData.hasDebugMaterial) {
                     joint.userData.hasDebugMaterial = true

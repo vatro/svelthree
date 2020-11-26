@@ -33,6 +33,7 @@
     } from "svelthree-three"
 
     import XRHandTouchTestModes from "../utils/XRHandTouchTestModes"
+    import XRHandTouchDefaults from "../utils/XRHandTouchDefaults"
 
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -78,8 +79,15 @@
 
     let xrHelpers: SvelthreeHelpersXR = new SvelthreeHelpersXR()
     let xrHandHitTester: XRHandHitTester = new XRHandHitTester()
-    let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt()
-    let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt(enableTouch.sphereRadius)
+
+    let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt(
+        enableTouch.lerpFactor,
+        enableTouch.touchDistance)
+
+    let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt(
+        enableTouch.lerpFactor,
+        enableTouch.touchDistance,
+        enableTouch.sphereRadius)
 
     $: requiredFeatures ? updateRequiredFeatures() : null
 
@@ -137,31 +145,42 @@
     function updateEnableTouch(): void {
         $svelthreeStores[sti].xr.enableTouch = enableTouch
 
-        for(let i = 0; i < $svelthreeStores[sti].xr.enableTouch.hands.length; i++) {
-            let item:XRHandTouchConfigHandsItem = $svelthreeStores[sti].xr.enableTouch.hands[i]
-            if(item.hand === "right") {
-                rightHandTouchEnabled = true
-                if(item.index.length > 0) {
-                    rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
+        if($svelthreeStores[sti].xr.enableTouch.hands) {
+            for(let i = 0; i < $svelthreeStores[sti].xr.enableTouch.hands.length; i++) {
+                let item:XRHandTouchConfigHandsItem = $svelthreeStores[sti].xr.enableTouch.hands[i]
+                if(item.hand === "right") {
+                    rightHandTouchEnabled = true
+                    if(item.index.length > 0) {
+                        rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
+                    }
                 }
-            }
 
-            if(item.hand === "left") {
-                leftHandTouchEnabled = true
-                if(item.index.length > 0) {
-                    leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
+                if(item.hand === "left") {
+                    leftHandTouchEnabled = true
+                    if(item.index.length > 0) {
+                        leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
+                    }
                 }
-            }
 
-            if(item.hand === "both") {
-                leftHandTouchEnabled = true
-                rightHandTouchEnabled = true
-                if(item.index.length > 0) {
-                    leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
-                    rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
+                if(item.hand === "both") {
+                    leftHandTouchEnabled = true
+                    rightHandTouchEnabled = true
+                    if(item.index.length > 0) {
+                        leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
+                        rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
+                    }
                 }
             }
         }
+        else {
+                // default: "both"
+                leftHandTouchEnabled = true
+                rightHandTouchEnabled = true
+                $svelthreeStores[sti].xr.enableTouch.hands = XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT
+                leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index)
+                rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index)
+            }
+            
 
         $svelthreeStores[sti].xr.leftHandTouchEnabled = leftHandTouchEnabled  
         $svelthreeStores[sti].xr.leftHandTouchEnabledJoints = leftHandTouchEnabledJoints
@@ -540,14 +559,6 @@
                     $svelthreeStores[sti].raycaster
                 )  : null
     }
-
-    //let lerpFactor = 0.05 // ok, but sometimes change to "slow"
-    //let lerpFactor = 0.1 // better
-    //let lerpFactor = 0.2
-    //let lerpFactor = 0.15
-    //let lerpFactor = 1
-    let lerpFactor = 0.5
-    let touchDistance = 0.008
  
     function updateXRTouchRay() :void {
         //console.log("updateXRTouchRay!")
@@ -556,7 +567,6 @@
         // 0.01x ms - very low
         xrHandTouchRay.updateToTest(currentScene)
         xrHandTouchRay.updateBVH($svelthreeStores[sti].useBVH)
-        xrHandTouchRay.updateTouchDistance(touchDistance)
         // TODO: implement NEW debugging
         // enableTouch.debug ? xrHandTouchRay.updateDebug(true) : xrHandTouchRay.updateDebug(false)
        
@@ -574,24 +584,23 @@
         //console.time("updateXRTouchRay update params")
         // 0.007 ms - almost nothing!
         let params:XRTouchRayUpdateParams = {
-                handProfile: handProfile,
-                lerpFactor: lerpFactor,
-                raycaster: $svelthreeStores[sti].raycaster,
-                enabledJoints: $svelthreeStores[sti].xr.leftHandTouchEnabledJoints,
-                xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
+            handProfile: handProfile,
+            raycaster: $svelthreeStores[sti].raycaster,
+            xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
         }
+        
         //console.timeEnd("updateXRTouchRay update params")
 
         //console.time("updateXRTouchRay hands update")
         // 0.09 - 0.4 (TOUCH AND TOUCH INSIDE) - 1.74 ms (FAST TOUCH CHECK)
         if (leftHand && $svelthreeStores[sti].xr.leftHandTouchEnabled === true) {
             //console.log("updateXRTouchRay left!")
-            xrHandTouchRay.update(leftHand, params)
+            xrHandTouchRay.update(leftHand, params, $svelthreeStores[sti].xr.leftHandTouchEnabledJoints)
         }
         
         if (rightHand && $svelthreeStores[sti].xr.rightHandTouchEnabled === true) {
             //console.log("updateXRTouchRay right!")
-            xrHandTouchRay.update(rightHand, params)
+            xrHandTouchRay.update(rightHand, params, $svelthreeStores[sti].xr.rightHandTouchEnabledJoints)
         }
         //console.timeEnd("updateXRTouchRay hands update")
     }
@@ -602,7 +611,6 @@
         //console.time("updateXRTouchSphere updates")
         xrHandTouchSphere.updateToTest(currentScene)
         xrHandTouchSphere.updateBVH($svelthreeStores[sti].useBVH)
-        xrHandTouchSphere.updateTouchDistance(touchDistance)
         // TODO: implement NEW debugging
         //enableTouch.debug ? xrHandTouchSphere.updateDebug(true) : xrHandTouchSphere.updateDebug(false)
 
@@ -619,9 +627,7 @@
         //console.time("updateXRTouchSphere update params")
         let params:XRTouchSphereUpdateParams = {
                 handProfile: handProfile,
-                lerpFactor: lerpFactor,
                 raycaster: $svelthreeStores[sti].raycaster,
-                enabledJoints: $svelthreeStores[sti].xr.leftHandTouchEnabledJoints,
                 xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
         }
         //console.timeEnd("updateXRTouchRay update params")
@@ -630,12 +636,12 @@
         // 0.09 - 0.4 (TOUCH AND TOUCH INSIDE) - 1.74 ms (FAST TOUCH CHECK)
         if (leftHand && $svelthreeStores[sti].xr.leftHandTouchEnabled === true) {
             //console.log("updateXRTouchRay left!")
-            xrHandTouchSphere.update(leftHand, params)
+            xrHandTouchSphere.update(leftHand, params, $svelthreeStores[sti].xr.leftHandTouchEnabledJoints)
         }
         
         if (rightHand && $svelthreeStores[sti].xr.rightHandTouchEnabled === true) {
             //console.log("updateXRTouchRay right!")
-            xrHandTouchSphere.update(rightHand, params)
+            xrHandTouchSphere.update(rightHand, params, $svelthreeStores[sti].xr.rightHandTouchEnabledJoints)
         }
         //console.timeEnd("updateXRTouchSphere hands update")
     }

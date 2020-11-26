@@ -22,24 +22,34 @@ declare type Raycaster = import('svelthree-three').Raycaster
 
 declare interface XRTouchRayUpdateParams {
     handProfile: XRHandProfile
-    lerpFactor: number
     raycaster: Raycaster
-    enabledJoints: number[]
     xrFrameDelta: number
 }
 
 declare interface XRTouchSphereUpdateParams {
     handProfile: XRHandProfile
-    lerpFactor: number
     raycaster: Raycaster
-    enabledJoints: number[]
     xrFrameDelta: number
 }
 
-
 //{hand: "left", mode:"hybrid",  distance: {remote: 2, touch: 0.01}, materials: {remote: pinchRemoteLineMat, touch: pinchTouchLineMat}, colors: {remote: 0xffffff, touch: 0xff0000}},
 declare interface XRHandPinchConfigItem {
-    hand: XRHandTouchEnabled, mode: XRHandPinchMode, distance?: { remote?: number, touch?: number }, materials?: { remote?: XRHandPinchRayMaterial, touch?: XRHandPinchRayMaterial }, colors?: { remote?: number, remoteHit?: number, touch?: number, touchHit?: number, }
+    hand: XRHandTouchEnabled
+    mode: XRHandPinchMode
+    distance?: {
+        remote?: number
+        touch?: number
+    }
+    materials?: {
+        remote?: XRHandPinchRayMaterial
+        touch?: XRHandPinchRayMaterial
+    }
+    colors?: {
+        remote?: number
+        remoteHit?: number
+        touch?: number
+        touchHit?: number
+    }
 }
 
 declare interface XRHandPinchConfig extends Array<XRHandPinchConfigItem> { }
@@ -48,7 +58,8 @@ declare type XRHandProfile = "boxes" | "spheres" | "oculus"
 declare type XRHandTouchEnabled = "left" | "right" | "both"
 
 declare interface XRHandTouchConfigHandsItem {
-    hand: XRHandTouchEnabled, index: number[]
+    hand: XRHandTouchEnabled
+    index: number[]
 }
 
 declare interface XRHandTouchConfigHands extends Array<XRHandTouchConfigHandsItem> { }
@@ -57,54 +68,56 @@ declare type XRHandTouchTestMode = "ray" | "sphere"
 
 
 declare interface XRHandTouchRayDebuggerConfig {
-    drawTentacles: boolean,
+    drawTentacles: boolean
     // TODO: Rename this
     drawTouchDebuggers: boolean
 }
 
 declare interface XRHandTouchSphereDebuggerConfig {
-    widthSegments: number,
-    heightSegments: number,
+    widthSegments: number
+    heightSegments: number
     colors: {
-        touch:number
-    },
+        touch: number
+    }
     mat: { [key: string]: any }
 }
 
 declare interface XRHandTouchDebugConfigItem {
     mode: XRHandTouchTestMode,
-    config: XRHandTouchRayDebuggerConfig | XRHandTouchSphereDebuggerConfig
+    config?: XRHandTouchRayDebuggerConfig | XRHandTouchSphereDebuggerConfig
 }
 
 declare interface XRHandTouchDebugConfig extends Array<XRHandTouchDebugConfigItem> { }
 
 declare interface XRHandTouchDebugParams {
-    enabled: boolean,
-    debugConfig?: XRHandTouchDebugConfig,
+    enabled: boolean
+    debugConfig: XRHandTouchDebugConfig
     hightlightJoints?: {
-        enabled: boolean,
-        colors: {
-            normal: number,
-            touch: number
+        enabled: boolean
+        colors?: {
+            normal?: number
+            touch?: number
         }
     },
     colorFaces?: {
-        enabled: boolean,
-        colors: {
-            touch: number,
-            unTouch: number,
-            touchThroughEnter: number,
-            touchThroughExit: number,
-            scratch: number
+        enabled: boolean
+        colors?: {
+            touch?: number
+            unTouch?: number
+            touchThroughEnter?: number
+            touchThroughExit?: number
+            scratch?: number
         }
     }
 }
 
 declare interface XRHandTouchConfig {
-    mode?: XRHandTouchTestMode,
-    sphereRadius?: number,
-    debug?: XRHandTouchDebugParams,
-    hands: XRHandTouchConfigHands
+    mode?: XRHandTouchTestMode
+    sphereRadius?: number
+    touchDistance?: number
+    lerpFactor?: number
+    debug?: XRHandTouchDebugParams
+    hands?: XRHandTouchConfigHands
 }
 
 declare interface XRHandTouchXIndexItem {
