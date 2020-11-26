@@ -1,7 +1,7 @@
 import {
     Mesh,
     Group,
-    MeshStandardMaterial
+    MeshBasicMaterial
 } from "svelthree-three"
 
 import XRHandJointindices from "../XRHandJointIndices"
@@ -9,17 +9,21 @@ import XRHandJointindices from "../XRHandJointIndices"
 export class XRHandTouchJointDebugger {
     currentScene: Scene
     jointMesh: Mesh
+    normalCol:number = 0x4299e1
+    touchCol:number = 0x00ff00
 
-    jointMat = new MeshStandardMaterial({
-        color: 0x4299e1,
-        roughness: 0.5,
-        metalness: 0.5
+    jointMat = new MeshBasicMaterial({
+        color: this.normalCol
     })
 
     constructor() { }
 
-    initialize(currentScene: Scene) {
+    initialize(currentScene: Scene, colors:{[key:string]: number}) {
         this.currentScene = currentScene
+
+        for (const [key, value] of Object.entries(colors)) {
+            value !== undefined ? this[`${key}Col`] = value : null
+          }
     }
 
     setJointMesh(hand: Group, joint: Group, i: number) {
@@ -49,10 +53,10 @@ export class XRHandTouchJointDebugger {
     }
 
     unhighlightJoint() {
-        if (this.jointMesh) { this.jointMesh.material["emissive"].setHex(0x000000) }
+        if (this.jointMesh) { this.jointMesh.material["color"].setHex(this.normalCol) }
     }
 
     highlightJoint() {
-        if (this.jointMesh) { this.jointMesh.material["emissive"].setHex(0x00ff00) }
+        if (this.jointMesh) { this.jointMesh.material["color"].setHex(this.touchCol) }
     }
 }

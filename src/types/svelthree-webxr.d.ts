@@ -65,6 +65,9 @@ declare interface XRHandTouchRayDebuggerConfig {
 declare interface XRHandTouchSphereDebuggerConfig {
     widthSegments: number,
     heightSegments: number,
+    colors: {
+        touch:number
+    },
     mat: { [key: string]: any }
 }
 
@@ -75,18 +78,32 @@ declare interface XRHandTouchDebugConfigItem {
 
 declare interface XRHandTouchDebugConfig extends Array<XRHandTouchDebugConfigItem> { }
 
-declare interface XRHandTouchDebuggerConfig {
+declare interface XRHandTouchDebugParams {
+    enabled: boolean,
     debugConfig?: XRHandTouchDebugConfig,
-    hightlightJoints?: boolean,
-    colorTouchedFaces?: boolean
+    hightlightJoints?: {
+        enabled: boolean,
+        colors: {
+            normal: number,
+            touch: number
+        }
+    },
+    colorFaces?: {
+        enabled: boolean,
+        colors: {
+            touch: number,
+            unTouch: number,
+            touchThroughEnter: number,
+            touchThroughExit: number,
+            scratch: number
+        }
+    }
 }
 
 declare interface XRHandTouchConfig {
     mode?: XRHandTouchTestMode,
-    debug?: boolean,
-    debugConfig?: XRHandTouchDebugConfig,
-    hightlightJoints?: boolean,
-    colorTouchedFaces?: boolean,
+    sphereRadius?: number,
+    debug?: XRHandTouchDebugParams,
     hands: XRHandTouchConfigHands
 }
 

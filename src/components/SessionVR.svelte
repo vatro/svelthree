@@ -79,7 +79,7 @@
     let xrHelpers: SvelthreeHelpersXR = new SvelthreeHelpersXR()
     let xrHandHitTester: XRHandHitTester = new XRHandHitTester()
     let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt()
-    let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt()
+    let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt(enableTouch.sphereRadius)
 
     $: requiredFeatures ? updateRequiredFeatures() : null
 
@@ -560,16 +560,14 @@
         // TODO: implement NEW debugging
         // enableTouch.debug ? xrHandTouchRay.updateDebug(true) : xrHandTouchRay.updateDebug(false)
        
-        if(enableTouch.debug === true) {
-            if(!xrHandTouchRay.debuggerInitiated) {
-                xrHandTouchRay.setDebugger({
-                    debugConfig: enableTouch.debugConfig,
-                    hightlightJoints: enableTouch.hightlightJoints,
-                    colorTouchedFaces: enableTouch.colorTouchedFaces
-                })
+        if(enableTouch.debug) {
+            xrHandTouchRay.updateDebug(enableTouch.debug.enabled)
+
+            if(enableTouch.debug.enabled && !xrHandTouchRay.debuggerInitiated) {
+                xrHandTouchRay.setDebugger(enableTouch.debug)
             }
-            xrHandTouchRay.updateDebug(enableTouch.debug)
         }
+
      
         //console.timeEnd("updateXRTouchRay updates")
 
@@ -608,15 +606,12 @@
         // TODO: implement NEW debugging
         //enableTouch.debug ? xrHandTouchSphere.updateDebug(true) : xrHandTouchSphere.updateDebug(false)
 
-        if(enableTouch.debug === true) {
-            if(!xrHandTouchSphere.debuggerInitiated) {
-                xrHandTouchSphere.setDebugger({
-                    debugConfig: enableTouch.debugConfig,
-                    hightlightJoints: enableTouch.hightlightJoints,
-                    colorTouchedFaces: enableTouch.colorTouchedFaces
-                })
+        if(enableTouch.debug) {
+            xrHandTouchSphere.updateDebug(enableTouch.debug.enabled)
+            
+            if(enableTouch.debug.enabled && !xrHandTouchSphere.debuggerInitiated) {
+                xrHandTouchSphere.setDebugger(enableTouch.debug)
             }
-            xrHandTouchSphere.updateDebug(enableTouch.debug)
         }
 
         //console.timeEnd("updateXRTouchSphere updates")

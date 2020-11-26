@@ -2,36 +2,44 @@ import { Color } from "svelthree-three";
 
 export class XRHandTouchFaceDebugger {
 
-    hlColTouch: Color = new Color(0x00ff00)
-    hlColTouch2: Color = new Color(0xffff00)
-    hlColUnTouch2: Color = new Color(0xff00ff)
-    hlColScratch: Color = new Color(0xc7c7c7)
-    hlColUnTouch: Color = new Color(0x0000ff)
+    touchCol = new Color(0x00ff00)
+    unTouchCol = new Color(0x0000ff)
+    touchThroughEnterCol = new Color(0xffff00)
+    touchThroughExitCol = new Color(0xff00ff)
+    scratchCol = new Color(0xc7c7c7)
 
     constructor() { }
 
+    initialize(colors:{[key:string]: number}) {
+        
+        for (const [key, value] of Object.entries(colors)) {
+            //console.log(`${key}: ${value}`);
+            value !== undefined ? this[`${key}Col`] = new Color(value) : null
+          }
+    }
+
     colorTouchedFace(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColTouch, message)
+        this.colorFace(intersected, this.touchCol, message)
     }
 
     colorTouchThroughEnter(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColTouch2, message)
+        this.colorFace(intersected, this.touchThroughEnterCol, message)
     }
 
     colorTouchThroughExit(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColUnTouch2, message)
+        this.colorFace(intersected, this.touchThroughExitCol, message)
     }
 
     colorFastTouchEnter(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColTouch2, message)
+        this.colorFace(intersected, this.touchThroughEnterCol, message)
     }
 
     colorScratch(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColScratch, message)
+        this.colorFace(intersected, this.scratchCol, message)
     }
 
     colorUnTouch(intersected: { [key: string]: any },  message: string) {
-        this.colorFace(intersected, this.hlColUnTouch, message)
+        this.colorFace(intersected, this.unTouchCol, message)
     }
 
     colorFace(intersected: { [key: string]: any }, color: Color, message: string) {

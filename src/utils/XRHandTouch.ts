@@ -27,12 +27,14 @@ export class XRHandTouch {
 
     touchDistance: number = 0.008
 
+    //overridden
+    touchSphereRadius: number
+
     debug: boolean = false
     debuggerSphere: XRHandTouchSphereDebugger
     debuggerRay: XRHandTouchRayDebugger
     jointDebugger: XRHandTouchJointDebugger
     faceDebugger: XRHandTouchFaceDebugger
-    colorTouchedFaces: boolean = false
 
     constructor() { }
 
@@ -108,7 +110,7 @@ export class XRHandTouch {
     /**
      * We can up to two 
      */
-    setDebugger(params: XRHandTouchDebuggerConfig): void {
+    setDebugger(params: XRHandTouchDebugParams): void {
 
         if (params.debugConfig !== undefined) {
             if (params.debugConfig.length > 0 && params.debugConfig.length <= 2) {
@@ -150,14 +152,14 @@ export class XRHandTouch {
         }
         */
 
-        if (params.hightlightJoints === true) {
+        if (params.hightlightJoints.enabled === true && !this.faceDebugger) {
             this.jointDebugger = new XRHandTouchJointDebugger()
-            this.jointDebugger.initialize(this.currentScene)
+            this.jointDebugger.initialize(this.currentScene, params.hightlightJoints.colors)
         }
 
-        if (params.colorTouchedFaces !== undefined) {
+        if (params.colorFaces.enabled === true && !this.faceDebugger) {
             this.faceDebugger = new XRHandTouchFaceDebugger()
-            this.colorTouchedFaces = params.colorTouchedFaces
+            this.faceDebugger.initialize(params.colorFaces.colors)
         }
 
         this.debuggerInitiated = true
@@ -182,13 +184,10 @@ export class XRHandTouch {
         this.debuggerRay.initialize(this.currentScene, this.touchDistance)
     }
 
-    /**
-     * Only XRHandTouchSphere overrides, because debug-sphere radius should be equal collision detection sphere radius
-     */
-    // overriden
-    setDebuggerSphere(config: XRHandTouchSphereDebuggerConfig): void {
-        return
-    }
+    setDebuggerSphere(config: XRHandTouchSphereDebuggerConfig) {
+        this.debuggerSphere = new XRHandTouchSphereDebugger(this.touchSphereRadius, config as XRHandTouchSphereDebuggerConfig)
+        this.debuggerSphere.initialize(this.currentScene, this.touchDistance)
+}   
 
     updateDebug(debug: boolean): void {
         this.debug = debug
