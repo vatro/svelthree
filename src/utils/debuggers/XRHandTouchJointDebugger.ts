@@ -4,7 +4,6 @@ import {
     MeshBasicMaterial
 } from "svelthree-three"
 
-import XRHandJointindices from "../XRHandJointIndices"
 import XRHandTouchDefaults from "../XRHandTouchDefaults"
 
 export class XRHandTouchJointDebugger {
