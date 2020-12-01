@@ -9,7 +9,7 @@
         PropRot,
         PropScale,
         PropLookAt
-    } from "./Sv3Types.svelte"
+    } from "./SvelthreeTypes.svelte"
 
     //hehe?
 
