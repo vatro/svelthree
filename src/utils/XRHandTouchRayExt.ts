@@ -14,28 +14,43 @@ export class XRHandTouchRayExt extends XRHandTouch {
     // override
     checkUntouchOutside(hand: Group, joint: Group, i: number, intersectObj: { [key: string]: any }, logMessage: String, raycaster?: Raycaster, origin?: Vector3) {
 
+        /*
+        The joint is IN 'touchDistance' with the currently intersected object / face which at this point
+        can be either the same (initially touched) or a different face of the SAME OBJECT:
+        The first two conditions in the 'XRHandTouch.touchingOutsideCheck' method check only for
+        different face and expect the currently intersected object to be the same as the initially
+        touched / intersected one (see 'joint.userData.touchObj')
+         TODO : can we just us this method for DIFFERENT object?! We're updating ('joint.userData.touchObj = intersectObj.object), so it should be possible
+         TODO : CHECK THE ABOVE TODO!
+        */
         if (intersectObj.distance < this.touchDistance) {
-            // don't dispatch untouch!
-            // we're in touch range with the newly intersected object / face
-            // so we update the joint.userData, but NOT yet joint.userData.raycasterTouchingDir
+            /*
+            Don't dispatch 'untouch'!
+            We update the 'joint.userData', but NOT yet 'joint.userData.raycasterTouchingDir',
+            we leave 'raycasterTouchingDir' as it is / was in the moment of the 'touch' event
+            before trying to switch to preferred "NEGATIVE NORMAL direction ray" raycast in order
+            for it to be used for subsequent raycasts --> real distance on next raycast.
+            */
             joint.userData.touchObj = intersectObj.object
             joint.userData.touchFaceNormal = intersectObj.face.normal
             joint.userData.touchFaceIndex = intersectObj.faceIndex
 
-            // - check if can switch to negative normal ray of the new face (means we're above new object/face) otherwise keep the old direction!
-            // re-raycast using negative normal ray! (in order to get real distance)
+            /*
+            Check if can switch to "NEGATIVE NORMAL direction ray" otherwise keep the old direction!
+            */
+
+            // re-raycast using "NEGATIVE NORMAL direction ray"! (in order to be used for subsequent raycasts --> real distance on next raycast)
             let nnRayHitDirection: Vector3 = this.nnRayIntersectsFace(joint, raycaster, origin, intersectObj)
             if (nnRayHitDirection) {
-                // negative normal raycast hits the same face means we can safely update raycasterTouchingDir
+                // "NEGATIVE NORMAL direction ray" intersects the face means we can safely update 'raycasterTouchingDir' to 'nnRayHitDirection'
                 joint.userData.raycasterTouchingDir = nnRayHitDirection
             }
             if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectObj, null) }
         } else {
-            // we're outside of touch range, but before dispatching untouch check if maybe the negative normal ray ist inside touch range
+            // the joint SEEMS to be OUT OF 'touchDistance' (using the inital directional ray), but before dispatching untouch check if maybe the negative normal ray ist inside touch range 
             let nnRayIsInsideTouchDir: Vector3 = this.nnRayIntersectsFaceAndIsInTouchRange(joint, raycaster, origin, intersectObj)
             if (nnRayIsInsideTouchDir) {
-                // we're in touch range with the newly intersected object / face after negative normal raycast check
-                // so we update the joint.userData ...
+                // the joint is IN 'touchDistance' to the currently intersected object / face after "NEGATIVE NORMAL direction ray" raycast check --> update joint.userData!
                 joint.userData.touchObj = intersectObj.object
                 joint.userData.touchFaceNormal = intersectObj.face.normal
                 joint.userData.touchFaceIndex = intersectObj.faceIndex
@@ -45,12 +60,14 @@ export class XRHandTouchRayExt extends XRHandTouch {
                 if (this.debug && this.faceDebugger) { this.faceDebugger.colorTouchedFace(intersectObj, null) }
             }
             else {
-                //dispatch untouch!
+                // the joint is OUT OF 'touchDistance' to the currently intersected object / face after "NEGATIVE NORMAL direction ray" raycast check --> dispatch 'untouch'!
                 console.log(logMessage, intersectObj.distance)
                 if (this.debug) {
                     if (this.faceDebugger) { this.faceDebugger.colorUnTouch(intersectObj, null) }
                     if (this.debuggerRay && this.debuggerRay.drawTentacles) { this.debuggerRay.removeAllTentacles(joint) }
                 }
+
+                // dispatch 'untouch'
                 this.resetJointTouchData(joint)
                 this.removeJointFromTouchingArray(hand, i)
                 this.dispatchUntouch(hand, joint, i, intersectObj)
@@ -60,13 +77,10 @@ export class XRHandTouchRayExt extends XRHandTouch {
 
     // override
     nnRayIntersectsFaceAndIsInTouchRangeCheck(testRaycast: any[], intersectObj: { [key: string]: any }): boolean {
-        if (testRaycast.length > 0 &&
+        return testRaycast.length > 0 &&
             testRaycast[0].object === intersectObj.object &&
             testRaycast[0].faceIndex === intersectObj.faceIndex &&
-            this.isInTouchDistance(testRaycast)) {
-            return true
-        }
-        return false
+            this.isInTouchDistance(testRaycast);
     }
 
     // override
