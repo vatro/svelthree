@@ -631,12 +631,12 @@ export class XRHandTouch {
 
         // RAYCAST : origin --> lastTouchPoint (on first run)
         if (joint.userData.lastTouchPoint) {
-            testRaycasterDir = new Vector3().subVectors(joint.userData.lastTouchPoint, joint.userData.origin)
+            testRaycasterDir = new Vector3().subVectors(joint.userData.lastTouchPoint, joint.userData.origin).normalize()
             testRaycasterLength = joint.userData.origin.distanceTo(joint.userData.lastTouchPoint)
 
             // RAYCAST : origin --> lastOrigin (on every subsequent run while the joint is still 'inside')
         } else {
-            testRaycasterDir = new Vector3().subVectors(joint.userData.lastOrigin, joint.userData.origin)
+            testRaycasterDir = new Vector3().subVectors(joint.userData.lastOrigin, joint.userData.origin).normalize()
             testRaycasterLength = joint.userData.origin.distanceTo(joint.userData.lastOrigin)
         }
 
@@ -652,6 +652,7 @@ export class XRHandTouch {
         if (testRaycast.length > 0) {
 
             // 'UNTOUCH' --> EXITED and is OUT OF 'touchDistance'
+            // TODO  what is it about speedFac here?
             if (testRaycast[0].point.distanceTo(joint.userData.origin) > this.touchDistance || joint.userData.speedFac > 1.1) {
                 console.log("TOUCH AND TOUCH INSIDE TRUE --> OBJECT EXITED (ray between origins intersected a face!)")
 
@@ -774,6 +775,7 @@ export class XRHandTouch {
         return raycaster.intersectObject(obj, true)
     }
 
+    // overridden & extended by SPHERE
     resetJointTouchData(joint: Group) {
         joint.userData.touch = false
         joint.userData.touchInside = false
