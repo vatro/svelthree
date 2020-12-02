@@ -15,18 +15,16 @@
                 initiatedFn = this.fn(obj, args)
 
                 if (!initiatedFn.hasOwnProperty("onStart")) {
-                    console.warn(
-                        "SVELTHREE > Provided animation is missing 'onStart' function!",
-                        { animation: initiatedFn }
-                    )
+                    console.warn("SVELTHREE > Provided animation is missing 'onStart' function!", {
+                        animation: initiatedFn
+                    })
                     throw new Error("SVELTHREE Exception (see warning above)")
                 }
 
                 if (!initiatedFn.hasOwnProperty("onDestroy")) {
-                    console.warn(
-                        "SVELTHREE > Provided animation has no 'onDestroy' function!",
-                        { animation: initiatedFn }
-                    )
+                    console.warn("SVELTHREE > Provided animation has no 'onDestroy' function!", {
+                        animation: initiatedFn
+                    })
                     throw new Error("SVELTHREE Exception (see warning above)")
                 }
             } catch (e) {

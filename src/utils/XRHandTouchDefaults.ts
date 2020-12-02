@@ -1,13 +1,13 @@
 import XRHandJointIndices from "./XRHandJointIndices"
 
 export default class XRHandTouchDefaults {
-    static HAND_LEFT:XRHandTouchEnabled = "left"  
-    static HAND_RIGHT:XRHandTouchEnabled = "right"  
-    static HAND_BOTH:XRHandTouchEnabled = "both"
+    static HAND_LEFT: XRHandTouchEnabled = "left"
+    static HAND_RIGHT: XRHandTouchEnabled = "right"
+    static HAND_BOTH: XRHandTouchEnabled = "both"
 
     // Lower values result in smoother direction change (less fidgeting) at cost of accuracy
     static LERP_FACTOR = 0.5 // 0-1
-    
+
     static TOUCH_DISTANCE = 0.008
 
     // 2000: no "untouch" intersection at very fast exits
@@ -15,7 +15,7 @@ export default class XRHandTouchDefaults {
     static SPEEDFAC_JOINTSPEED_MULTIPLIER = 2500
 
     static SPEEDFAC_LIMIT_LOW = 2
-    static SPEEDFAC_LIMIT_HIGH = undefined // TODO 10? 
+    static SPEEDFAC_LIMIT_HIGH = undefined // TODO 10?
 
     static MODE_SPHERE_RADIUS = XRHandTouchDefaults.TOUCH_DISTANCE
 

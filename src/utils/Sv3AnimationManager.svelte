@@ -8,12 +8,7 @@
         obj: Object3D
         scene: Scene
 
-        constructor(
-            animation: AnimationProp | any,
-            aniauto: boolean,
-            obj: Object3D,
-            scene: Scene
-        ) {
+        constructor(animation: AnimationProp | any, aniauto: boolean, obj: Object3D, scene: Scene) {
             this.animation = animation
             this.aniauto = aniauto
             this.obj = obj
@@ -21,11 +16,7 @@
         }
 
         handleCurrentSceneStatus(currentSceneActive: boolean) {
-            currentSceneActive
-                ? this.aniauto
-                    ? this.handleSceneActive()
-                    : null
-                : this.handleSceneInActive()
+            currentSceneActive ? (this.aniauto ? this.handleSceneActive() : null) : this.handleSceneInActive()
         }
 
         //active / reactivated
@@ -163,7 +154,7 @@
 
         getAnimation(): any {
             if (this.animationInitiated()) {
-                 return this.animation
+                return this.animation
             }
         }
     }

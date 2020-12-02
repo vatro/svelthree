@@ -2,20 +2,18 @@ import { Color } from "svelthree-three"
 import XRHandTouchDefaults from "../XRHandTouchDefaults"
 
 export class XRHandTouchFaceDebugger {
-
     touchCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCH_COL)
     unTouchCol = new Color(XRHandTouchDefaults.DBG_FACE_UNTOUCH_COL)
     touchThroughEnterCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCHTHROUGH_ENTER_COL)
     touchThroughExitCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCHTHROUGH_EXIT_COL)
     scratchCol = new Color(XRHandTouchDefaults.DBG_FACE_SCRATCH_COL)
 
-    constructor() { }
+    constructor() {}
 
     initialize(colors: { [key: string]: number }) {
-
         if (colors) {
             for (const [key, value] of Object.entries(colors)) {
-                value !== undefined ? this[`${key}Col`] = new Color(value) : null
+                value !== undefined ? (this[`${key}Col`] = new Color(value)) : null
             }
         }
     }
@@ -50,7 +48,7 @@ export class XRHandTouchFaceDebugger {
             intersected.object.geometry.attributes.color.setXYZ(intersected.face.a, color.r, color.g, color.b)
             intersected.object.geometry.attributes.color.setXYZ(intersected.face.b, color.r, color.g, color.b)
             intersected.object.geometry.attributes.color.setXYZ(intersected.face.c, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.needsUpdate = true;
+            intersected.object.geometry.attributes.color.needsUpdate = true
         } catch {
             debugger
         }

@@ -17,14 +17,7 @@
     import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
 
     export class UniversalPropIterator {
-        obj:
-            | Scene
-            | Object3D
-            | Material
-            | Material[]
-            | WebGLRenderer
-            | OrbitControls
-            | CubeCamera
+        obj: Scene | Object3D | Material | Material[] | WebGLRenderer | OrbitControls | CubeCamera
         //| WebGLCubeRenderTarget
         objTypeStr: string
         dlTarget: Object3D
@@ -71,22 +64,14 @@
             this.props[p].constructor === Vector3
                 ? this.obj[p].copy(this.props[p])
                 : Array.isArray(this.props[p])
-                ? this.obj[p].set(
-                      this.props[p][0],
-                      this.props[p][1],
-                      this.props[p][2]
-                  )
+                ? this.obj[p].set(this.props[p][0], this.props[p][1], this.props[p][2])
                 : null
         }
 
         checkSetColor(p: string): void {
             if (isArray(this.props[p])) {
                 if (isValidArray3Prop(this.props[p])) {
-                    this.obj[p] = new Color(
-                        this.props[p][0],
-                        this.props[p][1],
-                        this.props[p][2]
-                    )
+                    this.obj[p] = new Color(this.props[p][0], this.props[p][1], this.props[p][2])
                 } else {
                     console.error(
                         "SVELTHREE > UniversalPropIterator > checkSetColor : Prop should be an Array of three (3) values!",
@@ -144,8 +129,7 @@
                             : p === "color" || p === "groundColor"
                             ? this.checkSetColor(p)
                             : p === "target" &&
-                              (this.objTypeStr === "DirectionalLight" ||
-                                  this.objTypeStr === "SpotLight")
+                              (this.objTypeStr === "DirectionalLight" || this.objTypeStr === "SpotLight")
                             ? this.checkSetDlTarget(p)
                             : //standard 1:1
                               (this.obj[p] = this.props[p])
@@ -155,11 +139,7 @@
                             ? this.props[p].constructor === Vector3
                                 ? this.obj["lookAt"](this.props[p])
                                 : Array.isArray(this.props[p])
-                                ? this.obj["lookAt"](
-                                      this.props[p][0],
-                                      this.props[p][1],
-                                      this.props[p][2]
-                                  )
+                                ? this.obj["lookAt"](this.props[p][0], this.props[p][1], this.props[p][2])
                                 : null
                             : null
                     } else {
@@ -168,10 +148,7 @@
                          * but we'll keep this code here (does no harm), in case we missed something
                          * @see CubeCamera.svelte
                          */
-                        if (
-                            this.obj.constructor.name ===
-                            "WebGLCubeRenderTarget"
-                        ) {
+                        if (this.obj.constructor.name === "WebGLCubeRenderTarget") {
                             /*
                             console.info(
                                 "SVELTHREE > " +

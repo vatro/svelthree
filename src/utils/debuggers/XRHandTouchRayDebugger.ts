@@ -1,16 +1,8 @@
-import {
-    LineBasicMaterial,
-    Scene,
-    Group,
-    Vector3,
-    BufferGeometry,
-    Line
-} from "svelthree-three"
+import { LineBasicMaterial, Scene, Group, Vector3, BufferGeometry, Line } from "svelthree-three"
 
 import XRHandTouchDefaults from "../XRHandTouchDefaults"
 
 export class XRHandTouchRayDebugger {
-
     currentScene: Scene
     touchDistance: number
 
@@ -30,7 +22,7 @@ export class XRHandTouchRayDebugger {
     })
 
     tentacleTouchingRayMat = new LineBasicMaterial({
-        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_TOCHING_COL, 
+        color: XRHandTouchDefaults.DBG_RAY_TENTACLE_TOCHING_COL,
         linewidth: XRHandTouchDefaults.DBG_RAY_TENTACLE_WIDTH_STD
     })
 
@@ -45,18 +37,17 @@ export class XRHandTouchRayDebugger {
     tentacleDirScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_DIRSCALE
     tentacleTouchingRayScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_TOUCHINGRAY_SCALE
 
-    constructor(config:XRHandTouchRayDebuggerConfig) {
-        if(config) {
+    constructor(config: XRHandTouchRayDebuggerConfig) {
+        if (config) {
             this.drawTentacles = config.drawTentacles === true ? true : false
             this.drawTouchDebuggers = config.drawTouchDebuggers === true ? true : false
-        }
-        else {
+        } else {
             this.drawTentacles = true
             this.drawTouchDebuggers = true
         }
     }
 
-    initialize(currentScene:Scene, touchDistance:number = XRHandTouchDefaults.TOUCH_DISTANCE) {
+    initialize(currentScene: Scene, touchDistance: number = XRHandTouchDefaults.TOUCH_DISTANCE) {
         this.currentScene = currentScene
         this.touchDistance = touchDistance
     }
@@ -66,7 +57,7 @@ export class XRHandTouchRayDebugger {
         //this.drawTouchDebuggers = doUpdate
     }
 
-    setTentacleScales(jointSpeedFac:number) {
+    setTentacleScales(jointSpeedFac: number) {
         if (this.drawTentacles === true) {
             this.tentacleDirScale = this.touchDistance * jointSpeedFac
             this.tentacleTouchingRayScale = this.touchDistance * 3
@@ -87,37 +78,39 @@ export class XRHandTouchRayDebugger {
         this.currentScene.add(joint.userData.tentacleDir)
     }
 
-    addTouchDebugLine(joint:Group) {
-        const lineGeom:BufferGeometry = new BufferGeometry().setFromPoints([joint.userData.origin, joint.userData.lastIntersect.point])
-        const line:Line = new Line(lineGeom, this.tentacleTouchingRayMat)
+    addTouchDebugLine(joint: Group) {
+        const lineGeom: BufferGeometry = new BufferGeometry().setFromPoints([
+            joint.userData.origin,
+            joint.userData.lastIntersect.point
+        ])
+        const line: Line = new Line(lineGeom, this.tentacleTouchingRayMat)
         this.currentScene.add(line)
     }
 
-    addTouchDebugLineInside(joint:Group) {
-       //let p1Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
-            //let p2Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
+    addTouchDebugLineInside(joint: Group) {
+        //let p1Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
+        //let p2Geom:OctahedronBufferGeometry = this.debugPointGeom.clone()
 
-            let lineGeom: BufferGeometry
-            //let p3:Mesh = this.debugPointCurrent.clone()
-            //joint.userData.lastTouchPoint ?  p1.position.copy(joint.userData.lastTouchPoint) : p1.position.copy(joint.userData.lastOrigin)
+        let lineGeom: BufferGeometry
+        //let p3:Mesh = this.debugPointCurrent.clone()
+        //joint.userData.lastTouchPoint ?  p1.position.copy(joint.userData.lastTouchPoint) : p1.position.copy(joint.userData.lastOrigin)
 
-            if (joint.userData.lastTouchPoint) {
-                //p1Geom.translate(joint.userData.lastTouchPoint.x, joint.userData.lastTouchPoint.y, joint.userData.lastTouchPoint.z)
-                lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastTouchPoint, joint.userData.origin])
-            }
-            else {
-                //p1Geom.translate(joint.userData.lastOrigin.x, joint.userData.lastOrigin.y, joint.userData.lastOrigin.z)
-                lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastOrigin, joint.userData.origin])
-            }
+        if (joint.userData.lastTouchPoint) {
+            //p1Geom.translate(joint.userData.lastTouchPoint.x, joint.userData.lastTouchPoint.y, joint.userData.lastTouchPoint.z)
+            lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastTouchPoint, joint.userData.origin])
+        } else {
+            //p1Geom.translate(joint.userData.lastOrigin.x, joint.userData.lastOrigin.y, joint.userData.lastOrigin.z)
+            lineGeom = new BufferGeometry().setFromPoints([joint.userData.lastOrigin, joint.userData.origin])
+        }
 
-            //p2Geom.translate(joint.userData.origin.x, joint.userData.origin.y, joint.userData.origin.z)
+        //p2Geom.translate(joint.userData.origin.x, joint.userData.origin.y, joint.userData.origin.z)
 
-            //p2.position.copy(joint.userData.origin)
-            //p3.position.copy(currentOrigin)
+        //p2.position.copy(joint.userData.origin)
+        //p3.position.copy(currentOrigin)
 
-            let line = new Line(lineGeom, this.tentacleTouchingRayMat)
+        let line = new Line(lineGeom, this.tentacleTouchingRayMat)
 
-            /*
+        /*
             //somehow doesn't work --> ???
             this.debugPointMeshGeom.merge(p1Geom, 0)
             this.debugPointMeshGeom.merge(p1Geom, this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
@@ -125,10 +118,10 @@ export class XRHandTouchRayDebugger {
             this.debugPointMeshGeom.merge(p2Geom, this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
             console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
             */
-            this.currentScene.add(line)
-            //this.debugPointsCounter +=2
+        this.currentScene.add(line)
+        //this.debugPointsCounter +=2
 
-            //debugger
+        //debugger
     }
 
     removeAllTentacles(joint: Group) {
@@ -168,7 +161,9 @@ export class XRHandTouchRayDebugger {
             joint.userData.tentacleTouchingRay = undefined
         }
 
-        let target = origin.clone().add(joint.userData.raycasterTouchingDir.clone().multiplyScalar(this.tentacleTouchingRayScale))
+        let target = origin
+            .clone()
+            .add(joint.userData.raycasterTouchingDir.clone().multiplyScalar(this.tentacleTouchingRayScale))
         let lineGeom = new BufferGeometry().setFromPoints([origin, target])
         joint.userData.tentacleTouchingRay = new Line(lineGeom, this.tentacleTouchingRayMat)
 
@@ -176,7 +171,7 @@ export class XRHandTouchRayDebugger {
     }
 }
 
-// TODO: what to do with this?! 
+// TODO: what to do with this?!
 /*
  updateToTest(currentScene: Scene) {
       this.currentScene = currentScene

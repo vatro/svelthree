@@ -16,24 +16,20 @@ export class XRHandTouchSphereDebugger {
         this.touchSphereRadius = touchSphereRadius
 
         this.touchSphereDebug = new Mesh(
-
             new SphereBufferGeometry(
                 this.touchSphereRadius,
                 config && config.widthSegments ? config.widthSegments : XRHandTouchDefaults.DBG_SPHERE_SEG_W,
                 config && config.heightSegments ? config.heightSegments : XRHandTouchDefaults.DBG_SPHERE_SEG_H
             ),
 
-            new MeshBasicMaterial(
-                config && config.mat ? config.mat : XRHandTouchDefaults.DBG_SPHERE_DEFAULT_MAT_CONFIG
-            )
-
+            new MeshBasicMaterial(config && config.mat ? config.mat : XRHandTouchDefaults.DBG_SPHERE_DEFAULT_MAT_CONFIG)
         )
 
         this.touchSphereDebug.name = XRHandTouchSphereDebugger.touchSphereDebugName
 
         if (config && config.colors) {
             for (const [key, value] of Object.entries(config.colors)) {
-                value !== undefined ? this[`${key}Col`] = new Color(value) : null
+                value !== undefined ? (this[`${key}Col`] = new Color(value)) : null
             }
         }
     }
@@ -54,46 +50,40 @@ export class XRHandTouchSphereDebugger {
 
     // paint sphere touch
     colorSphereTouch(mesh: Mesh, indices: number[]) {
-
         const geom: BufferGeometry = mesh.geometry as BufferGeometry
-        const colorAttr = geom.getAttribute('color');
-        const indexAttr = geom.index;
+        const colorAttr = geom.getAttribute("color")
+        const indexAttr = geom.index
 
         //debugger
         //const indexAttr = geom.getAttribute( 'index' );
 
         for (let i = 0, l = indices.length; i < l; i++) {
-
-            const i2 = indexAttr.getX(indices[i]);
-            colorAttr.setX(i2, this.touchCol.r);
-            colorAttr.setY(i2, this.touchCol.g);
-            colorAttr.setZ(i2, this.touchCol.b);
-
+            const i2 = indexAttr.getX(indices[i])
+            colorAttr.setX(i2, this.touchCol.r)
+            colorAttr.setY(i2, this.touchCol.g)
+            colorAttr.setZ(i2, this.touchCol.b)
         }
 
-        colorAttr.needsUpdate = true;
+        colorAttr.needsUpdate = true
     }
 
-     // paint sphere touch
-     colorSphereUnTouch(mesh: Mesh, indices: number[]) {
-
+    // paint sphere touch
+    colorSphereUnTouch(mesh: Mesh, indices: number[]) {
         const geom: BufferGeometry = mesh.geometry as BufferGeometry
-        const colorAttr = geom.getAttribute('color');
-        const indexAttr = geom.index;
+        const colorAttr = geom.getAttribute("color")
+        const indexAttr = geom.index
 
         //debugger
         //const indexAttr = geom.getAttribute( 'index' );
 
         for (let i = 0, l = indices.length; i < l; i++) {
-
-            const i2 = indexAttr.getX(indices[i]);
-            colorAttr.setX(i2, this.unTouchCol.r);
-            colorAttr.setY(i2, this.unTouchCol.g);
-            colorAttr.setZ(i2, this.unTouchCol.b);
-
+            const i2 = indexAttr.getX(indices[i])
+            colorAttr.setX(i2, this.unTouchCol.r)
+            colorAttr.setY(i2, this.unTouchCol.g)
+            colorAttr.setZ(i2, this.unTouchCol.b)
         }
 
-        colorAttr.needsUpdate = true;
+        colorAttr.needsUpdate = true
     }
 
     update(doUpdate: boolean) {

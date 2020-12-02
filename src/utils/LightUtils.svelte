@@ -14,10 +14,7 @@
         }
 
         tryIntensityUpdate(intensity: number) {
-            console.info(
-                "SVELTHREE > LightUtils > tryIntensityUpdate ",
-                intensity
-            )
+            console.info("SVELTHREE > LightUtils > tryIntensityUpdate ", intensity)
             this.light ? (this.light.intensity = intensity) : null
         }
 
@@ -27,21 +24,14 @@
             this.light
                 ? isArray(color)
                     ? isValidArray3Prop(color)
-                        ? (this.light.color = new Color(
-                              color[0],
-                              color[1],
-                              color[2]
-                          ))
+                        ? (this.light.color = new Color(color[0], color[1], color[2]))
                         : null
                     : (this.light.color = new Color(color))
                 : null
         }
 
         tryShadowMapSizeUpdate(shadowMapSize: number) {
-            console.info(
-                "SVELTHREE > LightUtils > tryShadowMapSizeUpdate",
-                shadowMapSize
-            )
+            console.info("SVELTHREE > LightUtils > tryShadowMapSizeUpdate", shadowMapSize)
             this.light
                 ? ((this.light.shadow.mapSize.width = shadowMapSize),
                   (this.light.shadow.mapSize.height = shadowMapSize))
@@ -54,21 +44,12 @@
          * @param shadowBiasSize
          */
         tryShadowBiasUpdate(shadowBiasSize: number) {
-            console.info(
-                "SVELTHREE > LightUtils > tryShadowBiasUpdate",
-                shadowBiasSize
-            )
-            this.light
-                ? ((this.light.shadow.bias = shadowBiasSize),
-                  (this.light.shadow.bias = shadowBiasSize))
-                : null
+            console.info("SVELTHREE > LightUtils > tryShadowBiasUpdate", shadowBiasSize)
+            this.light ? ((this.light.shadow.bias = shadowBiasSize), (this.light.shadow.bias = shadowBiasSize)) : null
         }
 
         tryCastShadowUpdate(castShadow: boolean) {
-            console.info(
-                "SVELTHREE > LightUtils > tryCastShadowUpdate",
-                castShadow
-            )
+            console.info("SVELTHREE > LightUtils > tryCastShadowUpdate", castShadow)
             this.light ? (this.light.castShadow = castShadow) : null
             //console.info("SVELTHREE > LightUtils > tryCastShadowUpdate", {light: this.light, castShadow: castShadow})
         }

@@ -1,16 +1,16 @@
 import { sphereIntersectTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/MathUtilities"
-import { SeparatingAxisTriangle } from '../../node_modules/three-mesh-bvh/src/Utils/SeparatingAxisTriangle.js';
+import { SeparatingAxisTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/SeparatingAxisTriangle.js"
 import { XRHandTouch } from "./XRHandTouch"
 import { Mesh, Sphere, Group, Vector3, Matrix4, Matrix3, Object3D, Triangle } from "svelthree-three"
 import XRHandTouchDefaults from "./XRHandTouchDefaults"
 
 interface SphereTouchingResultsItem {
-    mesh: Mesh,
+    mesh: Mesh
     indices: number[]
     tris: SeparatingAxisTriangle[]
 }
 
-interface SphereTouchingResults extends Array<SphereTouchingResultsItem> { }
+interface SphereTouchingResults extends Array<SphereTouchingResultsItem> {}
 
 export class XRHandTouchSphereExt extends XRHandTouch {
     touchSphere: Sphere
@@ -20,7 +20,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     constructor(
         lerpFactor: number = XRHandTouchDefaults.LERP_FACTOR,
         touchDistance: number = XRHandTouchDefaults.TOUCH_DISTANCE,
-        sphereRadius: number = XRHandTouchDefaults.MODE_SPHERE_RADIUS) {
+        sphereRadius: number = XRHandTouchDefaults.MODE_SPHERE_RADIUS
+    ) {
         super()
         this.lerpFactor = lerpFactor
         this.touchDistance = touchDistance
@@ -28,14 +29,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    update(
-        hand: Group,
-        params: XRTouchRayUpdateParams,
-        enabledJoints: number[]
-    ): void {
-
+    update(hand: Group, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
         for (let i = 0; i < enabledJoints.length; i++) {
-
             const jointIndex: number = enabledJoints[i]
             const joint: Group = hand.children[jointIndex] as Group
 
@@ -52,7 +47,12 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                 joint.userData.lastOrigin = joint.userData.origin
             }
 
-            const currentOrigin: Vector3 = this.getJointOrigin(joint, jointIndex, params.handProfile, hand.userData.handedness)
+            const currentOrigin: Vector3 = this.getJointOrigin(
+                joint,
+                jointIndex,
+                params.handProfile,
+                hand.userData.handedness
+            )
 
             // SPHERE CLEANUP: we don't want to use direction at all in sphere mode
             // TODO  maybe save direction and speed?
@@ -77,7 +77,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                 //joint.userData.speedFac = 0
             }
 
-
             if (joint.userData.touch === undefined) {
                 joint.userData.touch = false
             }
@@ -88,10 +87,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                 }
             }
 
-
             switch (joint.userData.touch) {
                 case false:
-
                     console.log("FIRST CHECK!")
                     if (this.debug) {
                         if (this.jointDebugger) {
@@ -102,7 +99,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                     const sphereTouchingResults: SphereTouchingResults = this.isTouching(this.toTest, joint)
 
                     if (sphereTouchingResults.length > 0) {
-
                         // SPHERE CLEANUP: Ok, now we have the basis to test for multiple objects, we'll use only [0] for now
                         const sphereTouchingResult: SphereTouchingResultsItem = sphereTouchingResults[0]
 
@@ -131,7 +127,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
                         this.addJointToTouchingArray(hand, i)
                         this.dispatchTouch(hand, joint, i, sphereTouchingResults)
-
                     } else {
                         // TODO : tbd // nothing?
                     }
@@ -145,7 +140,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
                     // NO INTERSECTION
                     if (sphereTouchingResults2.length === 0) {
-                       
                         console.log("WE TOUCHED BEFORE! --> We're touching but NOT INTERSECTING!")
                         // We're touching but NOT INTERSECTING
                         joint.userData.sphereIntersect = false
@@ -157,24 +151,29 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
                         let dotProd: number
                         let jointNormal: Vector3
-                       
-                        // Run this only if we're not 
+
+                        // Run this only if we're not
                         // once we're INSIDE 'joint.userData.lastTouchTris' gets 'undefined'
-                        if(joint.userData.lastTouchTris !== undefined) {
+                        if (joint.userData.lastTouchTris !== undefined) {
                             console.log("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!!")
-                            //It should be enough to use just one point here (no need to calculate the center of the triangle) 
-                            jointNormal = new Vector3().subVectors(joint.userData.lastTouchTris[0].points[0], joint.userData.origin).normalize()
+                            //It should be enough to use just one point here (no need to calculate the center of the triangle)
+                            jointNormal = new Vector3()
+                                .subVectors(joint.userData.lastTouchTris[0].points[0], joint.userData.origin)
+                                .normalize()
                             let faceNormal = new Vector3()
                             joint.userData.lastTouchTris[0].getNormal(faceNormal)
                             dotProd = jointNormal.dot(faceNormal)
 
                             console.log("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!! dotProd: ", dotProd)
-                            dotProd > 0 ? joint.userData.touchInside = true : joint.userData.touchInside = false
+                            dotProd > 0 ? (joint.userData.touchInside = true) : (joint.userData.touchInside = false)
                         }
 
                         // a) We're INSIDE ---> do nothing -->  TODO  consider dispatching 'touching'
                         if (joint.userData.touchInside === true) {
-                            console.log("WE TOUCHED BEFORE! --> We're INSIDE ---> do nothing! joint.userData.touchInside: ", joint.userData.touchInside)
+                            console.log(
+                                "WE TOUCHED BEFORE! --> We're INSIDE ---> do nothing! joint.userData.touchInside: ",
+                                joint.userData.touchInside
+                            )
 
                             joint.userData.touch = true
 
@@ -196,13 +195,16 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                                 }
 
                                 if (this.debuggerSphere) {
-                                    this.debuggerSphere.colorSphereUnTouch(joint.userData.touchObj, joint.userData.touchIndices)
+                                    this.debuggerSphere.colorSphereUnTouch(
+                                        joint.userData.touchObj,
+                                        joint.userData.touchIndices
+                                    )
                                 }
                             }
 
                             this.resetJointTouchData(joint)
                             this.removeJointFromTouchingArray(hand, i)
-                            this.dispatchUntouch(hand, joint, i, null) // null details --> TODO  --> consider adding joint.userData.lastTouchIndices & joint.userData.lastTouchTris as detail  
+                            this.dispatchUntouch(hand, joint, i, null) // null details --> TODO  --> consider adding joint.userData.lastTouchIndices & joint.userData.lastTouchTris as detail
                         }
                     }
 
@@ -222,7 +224,10 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
                         if (this.debug) {
                             if (this.debuggerSphere) {
-                                this.debuggerSphere.colorSphereTouch(joint.userData.touchObj, joint.userData.touchIndices)
+                                this.debuggerSphere.colorSphereTouch(
+                                    joint.userData.touchObj,
+                                    joint.userData.touchIndices
+                                )
                             }
                         }
                     }
@@ -246,31 +251,29 @@ export class XRHandTouchSphereExt extends XRHandTouch {
         //console.log("joint.userData.origin: ", joint.userData.origin)
         //console.log("this.touchSphere center", this.touchSphere.center)
 
-        const bvh = mesh.geometry['boundsTree'] || undefined
+        const bvh = mesh.geometry["boundsTree"] || undefined
 
         //console.log("bvh: ", bvh)
 
-        const indices: number[] = [];
+        const indices: number[] = []
 
         // @see https://threejs.org/docs/#api/en/math/Triangle
-        const tris: SeparatingAxisTriangle[] = [];
+        const tris: SeparatingAxisTriangle[] = []
 
         //console.time("bvh.shapecast")
-
 
         if (bvh) {
             // @see MeshBVH.shapecast()
             bvh.shapecast(
                 mesh,
-                box => this.touchSphere.intersectsBox(box.applyMatrix4(mesh.matrixWorld)),
+                (box) => this.touchSphere.intersectsBox(box.applyMatrix4(mesh.matrixWorld)),
                 (tri, a, b, c) => {
-
                     tri.a.applyMatrix4(mesh.matrixWorld)
                     tri.b.applyMatrix4(mesh.matrixWorld)
                     tri.c.applyMatrix4(mesh.matrixWorld)
 
                     if (sphereIntersectTriangle(this.touchSphere, tri)) {
-                        indices.push(a, b, c);
+                        indices.push(a, b, c)
                         //console.log("tri:", tri) // SeparatingAxisTriangle
                         tris.push(tri)
                     }
@@ -286,7 +289,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
         return { indices: indices, tris: tris }
     }
-
 
     // override
     /**
@@ -332,10 +334,15 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
     */
 
-
     // override
     intersectionsPhase1Raycast(params: XRTouchRayUpdateParams, joint: Group): any {
-        return this.doRaycast(params.raycaster, joint.userData.origin, joint.userData.direction, 0, this.touchSphereRadius + this.touchDistance * joint.userData.speedFac)
+        return this.doRaycast(
+            params.raycaster,
+            joint.userData.origin,
+            joint.userData.direction,
+            0,
+            this.touchSphereRadius + this.touchDistance * joint.userData.speedFac
+        )
     }
 
     // override
@@ -346,7 +353,6 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
     // new isInTouchDistance alternative!
     isTouching(toTest: Object3D[], joint: Group): SphereTouchingResults {
-
         let allResults: SphereTouchingResults = []
 
         for (let i = 0; i < toTest.length; i++) {

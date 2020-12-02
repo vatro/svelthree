@@ -15,11 +15,7 @@
 
     //TODO: implement
     export function isValidMatrix4(p: any): boolean {
-        p
-            ? console.error(
-                  "SVELTHREE > passing a Matrix4 as prop is not implemented yet!"
-              )
-            : null
+        p ? console.error("SVELTHREE > passing a Matrix4 as prop is not implemented yet!") : null
         return false
     }
 </script>
