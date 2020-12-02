@@ -46,12 +46,12 @@
             }
 
             if (xrHandTouch) {
-                hand.addEventListener("touch", onXrHandTouch)
+                hand.addEventListener("touch", onXRHandTouch)
             }
         }
     }
 
-    function onXrHandTouch(e) {}
+    function onXRHandTouch(e) {}
 
     function removeListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
@@ -59,7 +59,7 @@
             //hands
             hand.removeEventListener("pinchstart", tryDispatch)
             hand.removeEventListener("pinchend", tryDispatch)
-            hand.removeEventListener("touch", onTouch)
+            hand.removeEventListener("touch", onXRHandTouch)
         }
     }
 
