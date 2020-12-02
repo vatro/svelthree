@@ -7,6 +7,7 @@ export class XRHandTouchSphereDebugger {
     touchSphereRadius: number
     touchSphereDebug: Mesh
     touchCol = new Color(XRHandTouchDefaults.DBG_SPHERE_TOUCHED_COL)
+    unTouchCol = new Color(XRHandTouchDefaults.DBG_SPHERE_UNTOUCH_COL)
 
     currentScene: Scene
     touchDistance: number
@@ -67,6 +68,28 @@ export class XRHandTouchSphereDebugger {
             colorAttr.setX(i2, this.touchCol.r);
             colorAttr.setY(i2, this.touchCol.g);
             colorAttr.setZ(i2, this.touchCol.b);
+
+        }
+
+        colorAttr.needsUpdate = true;
+    }
+
+     // paint sphere touch
+     colorSphereUnTouch(mesh: Mesh, indices: number[]) {
+
+        const geom: BufferGeometry = mesh.geometry as BufferGeometry
+        const colorAttr = geom.getAttribute('color');
+        const indexAttr = geom.index;
+
+        //debugger
+        //const indexAttr = geom.getAttribute( 'index' );
+
+        for (let i = 0, l = indices.length; i < l; i++) {
+
+            const i2 = indexAttr.getX(indices[i]);
+            colorAttr.setX(i2, this.unTouchCol.r);
+            colorAttr.setY(i2, this.unTouchCol.g);
+            colorAttr.setZ(i2, this.unTouchCol.b);
 
         }
 
