@@ -48,39 +48,24 @@ export class XRHandTouchSphereDebugger {
         joint.userData.debugSphere.position.copy(joint.userData.origin)
     }
 
-    // paint sphere touch
     colorSphereTouch(mesh: Mesh, indices: number[]) {
-        const geom: BufferGeometry = mesh.geometry as BufferGeometry
-        const colorAttr = geom.getAttribute("color")
-        const indexAttr = geom.index
-
-        //debugger
-        //const indexAttr = geom.getAttribute( 'index' );
-
-        for (let i = 0, l = indices.length; i < l; i++) {
-            const i2 = indexAttr.getX(indices[i])
-            colorAttr.setX(i2, this.touchCol.r)
-            colorAttr.setY(i2, this.touchCol.g)
-            colorAttr.setZ(i2, this.touchCol.b)
-        }
-
-        colorAttr.needsUpdate = true
+        this.colorFaces(mesh, indices, this.touchCol)
     }
 
-    // paint sphere touch
     colorSphereUnTouch(mesh: Mesh, indices: number[]) {
+        this.colorFaces(mesh, indices, this.unTouchCol)
+    }
+
+    colorFaces(mesh: Mesh, indices: number[], color: Color) {
         const geom: BufferGeometry = mesh.geometry as BufferGeometry
         const colorAttr = geom.getAttribute("color")
         const indexAttr = geom.index
 
-        //debugger
-        //const indexAttr = geom.getAttribute( 'index' );
-
         for (let i = 0, l = indices.length; i < l; i++) {
             const i2 = indexAttr.getX(indices[i])
-            colorAttr.setX(i2, this.unTouchCol.r)
-            colorAttr.setY(i2, this.unTouchCol.g)
-            colorAttr.setZ(i2, this.unTouchCol.b)
+            colorAttr.setX(i2, color.r)
+            colorAttr.setY(i2, color.g)
+            colorAttr.setZ(i2, color.b)
         }
 
         colorAttr.needsUpdate = true
