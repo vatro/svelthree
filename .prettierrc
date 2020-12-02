@@ -4,7 +4,7 @@
     "semi": false,
     "singleQuote": false,
     "jsxBracketSameLine": true,
-    "printWidth": 80,
+    "printWidth": 120,
 
     "svelteSortOrder" : "scripts-styles-markup",
     "svelteStrictMode": false,
