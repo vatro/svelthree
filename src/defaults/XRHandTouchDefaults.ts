@@ -1,9 +1,12 @@
 import XRHandJointIndices from "../utils/XRHandJointIndices"
 
 export default class XRHandTouchDefaults {
-    static HAND_LEFT: XRHandTouchEnabled = "left"
-    static HAND_RIGHT: XRHandTouchEnabled = "right"
-    static HAND_BOTH: XRHandTouchEnabled = "both"
+    static ENABLED_LEFT: XRHandTouchEnabled = "left"
+    static ENABLED_RIGHT: XRHandTouchEnabled = "right"
+    static ENABLED_BOTH: XRHandTouchEnabled = "both"
+
+    static TOUCH_TEST_MODE_RAY: XRHandTouchTestMode = "ray"
+    static TOUCH_TEST_MODE_SPHERE: XRHandTouchTestMode = "sphere"
 
     // Lower values result in smoother direction change (less fidgeting) at cost of accuracy
     static LERP_FACTOR = 0.5 // 0-1
@@ -61,6 +64,6 @@ export default class XRHandTouchDefaults {
     }
 
     static ENABLETOUCH_HANDS_DEFAULT: XRHandTouchConfigHands = [
-        { hand: XRHandTouchDefaults.HAND_BOTH, index: XRHandJointIndices.ALL }
+        { hand: XRHandTouchDefaults.ENABLED_BOTH, index: XRHandJointIndices.ALL }
     ]
 }

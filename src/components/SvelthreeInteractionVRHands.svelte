@@ -7,6 +7,7 @@
     import { onMount } from "svelte"
     import { Object3D, Group } from "svelthree-three"
     import { SvelteComponentDev } from "svelte/internal"
+    import XRDefaults from "../defaults/XRDefaults.js"
 
     export let interactionEnabled: boolean
     export let parent: SvelteComponentDev
@@ -266,7 +267,10 @@
     }
 
     function checkIntersect(): boolean {
-        if ($svelthreeStores[sti].xr.hitTestMode === "virtual" && $svelthreeStores[sti].allIntersections) {
+        if (
+            $svelthreeStores[sti].xr.hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL &&
+            $svelthreeStores[sti].allIntersections
+        ) {
             if (
                 $svelthreeStores[sti].allIntersections.length > 0 &&
                 $svelthreeStores[sti].allIntersections[0].object === obj

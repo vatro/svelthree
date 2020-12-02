@@ -24,6 +24,8 @@
     import { createEventDispatcher } from "svelte"
     import { SvelteComponentDev } from "svelte/internal"
 
+    import XRDefaults from "../defaults/XRDefaults"
+
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
     let renderer: WebGLRenderer
@@ -472,15 +474,15 @@
             })
 
             switch ($svelthreeStores[sti].xr.sessionMode) {
-                case "inline":
+                case XRDefaults.SESSION_MODE_INLINE:
                     console.error(
                         "SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'inline' is not yet implemented!"
                     )
                     break
-                case "immersive-ar":
+                case XRDefaults.SESSION_MODE_AR:
                     renderAR(timestamp, frame)
                     break
-                case "immersive-vr":
+                case XRDefaults.SESSION_MODE_VR:
                     break
                 default:
                     break
@@ -492,7 +494,7 @@
         let referenceSpace: XRReferenceSpace = renderer.xr.getReferenceSpace() as XRReferenceSpace
         let session: XRSession = renderer.xr.getSession() as XRSession
 
-        if ($svelthreeStores[sti].xr.hitTestMode === "realworld") {
+        if ($svelthreeStores[sti].xr.hitTestMode === XRDefaults.HITTEST_MODE_REALWORLD) {
             webxr.performRealWorldHitTest(referenceSpace, session, timestamp, frame)
         } else if ($svelthreeStores[sti].xr.hitTestResults !== undefined) {
             $svelthreeStores[sti].xr.hitTestResults = undefined

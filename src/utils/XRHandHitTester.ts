@@ -23,16 +23,16 @@ export class XRHandHitTester {
             let originXR1loc: Vector3
             let dirLoc: Vector3
 
-            hand.userData.handedness === "left"
+            hand.userData.handedness === XRControllerDefaults.HANDEDNESS_LEFT
                 ? (originXR1loc = XRHandRayConfigs.dirRayLfwdProps.origin.clone())
                 : null
-            hand.userData.handedness === "right"
+            hand.userData.handedness === XRControllerDefaults.HANDEDNESS_RIGHT
                 ? (originXR1loc = XRHandRayConfigs.dirRayRfwdProps.origin.clone())
                 : null
-            hand.userData.handedness === "left"
+            hand.userData.handedness === XRControllerDefaults.HANDEDNESS_LEFT
                 ? (dirLoc = XRHandRayConfigs.dirRayLfwdProps.direction.clone())
                 : null
-            hand.userData.handedness === "right"
+            hand.userData.handedness === XRControllerDefaults.HANDEDNESS_RIGHT
                 ? (dirLoc = XRHandRayConfigs.dirRayRfwdProps.direction.clone())
                 : null
 
@@ -102,7 +102,6 @@ export class XRHandHitTester {
         }
         */
 
-    //{hand: "left", mode:"hybrid", distance: {remote: 2, touch: 0.01}, materials: {remote: pinchRemoteLineMat, touch: pinchTouchLineMat}, colors: {remote: 0xffffff, touch: 0xff0000}},
     updatePinchRay(hand: Group, currentScene: Scene, raycaster: Raycaster) {
         //console.log("updateForwardDistance!:", hand.userData.handedness)
 

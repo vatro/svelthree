@@ -17,6 +17,10 @@ declare type XREventType =
     | "squeezeend"
     | "reset"
 
+
+declare type XRRequiredFeatures = XRReferenceSpaceType | "hand-tracking" | "hit-test"
+declare type XROptionalFeatures = XRRequiredFeatures
+
 declare interface XRSessionEvent extends Event {
     readonly session: XRSession
 }

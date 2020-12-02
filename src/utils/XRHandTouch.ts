@@ -6,8 +6,9 @@ import { XRHandTouchJointDebugger } from "./debuggers/XRHandTouchJointDebugger"
 import { XRHandTouchFaceDebugger } from "./debuggers/XRHandTouchFaceDebugger"
 
 import XRHandJointIndices from "./XRHandJointIndices"
-import XRHandTouchTestModes from "./XRHandTouchTestModes"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
+import XRControllerDefaults from "../defaults/XRControllerDefaults"
+import XRDefaults from "../defaults/XRDefaults"
 
 export class XRHandTouch {
     currentScene: Scene
@@ -103,7 +104,7 @@ export class XRHandTouch {
 
     createDebugger(mode: string, config: XRHandTouchRayDebuggerConfig | XRHandTouchSphereDebuggerConfig) {
         switch (mode) {
-            case XRHandTouchTestModes.RAY:
+            case XRHandTouchDefaults.TOUCH_TEST_MODE_RAY:
                 if (!this.debuggerRay) {
                     this.setDebuggerRay(config as XRHandTouchRayDebuggerConfig)
                 } else {
@@ -112,7 +113,7 @@ export class XRHandTouch {
                     )
                 }
                 break
-            case XRHandTouchTestModes.SPHERE:
+            case XRHandTouchDefaults.TOUCH_TEST_MODE_SPHERE:
                 if (!this.debuggerSphere) {
                     this.setDebuggerSphere(config as XRHandTouchSphereDebuggerConfig)
                 } else {
@@ -898,20 +899,20 @@ export class XRHandTouch {
         let tipOriginOffset: number = 0
 
         // set tips offset for oculus hands to feel more natural
-        handedness === "left" ? (tipOriginOffset = 0.005) : null
-        handedness === "right" ? (tipOriginOffset = 0.005 * -1) : null
+        handedness === XRControllerDefaults.HANDEDNESS_LEFT ? (tipOriginOffset = 0.005) : null
+        handedness === XRControllerDefaults.HANDEDNESS_RIGHT ? (tipOriginOffset = 0.005 * -1) : null
 
         return tipOriginOffset
     }
 
     /**
      * Returns joint's origin.
-     * Slightly offset if using "oculus" 'handProfile'
+     * Slightly offset if using XRDefaults.HAND_PROFILE_OCULUS 'handProfile'
      */
     getJointOrigin(joint: Group, jointIndex: number, handProfile: string, handedness: string): Vector3 {
         let origin: Vector3 = new Vector3().setFromMatrixPosition(joint.matrixWorld)
 
-        if (handProfile === "oculus" && XRHandJointIndices.TIP.indexOf(jointIndex) > -1) {
+        if (handProfile === XRDefaults.HAND_PROFILE_OCULUS && XRHandJointIndices.TIP.indexOf(jointIndex) > -1) {
             const tipOriginOffset: number = this.getTipOriginOffset(handedness)
             origin = new Vector3(tipOriginOffset, 0, 0).applyMatrix4(joint.matrixWorld)
         }

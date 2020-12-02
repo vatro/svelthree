@@ -33,8 +33,9 @@
         MeshStandardMaterial
     } from "svelthree-three"
 
-    import XRHandTouchTestModes from "../utils/XRHandTouchTestModes"
-    import XRHandTouchDefaults from "../utils/XRHandTouchDefaults"
+    import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
+    import XRControllerDefaults from "../defaults/XRControllerDefaults"
+    import XRDefaults from "../defaults/XRDefaults"
 
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -47,17 +48,17 @@
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
-    const sessionMode: XRSessionMode = "immersive-vr"
-    export let requiredFeatures: string[] = undefined
-    const hitTestMode: XRHitTestMode = "virtual" // no real world testing in VR
-    export let optionalFeatures: string[] = undefined // 'local-floor', 'bounded-floor', 'hand-tracking'
+    const sessionMode: XRSessionMode = XRDefaults.SESSION_MODE_VR
+    export let requiredFeatures: XRRequiredFeatures[] = undefined
+    const hitTestMode: XRHitTestMode = XRDefaults.DEFAULT_VR_XR_HITTEST_MODE
+    export let optionalFeatures: XROptionalFeatures[] = undefined
     export let btnClass: string = undefined
     export let btnTxt: { [key: string]: string } = undefined
     export let domOverlay: HTMLDivElement = undefined
-    export let maxControllers: number = 2 // defualt 2 controllers
-    export let input: SessionVRInputType = "controller" // default is input via controller
+    export let maxControllers: number = XRControllerDefaults.MAX_CONTROLLERS
+    export let input: SessionVRInputType = XRDefaults.DEFAULT_VR_INPUT_TYPE
     export let pathToHandModels: string = "./models/fbx/"
-    export let handProfile: XRHandProfile = undefined // "spheres", "boxes", "oculus"
+    export let handProfile: XRHandProfile = undefined
 
     let pinchRemoteLineMat = new LineBasicMaterial({
         color: 0x000000,
@@ -146,21 +147,21 @@
         if ($svelthreeStores[sti].xr.enableTouch.hands) {
             for (let i = 0; i < $svelthreeStores[sti].xr.enableTouch.hands.length; i++) {
                 let item: XRHandTouchConfigHandsItem = $svelthreeStores[sti].xr.enableTouch.hands[i]
-                if (item.hand === "right") {
+                if (item.hand === XRHandTouchDefaults.ENABLED_RIGHT) {
                     rightHandTouchEnabled = true
                     if (item.index.length > 0) {
                         rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
                     }
                 }
 
-                if (item.hand === "left") {
+                if (item.hand === XRHandTouchDefaults.ENABLED_LEFT) {
                     leftHandTouchEnabled = true
                     if (item.index.length > 0) {
                         leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
                     }
                 }
 
-                if (item.hand === "both") {
+                if (item.hand === XRHandTouchDefaults.ENABLED_BOTH) {
                     leftHandTouchEnabled = true
                     rightHandTouchEnabled = true
                     if (item.index.length > 0) {
@@ -235,13 +236,13 @@
             let controller = $svelthreeStores[sti].renderer.xr.getController(i)
 
             if (i === 0) {
-                controller.name = "LEFT CONTROLLER"
-                controller.userData.handedness = "left"
+                controller.name = XRControllerDefaults.CONTROLLER_NAME_LEFT
+                controller.userData.handedness = XRControllerDefaults.HANDEDNESS_LEFT
             }
 
             if (i === 1) {
-                controller.name = "RIGHT CONTROLLER"
-                controller.userData.handedness = "right"
+                controller.name = XRControllerDefaults.CONTROLLER_NAME_RIGHT
+                controller.userData.handedness = XRControllerDefaults.HANDEDNESS_RIGHT
             }
 
             $svelthreeStores[sti].xr.controllers.push(controller)
@@ -256,10 +257,10 @@
         console.warn("SVELTHREE > SessionVR > addInputListeners!")
 
         switch (input) {
-            case "controller":
+            case XRDefaults.VR_INPUT_TYPE_CONTROLLER:
                 addControllerListeners()
                 break
-            case "hand":
+            case XRDefaults.VR_INPUT_TYPE_HAND:
                 addHandListeners()
                 break
         }
@@ -299,14 +300,14 @@
             let hand = $svelthreeStores[sti].renderer.xr.getHand(i)
 
             if (i === 0) {
-                hand.name = "LEFT HAND"
-                hand.userData.handedness = "left"
+                hand.name = XRControllerDefaults.HAND_NAME_LEFT
+                hand.userData.handedness = XRControllerDefaults.HANDEDNESS_LEFT
                 leftHand = hand
             }
 
             if (i === 1) {
-                hand.name = "RIGHT HAND"
-                hand.userData.handedness = "right"
+                hand.name = XRControllerDefaults.HAND_NAME_RIGHT
+                hand.userData.handedness = XRControllerDefaults.HANDEDNESS_RIGHT
                 rightHand = hand
             }
 
@@ -371,19 +372,19 @@
         for (let i = 0; i < $svelthreeStores[sti].xr.touchEvents.length; i++) {
             let item: XRHandTouchEventsItem = $svelthreeStores[sti].xr.touchEvents[i]
 
-            if (item.hand === "left") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 registerHandTouchEvent(leftHand, item)
             }
 
-            if (item.hand === "right") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_RIGHT) {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 registerHandTouchEvent(rightHand, item)
             }
 
-            if (item.hand === "both") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_BOTH) {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
@@ -403,19 +404,19 @@
         for (let i = 0; i < $svelthreeStores[sti].xr.enableTouchX.length; i++) {
             let item: XRHandTouchXConfigItem = $svelthreeStores[sti].xr.enableTouchX[i]
 
-            if (item.hand === "left") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 registerHandTouchEventX(leftHand, item)
             }
 
-            if (item.hand === "right") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_RIGHT) {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 registerHandTouchEventX(rightHand, item)
             }
 
-            if (item.hand === "both") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_BOTH) {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
@@ -484,10 +485,10 @@
         if (doUpdateXRTouch) {
             if (enableTouch.mode) {
                 switch (enableTouch.mode) {
-                    case "ray":
+                    case XRHandTouchDefaults.TOUCH_TEST_MODE_RAY:
                         updateXRTouchRay()
                         break
-                    case "sphere":
+                    case XRHandTouchDefaults.TOUCH_TEST_MODE_SPHERE:
                         updateXRTouchSphere()
                         break
                     default:
@@ -507,21 +508,21 @@
             let item:XRHandPinchConfigItem = enablePinch[i]
 
                 switch (item.hand) {
-                    case "left":
+                    case XRHandTouchDefaults.ENABLED_LEFT:
                         xrHandHitTester.updateHandDistance(
                             leftHand,
                             currentScene,
                             $svelthreeStores[sti].raycaster
                         )
                         break
-                    case "right":
+                    case XRHandTouchDefaults.ENABLED_RIGHT:
                         xrHandHitTester.updateHandDistance(
                             rightHand,
                             currentScene,
                             $svelthreeStores[sti].raycaster
                         )
                         break
-                    case "both":
+                    case XRHandTouchDefaults.ENABLED_BOTH:
                         xrHandHitTester.updateHandDistance(
                             leftHand,
                             currentScene,
@@ -686,7 +687,7 @@
     // TODO : apply this kind of "hack" everywhere if needed
 
     //BAD practice
-    //$: hitTestMode === "virtual" && $svelthreeStores[sti].currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
+    //$: hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL && $svelthreeStores[sti].currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
 
     // GOOD practice (prevent unnecessary function calls)
 
@@ -717,16 +718,16 @@
         for (let i = 0; i < enablePinch.length; i++) {
             let item: XRHandPinchConfigItem = enablePinch[i]
 
-            if (item.hand === "left") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 registerPinchConfig(leftHand, item)
                 leftHandPinchEnabled = true
             }
-            if (item.hand === "right") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_RIGHT) {
                 registerPinchConfig(rightHand, item)
                 rightHandPinchEnabled = true
             }
 
-            if (item.hand === "both") {
+            if (item.hand === XRHandTouchDefaults.ENABLED_BOTH) {
                 registerPinchConfig(leftHand, item)
                 registerPinchConfig(rightHand, item)
                 leftHandPinchEnabled = true
@@ -770,10 +771,10 @@
                 )
 
                 switch (input) {
-                    case "controller":
+                    case XRDefaults.VR_INPUT_TYPE_CONTROLLER:
                         addController(i, currentScene)
                         break
-                    case "hand":
+                    case XRDefaults.VR_INPUT_TYPE_HAND:
                         addHand(i, currentScene)
                         break
                 }
@@ -912,7 +913,7 @@
     function performVirtualHitTest(controller: Group): void {
         console.warn("SessionVR performVirtualHitTest!")
 
-        if (input === "controller") {
+        if (input === XRDefaults.VR_INPUT_TYPE_CONTROLLER) {
             tempMatrix.identity().extractRotation(controller.matrixWorld)
 
             $svelthreeStores[sti].raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld)
@@ -927,7 +928,7 @@
             console.warn("current hits total: ", currentHitsTotal, $svelthreeStores[sti].allIntersections)
         }
 
-        if (input === "hand") {
+        if (input === XRDefaults.VR_INPUT_TYPE_HAND) {
             /*
             $svelthreeStores[sti].allIntersections = xrHandHitTester.test(
                 controller,

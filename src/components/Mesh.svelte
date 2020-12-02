@@ -21,6 +21,8 @@
     import SvelthreeInteractionVRHands from "./SvelthreeInteractionVRHands.svelte"
     import { createEventDispatcher } from "svelte"
 
+    import XRDefaults from "../defaults/XRDefaults"
+
     let ani: any
     let self = get_current_component()
     let dispatch = createEventDispatcher()
@@ -512,7 +514,7 @@
     let currentXRSessionMode: string = undefined
     $: $svelthreeStores[sti].xr.sessionMode ? (currentXRSessionMode = $svelthreeStores[sti].xr.sessionMode) : null
 
-    let currentXRInputType: string = undefined
+    let currentXRInputType: SessionVRInputType = undefined
     $: $svelthreeStores[sti].xr.inputType ? (currentXRInputType = $svelthreeStores[sti].xr.inputType) : null
 
     //controller
@@ -553,15 +555,15 @@
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
-    {#if currentXRSessionMode === 'immersive-ar'}
+    {#if currentXRSessionMode === XRDefaults.SESSION_MODE_AR}
         <SvelthreeInteractionAR {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
     {/if}
 
-    {#if currentXRSessionMode === 'immersive-vr'}
-        {#if currentXRInputType === 'controller'}
+    {#if currentXRSessionMode === XRDefaults.SESSION_MODE_VR}
+        {#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_CONTROLLER}
             <SvelthreeInteractionVRController {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
         {/if}
-        {#if currentXRInputType === 'hand'}
+        {#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_HAND}
             <SvelthreeInteractionVRHands
                 {sti}
                 {dispatch}

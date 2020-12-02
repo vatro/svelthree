@@ -1,4 +1,5 @@
 import { Line, LineDashedMaterial, BufferGeometry, Vector3, Scene, Color } from "svelthree-three"
+import XRControllerDefaults from "../defaults/XRControllerDefaults"
 
 export class RaycasterRayHelper {
     rayLineRMat: LineDashedMaterial
@@ -80,7 +81,7 @@ export class RaycasterRayHelper {
         let checkPoint = origin.clone()
         checkPoint.add(direction.multiplyScalar(scale))
 
-        if (handedness === "left") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_LEFT) {
             if (this.rayLineL_pinch.parent === currentScene) {
                 currentScene.remove(this.rayLineL_pinch)
             }
@@ -101,7 +102,7 @@ export class RaycasterRayHelper {
             }
         }
 
-        if (handedness === "right") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_RIGHT) {
             if (this.rayLineR_pinch.parent === currentScene) {
                 currentScene.remove(this.rayLineR_pinch)
             }
@@ -137,7 +138,7 @@ export class RaycasterRayHelper {
         let linePoint = rayData.origin.clone()
         linePoint.add(rayData.direction.multiplyScalar(rayData.scale))
 
-        if (handedness === "left") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_LEFT) {
             if (this.rayLineL_pinch.parent === rayData.currentScene) {
                 rayData.currentScene.remove(this.rayLineL_pinch)
             }
@@ -163,7 +164,7 @@ export class RaycasterRayHelper {
             }
         }
 
-        if (handedness === "right") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_RIGHT) {
             if (this.rayLineR_pinch.parent === rayData.currentScene) {
                 rayData.currentScene.remove(this.rayLineR_pinch)
             }
@@ -201,7 +202,7 @@ export class RaycasterRayHelper {
         let checkPoint = origin.clone()
         checkPoint.add(direction.multiplyScalar(scale))
 
-        if (handedness === "left") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_LEFT) {
             if (this.rayLineL_pinch.parent === currentScene) {
                 currentScene.remove(this.rayLineL_pinch)
             }
@@ -222,7 +223,7 @@ export class RaycasterRayHelper {
             }
         }
 
-        if (handedness === "right") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_RIGHT) {
             if (this.rayLineR_pinch.parent === currentScene) {
                 currentScene.remove(this.rayLineR_pinch)
             }
@@ -255,7 +256,7 @@ export class RaycasterRayHelper {
         let checkPoint = origin.clone()
         checkPoint.add(direction.multiplyScalar(scale))
 
-        if (handedness === "left") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_LEFT) {
             if (this.rayLineL.parent === currentScene) {
                 currentScene.remove(this.rayLineL)
             }
@@ -276,7 +277,7 @@ export class RaycasterRayHelper {
             }
         }
 
-        if (handedness === "right") {
+        if (handedness === XRControllerDefaults.HANDEDNESS_RIGHT) {
             if (this.rayLineR.parent === currentScene) {
                 currentScene.remove(this.rayLineR)
             }

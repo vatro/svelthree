@@ -15,6 +15,7 @@
     import { svelthreeStores } from "../stores.js"
     import { createEventDispatcher } from "svelte"
     import { Vector3, Quaternion, Object3D } from "svelthree-three"
+    import XRDefaults from "../defaults/XRDefaults"
 
     let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -27,10 +28,10 @@
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
-    const sessionMode: XRSessionMode = "immersive-ar"
-    export let requiredFeatures: string[] = undefined
-    export let hitTestMode: XRHitTestMode = "virtual" // default is "virtual", meaning no real world testing
-    export let optionalFeatures: string[] = undefined
+    const sessionMode: XRSessionMode = XRDefaults.SESSION_MODE_AR
+    export let requiredFeatures: XRRequiredFeatures[] = undefined
+    export let hitTestMode: XRHitTestMode = XRDefaults.HITTEST_MODE_VIRTUAL // default is "virtual", meaning no real world testing
+    export let optionalFeatures: XROptionalFeatures[] = undefined
     export let btnClass: string = undefined
     export let btnTxt: { [key: string]: string } = undefined
     export let domOverlay: HTMLDivElement = undefined
@@ -45,7 +46,7 @@
     $: hitTestMode ? updateHitTestMode() : null
 
     function updateHitTestMode(): void {
-        if (hitTestMode === "realworld") {
+        if (hitTestMode === XRDefaults.HITTEST_MODE_REALWORLD) {
             if (requiredFeatures.indexOf("hit-test") > -1) {
                 $svelthreeStores[sti].xr.hitTestMode = hitTestMode
             } else {
@@ -108,7 +109,7 @@
         /**
          *  AR (VR(?)) session with a reticle defined.
          */
-        if ($svelthreeStores[sti].xr.reticle && hitTestMode === "realworld") {
+        if ($svelthreeStores[sti].xr.reticle && hitTestMode === XRDefaults.HITTEST_MODE_REALWORLD) {
             if ($svelthreeStores[sti].xr.reticle.visible) {
                 dispatch("select", {
                     reticleMatrix: $svelthreeStores[sti].xr.reticle.matrix
@@ -146,7 +147,7 @@
     // TODO : apply this kind of "hack" everywhere if needed
 
     //BAD practice
-    //$: hitTestMode === "virtual" && $svelthreeStores[sti].currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
+    //$: hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL && $svelthreeStores[sti].currentSceneIndex ? tryAddingControllerToScene() : null // executed on every flush / update
 
     // GOOD practice (prevent unnecessary function calls)
 
@@ -155,7 +156,7 @@
         currentSceneIndex = $svelthreeStores[sti].currentSceneIndex
     }
 
-    $: if (hitTestMode === "virtual" && currentSceneIndex && controllerAvailable) {
+    $: if (hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL && currentSceneIndex && controllerAvailable) {
         tryAddingControllerToScene()
     }
 
