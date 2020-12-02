@@ -1,6 +1,6 @@
 import { XRHandTouch } from "./XRHandTouch"
 import { Group, Vector3 } from "svelthree-three"
-import XRHandTouchDefaults from "./XRHandTouchDefaults"
+import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchRayExt extends XRHandTouch {
     constructor(

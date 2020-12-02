@@ -1,6 +1,6 @@
 import { LineBasicMaterial, Scene, Group, Vector3, BufferGeometry, Line } from "svelthree-three"
 
-import XRHandTouchDefaults from "../XRHandTouchDefaults"
+import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchRayDebugger {
     currentScene: Scene

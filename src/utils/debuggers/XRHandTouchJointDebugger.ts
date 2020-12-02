@@ -1,6 +1,6 @@
 import { Mesh, Group, MeshBasicMaterial } from "svelthree-three"
 
-import XRHandTouchDefaults from "../XRHandTouchDefaults"
+import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchJointDebugger {
     currentScene: Scene

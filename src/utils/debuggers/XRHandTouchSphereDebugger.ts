@@ -1,5 +1,5 @@
 import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color } from "svelthree-three"
-import XRHandTouchDefaults from "../XRHandTouchDefaults"
+import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchSphereDebugger {
     static touchSphereDebugName: string = "touchSphereDebug"

@@ -1,4 +1,4 @@
-import XRHandJointIndices from "./XRHandJointIndices"
+import XRHandJointIndices from "../utils/XRHandJointIndices"
 
 export default class XRHandTouchDefaults {
     static HAND_LEFT: XRHandTouchEnabled = "left"

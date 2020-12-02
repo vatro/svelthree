@@ -7,7 +7,7 @@ import { XRHandTouchFaceDebugger } from "./debuggers/XRHandTouchFaceDebugger"
 
 import XRHandJointIndices from "./XRHandJointIndices"
 import XRHandTouchTestModes from "./XRHandTouchTestModes"
-import XRHandTouchDefaults from "./XRHandTouchDefaults"
+import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 export class XRHandTouch {
     currentScene: Scene

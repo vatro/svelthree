@@ -1,5 +1,5 @@
 import { Color } from "svelthree-three"
-import XRHandTouchDefaults from "../XRHandTouchDefaults"
+import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchFaceDebugger {
     touchCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCH_COL)

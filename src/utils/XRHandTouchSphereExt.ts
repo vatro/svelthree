@@ -2,7 +2,7 @@ import { sphereIntersectTriangle } from "../../node_modules/three-mesh-bvh/src/U
 import { SeparatingAxisTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/SeparatingAxisTriangle.js"
 import { XRHandTouch } from "./XRHandTouch"
 import { Mesh, Sphere, Group, Vector3, Matrix4, Matrix3, Object3D, Triangle } from "svelthree-three"
-import XRHandTouchDefaults from "./XRHandTouchDefaults"
+import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 interface SphereTouchingResultsItem {
     mesh: Mesh
