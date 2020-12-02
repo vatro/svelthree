@@ -132,6 +132,7 @@ declare interface XRHandTouchSphereDebuggerConfig {
     heightSegments: number
     colors: {
         touch: number
+        unTouch: number
     }
     mat: { [key: string]: any }
 }
