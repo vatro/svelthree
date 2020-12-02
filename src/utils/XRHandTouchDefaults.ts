@@ -49,6 +49,7 @@ export default class XRHandTouchDefaults {
     static DBG_SPHERE_SEG_W = 16
     static DBG_SPHERE_SEG_H = 16
     static DBG_SPHERE_TOUCHED_COL = 0x00ff00
+    static DBG_SPHERE_UNTOUCH_COL = 0xff0000
     static DBG_SPHERE_MAT_COL = 0x00ff00
     static DBG_SPHERE_MAT_TRANSP = true
     static DBG_SPHERE_MAT_OPACITY = 0.3
