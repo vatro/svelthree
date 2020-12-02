@@ -3,12 +3,7 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import {
-        RectAreaLight,
-        RectAreaLightHelper,
-        Scene,
-        Object3D
-    } from "svelthree-three"
+    import { RectAreaLight, RectAreaLightHelper, Scene, Object3D } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
     import type { PropPos, PropColor } from "../utils/SvelthreeTypes.svelte"
@@ -99,13 +94,4 @@
 
 <!-- cannot use {...$$props} see https://github.com/sveltejs/svelte/issues/4993 -->
 <!-- TOFIX  as soon as landed (not in 3.24.0), see https://github.com/sveltejs/svelte/pull/5123  -->
-<Light
-    {scene}
-    {parent}
-    {light}
-    {props}
-    {pos}
-    {color}
-    {intensity}
-    {animation}
-    {aniauto} />
+<Light {scene} {parent} {light} {props} {pos} {color} {intensity} {animation} {aniauto} />

@@ -21,10 +21,9 @@
     export let sti: number
 
     if (sti === undefined) {
-        console.warn(
-            "SVELTHREE > Scene : You have to provide a {sti} prop for the WebGLRenderer component!",
-            { sti: sti }
-        )
+        console.warn("SVELTHREE > Scene : You have to provide a {sti} prop for the WebGLRenderer component!", {
+            sti: sti
+        })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -63,8 +62,7 @@
         }
 
         if (!$svelthreeStores[sti].xr.hitTestModeInitial) {
-            $svelthreeStores[sti].xr.hitTestModeInitial =
-                $svelthreeStores[sti].xr.hitTestMode
+            $svelthreeStores[sti].xr.hitTestModeInitial = $svelthreeStores[sti].xr.hitTestMode
         }
     }
 
@@ -95,27 +93,15 @@
     let controllerAvailable: boolean = false
     $: $svelthreeStores[sti].xr.controller ? (controllerAvailable = true) : null
 
-    $: if (
-        $svelthreeStores[sti].renderer &&
-        currentSession &&
-        !$svelthreeStores[sti].xr.controller
-    ) {
-        $svelthreeStores[sti].xr.controller = $svelthreeStores[
-            sti
-        ].renderer.xr.getController(0)
+    $: if ($svelthreeStores[sti].renderer && currentSession && !$svelthreeStores[sti].xr.controller) {
+        $svelthreeStores[sti].xr.controller = $svelthreeStores[sti].renderer.xr.getController(0)
         addControllerListeners()
     }
 
     function addControllerListeners() {
         $svelthreeStores[sti].xr.controller.addEventListener("select", onSelect)
-        $svelthreeStores[sti].xr.controller.addEventListener(
-            "selectstart",
-            onSelectStart
-        )
-        $svelthreeStores[sti].xr.controller.addEventListener(
-            "selectend",
-            onSelectEnd
-        )
+        $svelthreeStores[sti].xr.controller.addEventListener("selectstart", onSelectStart)
+        $svelthreeStores[sti].xr.controller.addEventListener("selectend", onSelectEnd)
     }
 
     function onSelect(): void {
@@ -130,31 +116,25 @@
             }
         } else {
             // this is performant: it happens only on select, not on every frame or similar
-            if (
-                $svelthreeStores[sti].raycaster &&
-                $svelthreeStores[sti].xr.controller
-            ) {
+            if ($svelthreeStores[sti].raycaster && $svelthreeStores[sti].xr.controller) {
                 performVirtualHitTest()
             }
 
             dispatch("select", {
-                controllerMatrixWorld:
-                    $svelthreeStores[sti].xr.controller.matrixWorld
+                controllerMatrixWorld: $svelthreeStores[sti].xr.controller.matrixWorld
             })
         }
     }
 
     function onSelectStart(): void {
         dispatch("selectstart", {
-            controllerMatrixWorld:
-                $svelthreeStores[sti].xr.controller.matrixWorld
+            controllerMatrixWorld: $svelthreeStores[sti].xr.controller.matrixWorld
         })
     }
 
     function onSelectEnd(): void {
         dispatch("selectend", {
-            controllerMatrixWorld:
-                $svelthreeStores[sti].xr.controller.matrixWorld
+            controllerMatrixWorld: $svelthreeStores[sti].xr.controller.matrixWorld
         })
     }
 
@@ -175,19 +155,12 @@
         currentSceneIndex = $svelthreeStores[sti].currentSceneIndex
     }
 
-    $: if (
-        hitTestMode === "virtual" &&
-        currentSceneIndex &&
-        controllerAvailable
-    ) {
+    $: if (hitTestMode === "virtual" && currentSceneIndex && controllerAvailable) {
         tryAddingControllerToScene()
     }
 
     function tryAddingControllerToScene() {
-        let currentScene =
-            $svelthreeStores[sti].scenes[
-                $svelthreeStores[sti].currentSceneIndex - 1
-            ].scene
+        let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
         if ($svelthreeStores[sti].xr.controller.parent !== currentScene) {
             currentScene.add($svelthreeStores[sti].xr.controller)
@@ -199,33 +172,22 @@
     function performVirtualHitTest(): void {
         console.warn("SessionAR performVirtualHitTest!")
 
-        let currentScene =
-            $svelthreeStores[sti].scenes[
-                $svelthreeStores[sti].currentSceneIndex - 1
-            ].scene
+        let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
         let originXR: Vector3 = new Vector3(0, 0, 0)
         let directionXR: Vector3 = new Vector3(0, 0, -1)
         let quaternion: Quaternion = new Quaternion()
         let scale: Vector3 = new Vector3(1, 1, 1)
 
-        $svelthreeStores[sti].xr.controller.matrixWorld.decompose(
-            originXR,
-            quaternion,
-            scale
-        )
+        $svelthreeStores[sti].xr.controller.matrixWorld.decompose(originXR, quaternion, scale)
 
         directionXR.applyQuaternion(quaternion).normalize()
 
         $svelthreeStores[sti].raycaster.set(originXR, directionXR)
 
-        let toTest = currentScene.children.filter(
-            (child: Object3D) => child.type === "Mesh"
-        )
+        let toTest = currentScene.children.filter((child: Object3D) => child.type === "Mesh")
 
-        $svelthreeStores[sti].allIntersections = $svelthreeStores[
-            sti
-        ].raycaster.intersectObjects(toTest, true)
+        $svelthreeStores[sti].allIntersections = $svelthreeStores[sti].raycaster.intersectObjects(toTest, true)
     }
 
     // AR/VR Button creation
@@ -249,18 +211,11 @@
             var message = document.createElement("a")
 
             if (window.isSecureContext === false) {
-                message.href = document.location.href.replace(
-                    /^http:/,
-                    "https:"
-                )
-                message.innerHTML = btnTxt.notSecure
-                    ? btnTxt.notSecure
-                    : "WEBXR NEEDS HTTPS" // TODO Improve message (original three.js comment)
+                message.href = document.location.href.replace(/^http:/, "https:")
+                message.innerHTML = btnTxt.notSecure ? btnTxt.notSecure : "WEBXR NEEDS HTTPS" // TODO Improve message (original three.js comment)
             } else {
                 message.href = "https://immersiveweb.dev/"
-                message.innerHTML = btnTxt.noXR
-                    ? btnTxt.noXR
-                    : "WEBXR NOT AVAILABLE"
+                message.innerHTML = btnTxt.noXR ? btnTxt.noXR : "WEBXR NOT AVAILABLE"
             }
 
             message.style.left = "calc(50% - 90px)"

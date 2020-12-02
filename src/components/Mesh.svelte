@@ -5,30 +5,15 @@
 
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
-    import {
-        Mesh,
-        Object3D,
-        Scene,
-        Material,
-        BufferGeometry,
-        Geometry
-    } from "svelthree-three"
+    import { Mesh, Object3D, Scene, Material, BufferGeometry, Geometry } from "svelthree-three"
     import { svelthreeStores } from "../stores.js"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
-    import type {
-        PropPos,
-        PropRot,
-        PropScale,
-        PropMatrix4
-    } from "../utils/SvelthreeTypes.svelte"
-    import {
-        isValidArray3Prop,
-        isValidMatrix4
-    } from "../utils/PropUtils.svelte"
+    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
     import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
     //import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
@@ -57,25 +42,25 @@
 
     //interaction XR
     //pinch
-    export let pinchRemote:boolean = undefined
-    export let pinchTouch:boolean = undefined
-    export let pinchHybrid:boolean = undefined
+    export let pinchRemote: boolean = undefined
+    export let pinchTouch: boolean = undefined
+    export let pinchHybrid: boolean = undefined
 
-    export let xrHandTouch:boolean = undefined
+    export let xrHandTouch: boolean = undefined
 
-    export function pinchRemoteEnabled():boolean {
+    export function pinchRemoteEnabled(): boolean {
         return pinchRemote
     }
 
-    export function pinchTouchEnabled():boolean {
+    export function pinchTouchEnabled(): boolean {
         return pinchTouch
     }
 
-    export function pinchHybridEnabled():boolean {
+    export function pinchHybridEnabled(): boolean {
         return pinchHybrid
     }
 
-    export function xrHandTouchEnabled():boolean {
+    export function xrHandTouchEnabled(): boolean {
         return xrHandTouch
     }
 
@@ -85,10 +70,9 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > Mesh : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > Mesh : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
@@ -119,22 +103,16 @@
             mesh.geometry ? (geometry = mesh.geometry) : null
             mesh.material
                 ? (material = mesh.material)
-                : console.warn(
-                      "SVELTHREE > Mesh : Mesh provided, but has no material!",
-                      { mesh: mesh }
-                  )
+                : console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh: mesh })
             console.info("SVELTHREE > Mesh : Saved geometry:", {
                 geometry: geometry
             })
             console.info("SVELTHREE > Mesh : Saved material:", {
                 material: material
             })
-            ;(mesh.userData.initScale = mesh.scale.x),
-                (object3DUtils = new Object3DUtils(mesh))
+            ;(mesh.userData.initScale = mesh.scale.x), (object3DUtils = new Object3DUtils(mesh))
             meshPropIterator = new UniversalPropIterator(mesh)
-            material
-                ? (matPropIterator = new UniversalPropIterator(material))
-                : null
+            material ? (matPropIterator = new UniversalPropIterator(material)) : null
         }
     }
 
@@ -165,9 +143,7 @@
                 parentForSlot = mesh
             } else {
                 if (!mesh) {
-                    console.error(
-                        "SVELTHREE > Mesh : 'parent' check : no mesh provided yet!"
-                    )
+                    console.error("SVELTHREE > Mesh : 'parent' check : no mesh provided yet!")
                 } else if (parent) {
                     //parent is already there, either it has been provided or set on mesh generation to the mesh itself
                     //means this parent was provided and we are child
@@ -184,10 +160,7 @@
     }
 
     // reactive creating / recreating mesh
-    $: geometry && generate
-        ? (console.info("SVELTHREE > Mesh : Geometry provided!"),
-          tryGeometryUpdate())
-        : null
+    $: geometry && generate ? (console.info("SVELTHREE > Mesh : Geometry provided!"), tryGeometryUpdate()) : null
 
     $: material && generate
         ? (console.info("SVELTHREE > Mesh : Material provided!"),
@@ -198,43 +171,26 @@
     // change geometry and material on provided mesh
 
     //we know mesh has geometry if geometry is available and !generate, it was referenced onMeshProvided()
-    $: geometry && !generate
-        ? geometry !== mesh.geometry
-            ? tryGeometryUpdate()
-            : null
-        : null
+    $: geometry && !generate ? (geometry !== mesh.geometry ? tryGeometryUpdate() : null) : null
 
     //we know mesh has material if material is available and !generate, it was referenced onMeshProvided()
-    $: material && !generate
-        ? material !== mesh.material
-            ? tryMaterialUpdate()
-            : null
-        : null
+    $: material && !generate ? (material !== mesh.material ? tryMaterialUpdate() : null) : null
 
     $: geometry && material && !mesh && generate
         ? ((mesh = new Mesh(geometry, material)),
           (mesh.name = name),
-          (mesh.userData.initScale = mesh.scale.x,
-          mesh.userData.svelthreeComponent = self),
+          ((mesh.userData.initScale = mesh.scale.x), (mesh.userData.svelthreeComponent = self)),
           console.info("SVELTHREE > Mesh : " + geometry.type + " created!", {
               mesh: mesh
           }),
-          console.info(
-              "SVELTHREE > Mesh : saved 'geometry' (generated):",
-              geometry
-          ),
-          console.info(
-              "SVELTHREE > Mesh : saved 'material' (generated):",
-              material
-          ),
+          console.info("SVELTHREE > Mesh : saved 'geometry' (generated):", geometry),
+          console.info("SVELTHREE > Mesh : saved 'material' (generated):", material),
           (object3DUtils = new Object3DUtils(mesh)),
           (meshPropIterator = new UniversalPropIterator(mesh)))
         : null
 
     // This statement is being triggered on creation / recreation
-    $: mesh
-        ? tryAddingMesh()
-        : console.error("SVELTHREE > Mesh : mesh was not created!")
+    $: mesh ? tryAddingMesh() : console.error("SVELTHREE > Mesh : mesh was not created!")
 
     export let userData: { [key: string]: any } = undefined
 
@@ -285,25 +241,12 @@
     export let props: { [key: string]: any } = undefined
 
     //reactive updating props
-    $: !matrix
-        ? pos
-            ? isValidArray3Prop(pos)
-                ? object3DUtils.tryPosUpdate(pos)
-                : null
-            : null
-        : null
-    $: !matrix
-        ? rot
-            ? isValidArray3Prop(rot)
-                ? object3DUtils.tryRotUpdate(rot)
-                : null
-            : null
-        : null
+    $: !matrix ? (pos ? (isValidArray3Prop(pos) ? object3DUtils.tryPosUpdate(pos) : null) : null) : null
+    $: !matrix ? (rot ? (isValidArray3Prop(rot) ? object3DUtils.tryRotUpdate(rot) : null) : null) : null
     $: !matrix
         ? scale
             ? isValidArray3Prop(scale)
-                ? (object3DUtils.tryScaleUpdate(scale),
-                  (mesh.userData.initScale = mesh.scale.x))
+                ? (object3DUtils.tryScaleUpdate(scale), (mesh.userData.initScale = mesh.scale.x))
                 : null
             : null
         : null
@@ -314,42 +257,38 @@
           tryMatrixUpdate())
         : null
 
-    let useBVH:boolean = false    
-    $: $svelthreeStores[sti].useBVH === true ?  useBVH = true : useBVH = false
-    $: if(useBVH === true) {
+    let useBVH: boolean = false
+    $: $svelthreeStores[sti].useBVH === true ? (useBVH = true) : (useBVH = false)
+    $: if (useBVH === true) {
+        //use BVH if enabled
+        //if($svelthreeStores[sti].useBVH) {
+        // Using pre-made functions, see https://github.com/gkjohnson/three-mesh-bvh
+        console.warn("SVELTHREE > Mesh : Using BVH!")
+        if (mesh.geometry["computeBoundsTree"]) {
+            console.log("SVELTHREE > Mesh : Using BVH, mesh.matrixWorld: ", mesh.matrixWorld)
+            mesh.geometry.applyMatrix4(mesh.matrixWorld)
+            mesh.geometry["computeBoundsTree"]()
+            console.log("SVELTHREE > Mesh : computeBoundsTree finished, mesh: ", console.log(mesh))
+        } else {
+            console.error("SVELTHREE > Mesh : mesh.geometry.computeBoundsTree not available!")
+        }
+        //}
 
-          
-            //use BVH if enabled
-            //if($svelthreeStores[sti].useBVH) {
-                    // Using pre-made functions, see https://github.com/gkjohnson/three-mesh-bvh
-                    console.warn("SVELTHREE > Mesh : Using BVH!")
-                    if(mesh.geometry["computeBoundsTree"]) {
-                        console.log("SVELTHREE > Mesh : Using BVH, mesh.matrixWorld: ", mesh.matrixWorld)
-                        mesh.geometry.applyMatrix4(mesh.matrixWorld)
-                        mesh.geometry["computeBoundsTree"]()
-                        console.log("SVELTHREE > Mesh : computeBoundsTree finished, mesh: ", console.log(mesh))
-                    }
-                    else {
-                        console.error("SVELTHREE > Mesh : mesh.geometry.computeBoundsTree not available!")
-                    }
-                //}
-
-                // use BVH per default, if object is interactive and touchable, even if useBVH is not enabled
-                // BVH is being enabled globally (Canvas / store)
-                /*
+        // use BVH per default, if object is interactive and touchable, even if useBVH is not enabled
+        // BVH is being enabled globally (Canvas / store)
+        /*
                 if(interact && xrHandTouch && !useBVH) { 
                     
                 }
                 */
-        
     } else {
-        if(mesh.geometry['boundsTree']) {
+        if (mesh.geometry["boundsTree"]) {
             console.warn("SVELTHREE > Mesh : dispose boundsTree!")
-            if(mesh.geometry["disposeBoundsTree"]) {
-                    mesh.geometry["disposeBoundsTree"]()
+            if (mesh.geometry["disposeBoundsTree"]) {
+                mesh.geometry["disposeBoundsTree"]()
             } else {
-                        console.error("SVELTHREE > Mesh : mesh.geometry.disposeBoundsTree not available!")
-                    }
+                console.error("SVELTHREE > Mesh : mesh.geometry.disposeBoundsTree not available!")
+            }
         }
     }
 
@@ -367,10 +306,7 @@
     $: mat
         ? Object.keys(mat).length > 0
             ? matPropIterator
-                ? (console.info(
-                      "SVELTHREE > Mesh : matPropIterator is true: ",
-                      mat
-                  ),
+                ? (console.info("SVELTHREE > Mesh : matPropIterator is true: ", mat),
                   matPropIterator.tryPropsUpdate(mat))
                 : null
             : null
@@ -380,18 +316,14 @@
 
     let currentSceneActive = false
     $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
-        ? (currentSceneActive =
-              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
-                  .isActive)
+        ? (currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive)
         : null
 
     let animationEnabled = false
     $: animation ? (animationEnabled = true) : null
 
     let interactionEnabled: boolean = undefined
-    $: interactive && interact
-        ? (interactionEnabled = true)
-        : (interactionEnabled = false)
+    $: interactive && interact ? (interactionEnabled = true) : (interactionEnabled = false)
 
     // -----------------------------------
 
@@ -402,10 +334,7 @@
             ? () => fnOnMount(self)
             : () => {
                   if (parent) {
-                      console.info(
-                          "SVELTHREE > onMount : Mesh, parent: ",
-                          parent
-                      )
+                      console.info("SVELTHREE > onMount : Mesh, parent: ", parent)
                   } else {
                       console.info("SVELTHREE > onMount : Mesh")
                   }
@@ -421,14 +350,11 @@
         if (scene.userData.sti >= 0) {
             sti = scene.userData.sti
         } else {
-            console.warn(
-                "SVELTHREE > Mesh : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
+            console.warn("SVELTHREE > Mesh : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
+                scene: scene,
+                userData: scene.userData,
+                sti: scene.userData.sti
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
@@ -437,16 +363,11 @@
         if (!parentForUs) {
             if (mesh.parent !== scene) {
                 scene.add(mesh)
-                console.info(
-                    "SVELTHREE > Mesh : " +
-                        geometry.type +
-                        " was added to scene!",
-                    {
-                        mesh: mesh,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > Mesh : " + geometry.type + " was added to scene!", {
+                    mesh: mesh,
+                    scene: scene,
+                    total: scene.children.length
+                })
 
                 if (arReticle || arReticleAuto) {
                     $svelthreeStores[sti].xr.reticle = mesh
@@ -455,17 +376,12 @@
         } else {
             if (mesh.parent !== parentForUs) {
                 parentForUs.add(mesh)
-                console.info(
-                    "SVELTHREE > Mesh : " +
-                        geometry.type +
-                        " was added to parent!",
-                    {
-                        mesh: mesh,
-                        parent: parentForUs,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > Mesh : " + geometry.type + " was added to parent!", {
+                    mesh: mesh,
+                    parent: parentForUs,
+                    scene: scene,
+                    total: scene.children.length
+                })
                 if (arReticle || arReticleAuto) {
                     $svelthreeStores[sti].xr.reticle = mesh
                 }
@@ -482,10 +398,7 @@
     }
 
     function tryGeometryUpdate(): void {
-        mesh
-            ? ((mesh.geometry = geometry),
-              console.info("SVELTHREE > Mesh : Geometry updated!"))
-            : null
+        mesh ? ((mesh.geometry = geometry), console.info("SVELTHREE > Mesh : Geometry updated!")) : null
     }
 
     function tryCastShadowUpdate(): void {
@@ -498,9 +411,7 @@
 
     // TODO  implement updating Matrix
     function tryMatrixUpdate(): void {
-        console.error(
-            "SVELTHREE > Mesh : updating Matrix is not yet implemented!"
-        )
+        console.error("SVELTHREE > Mesh : updating Matrix is not yet implemented!")
     }
 
     // --- AR Reticle basic auto display and positioning -------
@@ -514,9 +425,7 @@
     function handleHitTestResults() {
         if ($svelthreeStores[sti].xr.hitTestResults.length > 0) {
             let hit = $svelthreeStores[sti].xr.hitTestResults[0]
-            let referenceSpace = $svelthreeStores[
-                sti
-            ].renderer.xr.getReferenceSpace()
+            let referenceSpace = $svelthreeStores[sti].renderer.xr.getReferenceSpace()
 
             //console.log({ hit: hit, referenceSpace: referenceSpace })
 
@@ -554,10 +463,7 @@
         mesh.visible = false
     }
 
-    function poseReticle(
-        hit: any = undefined,
-        referenceSpace: any = undefined
-    ): void {
+    function poseReticle(hit: any = undefined, referenceSpace: any = undefined): void {
         //console.info("poseReticle!", $svelthreeStores[sti].xr.reticle)
         mesh.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
     }
@@ -604,14 +510,10 @@
     //XR
 
     let currentXRSessionMode: string = undefined
-    $: $svelthreeStores[sti].xr.sessionMode
-        ? (currentXRSessionMode = $svelthreeStores[sti].xr.sessionMode)
-        : null
+    $: $svelthreeStores[sti].xr.sessionMode ? (currentXRSessionMode = $svelthreeStores[sti].xr.sessionMode) : null
 
     let currentXRInputType: string = undefined
-    $: $svelthreeStores[sti].xr.inputType
-        ? (currentXRInputType = $svelthreeStores[sti].xr.inputType)
-        : null
+    $: $svelthreeStores[sti].xr.inputType ? (currentXRInputType = $svelthreeStores[sti].xr.inputType) : null
 
     //controller
     export let onSelect: (e?: CustomEvent) => void = undefined
@@ -647,32 +549,17 @@
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-    <SvelthreeInteraction
-        {sti}
-        {dispatch}
-        obj={mesh}
-        parent={self}
-        {interactionEnabled} />
+    <SvelthreeInteraction {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
     {#if currentXRSessionMode === 'immersive-ar'}
-        <SvelthreeInteractionAR
-            {sti}
-            {dispatch}
-            obj={mesh}
-            parent={self}
-            {interactionEnabled} />
+        <SvelthreeInteractionAR {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
     {/if}
 
     {#if currentXRSessionMode === 'immersive-vr'}
         {#if currentXRInputType === 'controller'}
-            <SvelthreeInteractionVRController
-                {sti}
-                {dispatch}
-                obj={mesh}
-                parent={self}
-                {interactionEnabled} />
+            <SvelthreeInteractionVRController {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
         {/if}
         {#if currentXRInputType === 'hand'}
             <SvelthreeInteractionVRHands
@@ -684,8 +571,7 @@
                 {pinchRemote}
                 {pinchTouch}
                 {pinchHybrid}
-                {xrHandTouch}
-                />
+                {xrHandTouch} />
         {/if}
     {/if}
 {/if}

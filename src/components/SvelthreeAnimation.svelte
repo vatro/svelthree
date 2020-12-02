@@ -24,31 +24,23 @@
 
         if (!aniManager) {
             animation = new AnimationProp(animation)
-            aniManager = new SvelthreeAnimationManager(
-                animation,
-                aniauto,
-                obj,
-                scene
-            )
+            aniManager = new SvelthreeAnimationManager(animation, aniauto, obj, scene)
         }
     }
 
     export let currentSceneActive: boolean
 
     $: if (currentSceneActive) {
-        aniManager
-            ? aniManager.handleCurrentSceneStatus(currentSceneActive)
-            : null
+        aniManager ? aniManager.handleCurrentSceneStatus(currentSceneActive) : null
     }
 
     export function getAnimation(): any {
         if (aniManager) {
             return aniManager.getAnimation()
         } else {
-            console.error(
-                "SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
-                { aniManager: aniManager }
-            )
+            console.error("SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!", {
+                aniManager: aniManager
+            })
             return undefined
         }
     }
@@ -58,7 +50,7 @@
         if (aniManager) {
             aniManager.destroyAnimation()
         } else {
-            if(animation && animationEnabled) {
+            if (animation && animationEnabled) {
                 console.error(
                     "SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
                     { aniManager: aniManager }
@@ -71,10 +63,9 @@
         if (aniManager) {
             aniManager.startAni()
         } else {
-            console.error(
-                "SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
-                { aniManager: aniManager }
-            )
+            console.error("SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!", {
+                aniManager: aniManager
+            })
         }
     }
 

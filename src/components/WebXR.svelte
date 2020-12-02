@@ -48,9 +48,7 @@
          */
 
         if ($svelthreeStores[sti].xr.hitTestSource) {
-            let results = frame.getHitTestResults(
-                $svelthreeStores[sti].xr.hitTestSource
-            )
+            let results = frame.getHitTestResults($svelthreeStores[sti].xr.hitTestSource)
 
             $svelthreeStores[sti].xr.hitTestResults = results
             /*
@@ -67,10 +65,7 @@
      * @see https://immersive-web.github.io/hit-test/#requesting-hit-test
      */
 
-    function reqHitTestSource(
-        referenceSpace: any = undefined,
-        session: any = undefined
-    ): void {
+    function reqHitTestSource(referenceSpace: any = undefined, session: any = undefined): void {
         /**
          * @see https://immersive-web.github.io/webxr/#xrreferencespace-interface
          */

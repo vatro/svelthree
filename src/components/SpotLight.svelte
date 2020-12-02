@@ -3,12 +3,7 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import {
-        SpotLight,
-        SpotLightHelper,
-        Scene,
-        Object3D
-    } from "svelthree-three"
+    import { SpotLight, SpotLightHelper, Scene, Object3D } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
     import type { PropPos, PropColor } from "../utils/SvelthreeTypes.svelte"

@@ -29,7 +29,8 @@
         Scene,
         Line,
         LineBasicMaterial,
-        LineDashedMaterial, MeshStandardMaterial
+        LineDashedMaterial,
+        MeshStandardMaterial
     } from "svelthree-three"
 
     import XRHandTouchTestModes from "../utils/XRHandTouchTestModes"
@@ -40,10 +41,9 @@
     export let sti: number
 
     if (sti === undefined) {
-        console.warn(
-            "SVELTHREE > SessionVR : You have to provide a {sti} prop for the WebGLRenderer component!",
-            { sti: sti }
-        )
+        console.warn("SVELTHREE > SessionVR : You have to provide a {sti} prop for the WebGLRenderer component!", {
+            sti: sti
+        })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -60,34 +60,33 @@
     export let handProfile: XRHandProfile = undefined // "spheres", "boxes", "oculus"
 
     let pinchRemoteLineMat = new LineBasicMaterial({
-                color: 0x000000,
-                linewidth: 3
-            })  
+        color: 0x000000,
+        linewidth: 3
+    })
 
     let pinchTouchLineMat = new LineDashedMaterial({
-                color: 0x000000,
-                linewidth: 3,
-                scale: 1,
-                dashSize: 0.01,
-                gapSize: 0.01
-            })
+        color: 0x000000,
+        linewidth: 3,
+        scale: 1,
+        dashSize: 0.01,
+        gapSize: 0.01
+    })
 
     export let enablePinch: XRHandPinchConfig = undefined
     export let enableTouch: XRHandTouchConfig = undefined
     export let touchEvents: XRHandTouchEvents = undefined
-    export let enableTouchX:XRHandTouchXConfig = undefined
+    export let enableTouchX: XRHandTouchXConfig = undefined
 
     let xrHelpers: SvelthreeHelpersXR = new SvelthreeHelpersXR()
     let xrHandHitTester: XRHandHitTester = new XRHandHitTester()
 
-    let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt(
-        enableTouch.lerpFactor,
-        enableTouch.touchDistance)
+    let xrHandTouchRay: XRHandTouchRayExt = new XRHandTouchRayExt(enableTouch.lerpFactor, enableTouch.touchDistance)
 
     let xrHandTouchSphere: XRHandTouchSphereExt = new XRHandTouchSphereExt(
         enableTouch.lerpFactor,
         enableTouch.touchDistance,
-        enableTouch.sphereRadius)
+        enableTouch.sphereRadius
+    )
 
     $: requiredFeatures ? updateRequiredFeatures() : null
 
@@ -97,8 +96,7 @@
     }
 
     $svelthreeStores[sti].xr.hitTestMode = hitTestMode
-    $svelthreeStores[sti].xr.hitTestModeInitial =
-        $svelthreeStores[sti].xr.hitTestMode
+    $svelthreeStores[sti].xr.hitTestModeInitial = $svelthreeStores[sti].xr.hitTestMode
 
     $: optionalFeatures ? updateOptionalFeatures() : null
 
@@ -126,7 +124,7 @@
         $svelthreeStores[sti].xr.enablePinch = enablePinch
 
         //renderer is not available on init, so this will not be executed twice, only on reactive update!
-        if(rendererAvailable) {
+        if (rendererAvailable) {
             registerPinchConfigs()
         }
     }
@@ -145,44 +143,46 @@
     function updateEnableTouch(): void {
         $svelthreeStores[sti].xr.enableTouch = enableTouch
 
-        if($svelthreeStores[sti].xr.enableTouch.hands) {
-            for(let i = 0; i < $svelthreeStores[sti].xr.enableTouch.hands.length; i++) {
-                let item:XRHandTouchConfigHandsItem = $svelthreeStores[sti].xr.enableTouch.hands[i]
-                if(item.hand === "right") {
+        if ($svelthreeStores[sti].xr.enableTouch.hands) {
+            for (let i = 0; i < $svelthreeStores[sti].xr.enableTouch.hands.length; i++) {
+                let item: XRHandTouchConfigHandsItem = $svelthreeStores[sti].xr.enableTouch.hands[i]
+                if (item.hand === "right") {
                     rightHandTouchEnabled = true
-                    if(item.index.length > 0) {
+                    if (item.index.length > 0) {
                         rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
                     }
                 }
 
-                if(item.hand === "left") {
+                if (item.hand === "left") {
                     leftHandTouchEnabled = true
-                    if(item.index.length > 0) {
+                    if (item.index.length > 0) {
                         leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
                     }
                 }
 
-                if(item.hand === "both") {
+                if (item.hand === "both") {
                     leftHandTouchEnabled = true
                     rightHandTouchEnabled = true
-                    if(item.index.length > 0) {
+                    if (item.index.length > 0) {
                         leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(item.index)
                         rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(item.index)
                     }
                 }
             }
+        } else {
+            // default: "both"
+            leftHandTouchEnabled = true
+            rightHandTouchEnabled = true
+            $svelthreeStores[sti].xr.enableTouch.hands = XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT
+            leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(
+                XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index
+            )
+            rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(
+                XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index
+            )
         }
-        else {
-                // default: "both"
-                leftHandTouchEnabled = true
-                rightHandTouchEnabled = true
-                $svelthreeStores[sti].xr.enableTouch.hands = XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT
-                leftHandTouchEnabledJoints = leftHandTouchEnabledJoints.concat(XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index)
-                rightHandTouchEnabledJoints = rightHandTouchEnabledJoints.concat(XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT[0].index)
-            }
-            
 
-        $svelthreeStores[sti].xr.leftHandTouchEnabled = leftHandTouchEnabled  
+        $svelthreeStores[sti].xr.leftHandTouchEnabled = leftHandTouchEnabled
         $svelthreeStores[sti].xr.leftHandTouchEnabledJoints = leftHandTouchEnabledJoints
         $svelthreeStores[sti].xr.rightHandTouchEnabled = rightHandTouchEnabled
         $svelthreeStores[sti].xr.rightHandTouchEnabledJoints = rightHandTouchEnabledJoints
@@ -194,7 +194,7 @@
         $svelthreeStores[sti].xr.touchEvents = touchEvents
 
         //renderer is not available on init, so this will not be executed twice, only on reactive update!
-        if(rendererAvailable) {
+        if (rendererAvailable) {
             applyHandTouchEvents()
         }
     }
@@ -205,7 +205,7 @@
         $svelthreeStores[sti].xr.enableTouchX = enableTouchX
 
         //renderer is not available on init, so this will not be executed twice, only on reactive update!
-        if(rendererAvailable) {
+        if (rendererAvailable) {
             applyHandTouchEventsX()
         }
     }
@@ -291,8 +291,8 @@
         dispatch(e.type, { handedness: e.handedness, target: e.target })
     }
 
-    let leftHand:Group
-    let rightHand:Group
+    let leftHand: Group
+    let rightHand: Group
 
     function addHandListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
@@ -314,11 +314,11 @@
             if (enablePinch !== undefined) {
                 // Custom three.js Event defined inside WebXRController.js
 
-                if(hand.userData.pinchConfig) {
+                if (hand.userData.pinchConfig) {
                     hand.addEventListener("pinchstart", dispatchHandPinchEvent)
                     hand.addEventListener("pinchend", dispatchHandPinchEvent)
                 }
-                
+
                 doUpdatePinchRays = true
             }
 
@@ -334,7 +334,7 @@
                 - if we're detecting both: implement some kind of visual feedback (color / line change)
                 -  TODO  Line and visual feedback should be customizable (do it after commit as update)
             */
-            
+
             /*
             if(enablePinch !== undefined) {
                 doUpdateHandDistances = true
@@ -343,48 +343,47 @@
 
             // Activate hands touch
             if (enableTouch !== undefined) {
-                
-                    hand.addEventListener("touchstart", dispatchHandTouchEvent)
-                    hand.addEventListener("touchend", dispatchHandTouchEvent)
-                
-                    xrHandTouchRay.setLeftHand(leftHand)
-                    xrHandTouchRay.setRightHand(rightHand)
-                
-                    doUpdateXRTouch = true
+                hand.addEventListener("touchstart", dispatchHandTouchEvent)
+                hand.addEventListener("touchend", dispatchHandTouchEvent)
+
+                xrHandTouchRay.setLeftHand(leftHand)
+                xrHandTouchRay.setRightHand(rightHand)
+
+                doUpdateXRTouch = true
             }
         }
 
-        if(touchEvents !== undefined) {
+        if (touchEvents !== undefined) {
             applyHandTouchEvents()
         }
 
-        if(enableTouchX !== undefined) {
+        if (enableTouchX !== undefined) {
             applyHandTouchEventsX()
         }
     }
 
-    function applyHandTouchEvents():void {
+    function applyHandTouchEvents(): void {
         console.warn("SVELTHREE > SessionVR > applyHandTouchEvents!")
 
         //let leftHand = $svelthreeStores[sti].renderer.xr.getHand(0)
         //let rightHand = $svelthreeStores[sti].renderer.xr.getHand(1)
 
         for (let i = 0; i < $svelthreeStores[sti].xr.touchEvents.length; i++) {
-            let item:XRHandTouchEventsItem = $svelthreeStores[sti].xr.touchEvents[i]
+            let item: XRHandTouchEventsItem = $svelthreeStores[sti].xr.touchEvents[i]
 
-            if(item.hand === "left") {
+            if (item.hand === "left") {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 registerHandTouchEvent(leftHand, item)
             }
 
-            if(item.hand === "right") {
+            if (item.hand === "right") {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 registerHandTouchEvent(rightHand, item)
             }
 
-            if(item.hand === "both") {
+            if (item.hand === "both") {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEvent)
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEvent)
@@ -395,29 +394,28 @@
         }
     }
 
-    function applyHandTouchEventsX():void {
+    function applyHandTouchEventsX(): void {
         console.warn("SVELTHREE > SessionVR > applyHandTouchEventsX!")
 
         //let leftHand = $svelthreeStores[sti].renderer.xr.getHand(0)
         //let rightHand = $svelthreeStores[sti].renderer.xr.getHand(1)
 
-
         for (let i = 0; i < $svelthreeStores[sti].xr.enableTouchX.length; i++) {
-            let item:XRHandTouchXConfigItem = $svelthreeStores[sti].xr.enableTouchX[i]
+            let item: XRHandTouchXConfigItem = $svelthreeStores[sti].xr.enableTouchX[i]
 
-            if(item.hand === "left") {
+            if (item.hand === "left") {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 registerHandTouchEventX(leftHand, item)
             }
 
-            if(item.hand === "right") {
+            if (item.hand === "right") {
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 rightHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 registerHandTouchEventX(rightHand, item)
             }
 
-            if(item.hand === "both") {
+            if (item.hand === "both") {
                 leftHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
                 leftHand.addEventListener(item.name + "end", dispatchHandTouchEventX)
                 rightHand.addEventListener(item.name + "start", dispatchHandTouchEventX)
@@ -428,30 +426,29 @@
         }
     }
 
-    function registerHandTouchEvent(hand:Group, item:{[key:string]:any}) {
-        !hand.userData.touchEvent ? hand.userData.touchEvent = {} : null
-        !hand.userData.touchEvent[item.name] ? hand.userData.touchEvent[item.name] = {} : null
+    function registerHandTouchEvent(hand: Group, item: { [key: string]: any }) {
+        !hand.userData.touchEvent ? (hand.userData.touchEvent = {}) : null
+        !hand.userData.touchEvent[item.name] ? (hand.userData.touchEvent[item.name] = {}) : null
         hand.userData.touchEvent[item.name].requiredTouchingJoints = item.index
     }
 
-    function registerHandTouchEventX(hand:Group, item:{[key:string]:any}) {
-        !hand.userData.touchEventX ? hand.userData.touchEventX = {} : null
-        !hand.userData.touchEventX[item.name] ? hand.userData.touchEventX[item.name] = {} : null
+    function registerHandTouchEventX(hand: Group, item: { [key: string]: any }) {
+        !hand.userData.touchEventX ? (hand.userData.touchEventX = {}) : null
+        !hand.userData.touchEventX[item.name] ? (hand.userData.touchEventX[item.name] = {}) : null
         hand.userData.touchEventX[item.name].requiredJoints = item.index
         hand.userData.touchEventX[item.name].distance = item.distance
         hand.userData.touchEventX[item.name].touchtime = item.touchtime
     }
 
-    function unregisterHandTouchEvents(hand:Group) {
+    function unregisterHandTouchEvents(hand: Group) {
         hand.userData.touchEvent = undefined
     }
 
-    function unregisterHandTouchEventsX(hand:Group) {
+    function unregisterHandTouchEventsX(hand: Group) {
         hand.userData.touchEventX = undefined
     }
 
     function removeHandListeners() {
-
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
             let hand = $svelthreeStores[sti].renderer.xr.getHand(i)
 
@@ -473,34 +470,34 @@
 
     $: if ($svelthreeStores[sti].xr.currentFrame.frame) {
         //console.log("xr.currentFrame.frame " + $svelthreeStores[sti].xr.currentFrame.delta)
-        
+
         /*
         if (doUpdateHandDistances) {
             updateHandDistances()
         }
         */
-       
+
         if (doUpdatePinchRays) {
             updatePinchRays()
         }
-       
+
         if (doUpdateXRTouch) {
-            if(enableTouch.mode) {
-                switch(enableTouch.mode) {
+            if (enableTouch.mode) {
+                switch (enableTouch.mode) {
                     case "ray":
                         updateXRTouchRay()
                         break
-                        case "sphere":
+                    case "sphere":
                         updateXRTouchSphere()
                         break
-                        default:
+                    default:
                         updateXRTouchRay()
                         break
                 }
             }
         }
     }
-    
+
     /*
     function updateHandDistances(): void {
         let leftHand = $svelthreeStores[sti].renderer.xr.getHand(0)
@@ -547,20 +544,16 @@
         //let leftHand = $svelthreeStores[sti].renderer.xr.getHand(0)
         //let rightHand = $svelthreeStores[sti].renderer.xr.getHand(1)
 
-        $svelthreeStores[sti].xr.leftHandPinchEnabled ? xrHandHitTester.updatePinchRay(
-                    leftHand,
-                    currentScene,
-                    $svelthreeStores[sti].raycaster
-                )  : null
+        $svelthreeStores[sti].xr.leftHandPinchEnabled
+            ? xrHandHitTester.updatePinchRay(leftHand, currentScene, $svelthreeStores[sti].raycaster)
+            : null
 
-        $svelthreeStores[sti].xr.rightHandPinchEnabled ? xrHandHitTester.updatePinchRay(
-                    rightHand,
-                    currentScene,
-                    $svelthreeStores[sti].raycaster
-                )  : null
+        $svelthreeStores[sti].xr.rightHandPinchEnabled
+            ? xrHandHitTester.updatePinchRay(rightHand, currentScene, $svelthreeStores[sti].raycaster)
+            : null
     }
- 
-    function updateXRTouchRay() :void {
+
+    function updateXRTouchRay(): void {
         //console.log("updateXRTouchRay!")
 
         //console.time("updateXRTouchRay updates")
@@ -569,26 +562,25 @@
         xrHandTouchRay.updateBVH($svelthreeStores[sti].useBVH)
         // TODO: implement NEW debugging
         // enableTouch.debug ? xrHandTouchRay.updateDebug(true) : xrHandTouchRay.updateDebug(false)
-       
-        if(enableTouch.debug) {
+
+        if (enableTouch.debug) {
             xrHandTouchRay.updateDebug(enableTouch.debug.enabled)
 
-            if(enableTouch.debug.enabled && !xrHandTouchRay.debuggerInitiated) {
+            if (enableTouch.debug.enabled && !xrHandTouchRay.debuggerInitiated) {
                 xrHandTouchRay.setDebugger(enableTouch.debug)
             }
         }
 
-     
         //console.timeEnd("updateXRTouchRay updates")
 
         //console.time("updateXRTouchRay update params")
         // 0.007 ms - almost nothing!
-        let params:XRTouchRayUpdateParams = {
+        let params: XRTouchRayUpdateParams = {
             handProfile: handProfile,
             raycaster: $svelthreeStores[sti].raycaster,
             xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
         }
-        
+
         //console.timeEnd("updateXRTouchRay update params")
 
         //console.time("updateXRTouchRay hands update")
@@ -597,7 +589,7 @@
             //console.log("updateXRTouchRay left!")
             xrHandTouchRay.update(leftHand, params, $svelthreeStores[sti].xr.leftHandTouchEnabledJoints)
         }
-        
+
         if (rightHand && $svelthreeStores[sti].xr.rightHandTouchEnabled === true) {
             //console.log("updateXRTouchRay right!")
             xrHandTouchRay.update(rightHand, params, $svelthreeStores[sti].xr.rightHandTouchEnabledJoints)
@@ -605,8 +597,8 @@
         //console.timeEnd("updateXRTouchRay hands update")
     }
 
-    function updateXRTouchSphere() :void {
-         //console.log("updateXRTouchSphere!")
+    function updateXRTouchSphere(): void {
+        //console.log("updateXRTouchSphere!")
 
         //console.time("updateXRTouchSphere updates")
         xrHandTouchSphere.updateToTest(currentScene)
@@ -614,10 +606,10 @@
         // TODO: implement NEW debugging
         //enableTouch.debug ? xrHandTouchSphere.updateDebug(true) : xrHandTouchSphere.updateDebug(false)
 
-        if(enableTouch.debug) {
+        if (enableTouch.debug) {
             xrHandTouchSphere.updateDebug(enableTouch.debug.enabled)
-            
-            if(enableTouch.debug.enabled && !xrHandTouchSphere.debuggerInitiated) {
+
+            if (enableTouch.debug.enabled && !xrHandTouchSphere.debuggerInitiated) {
                 xrHandTouchSphere.setDebugger(enableTouch.debug)
             }
         }
@@ -625,10 +617,10 @@
         //console.timeEnd("updateXRTouchSphere updates")
 
         //console.time("updateXRTouchSphere update params")
-        let params:XRTouchSphereUpdateParams = {
-                handProfile: handProfile,
-                raycaster: $svelthreeStores[sti].raycaster,
-                xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
+        let params: XRTouchSphereUpdateParams = {
+            handProfile: handProfile,
+            raycaster: $svelthreeStores[sti].raycaster,
+            xrFrameDelta: $svelthreeStores[sti].xr.currentFrame.delta
         }
         //console.timeEnd("updateXRTouchRay update params")
 
@@ -638,7 +630,7 @@
             //console.log("updateXRTouchRay left!")
             xrHandTouchSphere.update(leftHand, params, $svelthreeStores[sti].xr.leftHandTouchEnabledJoints)
         }
-        
+
         if (rightHand && $svelthreeStores[sti].xr.rightHandTouchEnabled === true) {
             //console.log("updateXRTouchRay right!")
             xrHandTouchSphere.update(rightHand, params, $svelthreeStores[sti].xr.rightHandTouchEnabledJoints)
@@ -668,7 +660,6 @@
     }
 
     function dispatchHandTouchEvent(e) {
-
         console.warn("--------------> HAND TOUCH EVENT! <------------------- :", e.type)
 
         //debugger
@@ -677,7 +668,6 @@
     }
 
     function dispatchHandTouchEventX(e) {
-
         console.warn("--------------> HAND TOUCH EVENT X! <------------------- :", e.type)
 
         //debugger
@@ -686,9 +676,7 @@
     }
 
     let controllerModelFactory: XRControllerModelFactory = new XRControllerModelFactory()
-    let handModelFactory: XRHandModelFactory = new XRHandModelFactory().setPath(
-        pathToHandModels
-    )
+    let handModelFactory: XRHandModelFactory = new XRHandModelFactory().setPath(pathToHandModels)
 
     /**
      * We have to add the AR controller to the scene BEFORE hit test in order for it
@@ -708,14 +696,13 @@
     }
 
     $: if (rendererAvailable && currentSceneIndex) {
-        console.warn(
-            "SVELTHREE > SessionVR > currentSceneIndex: ",
-            currentSceneIndex
-        )
+        console.warn("SVELTHREE > SessionVR > currentSceneIndex: ", currentSceneIndex)
 
         addGlobalCoords()
         getControllers()
-        if(enablePinch) { registerPinchConfigs() }
+        if (enablePinch) {
+            registerPinchConfigs()
+        }
         addInputListeners()
         tryAddingControllersToScene()
     }
@@ -724,22 +711,22 @@
     let rightHandPinchEnabled = false
 
     function registerPinchConfigs() {
-        let leftHand:Group = $svelthreeStores[sti].renderer.xr.getHand(0)
-        let rightHand:Group = $svelthreeStores[sti].renderer.xr.getHand(1)
+        let leftHand: Group = $svelthreeStores[sti].renderer.xr.getHand(0)
+        let rightHand: Group = $svelthreeStores[sti].renderer.xr.getHand(1)
 
-        for(let i = 0; i < enablePinch.length; i++) {
-            let item:XRHandPinchConfigItem = enablePinch[i]
+        for (let i = 0; i < enablePinch.length; i++) {
+            let item: XRHandPinchConfigItem = enablePinch[i]
 
-            if(item.hand === "left") {
+            if (item.hand === "left") {
                 registerPinchConfig(leftHand, item)
                 leftHandPinchEnabled = true
-            } 
-            if(item.hand === "right") {
+            }
+            if (item.hand === "right") {
                 registerPinchConfig(rightHand, item)
                 rightHandPinchEnabled = true
             }
 
-            if(item.hand === "both") {
+            if (item.hand === "both") {
                 registerPinchConfig(leftHand, item)
                 registerPinchConfig(rightHand, item)
                 leftHandPinchEnabled = true
@@ -747,12 +734,12 @@
             }
         }
 
-        $svelthreeStores[sti].xr.leftHandPinchEnabled = leftHandPinchEnabled  
+        $svelthreeStores[sti].xr.leftHandPinchEnabled = leftHandPinchEnabled
         $svelthreeStores[sti].xr.rightHandPinchEnabled = rightHandPinchEnabled
     }
 
-    function registerPinchConfig(hand:Group, item:XRHandPinchConfigItem) {
-        !hand.userData.pinchConfig ? hand.userData.pinchConfig = {} : null
+    function registerPinchConfig(hand: Group, item: XRHandPinchConfigItem) {
+        !hand.userData.pinchConfig ? (hand.userData.pinchConfig = {}) : null
         hand.userData.pinchConfig = item
     }
 
@@ -762,10 +749,7 @@
     }
 
     function addGlobalCoords() {
-        let currentScene =
-            $svelthreeStores[sti].scenes[
-                $svelthreeStores[sti].currentSceneIndex - 1
-            ].scene
+        let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
         let globalCoord = xrHelpers.getCoordsHelper()
         globalCoord.scale.set(5, 5, 5)
@@ -774,20 +758,12 @@
 
     function tryAddingControllersToScene() {
         console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene!")
-        let currentScene =
-            $svelthreeStores[sti].scenes[
-                $svelthreeStores[sti].currentSceneIndex - 1
-            ].scene
+        let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
-        console.warn(
-            "SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:",
-            currentScene
-        )
+        console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:", currentScene)
 
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            if (
-                $svelthreeStores[sti].xr.controllers[i].parent !== currentScene
-            ) {
+            if ($svelthreeStores[sti].xr.controllers[i].parent !== currentScene) {
                 console.warn(
                     "SVELTHREE > SessionVR > tryAddingControllersToScene! $svelthreeStores[sti].xr.controllers[i]:",
                     $svelthreeStores[sti].xr.controllers[i]
@@ -813,54 +789,31 @@
     function addController(i: number, currentScene: Scene) {
         currentScene.add($svelthreeStores[sti].xr.controllers[i])
 
-        let controllerGrip = $svelthreeStores[
-            sti
-        ].renderer.xr.getControllerGrip(i)
+        let controllerGrip = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
 
-        console.warn(
-            "SVELTHREE > SessionVR > tryAddingControllersToScene! controllerGrip:",
-            controllerGrip
-        )
+        console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene! controllerGrip:", controllerGrip)
 
-        controllerGrip.add(
-            controllerModelFactory.createControllerModel(controllerGrip)
-        )
+        controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip))
 
         currentScene.add(controllerGrip)
 
-        console.warn(
-            "SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:",
-            currentScene
-        )
+        console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:", currentScene)
 
-        $svelthreeStores[sti].xr.controllers[i].add(
-            xrHelpers.controllerRay.clone()
-        )
+        $svelthreeStores[sti].xr.controllers[i].add(xrHelpers.controllerRay.clone())
     }
 
-    
     function addHand(i: number, currentScene: Scene) {
         currentScene.add($svelthreeStores[sti].xr.controllers[i])
 
-        let controllerGrip = $svelthreeStores[
-            sti
-        ].renderer.xr.getControllerGrip(i)
+        let controllerGrip = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
 
-        console.warn(
-            "SVELTHREE > SessionVR > tryAddingControllersToScene! controllerGrip:",
-            controllerGrip
-        )
+        console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene! controllerGrip:", controllerGrip)
 
-        controllerGrip.add(
-            controllerModelFactory.createControllerModel(controllerGrip)
-        )
+        controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip))
 
         currentScene.add(controllerGrip)
 
-        console.warn(
-            "SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:",
-            currentScene
-        )
+        console.warn("SVELTHREE > SessionVR > tryAddingControllersToScene! currentScene:", currentScene)
 
         //$svelthreeStores[sti].xr.controllers[i].add(line.clone())
 
@@ -885,8 +838,6 @@
     let metacarpal: number[] = [1, 5, 10, 15, 20]
 
     let joints: number[] = distal.concat(intermediate, proximal, metacarpal)
-
-    
 
     function addHandHelpers(xrhand, i: number) {
         let coordsScale: number = 0.0125
@@ -932,7 +883,6 @@
             xrhand.controller.children[joints[i]].add(stdRay.clone())
             xrhand.controller.children[joints[i]].add(coords)
         }
-
     }
 
     // ---- VR Hit Test ----
@@ -941,18 +891,12 @@
     $: $svelthreeStores[sti].currentSceneIndex ? updateCurrentScene() : null
 
     function updateCurrentScene(): void {
-        currentScene =
-            $svelthreeStores[sti].scenes[
-                $svelthreeStores[sti].currentSceneIndex - 1
-            ].scene
+        currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
     }
 
     let tempMatrix: Matrix4 = new Matrix4()
 
-    let rayLineGeom = new BufferGeometry().setFromPoints([
-        new Vector3(0, 0, 0),
-        new Vector3(0, 0, -1)
-    ])
+    let rayLineGeom = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, -1)])
     let rayLineMat = new LineDashedMaterial({
         color: 0x9ae6b4,
         linewidth: 1,
@@ -971,28 +915,16 @@
         if (input === "controller") {
             tempMatrix.identity().extractRotation(controller.matrixWorld)
 
-            $svelthreeStores[sti].raycaster.ray.origin.setFromMatrixPosition(
-                controller.matrixWorld
-            )
+            $svelthreeStores[sti].raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld)
 
-            $svelthreeStores[sti].raycaster.ray.direction
-                .set(0, 0, -1)
-                .applyMatrix4(tempMatrix)
+            $svelthreeStores[sti].raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix)
 
-            let toTest = currentScene.children.filter(
-                (child: Object3D) => child.type === "Mesh"
-            )
+            let toTest = currentScene.children.filter((child: Object3D) => child.type === "Mesh")
 
-            $svelthreeStores[sti].allIntersections = $svelthreeStores[
-                sti
-            ].raycaster.intersectObjects(toTest, true)
+            $svelthreeStores[sti].allIntersections = $svelthreeStores[sti].raycaster.intersectObjects(toTest, true)
 
             let currentHitsTotal = $svelthreeStores[sti].allIntersections.length
-            console.warn(
-                "current hits total: ",
-                currentHitsTotal,
-                $svelthreeStores[sti].allIntersections
-            )
+            console.warn("current hits total: ", currentHitsTotal, $svelthreeStores[sti].allIntersections)
         }
 
         if (input === "hand") {
@@ -1034,18 +966,11 @@
             var message = document.createElement("a")
 
             if (window.isSecureContext === false) {
-                message.href = document.location.href.replace(
-                    /^http:/,
-                    "https:"
-                )
-                message.innerHTML = btnTxt.notSecure
-                    ? btnTxt.notSecure
-                    : "WEBXR NEEDS HTTPS" // TODO Improve message (original three.js comment)
+                message.href = document.location.href.replace(/^http:/, "https:")
+                message.innerHTML = btnTxt.notSecure ? btnTxt.notSecure : "WEBXR NEEDS HTTPS" // TODO Improve message (original three.js comment)
             } else {
                 message.href = "https://immersiveweb.dev/"
-                message.innerHTML = btnTxt.noXR
-                    ? btnTxt.noXR
-                    : "WEBXR NOT AVAILABLE"
+                message.innerHTML = btnTxt.noXR ? btnTxt.noXR : "WEBXR NOT AVAILABLE"
             }
 
             message.style.left = "calc(50% - 90px)"

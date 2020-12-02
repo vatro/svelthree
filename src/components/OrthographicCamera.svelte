@@ -138,15 +138,4 @@
     }
 </script>
 
-<Camera
-    bind:this={camera}
-    {scene}
-    {cam}
-    {id}
-    {pos}
-    {rot}
-    {lookAt}
-    {matrix}
-    {props}
-    {animation}
-    {aniauto} />
+<Camera bind:this={camera} {scene} {cam} {id} {pos} {rot} {lookAt} {matrix} {props} {animation} {aniauto} />

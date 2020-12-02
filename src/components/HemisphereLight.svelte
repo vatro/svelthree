@@ -4,12 +4,7 @@
      */
 
     import { onMount } from "svelte"
-    import {
-        HemisphereLight,
-        HemisphereLightHelper,
-        Scene,
-        Object3D
-    } from "svelthree-three"
+    import { HemisphereLight, HemisphereLightHelper, Scene, Object3D } from "svelthree-three"
     import Light from "./Light.svelte"
     import type { PropColor } from "../utils/SvelthreeTypes.svelte"
 

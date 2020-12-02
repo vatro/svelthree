@@ -38,23 +38,20 @@
 
     //TODO: type hand
     function addListeners() {
-
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
             let hand = $svelthreeStores[sti].renderer.xr.getHand(i)
-            if(pinchRemote || pinchTouch || pinchHybrid) {
+            if (pinchRemote || pinchTouch || pinchHybrid) {
                 hand.addEventListener("pinchstart", tryDispatch)
                 hand.addEventListener("pinchend", tryDispatch)
             }
 
-            if(xrHandTouch) {
+            if (xrHandTouch) {
                 hand.addEventListener("touch", onXrHandTouch)
             }
         }
     }
 
-    function onXrHandTouch(e) {
-
-    }
+    function onXrHandTouch(e) {}
 
     function removeListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
@@ -119,7 +116,9 @@
         let pinchEvent = e
 
         let pinchDistanceLimit = e.target.userData.pinchRayLength + 0.01 // DEFAULT
-        e.target.userData.pinchConfig.distance.touch ? pinchDistanceLimit = e.target.userData.pinchRayLength + e.target.userData.pinchConfig.distance.touch : null
+        e.target.userData.pinchConfig.distance.touch
+            ? (pinchDistanceLimit = e.target.userData.pinchRayLength + e.target.userData.pinchConfig.distance.touch)
+            : null
 
         if (e.target.userData.pinchObject) {
             if (e.target.userData.pinchObject === obj && e.target.userData.pinchDistance <= pinchDistanceLimit) {
@@ -141,22 +140,24 @@
         let pinchEvent = e
 
         let pinchDistanceLimit = e.target.userData.pinchRayLength + 0.01 // DEFAULT
-        e.target.userData.pinchConfig.distance.touch ? pinchDistanceLimit = e.target.userData.pinchRayLength + e.target.userData.pinchConfig.distance.touch : null
-       
+        e.target.userData.pinchConfig.distance.touch
+            ? (pinchDistanceLimit = e.target.userData.pinchRayLength + e.target.userData.pinchConfig.distance.touch)
+            : null
+
         if (e.target.userData.pinchObject) {
             if (e.target.userData.pinchObject === obj) {
                 // if doesn't touch dispatch remote
                 if (e.target.userData.pinchDistance > pinchDistanceLimit) {
                     switch (e.type) {
-                            case "pinchstart":
-                                pinchEvent.type = "pinchremotestart"
-                                doDispatch(pinchEvent, !!parent.onPinchRemoteStart)
-                                break
-                            case "pinchend":
-                                pinchEvent.type = "pinchremoteend"
-                                doDispatch(pinchEvent, !!parent.onPinchRemoteEnd)
-                                break
-                        }
+                        case "pinchstart":
+                            pinchEvent.type = "pinchremotestart"
+                            doDispatch(pinchEvent, !!parent.onPinchRemoteStart)
+                            break
+                        case "pinchend":
+                            pinchEvent.type = "pinchremoteend"
+                            doDispatch(pinchEvent, !!parent.onPinchRemoteEnd)
+                            break
+                    }
                 }
                 // if touches dispatch touch
                 else {
@@ -234,11 +235,7 @@
         )
     }
 
-    function mDispatch(
-        message: string,
-        details: { [key: string]: any },
-        fireInternal: boolean
-    ): void {
+    function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
         dispatch(message, details)
 
         if (fireInternal) {
@@ -251,17 +248,13 @@
                     parent.onPinchEnd ? onPinchEndAction(event) : null
                     break
                 case "pinchremotestart":
-                    parent.onPinchRemoteStart
-                        ? onPinchRemoteStartAction(event)
-                        : null
+                    parent.onPinchRemoteStart ? onPinchRemoteStartAction(event) : null
                     break
                 case "pinchremoteeend":
                     parent.onPinchEnd ? onPinchRemoteEndAction(event) : null
                     break
                 case "pinchtouchstart":
-                    parent.onPinchTouchStart
-                        ? onPinchTouchStartAction(event)
-                        : null
+                    parent.onPinchTouchStart ? onPinchTouchStartAction(event) : null
                     break
                 case "pinchtouchend":
                     parent.onPinchTouchEnd ? onPinchTouchEndAction(event) : null
@@ -273,10 +266,7 @@
     }
 
     function checkIntersect(): boolean {
-        if (
-            $svelthreeStores[sti].xr.hitTestMode === "virtual" &&
-            $svelthreeStores[sti].allIntersections
-        ) {
+        if ($svelthreeStores[sti].xr.hitTestMode === "virtual" && $svelthreeStores[sti].allIntersections) {
             if (
                 $svelthreeStores[sti].allIntersections.length > 0 &&
                 $svelthreeStores[sti].allIntersections[0].object === obj
@@ -293,9 +283,7 @@
     // --- Internal Actions ---
 
     function onPinchStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchStartAction!")
         typeof parent.onPinchStart === "function"
             ? parent.onPinchStart(e)
             : console.error(
@@ -304,9 +292,7 @@
     }
 
     function onPinchEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchEndAction!")
         typeof parent.onPinchEnd === "function"
             ? parent.onPinchEnd(e)
             : console.error(
@@ -315,9 +301,7 @@
     }
 
     function onPinchRemoteStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteStartAction!")
         typeof parent.onPinchRemoteStart === "function"
             ? parent.onPinchRemoteStart(e)
             : console.error(
@@ -326,9 +310,7 @@
     }
 
     function onPinchRemoteEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteEndAction!")
         typeof parent.onPinchRemoteEnd === "function"
             ? parent.onPinchRemoteEnd(e)
             : console.error(
@@ -337,9 +319,7 @@
     }
 
     function onPinchTouchStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchStartAction!")
         typeof parent.onPinchTouchStart === "function"
             ? parent.onPinchTouchStart(e)
             : console.error(
@@ -348,9 +328,7 @@
     }
 
     function onPinchTouchEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchEndAction!")
         typeof parent.onPinchTouchEnd === "function"
             ? parent.onPinchTouchEnd(e)
             : console.error(
@@ -359,9 +337,7 @@
     }
 
     function onCustomTouchEventAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRHands :internal onCustomTouchEventAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onCustomTouchEventAction!")
         typeof parent.onCustomTouchEvent === "function"
             ? parent.onCustomTouchEvent(e)
             : console.error(

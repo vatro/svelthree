@@ -23,10 +23,7 @@
     export let sti: number
 
     if (sti === undefined) {
-        console.warn(
-            "SVELTHREE > Scene : You have to provide a {sti} prop for the Scene!",
-            { sti: sti }
-        )
+        console.warn("SVELTHREE > Scene : You have to provide a {sti} prop for the Scene!", { sti: sti })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 

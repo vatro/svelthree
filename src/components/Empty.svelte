@@ -8,16 +8,8 @@
     import { svelthreeStores } from "../stores.js"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-    import type {
-        PropPos,
-        PropRot,
-        PropScale,
-        PropMatrix4
-    } from "../utils/SvelthreeTypes.svelte"
-    import {
-        isValidArray3Prop,
-        isValidMatrix4
-    } from "../utils/PropUtils.svelte"
+    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
@@ -38,26 +30,20 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > Empty : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > Empty : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
-        console.warn(
-            "SVELTHREE > Empty : You have to provide a {scene} prop!",
-            { scene: scene }
-        )
+        console.warn("SVELTHREE > Empty : You have to provide a {scene} prop!", { scene: scene })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
     let empty: Object3D = new Object3D()
     empty.name = name
     let object3DUtils: Object3DUtils = new Object3DUtils(empty)
-    let emptyPropIterator: UniversalPropIterator = new UniversalPropIterator(
-        empty
-    )
+    let emptyPropIterator: UniversalPropIterator = new UniversalPropIterator(empty)
 
     scene.add(empty)
     console.info("SVELTHREE > EMPTY added!", {
@@ -84,26 +70,20 @@
         if (!parentForUs) {
             if (empty.parent !== scene) {
                 scene.add(empty)
-                console.info(
-                    "SVELTHREE > EMPTY " + empty.type + " added to scene!",
-                    {
-                        empty: empty,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > EMPTY " + empty.type + " added to scene!", {
+                    empty: empty,
+                    scene: scene,
+                    total: scene.children.length
+                })
             }
         } else {
             if (empty.parent !== parentForUs) {
                 parentForUs.add(empty)
-                console.info(
-                    "SVELTHREE > EMPTY " + empty.type + " added to parent!",
-                    {
-                        empty: empty,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > EMPTY " + empty.type + " added to parent!", {
+                    empty: empty,
+                    scene: scene,
+                    total: scene.children.length
+                })
             }
         }
     }
@@ -128,21 +108,9 @@
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    $: !matrix
-        ? isValidArray3Prop(pos)
-            ? object3DUtils.tryPosUpdate(pos)
-            : null
-        : null
-    $: !matrix
-        ? isValidArray3Prop(rot)
-            ? object3DUtils.tryRotUpdate(rot)
-            : null
-        : null
-    $: !matrix
-        ? isValidArray3Prop(scale)
-            ? object3DUtils.tryScaleUpdate(scale)
-            : null
-        : null
+    $: !matrix ? (isValidArray3Prop(pos) ? object3DUtils.tryPosUpdate(pos) : null) : null
+    $: !matrix ? (isValidArray3Prop(rot) ? object3DUtils.tryRotUpdate(rot) : null) : null
+    $: !matrix ? (isValidArray3Prop(scale) ? object3DUtils.tryScaleUpdate(scale) : null) : null
     $: isValidMatrix4(matrix)
         ? (console.warn(
               "SVELTHREE > Empty : Matrix provided, will ignore 'pos', 'rot' or 'scale' props if any provided!"
@@ -163,9 +131,7 @@
     let currentSceneActive = false
 
     $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
-        ? (currentSceneActive =
-              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
-                  .isActive)
+        ? (currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive)
         : null
 
     let animationEnabled = false
@@ -191,23 +157,18 @@
         if (scene.userData.sti >= 0) {
             sti = scene.userData.sti
         } else {
-            console.warn(
-                "SVELTHREE > Empty : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
+            console.warn("SVELTHREE > Empty : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
+                scene: scene,
+                userData: scene.userData,
+                sti: scene.userData.sti
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
 
     // TODO  implement updating Matrix
     function tryMatrixUpdate(): void {
-        console.error(
-            "SVELTHREE > Empty : updating Matrix is not yet implemented!"
-        )
+        console.error("SVELTHREE > Empty : updating Matrix is not yet implemented!")
     }
 
     export function removeEmptyFromParent(): void {

@@ -93,17 +93,11 @@
     function dispatchOnIntersect(e) {
         if (checkIntersect()) {
             e.type === "select" ? doDispatch(e, !!parent.onSelect) : null
-            e.type === "selectstart"
-                ? doDispatch(e, !!parent.onSelectStart)
-                : null
+            e.type === "selectstart" ? doDispatch(e, !!parent.onSelectStart) : null
             e.type === "selectend" ? doDispatch(e, !!parent.onSelectEnd) : null
             e.type === "squeeze" ? doDispatch(e, !!parent.onSqueeze) : null
-            e.type === "squeezestart"
-                ? doDispatch(e, !!parent.onSqueezeEnd)
-                : null
-            e.type === "squeezeend"
-                ? doDispatch(e, !!parent.onSqueezeEnd)
-                : null
+            e.type === "squeezestart" ? doDispatch(e, !!parent.onSqueezeEnd) : null
+            e.type === "squeezeend" ? doDispatch(e, !!parent.onSqueezeEnd) : null
         }
     }
 
@@ -111,7 +105,6 @@
     //function doDispatch(e: XRInputSourceEvent, fireInternal: boolean): void {
     //e : {type, target}
     function doDispatch(e, fireInternal: boolean): void {
-       
         mDispatch(
             e.type,
             {
@@ -126,11 +119,7 @@
         )
     }
 
-    function mDispatch(
-        message: string,
-        details: { [key: string]: any },
-        fireInternal: boolean
-    ): void {
+    function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
         dispatch(message, details)
 
         if (fireInternal) {
@@ -161,10 +150,7 @@
     }
 
     function checkIntersect(): boolean {
-        if (
-            $svelthreeStores[sti].xr.hitTestMode === "virtual" &&
-            $svelthreeStores[sti].allIntersections
-        ) {
+        if ($svelthreeStores[sti].xr.hitTestMode === "virtual" && $svelthreeStores[sti].allIntersections) {
             if (
                 $svelthreeStores[sti].allIntersections.length > 0 &&
                 $svelthreeStores[sti].allIntersections[0].object === obj
@@ -181,9 +167,7 @@
     // --- Internal Actions ---
 
     function onSelectAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSelectAction!")
         typeof parent.onSelect === "function"
             ? parent.onSelect(e)
             : console.error(
@@ -192,9 +176,7 @@
     }
 
     function onSelectStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSelectStartAction!")
         typeof parent.onSelectStart === "function"
             ? parent.onSelectStart(e)
             : console.error(
@@ -203,9 +185,7 @@
     }
 
     function onSelectEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSelectEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSelectEndAction!")
         typeof parent.onSelectEnd === "function"
             ? parent.onSelectEnd(e)
             : console.error(
@@ -215,9 +195,7 @@
 
     // VR
     function onSqueezeAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeAction!")
         typeof parent.onSqueeze === "function"
             ? parent.onSqueeze(e)
             : console.error(
@@ -226,9 +204,7 @@
     }
 
     function onSqueezeStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeStartAction!")
         typeof parent.onSqueezeStart === "function"
             ? parent.onSqueezeStart(e)
             : console.error(
@@ -237,9 +213,7 @@
     }
 
     function onSqueezeEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionVRController :internal onSqueezeEndAction!")
         typeof parent.onSqueezeEnd === "function"
             ? parent.onSqueezeEnd(e)
             : console.error(

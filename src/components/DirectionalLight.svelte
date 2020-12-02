@@ -3,11 +3,7 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import {
-        DirectionalLight,
-        DirectionalLightHelper,
-        Scene
-    } from "svelthree-three"
+    import { DirectionalLight, DirectionalLightHelper, Scene } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
     import type { PropPos, PropColor } from "../utils/SvelthreeTypes.svelte"
@@ -98,13 +94,4 @@
     }
 </script>
 
-<Light
-    {scene}
-    {light}
-    {props}
-    {pos}
-    {color}
-    {intensity}
-    {shadowMapSize}
-    {shadowBias}
-    {castShadow} />
+<Light {scene} {light} {props} {pos} {color} {intensity} {shadowMapSize} {shadowBias} {castShadow} />

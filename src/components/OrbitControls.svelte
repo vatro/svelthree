@@ -23,25 +23,19 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > OrbitControls : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > OrbitControls : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
-        console.warn(
-            "SVELTHREE > OrbitControls : You have to provide a {scene} prop!",
-            { scene: scene }
-        )
+        console.warn("SVELTHREE > OrbitControls : You have to provide a {scene} prop!", { scene: scene })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
     let orbitcontrolsCreated = false
 
-    $: $svelthreeStores[sti].renderer && !orbitcontrolsCreated
-        ? createAndAddOrbitControls()
-        : null
+    $: $svelthreeStores[sti].renderer && !orbitcontrolsCreated ? createAndAddOrbitControls() : null
 
     $: enableDamping || !enableDamping ? updateEneableDamping() : null
     $: autoRotate || !autoRotate ? updateAutoRotate() : null
@@ -61,9 +55,7 @@
                 $svelthreeStores[sti].renderer.domElement
             )
 
-            ocPropIterator = new UniversalPropIterator(
-                $svelthreeStores[sti].orbitcontrols
-            )
+            ocPropIterator = new UniversalPropIterator($svelthreeStores[sti].orbitcontrols)
 
             $svelthreeStores[sti].orbitcontrols.enableDamping = enableDamping
             $svelthreeStores[sti].orbitcontrols.autoRotate = autoRotate
@@ -77,17 +69,11 @@
     }
 
     function updateEneableDamping(): void {
-        $svelthreeStores[sti].orbitcontrols
-            ? ($svelthreeStores[
-                  sti
-              ].orbitcontrols.enableDamping = enableDamping)
-            : null
+        $svelthreeStores[sti].orbitcontrols ? ($svelthreeStores[sti].orbitcontrols.enableDamping = enableDamping) : null
     }
 
     function updateAutoRotate(): void {
-        $svelthreeStores[sti].orbitcontrols
-            ? ($svelthreeStores[sti].orbitcontrols.autoRotate = autoRotate)
-            : null
+        $svelthreeStores[sti].orbitcontrols ? ($svelthreeStores[sti].orbitcontrols.autoRotate = autoRotate) : null
     }
 
     function setSTI() {

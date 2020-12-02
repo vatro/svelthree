@@ -66,10 +66,9 @@
     export let sti: number
 
     if (sti === undefined) {
-        console.warn(
-            "SVELTHREE > Scene : You have to provide a {sti} prop for the WebGLRenderer component!",
-            { sti: sti }
-        )
+        console.warn("SVELTHREE > Scene : You have to provide a {sti} prop for the WebGLRenderer component!", {
+            sti: sti
+        })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -87,16 +86,8 @@
             : null
         : null
 
-    $: renderer
-        ? enableShadowMap
-            ? (renderer.shadowMap.enabled = true)
-            : (renderer.shadowMap.enabled = false)
-        : null
-    $: renderer
-        ? renderer.shadowMap.enabled
-            ? (renderer.shadowMap.type = shadowMapType)
-            : null
-        : null
+    $: renderer ? (enableShadowMap ? (renderer.shadowMap.enabled = true) : (renderer.shadowMap.enabled = false)) : null
+    $: renderer ? (renderer.shadowMap.enabled ? (renderer.shadowMap.type = shadowMapType) : null) : null
     $: renderer
         ? props
             ? Object.keys(props).length > 0
@@ -108,18 +99,10 @@
         : null
 
     export let xr: boolean = undefined
-    $: renderer
-        ? xr
-            ? (renderer.xr.enabled = true)
-            : (renderer.xr.enabled = false)
-        : null
+    $: renderer ? (xr ? (renderer.xr.enabled = true) : (renderer.xr.enabled = false)) : null
 
-    $: !currentScene && sceneToRenderId
-        ? ((currentScene = getSceneToRender()), activateCurrentScene())
-        : null
-    $: !currentCam && currentSceneId
-        ? ((currentCam = getCamToRender()), setCurrentCamActive())
-        : null
+    $: !currentScene && sceneToRenderId ? ((currentScene = getSceneToRender()), activateCurrentScene()) : null
+    $: !currentCam && currentSceneId ? ((currentCam = getCamToRender()), setCurrentCamActive()) : null
 
     $: {
         if (sceneToRenderId !== currentSceneId) {
@@ -136,11 +119,7 @@
         if (camToRenderId !== currentCamId) {
             //won't trigger change if 'currentCam' is not being set, this happens first time onMount()
             if (currentCam) {
-                currentCam
-                    ? (setCurrentCamInactive(),
-                      (currentCam = getCamToRender()),
-                      setCurrentCamActive())
-                    : null
+                currentCam ? (setCurrentCamInactive(), (currentCam = getCamToRender()), setCurrentCamActive()) : null
             } else {
                 //console.warn("SVELTHREE > WebGLRenderer : handle scene switch triggered, currentCam was NOT CHANGED:", {currentCam: currentCam})
             }
@@ -203,9 +182,7 @@
             isActive: currentCam.userData.isActive
         })
         currentCam.userData.isActive = true
-        $svelthreeStores[sti].cameras[
-            currentCam.userData.indexInCameras
-        ].isActive = true
+        $svelthreeStores[sti].cameras[currentCam.userData.indexInCameras].isActive = true
         $svelthreeStores[sti].activeCamera = currentCam
         console.info(
             "SVELTHREE > WebGLRenderer : setCurrentCamActive",
@@ -225,9 +202,7 @@
             isActive: currentCam.userData.isActive
         })
         currentCam.userData.isActive = false
-        $svelthreeStores[sti].cameras[
-            currentCam.userData.indexInCameras
-        ].isActive = false
+        $svelthreeStores[sti].cameras[currentCam.userData.indexInCameras].isActive = false
         console.info(
             "SVELTHREE > WebGLRenderer : setCurrentCamInactive",
             {
@@ -247,9 +222,7 @@
     function updateCameraAspect(tW: number, tH: number): void {
         console.info("SVELTHREE > WebGLRenderer : updateCameraAspect!")
         currentCam
-            ? (currentCam.type === "PerspectiveCamera"
-                  ? (currentCam.aspect = tW / tH)
-                  : null,
+            ? (currentCam.type === "PerspectiveCamera" ? (currentCam.aspect = tW / tH) : null,
               currentCam.updateProjectionMatrix())
             : null
     }
@@ -258,10 +231,9 @@
         console.info("SVELTHREE > WebGLRenderer : getSceneToRender!")
         if ($svelthreeStores[sti].scenes.length > 0) {
             if (sceneToRenderId === undefined) {
-                console.warn(
-                    "SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!",
-                    { sceneId: sceneToRenderId }
-                )
+                console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
+                    sceneId: sceneToRenderId
+                })
                 throw new Error("SVELTHREE Exception (see warning above)")
             } else {
                 for (let i = 0; i < $svelthreeStores[sti].scenes.length; i++) {
@@ -273,19 +245,15 @@
                     }
                 }
 
-                console.warn(
-                    "SVELTHREE > WebGLRenderer : Scene with id '" +
-                        sceneToRenderId +
-                        "' not found!",
-                    { scenes: $svelthreeStores[sti].scenes }
-                )
+                console.warn("SVELTHREE > WebGLRenderer : Scene with id '" + sceneToRenderId + "' not found!", {
+                    scenes: $svelthreeStores[sti].scenes
+                })
                 throw new Error("SVELTHREE Exception (see warning above)")
             }
         } else {
-            console.warn(
-                "SVELTHREE > WebGLRenderer : getSceneToRender: No Scenes available!",
-                { scenes: $svelthreeStores[sti].scenes }
-            )
+            console.warn("SVELTHREE > WebGLRenderer : getSceneToRender: No Scenes available!", {
+                scenes: $svelthreeStores[sti].scenes
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
@@ -294,10 +262,9 @@
         console.info("SVELTHREE > WebGLRenderer : getCamToRender!")
         if ($svelthreeStores[sti].cameras.length > 0) {
             if (camToRenderId === undefined) {
-                console.warn(
-                    "SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!",
-                    { camId: camToRenderId }
-                )
+                console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
+                    camId: camToRenderId
+                })
                 throw new Error("SVELTHREE Exception (see warning above)")
             } else {
                 for (let i = 0; i < $svelthreeStores[sti].cameras.length; i++) {
@@ -308,12 +275,9 @@
                     }
                 }
 
-                console.warn(
-                    "SVELTHREE > WebGLRenderer : Camera with id '" +
-                        camToRenderId +
-                        "' not found!",
-                    { cameras: $svelthreeStores[sti].cameras }
-                )
+                console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + camToRenderId + "' not found!", {
+                    cameras: $svelthreeStores[sti].cameras
+                })
                 throw new Error("SVELTHREE Exception (see warning above)")
             }
         } else {
@@ -328,9 +292,7 @@
     function deactivateCurrentScene(): void {
         if (currentScene.userData.isActive === true) {
             currentScene.userData.isActive = false
-            $svelthreeStores[sti].scenes[
-                currentScene.userData.indexInScenes
-            ].isActive = false
+            $svelthreeStores[sti].scenes[currentScene.userData.indexInScenes].isActive = false
         }
     }
 
@@ -338,12 +300,9 @@
         //resume animations only if scene was being deactivated before
         if (currentScene.userData.isActive === false) {
             currentScene.userData.isActive = true
-            $svelthreeStores[sti].scenes[
-                currentScene.userData.indexInScenes
-            ].isActive = true
+            $svelthreeStores[sti].scenes[currentScene.userData.indexInScenes].isActive = true
 
-            $svelthreeStores[sti].currentSceneIndex =
-                currentScene.userData.indexInScenes + 1
+            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
 
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
@@ -353,12 +312,9 @@
             console.info(currentScene)
 
             currentScene.userData.isActive = true
-            $svelthreeStores[sti].scenes[
-                currentScene.userData.indexInScenes
-            ].isActive = true
+            $svelthreeStores[sti].scenes[currentScene.userData.indexInScenes].isActive = true
 
-            $svelthreeStores[sti].currentSceneIndex =
-                currentScene.userData.indexInScenes + 1
+            $svelthreeStores[sti].currentSceneIndex = currentScene.userData.indexInScenes + 1
 
             /** would also work
             props.scenes[currentScene.userData.indexInScenes].isActive = true
@@ -389,13 +345,10 @@
     let isInteractive = false
     let raycaster: Raycaster
     $: $svelthreeStores[sti].canvas.interactive
-        ? ((raycaster = $svelthreeStores[sti].raycaster),
-          (isInteractive = true))
+        ? ((raycaster = $svelthreeStores[sti].raycaster), (isInteractive = true))
         : null
 
-    $: !$svelthreeStores[sti].canvas.interactive
-        ? ((isInteractive = false), (raycaster = null))
-        : null
+    $: !$svelthreeStores[sti].canvas.interactive ? ((isInteractive = false), (raycaster = null)) : null
 
     // ----------------------------------------------
 
@@ -404,10 +357,7 @@
         //Problem with above: canvas triggers reactive statement above because style changes! FIX below
 
         if (doit) {
-            if (
-                $svelthreeStores[sti].allIntersections[0].object.userData
-                    .interact
-            ) {
+            if ($svelthreeStores[sti].allIntersections[0].object.userData.interact) {
                 document.body.style.cursor = "pointer"
             } else if ($svelthreeStores[sti].orbitcontrols) {
                 document.body.style.cursor = "all-scroll"
@@ -452,57 +402,32 @@
     let webxr: WebXR
 
     // TODO : timestamp and frame types? timestamp / time unused. --> see onAnimationFrame() in WebXRManager.js
-    function render(
-        timestamp: any = undefined,
-        frame: XRFrame = undefined
-    ): void {
+    function render(timestamp: any = undefined, frame: XRFrame = undefined): void {
         if (doAnimate) {
             if (logOnce) {
                 logOnce = false
-                console.info(
-                    "SVELTHREE > WebGLRenderer > animate!",
-                    currentScene,
-                    currentCam,
-                    canvas
-                )
+                console.info("SVELTHREE > WebGLRenderer > animate!", currentScene, currentCam, canvas)
             }
 
             // Intersections / Raycaster using Camera and pointer.pos (NonXR)
             if (renderer.xr.enabled === false) {
                 isInteractive
-                    ? (raycaster.setFromCamera(
-                          $svelthreeStores[sti].pointer.pos,
-                          currentCam
-                      ),
-                      (toTest = currentScene.children.filter(
-                          (child) => child.type === "Mesh"
-                      )),
-                      ($svelthreeStores[
-                          sti
-                      ].allIntersections = raycaster.intersectObjects(
-                          toTest,
-                          true
-                      )))
+                    ? (raycaster.setFromCamera($svelthreeStores[sti].pointer.pos, currentCam),
+                      (toTest = currentScene.children.filter((child) => child.type === "Mesh")),
+                      ($svelthreeStores[sti].allIntersections = raycaster.intersectObjects(toTest, true)))
                     : null
 
                 isInteractive ? checkCursor() : null
 
                 // OrbitControls (NonXR)
                 // required if controls.enableDamping or controls.autoRotate are set to true
-                $svelthreeStores[sti].orbitcontrols
-                    ? $svelthreeStores[sti].orbitcontrols.update()
-                    : null
+                $svelthreeStores[sti].orbitcontrols ? $svelthreeStores[sti].orbitcontrols.update() : null
             }
 
             //update cube cameras
             if ($svelthreeStores[sti].cubeCameras.length > 0) {
-                for (
-                    let i = 0;
-                    i < $svelthreeStores[sti].cubeCameras.length;
-                    i++
-                ) {
-                    let cubeCamComponent: SvelteComponentDev =
-                        $svelthreeStores[sti].cubeCameras[i]
+                for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
+                    let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
                     cubeCamComponent.doUpdate()
                 }
             }
@@ -522,10 +447,7 @@
 
     let lastTimeStamp
 
-    function renderXR(
-        timestamp: number = undefined,
-        frame: XRFrame = undefined
-    ): void {
+    function renderXR(timestamp: number = undefined, frame: XRFrame = undefined): void {
         if (frame) {
             let delta: number
 
@@ -566,20 +488,12 @@
         }
     }
 
-    function renderAR(
-        timestamp: number = undefined,
-        frame: XRFrame = undefined
-    ): void {
+    function renderAR(timestamp: number = undefined, frame: XRFrame = undefined): void {
         let referenceSpace: XRReferenceSpace = renderer.xr.getReferenceSpace() as XRReferenceSpace
         let session: XRSession = renderer.xr.getSession() as XRSession
 
         if ($svelthreeStores[sti].xr.hitTestMode === "realworld") {
-            webxr.performRealWorldHitTest(
-                referenceSpace,
-                session,
-                timestamp,
-                frame
-            )
+            webxr.performRealWorldHitTest(referenceSpace, session, timestamp, frame)
         } else if ($svelthreeStores[sti].xr.hitTestResults !== undefined) {
             $svelthreeStores[sti].xr.hitTestResults = undefined
         }

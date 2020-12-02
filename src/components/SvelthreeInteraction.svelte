@@ -6,7 +6,7 @@
     import { svelthreeStores } from "../stores.js"
     import { onMount } from "svelte"
     import { Vector3, Raycaster, Object3D } from "svelthree-three"
-    import { SvelteComponentDev } from "svelte/internal";
+    import { SvelteComponentDev } from "svelte/internal"
 
     export let interactionEnabled: boolean
     export let parent: SvelteComponentDev
@@ -15,9 +15,7 @@
     //export let recursive: boolean
 
     let raycaster: Raycaster
-    $: $svelthreeStores[sti].raycaster
-        ? (raycaster = $svelthreeStores[sti].raycaster)
-        : null
+    $: $svelthreeStores[sti].raycaster ? (raycaster = $svelthreeStores[sti].raycaster) : null
 
     export let dispatch: (type: string, detail?: any) => void
 
@@ -25,9 +23,7 @@
      * Canvas-DOM-Element listens to 'pointermove' the whole time in order to trigger over/out enter/leave events
      */
     let c: HTMLElement
-    $: $svelthreeStores[sti].canvas.dom
-        ? (c = $svelthreeStores[sti].canvas.dom)
-        : null
+    $: $svelthreeStores[sti].canvas.dom ? (c = $svelthreeStores[sti].canvas.dom) : null
 
     $: if (c) {
         if (interactionEnabled && obj && !obj.userData.interact) {
@@ -249,16 +245,11 @@
         if (intersects()) {
             e.type === "click" ? doDispatch(e, !!parent.onClick) : null
             e.type === "pointerup" ? doDispatch(e, !!parent.onPointerUp) : null
-            e.type === "pointerdown"
-                ? doDispatch(e, !!parent.onPointerDown)
-                : null
+            e.type === "pointerdown" ? doDispatch(e, !!parent.onPointerDown) : null
         }
     }
 
-    function doDispatch(
-        e: MouseEvent | PointerEvent,
-        fireInternal: boolean
-    ): void {
+    function doDispatch(e: MouseEvent | PointerEvent, fireInternal: boolean): void {
         let pointerData = getPointerData(e)
         mDispatch(
             e.type,
@@ -272,11 +263,7 @@
         )
     }
 
-    function mDispatch(
-        message: string,
-        details: { [key: string]: any },
-        fireInternal: boolean
-    ): void {
+    function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
         dispatch(message, details)
 
         if (fireInternal) {
@@ -344,94 +331,58 @@
     // --- Internal Actions ---
 
     function onClickAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction :internal onClickAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteraction :internal onClickAction!")
         typeof parent.onClick === "function"
             ? parent.onClick(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onClick' object is not a valid function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onClick' object is not a valid function!")
     }
 
     function onPointerUpAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerUpAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerUpAction!")
         typeof parent.onPointerUp === "function"
             ? parent.onPointerUp(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerUp' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerUp' object is not a function!")
     }
 
     function onPointerDownAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerDownAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerDownAction!")
         typeof parent.onPointerDown === "function"
             ? parent.onPointerDown(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerDown' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerDown' object is not a function!")
     }
 
     function onPointerOverAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerOverAction!",
-            e
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerOverAction!", e)
         typeof parent.onPointerOver === "function"
             ? parent.onPointerOver(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerOver' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOver' object is not a function!")
     }
 
     function onPointerOutAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerOutAction!",
-            e
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerOutAction!", e)
         typeof parent.onPointerOut === "function"
             ? parent.onPointerOut(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerOut' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOut' object is not a function!")
     }
 
     function onPointerEnterAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerEnterAction!",
-            e
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerEnterAction!", e)
         typeof parent.onPointerEnter === "function"
             ? parent.onPointerEnter(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerEnter' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerEnter' object is not a function!")
     }
 
     function onPointerLeaveAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerLeaveAction!",
-            e
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerLeaveAction!", e)
         typeof parent.onPointerLeave === "function"
             ? parent.onPointerLeave(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerLeave' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerLeave' object is not a function!")
     }
 
     function onPointerMoveAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteraction : internal onPointerMoveAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteraction : internal onPointerMoveAction!")
         typeof parent.onPointerMove === "function"
             ? parent.onPointerMove(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteraction : provided 'onPointerMove' object is not a function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerMove' object is not a function!")
     }
 </script>

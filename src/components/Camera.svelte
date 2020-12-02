@@ -9,12 +9,7 @@
     import { isValidMatrix4 } from "../utils/PropUtils.svelte"
     import { svelthreeStores } from "../stores.js"
     import { Scene, Camera } from "svelthree-three"
-    import type {
-        PropPos,
-        PropRot,
-        PropLookAt,
-        PropMatrix4
-    } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
     let ani: any
@@ -27,17 +22,13 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > Camera : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > Camera : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
-        console.warn(
-            "SVELTHREE > Camera : You have to provide a {scene} prop!",
-            { scene: scene }
-        )
+        console.warn("SVELTHREE > Camera : You have to provide a {scene} prop!", { scene: scene })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -62,10 +53,7 @@
         object3DUtils = new Object3DUtils(cam)
         camPropIterator = new UniversalPropIterator(cam)
     } else {
-        console.warn(
-            "SVELTHREE > Camera : camera was not provided by parent component!",
-            { cam: cam }
-        )
+        console.warn("SVELTHREE > Camera : camera was not provided by parent component!", { cam: cam })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -108,9 +96,7 @@
 
     // TODO  implement updating Matrix
     $: isValidMatrix4(matrix)
-        ? (console.warn(
-              "SVELTHREE > Camera : Matrix provided, will ignore 'pos' or 'rot' props if any provided!"
-          ),
+        ? (console.warn("SVELTHREE > Camera : Matrix provided, will ignore 'pos' or 'rot' props if any provided!"),
           tryMatrixUpdate())
         : null
 
@@ -140,29 +126,22 @@
         if (scene.userData.sti >= 0) {
             sti = scene.userData.sti
         } else {
-            console.warn(
-                "SVELTHREE > Camera : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
+            console.warn("SVELTHREE > Camera : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
+                scene: scene,
+                userData: scene.userData,
+                sti: scene.userData.sti
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
 
     // TODO  implement updating Matrix
     function tryMatrixUpdate(): void {
-        console.error(
-            "SVELTHREE > Camera : updating Matrix is not yet implemented!"
-        )
+        console.error("SVELTHREE > Camera : updating Matrix is not yet implemented!")
     }
 
     function tryControlsUpdate(): void {
-        $svelthreeStores["orbitcontrols"]
-            ? $svelthreeStores["orbitcontrols"].update()
-            : null
+        $svelthreeStores["orbitcontrols"] ? $svelthreeStores["orbitcontrols"].update() : null
     }
 
     // reactive animation handling (has to be enabled as last, so that initial animation state overrides props)
@@ -170,9 +149,7 @@
     let currentSceneActive = false
 
     $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
-        ? (currentSceneActive =
-              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
-                  .isActive)
+        ? (currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive)
         : null
 
     let animationEnabled = false
@@ -189,8 +166,7 @@
     }
 
     export function getIndexInCameras(): number {
-        return $svelthreeStores[sti].cameras[cam.userData.indexInCameras].camera
-            .userData.indexInCameras
+        return $svelthreeStores[sti].cameras[cam.userData.indexInCameras].camera.userData.indexInCameras
     }
 
     export function getSTI(): number {

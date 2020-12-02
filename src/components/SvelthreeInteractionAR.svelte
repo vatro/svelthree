@@ -16,9 +16,7 @@
     export let dispatch: (type: string, detail?: any) => void
 
     let controller: Group
-    $: $svelthreeStores[sti].xr.controller
-        ? (controller = $svelthreeStores[sti].xr.controller)
-        : null
+    $: $svelthreeStores[sti].xr.controller ? (controller = $svelthreeStores[sti].xr.controller) : null
 
     $: if (controller) {
         if (interactionEnabled && obj && !obj.userData.interact) {
@@ -80,9 +78,7 @@
     function dispatchOnIntersect(e) {
         if (checkIntersect()) {
             e.type === "select" ? doDispatch(e, !!parent.onSelect) : null
-            e.type === "selectstart"
-                ? doDispatch(e, !!parent.onSelectStart)
-                : null
+            e.type === "selectstart" ? doDispatch(e, !!parent.onSelectStart) : null
             e.type === "selectend" ? doDispatch(e, !!parent.onSelectEnd) : null
         }
     }
@@ -103,11 +99,7 @@
         )
     }
 
-    function mDispatch(
-        message: string,
-        details: { [key: string]: any },
-        fireInternal: boolean
-    ): void {
+    function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
         dispatch(message, details)
 
         if (fireInternal) {
@@ -129,10 +121,7 @@
     }
 
     function checkIntersect(): boolean {
-        if (
-            $svelthreeStores[sti].xr.hitTestMode === "virtual" &&
-            $svelthreeStores[sti].allIntersections
-        ) {
+        if ($svelthreeStores[sti].xr.hitTestMode === "virtual" && $svelthreeStores[sti].allIntersections) {
             if (
                 $svelthreeStores[sti].allIntersections.length > 0 &&
                 $svelthreeStores[sti].allIntersections[0].object === obj
@@ -149,20 +138,14 @@
     // --- Internal Actions ---
 
     function onSelectAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionXR :internal onSelectAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectAction!")
         typeof parent.onSelect === "function"
             ? parent.onSelect(e)
-            : console.error(
-                  "SVELTHREE > SvelthreeInteractionXR : provided 'onSelect' object is not a valid function!"
-              )
+            : console.error("SVELTHREE > SvelthreeInteractionXR : provided 'onSelect' object is not a valid function!")
     }
 
     function onSelectStartAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionXR :internal onSelectStartAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectStartAction!")
         typeof parent.onSelectStart === "function"
             ? parent.onSelectStart(e)
             : console.error(
@@ -171,9 +154,7 @@
     }
 
     function onSelectEndAction(e: CustomEvent): void {
-        console.info(
-            "SVELTHREE > SvelthreeInteractionXR :internal onSelectEndAction!"
-        )
+        console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectEndAction!")
         typeof parent.onSelectEnd === "function"
             ? parent.onSelectEnd(e)
             : console.error(

@@ -1,12 +1,7 @@
 <script lang="typescript">
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
-    import {
-        WebGLCubeRenderTarget,
-        CubeCamera,
-        Mesh,
-        Vector3
-    } from "svelthree-three"
+    import { WebGLCubeRenderTarget, CubeCamera, Mesh, Vector3 } from "svelthree-three"
     //import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
 
@@ -19,19 +14,15 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > CubeCamera : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > CubeCamera : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
-        console.warn(
-            "SVELTHREE > CubeCamera : You have to provide a {scene} prop!",
-            {
-                scene: scene
-            }
-        )
+        console.warn("SVELTHREE > CubeCamera : You have to provide a {scene} prop!", {
+            scene: scene
+        })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -120,10 +111,7 @@
             parent.getWorldPosition(wp)
             cubeCamera.position.copy(wp)
             let renderer = $svelthreeStores[sti].renderer
-            let scene =
-                $svelthreeStores[sti].scenes[
-                    $svelthreeStores[sti].currentSceneIndex - 1
-                ].scene
+            let scene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
             cubeCamera.update(renderer, scene)
             parent.visible = true
         }

@@ -3,19 +3,11 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import {
-        GLTFLoader,
-        DRACOLoader,
-        LoadingManager,
-        Group
-    } from "svelthree-three"
+    import { GLTFLoader, DRACOLoader, LoadingManager, Group } from "svelthree-three"
     import type { GLTF } from "svelthree-three"
     import { createEventDispatcher } from "svelte"
 
-    const dispatch: (
-        type: string,
-        detail?: any
-    ) => void = createEventDispatcher()
+    const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
     /**
      * @see https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
@@ -30,10 +22,9 @@
     export let dracoPath: string = undefined
 
     if (!dracoPath && draco) {
-        console.warn(
-            "SVELTHREE > LoadedGLTF : You need to provide a 'dracoPath' prop if you use Draco!",
-            { path: path }
-        )
+        console.warn("SVELTHREE > LoadedGLTF : You need to provide a 'dracoPath' prop if you use Draco!", {
+            path: path
+        })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -52,19 +43,14 @@
     manager ? (loader = new GLTFLoader()) : (loader = new GLTFLoader(manager))
 
     draco
-        ? ((dracoLoader = new DRACOLoader()),
-          dracoLoader.setDecoderPath(dracoPath),
-          loader.setDRACOLoader(dracoLoader))
+        ? ((dracoLoader = new DRACOLoader()), dracoLoader.setDecoderPath(dracoPath), loader.setDRACOLoader(dracoLoader))
         : null
 
     //we want this to be reactive, so we can change GLTF  TODO : check it
     $: if (path) {
         doLoad()
     } else {
-        console.warn(
-            "SVELTHREE > LoadedGLTF : You have to provide a 'path' prop!",
-            { path: path }
-        )
+        console.warn("SVELTHREE > LoadedGLTF : You have to provide a 'path' prop!", { path: path })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -95,10 +81,7 @@
                     })
                 },
                 function (error) {
-                    console.error(
-                        "SVELTHREE > LoadedGLTF : doLoad : An error happened!",
-                        error
-                    )
+                    console.error("SVELTHREE > LoadedGLTF : doLoad : An error happened!", error)
                 }
             )
         }

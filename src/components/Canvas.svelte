@@ -56,7 +56,7 @@
         inputType: SessionVRInputType
         controller: Group // AR
         controllers: Group[] //VR
-        enablePinch: XRHandPinchConfig,
+        enablePinch: XRHandPinchConfig
         handProfile: XRHandProfile
         enableTouch: XRHandTouchConfig
         touchEvents: XRHandTouchEvents
@@ -171,39 +171,35 @@
     $: c ? addCanvasToStore() : null
 
     function addCanvasToStore(): void {
-        $svelthreeStores[sti].canvas.dom === undefined
-            ? ($svelthreeStores[sti].canvas.dom = c)
-            : null
+        $svelthreeStores[sti].canvas.dom === undefined ? ($svelthreeStores[sti].canvas.dom = c) : null
     }
 
-    let originalThreeRaycastFunction: ( raycaster: Raycaster, intersects: Intersection[] ) => void
+    let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: Intersection[]) => void
     export let useBVH: boolean
-    $: if(useBVH) {
+    $: if (useBVH) {
         $svelthreeStores[sti].useBVH = useBVH
 
-        if(!BufferGeometry.prototype["computeBoundsTree"]) {
+        if (!BufferGeometry.prototype["computeBoundsTree"]) {
             //backup original raycast function
             originalThreeRaycastFunction = Mesh.prototype.raycast
 
-            BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree;
-            BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree;
-            Mesh.prototype.raycast = acceleratedRaycast;
+            BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree
+            BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree
+            Mesh.prototype.raycast = acceleratedRaycast
         }
-    }
-    else {
+    } else {
         $svelthreeStores[sti].useBVH = useBVH
 
-        if(BufferGeometry.prototype["computeBoundsTree"]) {
-            BufferGeometry.prototype["computeBoundsTree"] = undefined;
-            BufferGeometry.prototype["disposeBoundsTree"] = undefined;
+        if (BufferGeometry.prototype["computeBoundsTree"]) {
+            BufferGeometry.prototype["computeBoundsTree"] = undefined
+            BufferGeometry.prototype["disposeBoundsTree"] = undefined
 
             //restore original raycast function
-            Mesh.prototype.raycast = originalThreeRaycastFunction;
+            Mesh.prototype.raycast = originalThreeRaycastFunction
         }
     }
 
-
-    export let interactive:boolean
+    export let interactive: boolean
     let isInteractive = false
     let raycaster: Raycaster
 
@@ -217,10 +213,7 @@
             startUpdatingPointer()
         }
 
-        console.info(
-            "SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
-            $svelthreeStores[sti]
-        )
+        console.info("SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ", $svelthreeStores[sti])
     }
 
     // reactive remove raycaster
@@ -233,10 +226,7 @@
             stopUpdatingPointer()
         }
 
-        console.info(
-            "SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ",
-            $svelthreeStores[sti]
-        )
+        console.info("SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ", $svelthreeStores[sti])
     }
 
     let didMount: boolean
@@ -250,32 +240,21 @@
     function updatePointer(e: PointerEvent): void {
         let rect: ClientRect = c.getBoundingClientRect()
 
-        $svelthreeStores[sti].pointer.pos.x =
-            ((e.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
-        $svelthreeStores[sti].pointer.pos.y =
-            -((e.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
+        $svelthreeStores[sti].pointer.pos.x = ((e.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
+        $svelthreeStores[sti].pointer.pos.y = -((e.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
 
-        e.clientX > rect.left &&
-        e.clientX < rect.right &&
-        e.clientY > rect.top &&
-        e.clientY < rect.bottom
+        e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom
             ? ($svelthreeStores[sti].pointer.isOverCanvas = true)
             : ($svelthreeStores[sti].pointer.isOverCanvas = false)
 
         // calculate unprojected Point
         // see https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z
-        let v: Vector3 = new Vector3(
-            $svelthreeStores[sti].pointer.pos.x,
-            $svelthreeStores[sti].pointer.pos.y,
-            0.5
-        )
+        let v: Vector3 = new Vector3($svelthreeStores[sti].pointer.pos.x, $svelthreeStores[sti].pointer.pos.y, 0.5)
         let t: Vector3 = new Vector3()
         v.unproject($svelthreeStores[sti].activeCamera)
         v.sub($svelthreeStores[sti].activeCamera.position).normalize()
         let d = -$svelthreeStores[sti].activeCamera.position.z / v.z
-        t.copy($svelthreeStores[sti].activeCamera.position).add(
-            v.multiplyScalar(d)
-        )
+        t.copy($svelthreeStores[sti].activeCamera.position).add(v.multiplyScalar(d))
         $svelthreeStores[sti].pointer.unprojected.copy(t)
 
         /**
@@ -291,10 +270,7 @@
 
     onMount(() => {
         didMount = true
-        console.info(
-            "SVELTHREE > onMount : Canvas, $svelthreeStores[sti]: ",
-            $svelthreeStores[sti]
-        )
+        console.info("SVELTHREE > onMount : Canvas, $svelthreeStores[sti]: ", $svelthreeStores[sti])
 
         return () => {
             console.info("SVELTHREE > onDestroy : Canvas")

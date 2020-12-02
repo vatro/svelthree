@@ -22,17 +22,13 @@
         if (scene.type === "Scene") {
             setSTI()
         } else {
-            console.warn(
-                "SVELTHREE > Light : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
+            console.warn("SVELTHREE > Light : You have to provide a valid 'scene' prop of type 'Scene'!", {
+                scene: scene
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     } else {
-        console.warn(
-            "SVELTHREE > Light : You have to provide a {scene} prop!",
-            { scene: scene }
-        )
+        console.warn("SVELTHREE > Light : You have to provide a {scene} prop!", { scene: scene })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -40,14 +36,11 @@
         if (scene.userData.sti >= 0) {
             sti = scene.userData.sti
         } else {
-            console.warn(
-                "SVELTHREE > Light : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
+            console.warn("SVELTHREE > Light : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
+                scene: scene,
+                userData: scene.userData,
+                sti: scene.userData.sti
+            })
             throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
@@ -76,10 +69,7 @@
         uniPropIterator = new UniversalPropIterator(light)
         lightUtils = new LightUtils(light)
     } else {
-        console.warn(
-            "SVELTHREE > Light : light was not provided by parent component!",
-            { light: light }
-        )
+        console.warn("SVELTHREE > Light : light was not provided by parent component!", { light: light })
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
@@ -101,32 +91,22 @@
             //Add to scene if no parent was provided & scene is not parent already
             if (light.parent !== scene) {
                 scene.add(light)
-                console.info(
-                    "SVELTHREE > Light : " +
-                        light.type +
-                        " was added to scene!",
-                    {
-                        light: light,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > Light : " + light.type + " was added to scene!", {
+                    light: light,
+                    scene: scene,
+                    total: scene.children.length
+                })
             }
         } else {
             //Add to provided parent if it's not parent already
             if (light.parent !== parentForUs) {
                 parentForUs.add(light)
-                console.info(
-                    "SVELTHREE > Light : " +
-                        light.type +
-                        " was added to parent!",
-                    {
-                        light: light,
-                        parent: parentForUs,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
+                console.info("SVELTHREE > Light : " + light.type + " was added to parent!", {
+                    light: light,
+                    parent: parentForUs,
+                    scene: scene,
+                    total: scene.children.length
+                })
             }
         }
     }
@@ -162,20 +142,14 @@
     $: shadowBias ? lightUtils.tryShadowBiasUpdate(shadowBias) : null
     $: castShadow ? lightUtils.tryCastShadowUpdate(castShadow) : null
 
-    $: props
-        ? Object.keys(props).length > 0
-            ? uniPropIterator.tryPropsUpdate(props)
-            : null
-        : null
+    $: props ? (Object.keys(props).length > 0 ? uniPropIterator.tryPropsUpdate(props) : null) : null
 
     // reactive animation handling (has to be enabled as last, so that initial animation state overrides props)
 
     let currentSceneActive = false
 
     $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
-        ? (currentSceneActive =
-              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
-                  .isActive)
+        ? (currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.indexInScenes].isActive)
         : null
 
     let animationEnabled = false

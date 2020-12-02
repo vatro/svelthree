@@ -6,12 +6,7 @@
     import { PerspectiveCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type {
-        PropPos,
-        PropRot,
-        PropLookAt,
-        PropMatrix4
-    } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
 
     export let scene: Scene
     export let id: string = undefined
@@ -135,15 +130,4 @@
     }
 </script>
 
-<Camera
-    bind:this={camera}
-    {scene}
-    {cam}
-    {id}
-    {pos}
-    {rot}
-    {lookAt}
-    {matrix}
-    {props}
-    {animation}
-    {aniauto} />
+<Camera bind:this={camera} {scene} {cam} {id} {pos} {rot} {lookAt} {matrix} {props} {animation} {aniauto} />
