@@ -1,4 +1,4 @@
-import { Group, Matrix3, Object3D, Raycaster, Scene, Vector3 } from "svelthree-three"
+import { Group, Matrix3, Object3D, Raycaster, Scene, Vector3, XRHandModel } from "svelthree-three"
 
 import { XRHandTouchRayDebugger } from "./debuggers/XRHandTouchRayDebugger"
 import { XRHandTouchSphereDebugger } from "./debuggers/XRHandTouchSphereDebugger"
@@ -13,8 +13,8 @@ import XRDefaults from "../defaults/XRDefaults"
 export class XRHandTouch {
     currentScene: Scene
 
-    leftHand: Group = undefined
-    rightHand: Group = undefined
+    leftHand: XRHandModel = undefined
+    rightHand: XRHandModel = undefined
 
     toTest: Object3D[]
     useBVH: boolean = false
@@ -33,11 +33,11 @@ export class XRHandTouch {
 
     constructor() {}
 
-    setLeftHand(leftHand: Group) {
+    setLeftHand(leftHand: XRHandModel) {
         this.leftHand = leftHand
     }
 
-    setRightHand(rightHand: Group) {
+    setRightHand(rightHand: XRHandModel) {
         this.rightHand = rightHand
     }
 
@@ -160,7 +160,7 @@ export class XRHandTouch {
      * Limit direction change by lerping the direction (see XRHandTouchDefaults.LERP_FACTOR)
      * Lower XRHandTouchDefaults.LERP_FACTOR values result in smoother direction change (less fidgeting) at cost of accuracy.
      */
-    update(hand: Group, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
+    update(hand: XRHandModel, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
         for (let i = 0; i < enabledJoints.length; i++) {
             const jointIndex: number = enabledJoints[i]
             const joint: Group = hand.children[jointIndex] as Group
@@ -554,7 +554,7 @@ export class XRHandTouch {
      *    "NEGATIVE NORMAL direction ray" doesn't intersect!
      *    Check if joint is INSIDE the object or OUTSIDE out of 'touchDistance' and should 'untouch': {@see touchingInsideCheck}
      */
-    touchingOutsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group): void {
+    touchingOutsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: XRHandModel): void {
         /*
         Raycasting from OUTSIDE (touching)
         Raycast using negative normal ray of touched face! (in order to get real distance)
@@ -659,7 +659,7 @@ export class XRHandTouch {
      *      - if yes: it will 'do nothing' except visualizing the 'inside movement trail' of the joint via 'debuggerRay' (if active)
      *                + changing 'joint.userData.touchInside' to 'false' --> on next frame 'touchingOutsideCheck' will be executed instead of this function.
      */
-    touchingInsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: Group): void {
+    touchingInsideCheck(joint: Group, i: number, raycaster: Raycaster, hand: XRHandModel): void {
         if (this.debug) {
             if (this.jointDebugger) {
                 this.jointDebugger.highlightJoint()
@@ -758,7 +758,7 @@ export class XRHandTouch {
      *  - SPHERE Mode: uses the result of {@see XRHandTouchSphereExt.checkSphereIntersection} (indices) if using {@see XRHandTouchSphereExt}
      */
     checkUntouchOutside(
-        hand: Group,
+        hand: XRHandModel,
         joint: Group,
         i: number,
         intersectObj: { [key: string]: any },
@@ -879,7 +879,7 @@ export class XRHandTouch {
         joint.userData.lastTouchPoint = undefined
     }
 
-    addJointToTouchingArray(hand: Group, i: number) {
+    addJointToTouchingArray(hand: XRHandModel, i: number) {
         if (hand.userData.jointsTouching === undefined) {
             hand.userData.jointsTouching = []
         }
@@ -889,7 +889,7 @@ export class XRHandTouch {
         }
     }
 
-    removeJointFromTouchingArray(hand: Group, i: number) {
+    removeJointFromTouchingArray(hand: XRHandModel, i: number) {
         if (hand.userData.jointsTouching.indexOf(i) > 0) {
             hand.userData.jointsTouching.splice(hand.userData.jointsTouching.indexOf(i), 1)
         }
@@ -968,19 +968,19 @@ export class XRHandTouch {
 
     // Dispatching Events
 
-    dispatchUntouch(hand: Group, joint: Group, i: number, intersect: { [key: string]: any }) {
+    dispatchUntouch(hand: XRHandModel, joint: Group, i: number, intersect: { [key: string]: any }) {
         hand.dispatchEvent({ type: "untouch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
         console.warn("HAND EVENT: untouch!")
     }
 
     // overridden by SPHERE
-    dispatchTouch(hand: Group, joint: Group, i: number, intersect: { [key: string]: any }) {
+    dispatchTouch(hand: XRHandModel, joint: Group, i: number, intersect: { [key: string]: any }) {
         hand.dispatchEvent({ type: "touch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
         console.warn("HAND EVENT: touch!")
     }
 
     dispatchTouchThrough(
-        hand: Group,
+        hand: XRHandModel,
         joint: Group,
         i: number,
         intersects: { enter: { [key: string]: any }; exit: { [key: string]: any } }
@@ -989,7 +989,7 @@ export class XRHandTouch {
         console.warn("HAND EVENT: touchthrough!")
     }
 
-    dispatchScratch(hand: Group, joint: Group, i: number, intersect: { [key: string]: any }) {
+    dispatchScratch(hand: XRHandModel, joint: Group, i: number, intersect: { [key: string]: any }) {
         hand.dispatchEvent({ type: "scratch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
         console.warn("HAND EVENT: scratch!")
     }

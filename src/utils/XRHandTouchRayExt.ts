@@ -1,5 +1,5 @@
 import { XRHandTouch } from "./XRHandTouch"
-import { Group, Vector3 } from "svelthree-three"
+import { Group, Vector3, XRHandModel } from "svelthree-three"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 export class XRHandTouchRayExt extends XRHandTouch {
@@ -14,7 +14,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
 
     // override
     checkUntouchOutside(
-        hand: Group,
+        hand: XRHandModel,
         joint: Group,
         i: number,
         intersectObj: { [key: string]: any },

@@ -1,7 +1,7 @@
 import { sphereIntersectTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/MathUtilities"
 import { SeparatingAxisTriangle } from "../../node_modules/three-mesh-bvh/src/Utils/SeparatingAxisTriangle.js"
 import { XRHandTouch } from "./XRHandTouch"
-import { Mesh, Sphere, Group, Vector3, Matrix4, Matrix3, Object3D, Triangle } from "svelthree-three"
+import { Mesh, Sphere, Group, Vector3, Matrix4, Matrix3, Object3D, Triangle, XRHandModel } from "svelthree-three"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 interface SphereTouchingResultsItem {
@@ -29,7 +29,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    update(hand: Group, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
+    update(hand: XRHandModel, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
         for (let i = 0; i < enabledJoints.length; i++) {
             const jointIndex: number = enabledJoints[i]
             const joint: Group = hand.children[jointIndex] as Group
@@ -373,7 +373,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    dispatchTouch(hand: Group, joint: Group, i: number, intersect: SphereTouchingResults) {
+    dispatchTouch(hand: XRHandModel, joint: Group, i: number, intersect: SphereTouchingResults) {
         hand.dispatchEvent({ type: "touch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
         console.warn("HAND EVENT: touch!")
     }

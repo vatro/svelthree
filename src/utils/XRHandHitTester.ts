@@ -1,4 +1,4 @@
-import { Group, Vector3, Object3D, Scene, Raycaster } from "svelthree-three"
+import { Group, Vector3, Object3D, Scene, Raycaster, XRHandModel } from "svelthree-three"
 
 import { RaycasterRayHelper } from "./RaycasterRayHelper"
 import { XRHandRayConfigs } from "./XRHandRayConfigs"
@@ -13,7 +13,7 @@ export class XRHandHitTester {
         // TODO: Remove this functionality, move updating hand distance to XRHandTouch, as it is irrelevant here!
         // directional Ray coming from the hand behaving like touch (negative normal ray check)
         updateHandDistance(
-            hand: Group,
+            hand: XRHandModel,
             currentScene: Scene,
             raycaster: Raycaster
         ) {
@@ -102,7 +102,7 @@ export class XRHandHitTester {
         }
         */
 
-    updatePinchRay(hand: Group, currentScene: Scene, raycaster: Raycaster) {
+    updatePinchRay(hand: XRHandModel, currentScene: Scene, raycaster: Raycaster) {
         //console.log("updateForwardDistance!:", hand.userData.handedness)
 
         // Proximal Phalanx (Index & Thumb) --> origin

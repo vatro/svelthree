@@ -1,4 +1,4 @@
-import { Mesh, Group, MeshBasicMaterial } from "svelthree-three"
+import { Mesh, Group, MeshBasicMaterial, XRHandModel } from "svelthree-three"
 
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
@@ -24,11 +24,11 @@ export class XRHandTouchJointDebugger {
         }
     }
 
-    setJointMesh(hand: Group, joint: Group, i: number) {
+    setJointMesh(hand: XRHandModel, joint: Group, i: number) {
         this.jointMesh = this.getJointMesh(hand, joint, i)
     }
 
-    getJointMesh(hand: Group, joint: Group, i: number): Mesh {
+    getJointMesh(hand: XRHandModel, joint: Group, i: number): Mesh {
         let jointMesh: Mesh
 
         if (hand.children[25].children.length > 0) {
