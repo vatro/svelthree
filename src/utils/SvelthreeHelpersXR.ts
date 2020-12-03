@@ -1,6 +1,15 @@
-import { LineBasicMaterial, LineDashedMaterial, BufferGeometry, Vector3, Line, Group } from "svelthree-three"
+import {
+    LineBasicMaterial,
+    LineDashedMaterial,
+    XRHandModel,
+    BufferGeometry,
+    Vector3,
+    Line,
+    Group
+} from "svelthree-three"
 
 import { XRHandRayConfigs } from "./XRHandRayConfigs"
+import XRHandJointIndices from "./XRHandJointIndices"
 
 export class SvelthreeHelpersXR {
     controllerRay: Line
@@ -230,5 +239,57 @@ export class SvelthreeHelpersXR {
         this.dirRayRpunch = new Line(dirRayRpunch_geom, dir_mat)
         this.dirRayRpunch.computeLineDistances()
         this.dirRayRpunch.name = "DirRayPunch R"
+    }
+
+    joints: number[] = XRHandJointIndices.DISTAL.concat(
+        XRHandJointIndices.INTERMEDIATE,
+        XRHandJointIndices.PROXIMAL,
+        XRHandJointIndices.METACARPAL
+    )
+
+    addHandHelpers(xrhand: XRHandModel, i: number) {
+        let coordsScale: number = 0.0125
+        let tipRay: Line
+        let stdRay: Line
+        let dirRayFwd: Line
+        let dirRayDwn: Line
+        let dirRayPunch: Line
+
+        i == 0 ? (tipRay = this.tipRayL) : null
+        i == 1 ? (tipRay = this.tipRayR) : null
+        i == 0 ? (stdRay = this.stdRayL) : null
+        i == 1 ? (stdRay = this.stdRayR) : null
+        i == 0 ? (dirRayFwd = this.dirRayLfwd) : null
+        i == 1 ? (dirRayFwd = this.dirRayRfwd) : null
+        i == 0 ? (dirRayDwn = this.dirRayLdwn) : null
+        i == 1 ? (dirRayDwn = this.dirRayRdwn) : null
+        i == 0 ? (dirRayPunch = this.dirRayLpunch) : null
+        i == 1 ? (dirRayPunch = this.dirRayRpunch) : null
+
+        //wrist
+        xrhand.controller.children[0].add(stdRay.clone())
+
+        //direction
+        xrhand.controller.children[10].add(dirRayFwd.clone())
+        xrhand.controller.children[10].add(dirRayDwn.clone())
+
+        //punch
+        xrhand.controller.children[11].add(dirRayPunch.clone())
+
+        //tips
+        for (let i = 0; i < XRHandJointIndices.TIP.length; i++) {
+            let coords: Group = this.getCoordsHelper()
+            coords.scale.set(coordsScale, coordsScale, coordsScale)
+            xrhand.controller.children[XRHandJointIndices.TIP[i]].add(tipRay.clone())
+            xrhand.controller.children[XRHandJointIndices.TIP[i]].add(coords)
+        }
+
+        //joints
+        for (let i = 0; i < this.joints.length; i++) {
+            let coords: Group = this.getCoordsHelper()
+            coords.scale.set(coordsScale, coordsScale, coordsScale)
+            xrhand.controller.children[this.joints[i]].add(stdRay.clone())
+            xrhand.controller.children[this.joints[i]].add(coords)
+        }
     }
 }

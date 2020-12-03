@@ -17,7 +17,6 @@ declare type XREventType =
     | "squeezeend"
     | "reset"
 
-
 declare type XRRequiredFeatures = XRReferenceSpaceType | "hand-tracking" | "hit-test"
 declare type XROptionalFeatures = XRRequiredFeatures
 
@@ -95,6 +94,13 @@ declare interface XRHandTouchConfig {
     lerpFactor?: number
     debug?: XRHandTouchDebugParams
     hands?: XRHandTouchConfigHands
+}
+
+declare interface XRHandEnableTouchResult {
+    leftHandTouchEnabled: boolean
+    leftHandTouchEnabledJoints: number[]
+    rightHandTouchEnabled: boolean
+    rightHandTouchEnabledJoints: number[]
 }
 
 // Update Props passed to an 'XRHandTouchRayExt' or 'XRHandTouchSphereExt' instance on every XRFrame --> @see 'SessionVR'

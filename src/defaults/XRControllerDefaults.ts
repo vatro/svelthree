@@ -1,5 +1,15 @@
 export default class XRControllerDefaults {
-    static MAX_CONTROLLERS = 2
+    /**
+     * WHY?  Somehow the indices of left/right controllers/hands are switched now
+     * There have been several Oculus Quest updates, so I aussumed it's related to them,
+     * yet I couldn't find any informations on this.
+     * TODO  Look at the code and try to figure out if it's maybe svelthree's fault,
+     * if something has changed during the refactoring of XRHandTouch.
+     */
+    static INDEX_LEFT: number = 1 // was 0
+    static INDEX_RIGHT: number = 0
+
+    static MAX_CONTROLLERS: number = 2
 
     static HANDEDNESS_LEFT: XRHandedness = "left"
     static HANDEDNESS_RIGHT: XRHandedness = "right"
