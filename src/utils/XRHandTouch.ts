@@ -160,9 +160,9 @@ export class XRHandTouch {
      * Limit direction change by lerping the direction (see XRHandTouchDefaults.LERP_FACTOR)
      * Lower XRHandTouchDefaults.LERP_FACTOR values result in smoother direction change (less fidgeting) at cost of accuracy.
      */
-    update(hand: XRHandModel, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
-        for (let i = 0; i < enabledJoints.length; i++) {
-            const jointIndex: number = enabledJoints[i]
+    update(hand: XRHandModel, params: XRTouchUpdateParams): void {
+        for (let i = 0; i < hand.userData.enabledJoints.length; i++) {
+            const jointIndex: number = hand.userData.enabledJoints[i]
             const joint: Group = hand.children[jointIndex] as Group
 
             if (this.debug) {
@@ -948,7 +948,7 @@ export class XRHandTouch {
     }
 
     // overridden
-    intersectionsPhase1Raycast(params: XRTouchRayUpdateParams, joint: Group): any {
+    intersectionsPhase1Raycast(params: XRTouchUpdateParams, joint: Group): any {
         return {}
     }
 

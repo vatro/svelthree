@@ -29,9 +29,9 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    update(hand: XRHandModel, params: XRTouchRayUpdateParams, enabledJoints: number[]): void {
-        for (let i = 0; i < enabledJoints.length; i++) {
-            const jointIndex: number = enabledJoints[i]
+    update(hand: XRHandModel, params: XRTouchUpdateParams): void {
+        for (let i = 0; i < hand.userData.enabledJoints.length; i++) {
+            const jointIndex: number = hand.userData.enabledJoints[i]
             const joint: Group = hand.children[jointIndex] as Group
 
             if (this.debug) {
@@ -335,7 +335,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     */
 
     // override
-    intersectionsPhase1Raycast(params: XRTouchRayUpdateParams, joint: Group): any {
+    intersectionsPhase1Raycast(params: XRTouchUpdateParams, joint: Group): any {
         return this.doRaycast(
             params.raycaster,
             joint.userData.origin,

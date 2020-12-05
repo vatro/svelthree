@@ -2,6 +2,9 @@ declare type Scene = import("svelthree-three").Scene
 declare type Raycaster = import("svelthree-three").Raycaster
 declare type LineDashedMaterial = import("svelthree-three").LineDashedMaterial
 declare type LineBasicMaterial = import("svelthree-three").LineBasicMaterial
+declare type XRHandModel = import("svelthree-three").XRHandModel
+declare type XRHandTouchRayExt = import("../utils/XRHandTouchRayExt").XRHandTouchRayExt
+declare type XRHandTouchSphereExt = import("../utils/XRHandTouchSphereExt").XRHandTouchSphereExt
 
 // based on @see https://github.com/BabylonJS/Babylon.js/blob/master/src/LibDeclarations/webxr.d.ts
 declare type XREventType =
@@ -105,17 +108,25 @@ declare interface XRHandEnableTouchResult {
 
 // Update Props passed to an 'XRHandTouchRayExt' or 'XRHandTouchSphereExt' instance on every XRFrame --> @see 'SessionVR'
 
-declare interface XRTouchRayUpdateParams {
+declare interface XRTouchUpdateParams {
     handProfile: XRHandProfile
     raycaster: Raycaster
     xrFrameDelta: number
 }
 
-declare interface XRTouchSphereUpdateParams {
-    handProfile: XRHandProfile
-    raycaster: Raycaster
-    xrFrameDelta: number
-}
+declare interface XRTouchUpdateArgsItem {}
+
+declare type XRTouchUpdateArgs = [
+    currentScene: Scene,
+    raycaster: Raycaster,
+    handProfile: XRHandProfile,
+    leftHand: XRHandModel,
+    rightHand: XRHandModel,
+    xrHandTouch: XRHandTouchRayExt | XRHandTouchSphereExt,
+    xrFrameDelta: number,
+    useBVH: boolean,
+    debug: XRHandTouchDebugParams
+]
 
 // VR HAND TOUCH - Events
 

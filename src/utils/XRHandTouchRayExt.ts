@@ -106,7 +106,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
     }
 
     // override
-    intersectionsPhase1Raycast(params: XRTouchRayUpdateParams, joint: Group): any {
+    intersectionsPhase1Raycast(params: XRTouchUpdateParams, joint: Group): any {
         return this.doRaycast(
             params.raycaster,
             joint.userData.origin,
