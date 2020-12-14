@@ -1,8 +1,8 @@
 import { XRHandTouch } from "./XRHandTouch"
-import { Group, Vector3, XRHandModel } from "svelthree-three"
+import { Group, Vector3 } from "svelthree-three"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
-export class XRHandTouchRayExt extends XRHandTouch {
+export default class XRHandTouchRayExt extends XRHandTouch {
     constructor(
         lerpFactor: number = XRHandTouchDefaults.LERP_FACTOR,
         touchDistance: number = XRHandTouchDefaults.TOUCH_DISTANCE
@@ -14,7 +14,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
 
     // override
     checkUntouchOutside(
-        hand: XRHandModel,
+        handSpace: Group,
         joint: Group,
         i: number,
         intersectObj: { [key: string]: any },
@@ -57,7 +57,7 @@ export class XRHandTouchRayExt extends XRHandTouch {
                 this.faceDebugger.colorTouchedFace(intersectObj, null)
             }
         } else {
-            // the joint SEEMS to be OUT OF 'touchDistance' (using the inital directional ray), but before dispatching untouch check if maybe the negative normal ray ist inside touch range
+            // the joint SEEMS to be OUT OF 'touchDistance' (using the initial directional ray), but before dispatching untouch check if maybe the negative normal ray ist inside touch range
             let nnRayIsInsideTouchDir: Vector3 = this.nnRayIntersectsFaceAndIsInTouchRange(
                 joint,
                 raycaster,
@@ -89,8 +89,8 @@ export class XRHandTouchRayExt extends XRHandTouch {
 
                 // dispatch 'untouch'
                 this.resetJointTouchData(joint)
-                this.removeJointFromTouchingArray(hand, i)
-                this.dispatchUntouch(hand, joint, i, intersectObj)
+                this.removeJointFromTouchingArray(handSpace, i)
+                this.dispatchUntouch(handSpace, joint, i, intersectObj)
             }
         }
     }

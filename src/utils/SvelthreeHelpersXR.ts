@@ -5,6 +5,7 @@ import {
     BufferGeometry,
     Vector3,
     Line,
+    Object3D,
     Group
 } from "svelthree-three"
 
@@ -12,7 +13,6 @@ import { XRHandRayConfigs } from "./XRHandRayConfigs"
 import XRHandJointIndices from "./XRHandJointIndices"
 
 export class SvelthreeHelpersXR {
-    controllerRay: Line
     tipRayL: Line
     tipRayR: Line
     stdRay: Line
@@ -27,7 +27,6 @@ export class SvelthreeHelpersXR {
     dirRayRpunch: Line
 
     constructor() {
-        this.createControllerHelper()
         this.createTipHelpers()
         this.createStandardHelpers()
         this.createHandDirectionHelpers()
@@ -95,13 +94,6 @@ export class SvelthreeHelpersXR {
         coord.add(cXp, cXn, cYp, cYn, cZp, cZn)
 
         return coord
-    }
-
-    createControllerHelper(): void {
-        let lineGeom: BufferGeometry = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, -1)])
-        this.controllerRay = new Line(lineGeom)
-        this.controllerRay.name = "Controller Ray"
-        this.controllerRay.scale.z = 5
     }
 
     /**
@@ -247,7 +239,7 @@ export class SvelthreeHelpersXR {
         XRHandJointIndices.METACARPAL
     )
 
-    addHandHelpers(xrhand: XRHandModel, i: number) {
+    addHandHelpers(xrhand: XRHandModel, handedness: XRHandedness) {
         let coordsScale: number = 0.0125
         let tipRay: Line
         let stdRay: Line
@@ -255,16 +247,16 @@ export class SvelthreeHelpersXR {
         let dirRayDwn: Line
         let dirRayPunch: Line
 
-        i == 0 ? (tipRay = this.tipRayL) : null
-        i == 1 ? (tipRay = this.tipRayR) : null
-        i == 0 ? (stdRay = this.stdRayL) : null
-        i == 1 ? (stdRay = this.stdRayR) : null
-        i == 0 ? (dirRayFwd = this.dirRayLfwd) : null
-        i == 1 ? (dirRayFwd = this.dirRayRfwd) : null
-        i == 0 ? (dirRayDwn = this.dirRayLdwn) : null
-        i == 1 ? (dirRayDwn = this.dirRayRdwn) : null
-        i == 0 ? (dirRayPunch = this.dirRayLpunch) : null
-        i == 1 ? (dirRayPunch = this.dirRayRpunch) : null
+        handedness === "left" ? (tipRay = this.tipRayL) : null
+        handedness === "right" ? (tipRay = this.tipRayR) : null
+        handedness === "left" ? (stdRay = this.stdRayL) : null
+        handedness === "right" ? (stdRay = this.stdRayR) : null
+        handedness === "left" ? (dirRayFwd = this.dirRayLfwd) : null
+        handedness === "right" ? (dirRayFwd = this.dirRayRfwd) : null
+        handedness === "left" ? (dirRayDwn = this.dirRayLdwn) : null
+        handedness === "right" ? (dirRayDwn = this.dirRayRdwn) : null
+        handedness === "left" ? (dirRayPunch = this.dirRayLpunch) : null
+        handedness === "right" ? (dirRayPunch = this.dirRayRpunch) : null
 
         //wrist
         xrhand.controller.children[0].add(stdRay.clone())

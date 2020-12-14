@@ -7,6 +7,7 @@
     import { svelthreeStores } from "../stores.js"
     import {
         WebGLRenderer,
+        WebXRController,
         Camera,
         Scene,
         Raycaster,
@@ -14,7 +15,6 @@
         Vector3,
         OrbitControls,
         Mesh,
-        Group,
         BufferGeometry
     } from "svelthree-three"
 
@@ -53,11 +53,13 @@
 
     interface XR {
         sessionMode: string
-        inputType: SessionVRInputType
-        controller: Group // AR
-        controllers: Group[] //VR
+        //inputType: SessionVRInputType
+        inputConfig: SessionVRInputConfig
+        controller: WebXRController // AR
+        controllerConfig: XRInputConfigGrippable
+        controllers: WebXRController[] //VR
         enablePinch: XRHandPinchConfig
-        handProfile: XRHandProfile
+        //handProfile: XRHandProfile
         enableTouch: XRHandTouchConfig
         touchEvents: XRHandTouchEvents
         enableTouchX: XRHandTouchXConfig
@@ -66,7 +68,9 @@
         rightHandTouchEnabled: boolean
         rightHandTouchEnabledJoints: number[]
         leftHandPinchEnabled: boolean
+        leftHandPinchConfig: XRHandPinchConfigItem
         rightHandPinchEnabled: boolean
+        rightHandPinchConfig: XRHandPinchConfigItem
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
@@ -126,11 +130,13 @@
         orbitcontrols: undefined,
         xr: {
             sessionMode: undefined,
-            inputType: undefined,
+            //inputType: undefined,
+            inputConfig: undefined,
             controller: undefined,
+            controllerConfig: undefined,
             controllers: [],
             enablePinch: undefined,
-            handProfile: undefined,
+            //handProfile: undefined,
             enableTouch: undefined,
             touchEvents: undefined,
             enableTouchX: undefined,
@@ -138,8 +144,10 @@
             leftHandTouchEnabledJoints: undefined,
             rightHandTouchEnabled: undefined,
             rightHandTouchEnabledJoints: undefined,
-            leftHandPinchEnabled: undefined,
-            rightHandPinchEnabled: undefined,
+            leftHandPinchEnabled: false,
+            leftHandPinchConfig: undefined,
+            rightHandPinchEnabled: false,
+            rightHandPinchConfig: undefined,
             requiredFeatures: [],
             optionalFeatures: [],
             domOverlay: undefined,

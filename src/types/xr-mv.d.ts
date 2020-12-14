@@ -89,14 +89,8 @@ declare interface XRPose {
 type XRHandedness = "" | "left" | "right"
 type XRTargetRayMode = "gaze" | "tracked-pointer" | "screen"
 
-declare interface XRInputSource {
-    readonly handedness: XRHandedness
-    readonly targetRayMode: XRTargetRayMode
-    readonly targetRaySpace: XRSpace
-    readonly gripSpace?: XRSpace
-    readonly profiles: Array<String>
-    readonly gamepad: Gamepad
-}
+// took babylon version
+// declare interface XRInputSource
 
 declare interface XRInputSourceEvent extends Event {
     readonly frame: XRFrame

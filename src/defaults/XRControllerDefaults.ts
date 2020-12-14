@@ -6,8 +6,12 @@ export default class XRControllerDefaults {
      * TODO  Look at the code and try to figure out if it's maybe svelthree's fault,
      * if something has changed during the refactoring of XRHandTouch.
      */
-    static INDEX_LEFT: number = 1 // was 0
-    static INDEX_RIGHT: number = 0
+    static INDEX_LEFT: number = 0 // was 0
+    static INDEX_RIGHT: number = 1
+
+    static ENABLED_LEFT: XRGrippableEnabled = "left"
+    static ENABLED_RIGHT: XRGrippableEnabled = "right"
+    static ENABLED_BOTH: XRGrippableEnabled = "both"
 
     static MAX_CONTROLLERS: number = 2
 

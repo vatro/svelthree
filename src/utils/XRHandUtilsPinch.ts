@@ -1,15 +1,15 @@
-import { XRHandModel } from "svelthree-three"
+import { Group } from "svelthree-three"
 
 export default class XRHandUtilsPinch {
     // event: Event --> Custom three.js Event defined inside WebXRController.js
-    public addListeners(hand: XRHandModel, listener: (event: Event) => void): void {
-        hand.addEventListener("pinchstart", listener)
-        hand.addEventListener("pinchend", listener)
+    public addListeners(handSpace: Group, listener: (event: Event) => void): void {
+        handSpace.addEventListener("pinchstart", listener)
+        handSpace.addEventListener("pinchend", listener)
     }
 
     // event: Event --> Custom three.js Event defined inside WebXRController.js
-    public removeListeners(hand: XRHandModel, listener: (event: Event) => void): void {
-        hand.removeEventListener("pinchstart", listener)
-        hand.removeEventListener("pinchend", listener)
+    public removeListeners(handSpace: Group, listener: (event: Event) => void): void {
+        handSpace.removeEventListener("pinchstart", listener)
+        handSpace.removeEventListener("pinchend", listener)
     }
 }

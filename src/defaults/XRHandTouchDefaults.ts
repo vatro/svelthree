@@ -1,9 +1,9 @@
 import XRHandJointIndices from "../utils/XRHandJointIndices"
 
 export default class XRHandTouchDefaults {
-    static ENABLED_LEFT: XRHandTouchEnabled = "left"
-    static ENABLED_RIGHT: XRHandTouchEnabled = "right"
-    static ENABLED_BOTH: XRHandTouchEnabled = "both"
+    static ENABLED_LEFT: XRHandEnabled = "left"
+    static ENABLED_RIGHT: XRHandEnabled = "right"
+    static ENABLED_BOTH: XRHandEnabled = "both"
 
     static TOUCH_TEST_MODE_RAY: XRHandTouchTestMode = "ray"
     static TOUCH_TEST_MODE_SPHERE: XRHandTouchTestMode = "sphere"
@@ -49,6 +49,7 @@ export default class XRHandTouchDefaults {
     static DBG_RAY_TENTACLE_DIRSCALE = 0.02
     static DBG_RAY_TENTACLE_TOUCHINGRAY_SCALE = XRHandTouchDefaults.DBG_RAY_TENTACLE_DIRSCALE * 3
 
+    static DBG_SPHERE_NAME = "debuggerSphere"
     static DBG_SPHERE_SEG_W = 16
     static DBG_SPHERE_SEG_H = 16
     static DBG_SPHERE_TOUCHED_COL = 0x00ff00

@@ -1,9 +1,7 @@
 import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color } from "svelthree-three"
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
-export class XRHandTouchSphereDebugger {
-    static touchSphereDebugName: string = "touchSphereDebug"
-
+export default class XRHandTouchSphereDebugger {
     touchSphereRadius: number
     touchSphereDebug: Mesh
     touchCol = new Color(XRHandTouchDefaults.DBG_SPHERE_TOUCHED_COL)
@@ -25,7 +23,7 @@ export class XRHandTouchSphereDebugger {
             new MeshBasicMaterial(config && config.mat ? config.mat : XRHandTouchDefaults.DBG_SPHERE_DEFAULT_MAT_CONFIG)
         )
 
-        this.touchSphereDebug.name = XRHandTouchSphereDebugger.touchSphereDebugName
+        this.touchSphereDebug.name = XRHandTouchDefaults.DBG_SPHERE_NAME
 
         if (config && config.colors) {
             for (const [key, value] of Object.entries(config.colors)) {
@@ -59,16 +57,21 @@ export class XRHandTouchSphereDebugger {
     colorFaces(mesh: Mesh, indices: number[], color: Color) {
         const geom: BufferGeometry = mesh.geometry as BufferGeometry
         const colorAttr = geom.getAttribute("color")
-        const indexAttr = geom.index
 
-        for (let i = 0, l = indices.length; i < l; i++) {
-            const i2 = indexAttr.getX(indices[i])
-            colorAttr.setX(i2, color.r)
-            colorAttr.setY(i2, color.g)
-            colorAttr.setZ(i2, color.b)
+        // Ignore non-paintable geometries (prevents Error: "cannot setX of undefined!")
+        if (colorAttr !== undefined) {
+            const indexAttr = geom.index
+
+            for (let i = 0, l = indices.length; i < l; i++) {
+                const i2 = indexAttr.getX(indices[i])
+
+                colorAttr.setX(i2, color.r)
+                colorAttr.setY(i2, color.g)
+                colorAttr.setZ(i2, color.b)
+            }
+
+            colorAttr.needsUpdate = true
         }
-
-        colorAttr.needsUpdate = true
     }
 
     update(doUpdate: boolean) {

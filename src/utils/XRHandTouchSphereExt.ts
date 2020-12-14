@@ -12,7 +12,7 @@ interface SphereTouchingResultsItem {
 
 interface SphereTouchingResults extends Array<SphereTouchingResultsItem> {}
 
-export class XRHandTouchSphereExt extends XRHandTouch {
+export default class XRHandTouchSphereExt extends XRHandTouch {
     touchSphere: Sphere
     // override
     touchSphereRadius: number
@@ -29,14 +29,14 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    update(hand: XRHandModel, params: XRTouchUpdateParams): void {
-        for (let i = 0; i < hand.userData.enabledJoints.length; i++) {
-            const jointIndex: number = hand.userData.enabledJoints[i]
-            const joint: Group = hand.children[jointIndex] as Group
+    update(handSpace: Group, params: XRTouchUpdateParams): void {
+        for (let i = 0; i < handSpace.userData.touchEnabledJoints.length; i++) {
+            const jointIndex: number = handSpace.userData.touchEnabledJoints[i]
+            const joint: Group = handSpace.children[jointIndex] as Group
 
             if (this.debug) {
                 if (this.jointDebugger) {
-                    this.jointDebugger.setJointMesh(hand, joint, jointIndex)
+                    this.jointDebugger.setJointMesh(handSpace, joint, jointIndex)
                 }
                 if (this.debuggerSphere && !joint.userData.debugSphere) {
                     this.debuggerSphere.createDebugSphere(joint)
@@ -51,7 +51,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                 joint,
                 jointIndex,
                 params.handProfile,
-                hand.userData.handedness
+                handSpace.userData.handedness
             )
 
             // SPHERE CLEANUP: we don't want to use direction at all in sphere mode
@@ -89,7 +89,7 @@ export class XRHandTouchSphereExt extends XRHandTouch {
 
             switch (joint.userData.touch) {
                 case false:
-                    console.log("FIRST CHECK!")
+                    //console.log("FIRST CHECK!")
                     if (this.debug) {
                         if (this.jointDebugger) {
                             this.jointDebugger.unhighlightJoint()
@@ -125,8 +125,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                             this.jointDebugger.highlightJoint()
                         }
 
-                        this.addJointToTouchingArray(hand, i)
-                        this.dispatchTouch(hand, joint, i, sphereTouchingResults)
+                        this.addJointToTouchingArray(handSpace, i)
+                        this.dispatchTouch(handSpace, joint, i, sphereTouchingResults)
                     } else {
                         // TODO : tbd // nothing?
                     }
@@ -203,8 +203,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
                             }
 
                             this.resetJointTouchData(joint)
-                            this.removeJointFromTouchingArray(hand, i)
-                            this.dispatchUntouch(hand, joint, i, null) // null details --> TODO  --> consider adding joint.userData.lastTouchIndices & joint.userData.lastTouchTris as detail
+                            this.removeJointFromTouchingArray(handSpace, i)
+                            this.dispatchUntouch(handSpace, joint, i, null) // null details --> TODO  --> consider adding joint.userData.lastTouchIndices & joint.userData.lastTouchTris as detail
                         }
                     }
 
@@ -373,8 +373,8 @@ export class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    dispatchTouch(hand: XRHandModel, joint: Group, i: number, intersect: SphereTouchingResults) {
-        hand.dispatchEvent({ type: "touch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
+    dispatchTouch(handSpace: Group, joint: Group, i: number, intersect: SphereTouchingResults) {
+        handSpace.dispatchEvent({ type: "touch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
         console.warn("HAND EVENT: touch!")
     }
 

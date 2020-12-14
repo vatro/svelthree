@@ -7,8 +7,9 @@ export default class XRDefaults {
     static HITTEST_MODE_REALWORLD: XRHitTestMode = "realworld"
     static DEFAULT_VR_XR_HITTEST_MODE: XRHitTestMode = XRDefaults.HITTEST_MODE_VIRTUAL
 
-    static VR_INPUT_TYPE_CONTROLLER: SessionVRInputType = "controller"
+    static VR_INPUT_TYPE_CONTROLLER: SessionVRInputType = "grippable"
     static VR_INPUT_TYPE_HAND: SessionVRInputType = "hand"
+    static VR_INPUT_TYPE_HYBRID: SessionVRInputType = "hybrid"
     static DEFAULT_VR_INPUT_TYPE: SessionVRInputType = XRDefaults.VR_INPUT_TYPE_CONTROLLER
 
     static HAND_PROFILE_BOXES: XRHandProfile = "boxes"

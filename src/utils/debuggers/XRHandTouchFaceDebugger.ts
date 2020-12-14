@@ -1,7 +1,7 @@
-import { Color } from "svelthree-three"
+import { BufferGeometry, Color } from "svelthree-three"
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
-export class XRHandTouchFaceDebugger {
+export default class XRHandTouchFaceDebugger {
     touchCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCH_COL)
     unTouchCol = new Color(XRHandTouchDefaults.DBG_FACE_UNTOUCH_COL)
     touchThroughEnterCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCHTHROUGH_ENTER_COL)
@@ -43,14 +43,16 @@ export class XRHandTouchFaceDebugger {
     }
 
     colorFace(intersected: { [key: string]: any }, color: Color, message: string) {
-        console.log("XRHandTouch : colorFace! " + message)
-        try {
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.a, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.b, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.setXYZ(intersected.face.c, color.r, color.g, color.b)
-            intersected.object.geometry.attributes.color.needsUpdate = true
-        } catch {
-            debugger
+        message ? console.log("XRHandTouch : colorFace! " + message) : console.log("XRHandTouch : colorFace!")
+
+        const geom: BufferGeometry = intersected.object.geometry as BufferGeometry
+        const colorAttr = geom.getAttribute("color")
+
+        if (colorAttr !== undefined) {
+            colorAttr.setXYZ(intersected.face.a, color.r, color.g, color.b)
+            colorAttr.setXYZ(intersected.face.b, color.r, color.g, color.b)
+            colorAttr.setXYZ(intersected.face.c, color.r, color.g, color.b)
+            colorAttr.needsUpdate = true
         }
     }
 }

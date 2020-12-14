@@ -37,17 +37,17 @@
         }
     }
 
-    //TODO: type hand
+    //TODO: type handSpace
     function addListeners() {
         for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            let hand = $svelthreeStores[sti].renderer.xr.getHand(i)
+            let handSpace: Group = $svelthreeStores[sti].renderer.xr.getHand(i)
             if (pinchRemote || pinchTouch || pinchHybrid) {
-                hand.addEventListener("pinchstart", tryDispatch)
-                hand.addEventListener("pinchend", tryDispatch)
+                handSpace.addEventListener("pinchstart", tryDispatch)
+                handSpace.addEventListener("pinchend", tryDispatch)
             }
 
             if (xrHandTouch) {
-                hand.addEventListener("touch", onXRHandTouch)
+                handSpace.addEventListener("touch", onXRHandTouch)
             }
         }
     }
@@ -55,12 +55,15 @@
     function onXRHandTouch(e) {}
 
     function removeListeners() {
-        for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            let hand = $svelthreeStores[sti].renderer.xr.getHand(i)
-            //hands
-            hand.removeEventListener("pinchstart", tryDispatch)
-            hand.removeEventListener("pinchend", tryDispatch)
-            hand.removeEventListener("touch", onXRHandTouch)
+        // Check if renderer is available, otherwise we get an error when trying to call $svelthreeStores[sti].renderer.xr.getHand(i)
+        if ($svelthreeStores[sti].renderer) {
+            for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
+                let handSpace = $svelthreeStores[sti].renderer.xr.getHand(i)
+                //hands
+                handSpace.removeEventListener("pinchstart", tryDispatch)
+                handSpace.removeEventListener("pinchend", tryDispatch)
+                handSpace.removeEventListener("touch", onXRHandTouch)
+            }
         }
     }
 

@@ -2,7 +2,7 @@ import { LineBasicMaterial, Scene, Group, Vector3, BufferGeometry, Line } from "
 
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
-export class XRHandTouchRayDebugger {
+export default class XRHandTouchRayDebugger {
     currentScene: Scene
     touchDistance: number
 

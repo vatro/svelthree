@@ -13,29 +13,4 @@
     export type PropScale = Vector3 | Array3
     export type PropLookAt = Vector3 | Array3
     export type PropMatrix4 = Matrix4
-
-    /*
-    export interface ISvelthreeAnimationFnResult {
-        onStart: () => void
-        onDestroy: () => void
-        onSceneDeactivated?: () => void
-        onSceneReactivated?: () => void
-    }
-
-    // export type SvelthreeAnimationFn = (obj:any, ...args:any[]) => ISvelthreeAnimationFnResult
-
-   
-    let fn:SvelthreeAnimationFn = () => {
-
-        function onStart() {}
-        function onDestroy() {}
-        function onPause() {}
-
-        return {
-            onStart: onStart,
-            onDestroy: onDestroy,
-            onPause: onPause
-        }
-    }
-*/
 </script>

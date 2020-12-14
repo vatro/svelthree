@@ -24,8 +24,8 @@
     import XRDefaults from "../defaults/XRDefaults"
 
     let ani: any
-    let self = get_current_component()
-    let dispatch = createEventDispatcher()
+    const self = get_current_component()
+    const dispatch = createEventDispatcher()
 
     // construction
 

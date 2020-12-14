@@ -1,8 +1,7 @@
-import { Mesh, Group, MeshBasicMaterial, XRHandModel } from "svelthree-three"
-
+import { Mesh, Group, MeshBasicMaterial } from "svelthree-three"
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
-export class XRHandTouchJointDebugger {
+export default class XRHandTouchJointDebugger {
     currentScene: Scene
     jointMesh: Mesh
     normalCol: number = XRHandTouchDefaults.DBG_JOINT_NORMAL_COL
@@ -24,16 +23,16 @@ export class XRHandTouchJointDebugger {
         }
     }
 
-    setJointMesh(hand: XRHandModel, joint: Group, i: number) {
-        this.jointMesh = this.getJointMesh(hand, joint, i)
+    setJointMesh(handSpace: Group, joint: Group, i: number) {
+        this.jointMesh = this.getJointMesh(handSpace, joint, i)
     }
 
-    getJointMesh(hand: XRHandModel, joint: Group, i: number): Mesh {
+    getJointMesh(handSpace: Group, joint: Group, i: number): Mesh {
         let jointMesh: Mesh
 
-        if (hand.children[25].children.length > 0) {
-            if (hand.children[25].children[0].children.length > 2) {
-                jointMesh = hand.children[25].children[0].children[i] as Mesh
+        if (handSpace.children[25].children.length > 0) {
+            if (handSpace.children[25].children[0].children.length > 2) {
+                jointMesh = handSpace.children[25].children[0].children[i] as Mesh
 
                 if (!joint.userData.hasDebugMaterial) {
                     joint.userData.hasDebugMaterial = true

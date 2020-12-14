@@ -5,7 +5,8 @@
 
     import { svelthreeStores } from "../stores.js"
     import { onMount } from "svelte"
-    import { Object3D } from "svelthree-three"
+
+    import { Object3D, WebXRController } from "svelthree-three"
     import { SvelteComponentDev } from "svelte/internal"
     import XRDefaults from "../defaults/XRDefaults.js"
 
@@ -17,13 +18,15 @@
     export let dispatch: (type: string, detail?: any) => void
 
     let controllersTotal: number = undefined
-    $: $svelthreeStores[sti].xr.controllers.length > 0
-        ? (controllersTotal = $svelthreeStores[sti].xr.controllers.length)
+    $: $svelthreeStores[sti].renderer.xr.getControllers().length > 0
+        ? (controllersTotal = $svelthreeStores[sti].renderer.xr.getControllers().length)
         : null
 
     $: if (controllersTotal) {
         if (interactionEnabled && obj && !obj.userData.interact) {
             //requestAnimationFrame(() => addListeners())
+
+            //debugger
             addListeners()
             obj.userData.interact = true
         } else if (!interactionEnabled && obj && obj.userData.interact) {
@@ -33,28 +36,85 @@
     }
 
     function addListeners() {
-        for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            let controller = $svelthreeStores[sti].xr.controllers[i]
-            //grips
-            controller.addEventListener("select", tryDispatch)
-            controller.addEventListener("selectstart", tryDispatch)
-            controller.addEventListener("selectend", tryDispatch)
-            controller.addEventListener("squeeze", tryDispatch)
-            controller.addEventListener("squeezestart", tryDispatch)
-            controller.addEventListener("squeezeend", tryDispatch)
+        for (let i = 0; i < $svelthreeStores[sti].renderer.xr.getControllers().length; i++) {
+            // WHY?  this doesn't work! returns new Group with controller.getTargetRaySpace()
+            //let controller: WebXRController = $svelthreeStores[sti].xr.controllers[i]
+
+            /*
+            let controller2: WebXRController = $svelthreeStores[sti].renderer.xr.getControllers[i]
+
+            const targetRaySpace1: Group = controller.getTargetRaySpace()
+            const targetRaySpace2: Group = controller2.getTargetRaySpace()
+
+            console.log(targetRaySpace1 === targetRaySpace2) // true
+
+            const targetRaySpace: Group = controller.getTargetRaySpace()
+
+            console.log(targetRaySpace1 === targetRaySpace) // true
+
+            debugger
+            */
+
+            const targetRaySpace: Group = $svelthreeStores[sti].renderer.xr.getController(i)
+
+            // WHY?  this doesn't work! returns new Group!
+            //const targetRaySpace: Group = controller.getTargetRaySpace()
+
+            targetRaySpace.addEventListener("select", tryDispatch)
+            targetRaySpace.addEventListener("selectstart", tryDispatch)
+            targetRaySpace.addEventListener("selectend", tryDispatch)
+            targetRaySpace.addEventListener("squeeze", tryDispatch)
+            targetRaySpace.addEventListener("squeezestart", tryDispatch)
+            targetRaySpace.addEventListener("squeezeend", tryDispatch)
+
+            // wleche uuid hat die gruppe und welche listener? vergleiche mit vrinteraction
+            // debugger
+
+            const gripSpace: Group = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
+
+            // this doesn't work! returns new Group!
+            //const gripSpace: Group = controller.getGripSpace()
+
+            gripSpace.addEventListener("select", tryDispatch)
+            gripSpace.addEventListener("selectstart", tryDispatch)
+            gripSpace.addEventListener("selectend", tryDispatch)
+            gripSpace.addEventListener("squeeze", tryDispatch)
+            gripSpace.addEventListener("squeezestart", tryDispatch)
+            gripSpace.addEventListener("squeezeend", tryDispatch)
+
+            // wleche uuid hat die gruppe und welche listener? vergleiche mit vrinteraction
+            //debugger
         }
     }
 
     function removeListeners() {
-        for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            let controller = $svelthreeStores[sti].xr.controllers[i]
-            //grips
-            controller.removeEventListener("select", tryDispatch)
-            controller.removeEventListener("selectstart", tryDispatch)
-            controller.removeEventListener("selectend", tryDispatch)
-            controller.removeEventListener("squeeze", tryDispatch)
-            controller.removeEventListener("squeezestart", tryDispatch)
-            controller.removeEventListener("squeezeend", tryDispatch)
+        for (let i = 0; i < $svelthreeStores[sti].renderer.xr.getControllers().length; i++) {
+            // WHY?  this doesn't work! returns new Group with controller.getTargetRaySpace()
+            //let controller = $svelthreeStores[sti].xr.controllers[i]
+
+            const targetRaySpace: Group = $svelthreeStores[sti].renderer.xr.getController(i)
+
+            // WHY?  this doesn't work! returns new Group!
+            // const targetRaySpace: Group = controller.getTargetRaySpace()
+
+            targetRaySpace.removeEventListener("select", tryDispatch)
+            targetRaySpace.removeEventListener("selectstart", tryDispatch)
+            targetRaySpace.removeEventListener("selectend", tryDispatch)
+            targetRaySpace.removeEventListener("squeeze", tryDispatch)
+            targetRaySpace.removeEventListener("squeezestart", tryDispatch)
+            targetRaySpace.removeEventListener("squeezeend", tryDispatch)
+
+            const gripSpace: Group = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
+
+            // WHY?  this doesn't work! returns new Group!
+            //const gripSpace: Group = controller.getGripSpace()
+
+            gripSpace.removeEventListener("select", tryDispatch)
+            gripSpace.removeEventListener("selectstart", tryDispatch)
+            gripSpace.removeEventListener("selectend", tryDispatch)
+            gripSpace.removeEventListener("squeeze", tryDispatch)
+            gripSpace.removeEventListener("squeezestart", tryDispatch)
+            gripSpace.removeEventListener("squeezeend", tryDispatch)
         }
     }
 
@@ -82,7 +142,9 @@
         return () => {
             console.info("SVELTHREE > onDestroy : SvelthreeInteractionVRController")
             obj.userData.interact = false
-            removeListeners()
+            if ($svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr) {
+                removeListeners()
+            }
         }
     })
 
@@ -92,7 +154,13 @@
     //function dispatchOnIntersect(e:XRInputSourceEvent): void {
     //e : {type, target}
     function dispatchOnIntersect(e) {
-        if (checkIntersect()) {
+        const eventType: XRControllerEventType = e.type
+
+        console.log(eventType)
+
+        //debugger
+
+        if (checkIntersect(e.target.userData.intersections)) {
             e.type === "select" ? doDispatch(e, !!parent.onSelect) : null
             e.type === "selectstart" ? doDispatch(e, !!parent.onSelectStart) : null
             e.type === "selectend" ? doDispatch(e, !!parent.onSelectEnd) : null
@@ -102,29 +170,39 @@
         }
     }
 
-    //TODO: Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
+    // TODO  Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
     //function doDispatch(e: XRInputSourceEvent, fireInternal: boolean): void {
     //e : {type, target}
-    function doDispatch(e, fireInternal: boolean): void {
-        mDispatch(
-            e.type,
-            {
-                type: e.type,
-                obj: obj,
-                target: e.target,
-                handedness: e.target.userData.handedness
-                //frame: e.frame,
-                //inputSource: e.inputSource
-            },
-            fireInternal
-        )
+    function doDispatch(e: XRControllerSpaceEvent, fireInternal: boolean): void {
+        const message: XRControllerEventType = e.type
+
+        const detail: XRControllerEventDetailObj = {
+            //type: e.type,
+            xrInputSource: e.target.userData.xrInputSource, // XRInputSource
+            controllerSpace: e.target,
+            controllerSpaceType: e.target.userData.spaceType,
+            //obj: obj,
+            controllerHandedness: e.target.userData.xrInputSource.handedness,
+            targetObj: obj
+            //frame: e.frame,
+            //inputSource: e.inputSource
+        }
+
+        const target: Object3D = obj
+
+        mDispatch(message, detail, fireInternal)
     }
 
-    function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
-        dispatch(message, details)
+    // TODO  Type details!
+    function mDispatch(
+        message: XRControllerEventType,
+        detail: XRControllerEventDetailObj,
+        fireInternal: boolean
+    ): void {
+        dispatch(message, detail)
 
         if (fireInternal) {
-            let event = new CustomEvent(message, { detail: details })
+            let event = new CustomEvent(message, { detail: detail })
             switch (message) {
                 case "select":
                     parent.onSelect ? onSelectAction(event) : null
@@ -150,15 +228,9 @@
         }
     }
 
-    function checkIntersect(): boolean {
-        if (
-            $svelthreeStores[sti].xr.hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL &&
-            $svelthreeStores[sti].allIntersections
-        ) {
-            if (
-                $svelthreeStores[sti].allIntersections.length > 0 &&
-                $svelthreeStores[sti].allIntersections[0].object === obj
-            ) {
+    function checkIntersect(intersections: any[]): boolean {
+        if ($svelthreeStores[sti].xr.hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL && intersections) {
+            if (intersections.length > 0 && intersections[0].object === obj) {
                 return true
             }
 
