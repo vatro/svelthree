@@ -50,6 +50,7 @@ export default {
     ],
     plugins: [
         svelte({
+            extensions: ['.svelte'],
             preprocess: preprocess({
                 typescript: {
                     /**
@@ -78,7 +79,7 @@ export default {
                      */
                     //  WHY?  This must be true, otherwise the build fails.
                     //  WHY?  Update: it doesn't fail anymore, leave it true.
-                    transpileOnly: true
+                    transpileOnly: false
                 }
             })
         }),

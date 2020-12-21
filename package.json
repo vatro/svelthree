@@ -10,25 +10,32 @@
     "build": "rollup -c",
     "prepublishOnly": "npm run build",
     "svelte-check": "svelte-check",
+    "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
     "local-tsc": "tsc",
+    "declarations": "tsc --declaration --emitDeclarationOnly --removeComments true --declarationDir ./src/types",
+    "docs": "typedoc --out docs src",
+    "svelthree-three-types": "node generate-svelthree-three-types.js",
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
-    "@rollup/plugin-typescript": "^5.0.2",
-    "prettier": "^2.0.5",
-    "rollup": "^2.23.0",
-    "rollup-plugin-svelte": "^5.2.3",
-    "rollup-plugin-terser": "^6.1.0",
-    "svelte": "^3.24.0",
-    "svelte-check": "^1.0.5",
-    "svelte-preprocess": "^4.0.9",
-    "tslib": "^2.0.0",
-    "typescript": "^3.9.7"
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-typescript": "^6.0.0",
+    "copy-dir": "^1.3.0",
+    "prettier": "^2.1.2",
+    "rollup": "^2.28.2",
+    "rollup-plugin-svelte": "^6.0.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "svelte": "^3.29.0",
+    "svelte-check": "^1.0.52",
+    "svelte-preprocess": "^4.3.2",
+    "tslib": "^2.0.1",
+    "typedoc": "^0.19.2",
+    "typedoc-plugin-markdown": "^3.0.11",
+    "typescript": "^4.1.2"
   },
   "dependencies": {
-    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#119-1"
+    "three-mesh-bvh": "git+https://github.com/gkjohnson/three-mesh-bvh.git"
   },
   "author": "Vatroslav Vrbanic",
   "repository": {

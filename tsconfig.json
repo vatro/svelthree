@@ -2,7 +2,8 @@
     "compilerOptions": {
         // @see https://github.com/sveltejs/language-tools/blob/master/docs/preprocessors/typescript.md#getting-it-to-work-for-your-build 
         "moduleResolution": "node",
-        "target": "es2017",
+        "target": "es2018",
+        "module": "ES2020", //enables dynmaic imports
         //This fixes wrong code line highlighting (svelte errors)!
         "sourceMap": true,
 
@@ -21,6 +22,10 @@
         // TODO: Keep an eye on how to emit a d.ts files from a .svelte component using typescript.
         // I believe this is currently not possible. (?)
         
+        // If we set this to true, we get 'undefined' Errors! So we would have to add 'undefined' to every Type we initially set as 'undefined'
+        // turning them into Union-Types, which we don't want.
+        //"strict": true,
+
         /*
         "declaration": true,
         "declarationDir": "./dist/types",
@@ -41,7 +46,6 @@
             //trying to fix bundle bug (importing from .mjs)
             "es2017", "DOM"
         ],*/
-
         "types": [
             "svelte"
         ],
@@ -51,6 +55,6 @@
         "src/**/*"
       ],
     "exclude": [
-        "node_modules/*", "dist/*"
+        "src/utils/__depr/*.ts"
     ]
 }
