@@ -9,7 +9,12 @@ import {
     Vector3,
     LineBasicMaterial,
     Line,
-    LineDashedMaterial
+    LineDashedMaterial,
+    XRControllerModel,
+    XRControllerModelFactory,
+    GLTFLoader,
+    Raycaster,
+    Scene
 } from "svelthree-three"
 import XRControllerDefaults from "../defaults/XRControllerDefaults"
 
@@ -39,7 +44,10 @@ export default class XRControllerUtils {
         material?: LineBasicMaterial | LineDashedMaterial,
         scaleZ?: number
     ): Object3D {
-        let lineGeom: BufferGeometry = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, -1)])
+        const lineGeom: BufferGeometry = new BufferGeometry().setFromPoints([
+            new Vector3(0, 0, 0),
+            new Vector3(0, 0, -1)
+        ])
         let lineMat: LineBasicMaterial | LineDashedMaterial
 
         material ? (lineMat = material) : (lineMat = new LineBasicMaterial({ color: 0xc53030, linewidth: 2 }))
@@ -55,22 +63,22 @@ export default class XRControllerUtils {
     }
 
     public static getRayIntersections(raycaster: Raycaster, currentScene: Scene, controller: Group): any[] {
-        console.warn("SessionVR getRayIntersections!")
+        console.warn("SVELTHREE > SessionVR > XRControllerUtils > getRayIntersections!")
 
-        let tempMatrix: Matrix4 = new Matrix4()
+        const tempMatrix: Matrix4 = new Matrix4()
 
         tempMatrix.identity().extractRotation(controller.matrixWorld)
         raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld)
         raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix)
 
         // TODO  will the controller intersect itself like this?
-        let toTest = currentScene.children.filter((child: Object3D) => child.type === "Mesh")
+        const toTest = currentScene.children.filter((child: Object3D) => child.type === "Mesh")
 
         return raycaster.intersectObjects(toTest, true)
     }
 
     public static createControllers(maxControllers: number, xr: WebXRManager): WebXRController[] {
-        let controllers: WebXRController[] = []
+        const controllers: WebXRController[] = []
 
         for (let i = 0; i < maxControllers; i++) {
             /* Create new controller directly */
@@ -89,44 +97,139 @@ export default class XRControllerUtils {
         return controllers
     }
 
+    public static getInputConfigGrippable(inputConfig: SessionVRInputConfig): XrInputConfigGrippable {
+        for (let i = 0; i < inputConfig.length; i++) {
+            const c = inputConfig[i]
+            if (c.type === "grippable") {
+                return c.config as XrInputConfigGrippable
+            }
+        }
+
+        return null
+    }
+
     public static applyGrippableConfig(
-        grippableConfig: XRInputConfigGrippable,
+        grippableConfig: XrInputConfigGrippable,
+        gripSpace: Group,
+        handedness: XRHandedness
+    ): boolean {
+        let useGrip: boolean = false
+
+        for (let i = 0; i < grippableConfig.length; i++) {
+            let config: XrInputConfigGrippableItem = grippableConfig[i]
+
+            if (config.controller === XRControllerDefaults.ENABLED_BOTH || handedness === config.controller) {
+                config.useGrip ? (gripSpace.userData.useGrip = config.useGrip) : (gripSpace.userData.useGrip = null)
+                config.grip ? (gripSpace.userData.gripConfig = config.grip) : (gripSpace.userData.gripConfig = null)
+
+                config.useGrip ? (useGrip = true) : null
+            }
+        }
+
+        return useGrip
+    }
+
+    public static addGripModelCheck(gripSpace: Group): boolean {
+        const existingGripModels: XRControllerModel[] = XRControllerUtils.getAllControllerModelsInside(gripSpace)
+
+        if (existingGripModels.length === 0) {
+            if (gripSpace.userData.gripConfig === null) {
+                return true
+            }
+        } else {
+            if (existingGripModels.length === 1) {
+                console.warn(
+                    "SVELTHREE > SessionVR > XRControllerUtils > addGripModelCheck : XRControllerdModel is already existing inside gripSpace! ",
+                    gripSpace
+                )
+            }
+
+            if (existingGripModels.length > 1) {
+                // This shouldn't happen -->  TODO  Is there a scenario where we want to use more than one hand model?
+                console.error(
+                    "SVELTHREE > SessionVR > XRControllerUtils > addGripModelCheck : There are more than one XRControllerdModels inside gripSpace! ",
+                    gripSpace
+                )
+            }
+        }
+
+        return false
+    }
+
+    public static addNewXRControllerModelToSpace(gripSpace: Group, gltfLoader?: GLTFLoader): XRControllerModel {
+        console.warn("SVELTHREE > SessionVR > XRControllerUtils > addNewXRControllerModelToSpace!", gripSpace)
+
+        // TODO  We could pass a custom GLTF-Loader to the XRControllerModelFactory, but it doesn't seem to be implemented fully in 119 (?)
+        const controllerModelFactory: XRControllerModelFactory = new XRControllerModelFactory(gltfLoader)
+
+        const gripModel = controllerModelFactory.createControllerModel(gripSpace)
+
+        gripSpace.add(gripModel)
+
+        return gripModel
+    }
+
+    public static removeAllExistingXRControllerModelsFromSpace(gripSpace: Group) {
+        const existingControllerModels: XRControllerModel[] = XRControllerUtils.getAllControllerModelsInside(gripSpace)
+
+        if (existingControllerModels.length > 0) {
+            // This shouldn't happen -->  TODO  Is there a scenario where we want to use more than one controller model?
+            console.error(
+                "SVELTHREE > SessionVR > onGripSpaceConnected : Deleting all existing XRControllerModels from grip space! ",
+                gripSpace,
+                existingControllerModels
+            )
+
+            // remove all existing grip models,because we don't need them / we don't use grip (anymore)
+
+            for (let i = existingControllerModels.length - 1; i >= 0; i--) {
+                gripSpace.remove(existingControllerModels[i])
+            }
+        }
+    }
+
+    public static applyTargetRayConfig(
+        grippableConfig: XrInputConfigGrippable,
         handedness: XRHandedness,
         space: Group,
         doEmpty?: boolean
-    ): boolean {
-        let targetRayConfig: XRControllerTargetRayConfig = undefined
+    ): void {
+        let targetRayConfig: XrControllerTargetRayConfig = undefined
 
         for (let i = 0; i < grippableConfig.length; i++) {
-            let config: XRInputConfigGrippableItem = grippableConfig[i]
+            let config: XrInputConfigGrippableItem = grippableConfig[i]
 
-            if (config.controller === XRControllerDefaults.ENABLED_BOTH) {
-                targetRayConfig = config.targetRay
-            } else if (
-                handedness === XRControllerDefaults.ENABLED_LEFT &&
-                config.controller === XRControllerDefaults.ENABLED_LEFT
-            ) {
-                targetRayConfig = config.targetRay
-            } else if (
-                handedness === XRControllerDefaults.ENABLED_RIGHT &&
-                config.controller === XRControllerDefaults.ENABLED_RIGHT
-            ) {
-                targetRayConfig = config.targetRay
+            if (config.targetRay) {
+                if (config.controller === XRControllerDefaults.ENABLED_BOTH) {
+                    targetRayConfig = config.targetRay
+                } else if (
+                    handedness === XRControllerDefaults.ENABLED_LEFT &&
+                    config.controller === XRControllerDefaults.ENABLED_LEFT
+                ) {
+                    targetRayConfig = config.targetRay
+                } else if (
+                    handedness === XRControllerDefaults.ENABLED_RIGHT &&
+                    config.controller === XRControllerDefaults.ENABLED_RIGHT
+                ) {
+                    targetRayConfig = config.targetRay
+                }
             }
         }
 
         if (targetRayConfig) {
             XRControllerUtils.addRayToControllerTargetRaySpace(space, targetRayConfig, doEmpty)
-            return true
         } else {
-            // remove standard ray
-            return false
+            // don't add ray
+            console.warn(
+                "SVELTHREE > SessionVR > XRControllerUtils > applyTargetRayConfig : Controller will have no visible target for provided configuration! ",
+                grippableConfig
+            )
         }
     }
 
     public static addRayToControllerTargetRaySpace(
         targetRaySpace: Group,
-        targetRayConfig?: XRControllerTargetRayConfig,
+        targetRayConfig?: XrControllerTargetRayConfig,
         doEmpty?: boolean
     ) {
         if (doEmpty) {
@@ -151,7 +254,7 @@ export default class XRControllerUtils {
     public static clearControllerSpace(space: Group) {
         if (space.children.length > 0) {
             for (let i = space.children.length - 1; i >= 0; i--) {
-                let content: Object3D = space.children[i]
+                const content: Object3D = space.children[i]
                 space.remove(content)
             }
         }
@@ -159,8 +262,8 @@ export default class XRControllerUtils {
 
     public static getTargetRaySpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
         for (let i = 0; i < manager.getControllers().length; i++) {
-            let targetRaySpace: Group = manager.getController(i)
-            let inputSource: XRInputSource = targetRaySpace.userData.xrInputSource
+            const targetRaySpace: Group = manager.getController(i)
+            const inputSource: XRInputSource = targetRaySpace.userData.xrInputSource
 
             if (inputSource.handedness === handedness) {
                 return targetRaySpace
@@ -172,15 +275,63 @@ export default class XRControllerUtils {
 
     public static getGripSpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
         for (let i = 0; i < manager.getControllers().length; i++) {
-            let targetRaySpace: Group = manager.getController(i)
-            let gripSpace: Group = manager.getControllerGrip(i)
-            let inputSource: XRInputSource = targetRaySpace.userData.xrInputSource
+            const controller: WebXRController = manager.getControllers()[i]
 
-            if (inputSource.handedness === handedness) {
-                return gripSpace
+            // we can get gripSpace directly from controller in order to prevent using manager.getControllerGrip(i), which will create a new handSpace, but we may not want that.
+            let gripSpaceAvailable: boolean = controller["_grip"] ? true : false
+
+            if (gripSpaceAvailable) {
+                const gripSpace: Group = manager.getControllerGrip(i)
+                const inputSource: XRInputSource = gripSpace.userData.xrInputSource
+
+                if (inputSource.handedness === handedness) {
+                    return gripSpace
+                }
             }
         }
 
         return null
+    }
+
+    public static tryAddingSpaceToScene(space: Group, scene: Scene) {
+        if (space.parent !== scene) {
+            scene.add(space)
+        } else {
+            console.warn(
+                "SVELTHREE > SessionVR > XRControllerUtils > tryAddingSpaceToScene : Provided space was already added to the Scene!",
+                {
+                    space: space,
+                    xrInputSource: space.userData.xrInputSource
+                }
+            )
+        }
+    }
+
+    public static tryRemovingSpaceFromScene(space: Group, scene: Scene) {
+        if (space.parent === scene) {
+            scene.remove(space)
+        } else {
+            console.warn(
+                "SVELTHREE > SessionVR > XRControllerUtils > tryRemovingSpaceFromScene : Provided space is not a child of the Scene!",
+                {
+                    space: space,
+                    xrInputSource: space.userData.xrInputSource
+                }
+            )
+        }
+    }
+
+    public static getAllControllerModelsInside(gripSpace: Group): XRControllerModel[] {
+        const controllerModels: XRControllerModel[] = []
+
+        for (let i = 0; i < gripSpace.children.length; i++) {
+            let child: any = gripSpace.children[i]
+
+            if (child instanceof XRControllerModel) {
+                controllerModels.push(child as XRControllerModel)
+            }
+        }
+
+        return controllerModels
     }
 }

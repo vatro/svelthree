@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _OrthographicCamera_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -6,7 +11,7 @@
     import { OrthographicCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropRot, PropLookAt } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropLookAt } from "../utils/SvelthreeTypes"
 
     export let scene: Scene
     export let id: string = undefined
@@ -18,7 +23,6 @@
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
-    // TODO  Implement animation
     export let animation: any = undefined
     export let aniauto = false
 
@@ -33,23 +37,16 @@
     // TODO  Implement
     export let matrix = undefined
 
-    //props object can be filled with all available Theejs-PerspectiveCamera parameters and props
-    //PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
-
-    // TOFIX : (compiles) if possible --> Type '{ [key: string]: any; }' must have a '[Symbol.iterator]()' method that returns an iterator.
-    //WHY? not just hardcode contructor arguments? ANSWER: Avoiding mainting THREE constructor changes, let THREE report constructor API Errors.
-    export let config: { [key: string]: any } = undefined
+    export let params: ConstructorParameters<typeof OrthographicCamera> = undefined
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
     let cam: OrthographicCamera = undefined
 
-    config && config.length > 0
-        ? // TOFIX : (compiles) if possible --> Expected 4-6 arguments, but got 0 or more.
-          //WHY? not just hardcode contructor arguments? ANSWER: Avoiding mainting THREE constructor changes, let THREE report constructor API Errors.
-          (cam = new OrthographicCamera(...config))
-        : // INCONSISTENCY  we said we don't want to hardcode constructor and now we're doing it as default init config!
+    params && params.length > 0
+        ? (cam = new OrthographicCamera(...params))
+        : // TODO  INCONSISTENCY  we said we don't want to hardcode constructor and now we're doing it as default init config!
           (cam = new OrthographicCamera(
               (frustumSize * aspect) / -2,
               (frustumSize * aspect) / 2,
@@ -117,15 +114,9 @@
         return id
     }
 
-    /** TODO  how to type Svelte components?
-     * type SvelteComponent = import('*.svelte').default
-     * */
+    let camera: Camera
 
-    // TODO  do I have to write an Interface by myself?
-    let camera: Camera // typeof = 'object'
-
-    export function getCamera(): Camera {
-        // TODO  keep an eye on it / fix. compiles without errors, so leave it.
+    export function getCamera(): THREE.Camera {
         return camera.getCamera()
     }
 

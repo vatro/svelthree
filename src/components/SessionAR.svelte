@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _SessionAR_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -29,9 +34,9 @@
     }
 
     const sessionMode: XRSessionMode = XRDefaults.SESSION_MODE_AR
-    export let requiredFeatures: XRRequiredFeatures[] = undefined
-    export let hitTestMode: XRHitTestMode = XRDefaults.HITTEST_MODE_VIRTUAL // default is "virtual", meaning no real world testing
-    export let optionalFeatures: XROptionalFeatures[] = undefined
+    export let requiredFeatures: XrRequiredFeatures[] = undefined
+    export let hitTestMode: XrHitTestMode = XRDefaults.HITTEST_MODE_VIRTUAL // default is "virtual", meaning no real world testing
+    export let optionalFeatures: XrOptionalFeatures[] = undefined
     export let btnClass: string = undefined
     export let btnTxt: { [key: string]: string } = undefined
     export let domOverlay: HTMLDivElement = undefined
@@ -353,7 +358,9 @@
         console.info("SVELTHREE > onMount : SessionAR")
     })
 
-    export function sethitTestMode(mode: XRHitTestMode) {
+    export function sethitTestMode(mode: XrHitTestMode) {
         hitTestMode = mode
     }
 </script>
+
+

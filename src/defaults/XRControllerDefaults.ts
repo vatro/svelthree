@@ -9,9 +9,9 @@ export default class XRControllerDefaults {
     static INDEX_LEFT: number = 0 // was 0
     static INDEX_RIGHT: number = 1
 
-    static ENABLED_LEFT: XRGrippableEnabled = "left"
-    static ENABLED_RIGHT: XRGrippableEnabled = "right"
-    static ENABLED_BOTH: XRGrippableEnabled = "both"
+    static ENABLED_LEFT: XrGrippableEnabled = "left"
+    static ENABLED_RIGHT: XrGrippableEnabled = "right"
+    static ENABLED_BOTH: XrGrippableEnabled = "both"
 
     static MAX_CONTROLLERS: number = 2
 

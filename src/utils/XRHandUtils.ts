@@ -1,3 +1,4 @@
+import { Group, WebXRController, WebXRManager, XRHandModel, XRHandModelFactory } from "svelthree-three"
 import XRControllerDefaults from "../defaults/XRControllerDefaults"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 import XRHandUtilsPinch from "./XRHandUtilsPinch"
@@ -6,7 +7,7 @@ import XRHandUtilsTouchX from "./XRHandUtilsTouchX"
 
 export default class XRHandUtils {
     public static addName(handSpace: Group): void {
-        let handInputSource: XRInputSource = handSpace.userData.xrInputSource
+        const handInputSource: XRInputSource = handSpace.userData.xrInputSource
         handInputSource.handedness === XRControllerDefaults.HANDEDNESS_LEFT
             ? (handSpace.name = XRControllerDefaults.HAND_NAME_LEFT)
             : null
@@ -16,12 +17,12 @@ export default class XRHandUtils {
     }
 
     public static addUserDataHandedness(handSpace: Group): void {
-        let handInputSource: XRInputSource = handSpace.userData.xrInputSource
+        const handInputSource: XRInputSource = handSpace.userData.xrInputSource
         handSpace.userData.handedness = handInputSource.handedness
     }
 
-    public static applyEnablePinch(enablePinch: XRHandPinchConfig): XRHandEnablePinchResult {
-        let result: XRHandEnablePinchResult = {
+    public static applyEnablePinch(enablePinch: XrHandPinchConfig): XrHandEnablePinchResult {
+        const result: XrHandEnablePinchResult = {
             leftHandPinchEnabled: false,
             leftHandPinchConfig: undefined,
             rightHandPinchEnabled: false,
@@ -29,7 +30,7 @@ export default class XRHandUtils {
         }
 
         for (let i = 0; i < enablePinch.length; i++) {
-            let item: XRHandPinchConfigItem = enablePinch[i]
+            const item: XrHandPinchConfigItem = enablePinch[i]
 
             if (item.hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 result.leftHandPinchConfig = item
@@ -70,8 +71,8 @@ export default class XRHandUtils {
         return result
     }
 
-    public static applyEnableTouch(hands: XRHandTouchConfigHands): XRHandEnableTouchResult {
-        let result: XRHandEnableTouchResult = {
+    public static applyEnableTouch(hands: XrHandTouchConfigHands): XrHandEnableTouchResult {
+        const result: XrHandEnableTouchResult = {
             leftHandTouchEnabled: false,
             leftHandTouchEnabledJoints: [],
             rightHandTouchEnabled: false,
@@ -79,8 +80,8 @@ export default class XRHandUtils {
         }
 
         for (let i = 0; i < hands.length; i++) {
-            let item: XRHandTouchConfigHandsItem = hands[i]
-            let hand: XRHandTouchEnabled = item.hand
+            const item: XrHandTouchConfigHandsItem = hands[i]
+            const hand: XrHandTouchEnabled = item.hand
 
             if (hand === XRHandTouchDefaults.ENABLED_RIGHT) {
                 result.rightHandTouchEnabled = true
@@ -109,22 +110,11 @@ export default class XRHandUtils {
         return result
     }
 
-    public static getInputConfigGrippable(inputConfig: SessionVRInputConfig): XRInputConfigGrippable {
+    public static getInputConfigHand(inputConfig: SessionVRInputConfig): XrInputConfigHand {
         for (let i = 0; i < inputConfig.length; i++) {
-            let c = inputConfig[i]
-            if (c.type === "grippable") {
-                return c.config as XRInputConfigGrippable
-            }
-        }
-
-        return null
-    }
-
-    public static getInputConfigHand(inputConfig: SessionVRInputConfig): XRInputConfigHand {
-        for (let i = 0; i < inputConfig.length; i++) {
-            let c = inputConfig[i]
+            const c = inputConfig[i]
             if (c.type === "hand") {
-                return c.config as XRInputConfigHand
+                return c.config as XrInputConfigHand
             }
         }
 
@@ -132,7 +122,7 @@ export default class XRHandUtils {
     }
 
     public static applyHandConfig(
-        inputConfigHand: XRInputConfigHand,
+        inputConfigHand: XrInputConfigHand,
         handedness: XRHandedness,
         handSpace: Group
     ): boolean {
@@ -148,7 +138,110 @@ export default class XRHandUtils {
             }
         }
 
+        console.warn(
+            "SVELTHREE > SessionVR > XRHandUtils > applyHandConfig : Failed! No applicable hand configuration was found! ",
+            inputConfigHand
+        )
         return false
+    }
+
+    public static getHandSpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
+        for (let i = 0; i < manager.getControllers().length; i++) {
+            const controller: WebXRController = manager.getControllers()[i]
+
+            // let gripSpaceAvailable:boolean = controller['_grip'] ? true : false
+            // let targetRayAvailable:boolean = controller['_targetRay'] ? true : false
+
+            // we can get handSpace directly from controller in order to prevent using manager.getHand(i), which will create a new handSpace, but we may not want that.
+            let handSpaceAvailable: boolean = controller["_hand"] ? true : false
+
+            if (handSpaceAvailable) {
+                const handSpace: Group = manager.getHand(i)
+
+                /**
+                 * If 'inputSource' is null it means Hand was not connected yet, or it shouldn't be available
+                 * @see SessionVR.onConnectedHandSpace
+                 */
+                const inputSource: XRInputSource = handSpace.userData.xrInputSource || null
+
+                if (inputSource && inputSource.handedness === handedness) {
+                    return handSpace
+                }
+            }
+        }
+
+        return null
+    }
+
+    public static addXRHandModelCheck(handSpace: Group): boolean {
+        const existingHandModels: XRHandModel[] = XRHandUtils.getAllHandModelsInside(handSpace)
+
+        if (existingHandModels.length === 0) {
+            return true
+        } else {
+            if (existingHandModels.length === 1) {
+                console.warn(
+                    "SVELTHREE > SessionVR > XRHandUtils > addXRHandModelCheck : XRHandModel is already existing inside handSpace! ",
+                    handSpace,
+                    existingHandModels
+                )
+            }
+
+            if (existingHandModels.length > 1) {
+                // This shouldn't happen -->  TODO  Is there a scenario where we want to use more than one hand model?
+                console.error(
+                    "SVELTHREE > SessionVR > XRHandUtils > addXRHandModelCheck : There are more than one XRHandModel inside handSpace! ",
+                    handSpace,
+                    existingHandModels
+                )
+            }
+        }
+
+        return false
+    }
+
+    public static getAllHandModelsInside(handSpace: Group): XRHandModel[] {
+        const handModels: XRHandModel[] = []
+
+        for (let i = 0; i < handSpace.children.length; i++) {
+            let child: any = handSpace.children[i]
+
+            if (child instanceof XRHandModel) {
+                handModels.push(child as XRHandModel)
+            }
+        }
+
+        return handModels
+    }
+
+    public static addNewXRHandModelToSpace(handSpace: Group): XRHandModel {
+        console.warn("SVELTHREE > SessionVR > XRHandUtils > addNewXRHandModelToSpace!", handSpace)
+
+        const handModelFactory: XRHandModelFactory = new XRHandModelFactory().setPath(
+            handSpace.userData.pathToHandModels
+        )
+
+        const handModel = handModelFactory.createHandModel(handSpace, handSpace.userData.handProfile, null)
+
+        handSpace.add(handModel)
+
+        return handModel
+    }
+
+    public static removeAllExistingXRHandModelsFromSpace(handSpace: Group): void {
+        const existingHandModels: XRHandModel[] = XRHandUtils.getAllHandModelsInside(handSpace)
+
+        if (existingHandModels.length > 0) {
+            console.warn(
+                "SVELTHREE > SessionVR > XRHandUtils > removeAllExistingXRHandModelsFromSpace : Removing all existing XRHandModel inside handSpace! ",
+                handSpace,
+                existingHandModels
+            )
+
+            for (let i = existingHandModels.length - 1; i >= 0; i--) {
+                handSpace.remove(existingHandModels[i])
+            }
+        }
     }
 
     static PINCH: XRHandUtilsPinch = new XRHandUtilsPinch()

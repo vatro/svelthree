@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _SvelthreeInteractionVRHands_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -5,9 +10,8 @@
 
     import { svelthreeStores } from "../stores.js"
     import { onMount } from "svelte"
-    import { Object3D, Group } from "svelthree-three"
+    import { Object3D, Group, WebXRManager, WebGLRenderer } from "svelthree-three"
     import { SvelteComponentDev } from "svelte/internal"
-    import XRDefaults from "../defaults/XRDefaults.js"
 
     export let interactionEnabled: boolean
     export let parent: SvelteComponentDev
@@ -22,13 +26,37 @@
     export let dispatch: (type: string, detail?: any) => void
 
     let controllersTotal: number = undefined
-    $: $svelthreeStores[sti].xr.controllers.length > 0
-        ? (controllersTotal = $svelthreeStores[sti].xr.controllers.length)
-        : null
+
+    let renderer: WebGLRenderer
+
+    $: if ($svelthreeStores[sti].renderer) {
+        renderer = $svelthreeStores[sti].renderer
+    }
+
+    $: if ($svelthreeStores[sti].renderer.xr) {
+        webXRManager = $svelthreeStores[sti].renderer.xr
+    }
+
+    let webXRManager: WebXRManager
+
+    $: if ($svelthreeStores[sti].renderer.xr) {
+        webXRManager = $svelthreeStores[sti].renderer.xr
+    }
+
+    $: if ($svelthreeStores[sti].renderer.xr.getControllers().length > 0) {
+        controllersTotal = $svelthreeStores[sti].renderer.xr.getControllers().length
+    }
 
     $: if (controllersTotal) {
+        applyListeners()
+    }
+
+    $: if (interactionEnabled) {
+        applyListeners()
+    }
+
+    function applyListeners() {
         if (interactionEnabled && obj && !obj.userData.interact) {
-            //requestAnimationFrame(() => addListeners())
             addListeners()
             obj.userData.interact = true
         } else if (!interactionEnabled && obj && obj.userData.interact) {
@@ -37,17 +65,19 @@
         }
     }
 
-    //TODO: type handSpace
     function addListeners() {
-        for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-            let handSpace: Group = $svelthreeStores[sti].renderer.xr.getHand(i)
+        for (let i = 0; i < controllersTotal; i++) {
+            let handSpace: Group = webXRManager.getHand(i)
             if (pinchRemote || pinchTouch || pinchHybrid) {
-                handSpace.addEventListener("pinchstart", tryDispatch)
-                handSpace.addEventListener("pinchend", tryDispatch)
+                handSpace.addEventListener("pinchstart", dispatchVRHandsInteractionEvent)
+                handSpace.addEventListener("pinchend", dispatchVRHandsInteractionEvent)
             }
 
             if (xrHandTouch) {
-                handSpace.addEventListener("touch", onXRHandTouch)
+                handSpace.addEventListener("touch", dispatchVRHandsInteractionEvent)
+                handSpace.addEventListener("untouch", dispatchVRHandsInteractionEvent)
+                handSpace.addEventListener("touchthrough", dispatchVRHandsInteractionEvent)
+                handSpace.addEventListener("scratch", dispatchVRHandsInteractionEvent)
             }
         }
     }
@@ -56,32 +86,53 @@
 
     function removeListeners() {
         // Check if renderer is available, otherwise we get an error when trying to call $svelthreeStores[sti].renderer.xr.getHand(i)
-        if ($svelthreeStores[sti].renderer) {
-            for (let i = 0; i < $svelthreeStores[sti].xr.controllers.length; i++) {
-                let handSpace = $svelthreeStores[sti].renderer.xr.getHand(i)
+        if (renderer) {
+            for (let i = 0; i < controllersTotal; i++) {
+                let handSpace = webXRManager.getHand(i)
                 //hands
-                handSpace.removeEventListener("pinchstart", tryDispatch)
-                handSpace.removeEventListener("pinchend", tryDispatch)
-                handSpace.removeEventListener("touch", onXRHandTouch)
+                handSpace.removeEventListener("pinchstart", dispatchVRHandsInteractionEvent)
+                handSpace.removeEventListener("pinchend", dispatchVRHandsInteractionEvent)
+                handSpace.removeEventListener("touch", dispatchVRHandsInteractionEvent)
+                handSpace.removeEventListener("untouch", dispatchVRHandsInteractionEvent)
+                handSpace.removeEventListener("touchthrough", dispatchVRHandsInteractionEvent)
+                handSpace.removeEventListener("scratch", dispatchVRHandsInteractionEvent)
             }
         }
     }
 
     let checks = {
         pinchstart: { check: differPinch },
-        pinchend: { check: differPinch }
+        pinchend: { check: differPinch },
+        touch: { check: differTouch },
+        untouch: { check: differTouch },
+        touchthrough: { check: differTouch },
+        scratch: { check: differTouch }
     }
 
     //TODO: Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
     //function tryDispatch(e:XRInputSourceEvent): void {
     //e : {type, target}
-    function tryDispatch(e): void {
+    function dispatchVRHandsInteractionEvent(e): void {
         if (checks.hasOwnProperty(e.type)) {
             checks[e.type].check(e)
         }
     }
 
     function differPinch(e): void {
+        if ($svelthreeStores[sti].xr.enablePinch) {
+            if (pinchRemote) {
+                tryDispatchRemotePinch(e)
+            }
+            if (pinchTouch) {
+                tryDispatchTouchPinch(e)
+            }
+            if (pinchHybrid) {
+                tryDispatchHybridPinch(e)
+            }
+        }
+    }
+
+    function differTouch(e): void {
         if ($svelthreeStores[sti].xr.enablePinch) {
             if (pinchRemote) {
                 tryDispatchRemotePinch(e)
@@ -190,38 +241,7 @@
         }
     })
 
-    let intersects: boolean = false
-
-    //TODO: Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
-    //function dispatchOnIntersect(e:XRInputSourceEvent): void {
-    //e : {type, target}
-    function dispatchOnIntersect(e) {
-        if (checkIntersect()) {
-            /*
-            e.type === "select" ? doDispatch(e, !!parent.onSelect) : null
-            e.type === "selectstart"
-                ? doDispatch(e, !!parent.onSelectStart)
-                : null
-            e.type === "selectend" ? doDispatch(e, !!parent.onSelectEnd) : null
-            e.type === "squeeze" ? doDispatch(e, !!parent.onSqueeze) : null
-            e.type === "squeezestart"
-                ? doDispatch(e, !!parent.onSqueezeEnd)
-                : null
-            e.type === "squeezeend"
-                ? doDispatch(e, !!parent.onSqueezeEnd)
-                : null
-                */
-        }
-    }
-
-    function dispatchAlways(e) {
-        //hands
-        e.type === "pinchstart" ? doDispatch(e, !!parent.onPinchStart) : null
-
-        e.type === "pinchend" ? doDispatch(e, !!parent.onPinchEnd) : null
-    }
-
-    //TODO: Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
+    //  TODO  Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
     //function doDispatch(e: XRInputSourceEvent, fireInternal: boolean): void {
     //e : {type, target}
     function doDispatch(e, fireInternal: boolean): void {
@@ -266,24 +286,6 @@
                 default:
                     break
             }
-        }
-    }
-
-    function checkIntersect(): boolean {
-        if (
-            $svelthreeStores[sti].xr.hitTestMode === XRDefaults.HITTEST_MODE_VIRTUAL &&
-            $svelthreeStores[sti].allIntersections
-        ) {
-            if (
-                $svelthreeStores[sti].allIntersections.length > 0 &&
-                $svelthreeStores[sti].allIntersections[0].object === obj
-            ) {
-                return true
-            }
-
-            return false
-        } else {
-            return false
         }
     }
 
@@ -352,3 +354,5 @@
               )
     }
 </script>
+
+

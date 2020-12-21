@@ -2,6 +2,23 @@
  * @see https://github.com/BabylonJS/Babylon.js/blob/master/src/LibDeclarations/webxr.d.ts
  */
 
+type XREventType =
+    | "devicechange"
+    | "visibilitychange"
+    | "end"
+    | "inputsourceschange"
+    | "select"
+    | "selectstart"
+    | "selectend"
+    | "squeeze"
+    | "squeezestart"
+    | "squeezeend"
+    | "reset"
+
+interface XRSessionEvent extends Event {
+    readonly session: XRSession
+}
+
 interface XRJointSpace extends XRSpace {}
 
 interface XRJointPose extends XRPose {

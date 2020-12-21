@@ -1,4 +1,4 @@
-import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color } from "svelthree-three"
+import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color, Scene } from "svelthree-three"
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export default class XRHandTouchSphereDebugger {
@@ -10,7 +10,7 @@ export default class XRHandTouchSphereDebugger {
     currentScene: Scene
     touchDistance: number
 
-    constructor(touchSphereRadius: number, config: XRHandTouchSphereDebuggerConfig) {
+    constructor(touchSphereRadius: number, config: XrHandTouchSphereDebuggerConfig) {
         this.touchSphereRadius = touchSphereRadius
 
         this.touchSphereDebug = new Mesh(

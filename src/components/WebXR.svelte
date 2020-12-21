@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _WebXR_ Component.  
+// TODO  Rename (?) + Describe in detail
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -69,7 +74,6 @@
         /**
          * @see https://immersive-web.github.io/webxr/#xrreferencespace-interface
          */
-
         session.requestReferenceSpace("viewer").then(function (referenceSpace) {
             session
                 .requestHitTestSource({
@@ -90,3 +94,5 @@
         $svelthreeStores[sti].xr.hitTestSource = null
     }
 </script>
+
+

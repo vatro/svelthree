@@ -1,41 +1,29 @@
-declare type Scene = import("svelthree-three").Scene
-declare type Raycaster = import("svelthree-three").Raycaster
-declare type LineDashedMaterial = import("svelthree-three").LineDashedMaterial
-declare type LineBasicMaterial = import("svelthree-three").LineBasicMaterial
-declare type Line = import("svelthree-three").Line
-declare type XRHandModel = import("svelthree-three").XRHandModel
-declare type BufferGeometry = import("svelthree-three").BufferGeometry
-declare type Material = import("svelthree-three").Material
-declare type Group = import("svelthree-three").Group
-declare type Mesh = import("svelthree-three").Mesh
-declare type Object3D = import("svelthree-three").Object3D
+/*
+import {
+    Scene,
+    Raycaster,
+    LineDashedMaterial,
+    LineBasicMaterial,
+    BufferGeometry,
+    Material,
+    Group,
+    Mesh,
+    Object3D
+} from "svelthree-three"
+*/
+
 declare type XRHandTouchRayExt = import("../utils/XRHandTouchRayExt").default
 declare type XRHandTouchSphereExt = import("../utils/XRHandTouchSphereExt").default
 
-// based on @see https://github.com/BabylonJS/Babylon.js/blob/master/src/LibDeclarations/webxr.d.ts
-declare type XREventType =
-    | "devicechange"
-    | "visibilitychange"
-    | "end"
-    | "inputsourceschange"
-    | "select"
-    | "selectstart"
-    | "selectend"
-    | "squeeze"
-    | "squeezestart"
-    | "squeezeend"
-    | "reset"
+declare type XrRequiredFeatures = XRReferenceSpaceType | "hand-tracking" | "hit-test"
+declare type XrOptionalFeatures = XrRequiredFeatures
 
-declare type XRRequiredFeatures = XRReferenceSpaceType | "hand-tracking" | "hit-test"
-declare type XROptionalFeatures = XRRequiredFeatures
+declare type XrHitTestMode = "realworld" | "virtual"
 
-declare interface XRSessionEvent extends Event {
-    readonly session: XRSession
-}
+declare type SessionVRInputType = "grippable" | "hand"
 
-declare type XRHitTestMode = "realworld" | "virtual"
-
-declare type SessionVRInputType = "grippable" | "hand" | "hybrid"
+// Ehm! "hybrid" is not possible 😬 simultaneous usage of hand-tracking and grippable is not supported by the Quest (yet?)
+//type SessionVRInputType = "grippable" | "hand" | "hybrid"
 
 // VR
 
@@ -43,40 +31,38 @@ declare type SessionVRInputType = "grippable" | "hand" | "hybrid"
 
 declare interface SessionVRInputConfigItem {
     type: SessionVRInputType
-    config: XRInputConfigGrippable | XRInputConfigHand
+    config: XrInputConfigGrippable | XrInputConfigHand
 }
 
 declare interface SessionVRInputConfig extends Array<SessionVRInputConfigItem> {}
 
-declare type XRHandProfile = "boxes" | "spheres" | "oculus"
-declare type XRHandTouchEnabled = "left" | "right" | "both"
-declare type XRHandEnabled = XRHandTouchEnabled
+declare type XrHandProfile = "boxes" | "spheres" | "oculus"
+declare type XrHandTouchEnabled = "left" | "right" | "both"
+declare type XrHandEnabled = XrHandTouchEnabled
 
-declare interface XRHandTouchConfigHandsItem {
-    hand: XRHandTouchEnabled
+declare interface XrHandTouchConfigHandsItem {
+    hand: XrHandTouchEnabled
     index: number[]
 }
 
-declare interface XRHandTouchConfigHands extends Array<XRHandTouchConfigHandsItem> {}
+declare interface XrHandTouchConfigHands extends Array<XrHandTouchConfigHandsItem> {}
 
-/*
---------- VR PINCH ---------
-*/
+/* --------- VR PINCH -------- */
 
 // VR PINCH - Configuration
 
-declare type XRHandPinchMode = "remote" | "touch" | "hybrid"
+declare type XrHandPinchMode = "remote" | "touch" | "hybrid"
 
-declare interface XRHandPinchConfigItem {
-    hand: XRHandTouchEnabled
-    mode: XRHandPinchMode
+declare interface XrHandPinchConfigItem {
+    hand: XrHandTouchEnabled
+    mode: XrHandPinchMode
     distance?: {
         remote?: number
         touch?: number
     }
     materials?: {
-        remote?: XRHandPinchRayMaterial
-        touch?: XRHandPinchRayMaterial
+        remote?: XrHandPinchRayMaterial
+        touch?: XrHandPinchRayMaterial
     }
     colors?: {
         remote?: number
@@ -86,18 +72,18 @@ declare interface XRHandPinchConfigItem {
     }
 }
 
-declare interface XRHandPinchConfig extends Array<XRHandPinchConfigItem> {}
+declare interface XrHandPinchConfig extends Array<XrHandPinchConfigItem> {}
 
-declare interface XRHandEnablePinchResult {
+declare interface XrHandEnablePinchResult {
     leftHandPinchEnabled: boolean
-    leftHandPinchConfig: XRHandPinchConfigItem
+    leftHandPinchConfig: XrHandPinchConfigItem
     rightHandPinchEnabled: boolean
-    rightHandPinchConfig: XRHandPinchConfigItem
+    rightHandPinchConfig: XrHandPinchConfigItem
 }
 
 // VR PINCH - Debugger
 
-declare type XRHandPinchRayMaterial = LineDashedMaterial | LineBasicMaterial
+declare type XrHandPinchRayMaterial = THREE.LineDashedMaterial | THREE.LineBasicMaterial
 
 /*
 --------- VR TOUCH (HANDS) ----------
@@ -105,32 +91,32 @@ declare type XRHandPinchRayMaterial = LineDashedMaterial | LineBasicMaterial
 
 // HAND INPUT CONFIG
 
-declare interface XRInputConfigHandItem {
-    hand: XRHandEnabled
-    handProfile: XRHandProfile
+declare interface XrInputConfigHandItem {
+    hand: XrHandEnabled
+    handProfile: XrHandProfile
     pathToHandModels: string
 }
 
-declare interface XRInputConfigHand extends Array<XRInputConfigHandItem> {}
+declare interface XrInputConfigHand extends Array<XrInputConfigHandItem> {}
 
 // VR HAND TOUCH - Configuration
 
 // Aavailable Hit-Test Modes
 
-declare type XRHandTouchTestMode = "ray" | "sphere"
+declare type XrHandTouchTestMode = "ray" | "sphere"
 
 // Configuration Prop passed to a 'SessionVR' component
 
-declare interface XRHandTouchConfig {
-    mode?: XRHandTouchTestMode
+declare interface XrHandTouchConfig {
+    mode?: XrHandTouchTestMode
     sphereRadius?: number
     touchDistance?: number
     lerpFactor?: number
-    debug?: XRHandTouchDebugParams
-    hands?: XRHandTouchConfigHands
+    debug?: XrHandTouchDebugParams
+    hands?: XrHandTouchConfigHands
 }
 
-declare interface XRHandEnableTouchResult {
+declare interface XrHandEnableTouchResult {
     leftHandTouchEnabled: boolean
     leftHandTouchEnabledJoints: number[]
     rightHandTouchEnabled: boolean
@@ -139,46 +125,46 @@ declare interface XRHandEnableTouchResult {
 
 // Update Props passed to an 'XRHandTouchRayExt' or 'XRHandTouchSphereExt' instance on every XRFrame --> @see 'SessionVR'
 
-declare interface XRTouchUpdateParams {
-    handProfile: XRHandProfile
-    raycaster: Raycaster
+declare interface XrTouchUpdateParams {
+    handProfile: XrHandProfile
+    raycaster: THREE.Raycaster
     xrFrameDelta: number
 }
 
-declare interface XRTouchUpdateArgsItem {}
+declare interface TouchUpdateArgsItem {}
 
-declare type XRTouchUpdateArgs = [
-    currentScene: Scene,
-    raycaster: Raycaster,
-    //handProfile: XRHandProfile,
-    leftHand: Group,
-    rightHand: Group,
+declare type XrTouchUpdateArgs = [
+    currentScene: THREE.Scene,
+    raycaster: THREE.Raycaster,
+    //handProfile: XrHandProfile,
+    leftHand: THREE.Group,
+    rightHand: THREE.Group,
     xrHandTouch: XRHandTouchRayExt | XRHandTouchSphereExt,
     xrFrameDelta: number,
     useBVH: boolean,
-    debug: XRHandTouchDebugParams
+    debug: XrHandTouchDebugParams
 ]
 
 // VR HAND TOUCH - Events
 
-declare interface XRHandTouchEventsItem {
-    hand: XRHandEnabled
-    name: XRHandTouchEnabled
+declare interface XrHandTouchEventsItem {
+    hand: XrHandEnabled
+    name: XrHandTouchEnabled
     touchtime?: number
     index: number[]
 }
 
-declare interface XRHandTouchEvents extends Array<XRHandTouchEventsItem> {}
+declare interface XrHandTouchEvents extends Array<XrHandTouchEventsItem> {}
 
 // VR HAND TOUCH - Debugger Configuration
 
-declare interface XRHandTouchRayDebuggerConfig {
+declare interface XrHandTouchRayDebuggerConfig {
     drawTentacles: boolean
     // TODO: Rename this
     drawTouchDebuggers: boolean
 }
 
-declare interface XRHandTouchSphereDebuggerConfig {
+declare interface XrHandTouchSphereDebuggerConfig {
     widthSegments: number
     heightSegments: number
     colors: {
@@ -188,16 +174,16 @@ declare interface XRHandTouchSphereDebuggerConfig {
     mat: { [key: string]: any }
 }
 
-declare interface XRHandTouchDebugConfigItem {
-    mode: XRHandTouchTestMode
-    config?: XRHandTouchRayDebuggerConfig | XRHandTouchSphereDebuggerConfig
+declare interface XrHandTouchDebugConfigItem {
+    mode: XrHandTouchTestMode
+    config?: XrHandTouchRayDebuggerConfig | XrHandTouchSphereDebuggerConfig
 }
 
-declare interface XRHandTouchDebugConfig extends Array<XRHandTouchDebugConfigItem> {}
+declare interface XrHandTouchDebugConfig extends Array<XrHandTouchDebugConfigItem> {}
 
-declare interface XRHandTouchDebugParams {
+declare interface XrHandTouchDebugParams {
     enabled: boolean
-    debugConfig: XRHandTouchDebugConfig
+    debugConfig: XrHandTouchDebugConfig
     highlightJoints?: {
         enabled: boolean
         colors?: {
@@ -221,101 +207,105 @@ declare interface XRHandTouchDebugParams {
 
 // VR HAND TOUCH X - Configuration
 
-declare interface XRHandTouchXIndexItem {
+declare interface XrHandTouchXIndexItem {
     left: number[]
     right: number[] | number[]
 }
 
-declare interface XRHandTouchXIndexPairs extends Array<XRHandTouchXIndexItem> {}
+declare interface XrHandTouchXIndexPairs extends Array<XrHandTouchXIndexItem> {}
 
-declare interface XRHandTouchXConfigItem {
-    hand: XRHandTouchEnabled
+interface XrHandTouchXConfigItem {
+    hand: XrHandTouchEnabled
     name: string
     distance?: number
     touchtime?: number
-    indexPairs: XRHandTouchXIndexPairs
+    indexPairs: XrHandTouchXIndexPairs
 }
 
-declare interface XRHandTouchXConfig extends Array<XRHandTouchXConfigItem> {}
+declare interface XrHandTouchXConfig extends Array<XrHandTouchXConfigItem> {}
 
 // CONTROLLER Config
 
 // TODO  provide the ability to customize grip model via config, atm. only the (straight Line) ray is configurable atm
-/*
-declare interface XRControllerSpaceModelConfig{
-    geometry?: BufferGeometry
-    material: Material | Material[]
-    mesh?: Mesh
-    scene?: Scene
+declare interface XrControllerSpaceModelConfig {
+    geometry?: THREE.BufferGeometry
+    material: THREE.Material | THREE.Material[]
+    mesh?: THREE.Mesh
+    scene?: THREE.Scene
     pathToModel?: string
 }
-*/
 
-declare interface XRControllerTargetRayConfig {
+declare interface XrControllerTargetRayConfig {
     name: string
-    material?: LineBasicMaterial | LineDashedMaterial
+    material?: THREE.LineBasicMaterial | THREE.LineDashedMaterial
     scaleZ?: number // 1*ScaleZ
 }
 
-declare type XRGrippableEnabled = "left" | "right" | "both"
+declare type XrGrippableEnabled = "left" | "right" | "both"
 
-declare interface XRInputConfigGrippableItem {
-    controller: XRGrippableEnabled
-    targetRay?: XRControllerTargetRayConfig
-    // grip?: XRControllerSpaceModelConfig
+declare interface XrInputConfigGrippableItem {
+    controller: XrGrippableEnabled
+    useGrip?: boolean
+    targetRay?: XrControllerTargetRayConfig
+    grip?: XrControllerSpaceModelConfig
     // distance?: number
 }
 
-declare interface XRInputConfigGrippable extends Array<XRInputConfigGrippableItem> {}
+declare interface XrInputConfigGrippable extends Array<XrInputConfigGrippableItem> {}
 
 // CONTROLLER EVENTS
 
-declare type XRControllerSpaceType = "targetray" | "grip" | "hand"
-declare type XRControllerEventType = "select" | "selectstart" | "selectend" | "squeeze" | "squeezestart" | "squeezeend"
-declare type XRControllerEventTypeMissed =
+declare type XrControllerSpaceType = "targetray" | "grip" | "hand"
+declare type XrControllerEventType = "select" | "selectstart" | "selectend" | "squeeze" | "squeezestart" | "squeezeend"
+declare type XrControllerEventTypeMissed =
     | "missed_interactive_select"
     | "missed_interactive_squeeze"
     | "missed_all_select"
     | "missed_all_squeeze"
 
-declare type XRControllerSpaceEvent = {
-    type: XRControllerEventType
+declare type XrControllerSpaceEvent = {
+    type: XrControllerEventType
     data: XRInputSource
-    target: Group
+    target: THREE.Group
 }
 
-declare type XRControllerEventDetailObj = {
+declare type XrControllerEventDetailObj = {
     xrInputSource: XRInputSource
-    controllerSpace: Group
-    controllerSpaceType: XRControllerSpaceType
+    controllerSpace: THREE.Group
+    controllerSpaceType: XrControllerSpaceType
     controllerHandedness: XRHandedness
-    targetObj: Object3D
+    targetObj: THREE.Object3D
 }
 
-declare type XRControllerEventDetailSession = {
+declare type XrControllerEventDetailSession = {
     xrInputSource: XRInputSource
-    controllerSpace: Group
-    controllerSpaceType: XRControllerSpaceType
+    controllerSpace: THREE.Group
+    controllerSpaceType: XrControllerSpaceType
     controllerHandedness: XRHandedness
-    intersectedObj: Object3D
+    intersectedObj: THREE.Object3D
 }
 
-declare type XRControllerEventSession = {
-    type: XRControllerEventType | XRControllerEventTypeMissed
-    detail: XRControllerEventDetailSession
+declare type XrControllerEventSession = {
+    type: XrControllerEventType | XrControllerEventTypeMissed
+    detail: XrControllerEventDetailSession
 }
 
-declare type XRControllerEventSessionDispatcher = {
-    select: XRControllerEventDetailSession
-    selectstart: XRControllerEventDetailSession
-    selectend: XRControllerEventDetailSession
-    squeeze: XRControllerEventDetailSession
-    squeezestart: XRControllerEventDetailSession
-    squeezeend: XRControllerEventDetailSession
-    missed_interactive_select: XRControllerEventDetailSession
-    missed_interactive_squeeze: XRControllerEventDetailSession
-    missed_all_select: XRControllerEventDetailSession
-    missed_all_squeeze: XRControllerEventDetailSession
+declare type XrControllerEventObject = {
+    type: XrControllerEventType | XrControllerEventTypeMissed
+    detail: XrControllerEventDetailObj
+}
+
+declare type XrControllerEventSessionDispatcher = {
+    select: XrControllerEventDetailSession
+    selectstart: XrControllerEventDetailSession
+    selectend: XrControllerEventDetailSession
+    squeeze: XrControllerEventDetailSession
+    squeezestart: XrControllerEventDetailSession
+    squeezeend: XrControllerEventDetailSession
+    missed_interactive_select: XrControllerEventDetailSession
+    missed_interactive_squeeze: XrControllerEventDetailSession
+    missed_all_select: XrControllerEventDetailSession
+    missed_all_squeeze: XrControllerEventDetailSession
 }
 
 // HAND EVENTS

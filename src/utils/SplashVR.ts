@@ -6,8 +6,8 @@ export default class SplashVR {
     public dispatcher: EventDispatcher
 
     constructor(
-        private requiredFeatures: XRRequiredFeatures[],
-        private optionalFeatures: XROptionalFeatures[],
+        private requiredFeatures: XrRequiredFeatures[],
+        private optionalFeatures: XrOptionalFeatures[],
         private domOverlay: HTMLDivElement,
         private btnClass: string,
         private sessionMode: XRSessionMode,

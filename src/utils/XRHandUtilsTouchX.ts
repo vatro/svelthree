@@ -5,12 +5,12 @@ export default class XRHandUtilsTouchX {
     public applyEventsX(
         leftHand: Group,
         rightHand: Group,
-        touchXConfigs: XRHandTouchXConfig,
+        touchXConfigs: XrHandTouchXConfig,
         listener: (event: Event) => void
     ) {
         for (let i = 0; i < touchXConfigs.length; i++) {
-            let touchXConfig: XRHandTouchXConfigItem = touchXConfigs[i]
-            let hand: XRHandTouchEnabled = touchXConfig.hand
+            let touchXConfig: XrHandTouchXConfigItem = touchXConfigs[i]
+            let hand: XrHandTouchEnabled = touchXConfig.hand
 
             if (hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 leftHand.addEventListener(touchXConfig.name + "start", listener)
@@ -36,7 +36,7 @@ export default class XRHandUtilsTouchX {
         }
     }
 
-    private registerEventX(handSpace: Group, touchXConfig: XRHandTouchXConfigItem) {
+    private registerEventX(handSpace: Group, touchXConfig: XrHandTouchXConfigItem) {
         !handSpace.userData.touchEventX ? (handSpace.userData.touchEventX = {}) : null
         !handSpace.userData.touchEventX[touchXConfig.name]
             ? (handSpace.userData.touchEventX[touchXConfig.name] = {})

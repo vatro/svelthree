@@ -1,6 +1,16 @@
+<!-- 
+@component
+This is a **svelthree** _Mesh_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
+     */
+    /**
+     *
+     * Doesn't work
+     *
      */
 
     import { onMount } from "svelte"
@@ -12,12 +22,11 @@
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
-    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes"
     import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
     import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
-    //import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
-    import SvelthreeInteractionVRController from "./SvelthreeInteractionVRController.svelte"
+    import SvelthreeInteractionVRGrippable from "./SvelthreeInteractionVRGrippable.svelte"
     import SvelthreeInteractionVRHands from "./SvelthreeInteractionVRHands.svelte"
     import { createEventDispatcher } from "svelte"
 
@@ -515,7 +524,9 @@
     $: $svelthreeStores[sti].xr.sessionMode ? (currentXRSessionMode = $svelthreeStores[sti].xr.sessionMode) : null
 
     let currentXRInputType: SessionVRInputType = undefined
-    $: $svelthreeStores[sti].xr.inputType ? (currentXRInputType = $svelthreeStores[sti].xr.inputType) : null
+    $: $svelthreeStores[sti].xr.currentVRInputType
+        ? (currentXRInputType = $svelthreeStores[sti].xr.currentVRInputType)
+        : null
 
     //controller
     export let onSelect: (e?: CustomEvent) => void = undefined
@@ -560,8 +571,8 @@
     {/if}
 
     {#if currentXRSessionMode === XRDefaults.SESSION_MODE_VR}
-        {#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_CONTROLLER}
-            <SvelthreeInteractionVRController {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
+        {#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_GRIPPABLE}
+            <SvelthreeInteractionVRGrippable {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
         {/if}
         {#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_HAND}
             <SvelthreeInteractionVRHands

@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _DirectionalLight_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -6,7 +11,7 @@
     import { DirectionalLight, DirectionalLightHelper, Scene } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropColor } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropColor } from "../utils/SvelthreeTypes"
 
     /**
      *  TODO  keep an eye on the issue:

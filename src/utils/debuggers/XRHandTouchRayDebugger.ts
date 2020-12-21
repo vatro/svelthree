@@ -37,7 +37,7 @@ export default class XRHandTouchRayDebugger {
     tentacleDirScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_DIRSCALE
     tentacleTouchingRayScale = XRHandTouchDefaults.DBG_RAY_TENTACLE_TOUCHINGRAY_SCALE
 
-    constructor(config: XRHandTouchRayDebuggerConfig) {
+    constructor(config: XrHandTouchRayDebuggerConfig) {
         if (config) {
             this.drawTentacles = config.drawTentacles === true ? true : false
             this.drawTouchDebuggers = config.drawTouchDebuggers === true ? true : false

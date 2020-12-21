@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _HemisphereLight_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -6,7 +11,7 @@
     import { onMount } from "svelte"
     import { HemisphereLight, HemisphereLightHelper, Scene, Object3D } from "svelthree-three"
     import Light from "./Light.svelte"
-    import type { PropColor } from "../utils/SvelthreeTypes.svelte"
+    import type { PropColor } from "../utils/SvelthreeTypes"
 
     export let props: { [key: string]: any } = undefined
 

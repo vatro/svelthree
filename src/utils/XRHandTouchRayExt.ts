@@ -1,5 +1,5 @@
 import { XRHandTouch } from "./XRHandTouch"
-import { Group, Vector3 } from "svelthree-three"
+import { Group, Raycaster, Vector3 } from "svelthree-three"
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 
 export default class XRHandTouchRayExt extends XRHandTouch {
@@ -17,7 +17,7 @@ export default class XRHandTouchRayExt extends XRHandTouch {
         handSpace: Group,
         joint: Group,
         i: number,
-        intersectObj: { [key: string]: any },
+        intersectObj: RaycasterIntersectObject,
         logMessage: String,
         raycaster?: Raycaster,
         origin?: Vector3
@@ -90,7 +90,7 @@ export default class XRHandTouchRayExt extends XRHandTouch {
                 // dispatch 'untouch'
                 this.resetJointTouchData(joint)
                 this.removeJointFromTouchingArray(handSpace, i)
-                this.dispatchUntouch(handSpace, joint, i, intersectObj)
+                this.dispatchUntouch(XRHandTouchDefaults.TOUCH_TEST_MODE_RAY, handSpace, joint, i, intersectObj)
             }
         }
     }
@@ -106,7 +106,7 @@ export default class XRHandTouchRayExt extends XRHandTouch {
     }
 
     // override
-    intersectionsPhase1Raycast(params: XRTouchUpdateParams, joint: Group): any {
+    intersectionsPhase1Raycast(params: XrTouchUpdateParams, joint: Group): any {
         return this.doRaycast(
             params.raycaster,
             joint.userData.origin,

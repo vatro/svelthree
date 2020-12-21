@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _Canvas_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -53,29 +58,29 @@
 
     interface XR {
         sessionMode: string
-        //inputType: SessionVRInputType
+        //currentVRInputType: SessionVRInputType
         inputConfig: SessionVRInputConfig
         controller: WebXRController // AR
-        controllerConfig: XRInputConfigGrippable
+        controllerConfig: XrInputConfigGrippable
         controllers: WebXRController[] //VR
-        enablePinch: XRHandPinchConfig
-        //handProfile: XRHandProfile
-        enableTouch: XRHandTouchConfig
-        touchEvents: XRHandTouchEvents
-        enableTouchX: XRHandTouchXConfig
+        enablePinch: XrHandPinchConfig
+        //handProfile: XrHandProfile
+        enableTouch: XrHandTouchConfig
+        touchEvents: XrHandTouchEvents
+        enableTouchX: XrHandTouchXConfig
         leftHandTouchEnabled: boolean
         leftHandTouchEnabledJoints: number[]
         rightHandTouchEnabled: boolean
         rightHandTouchEnabledJoints: number[]
         leftHandPinchEnabled: boolean
-        leftHandPinchConfig: XRHandPinchConfigItem
+        leftHandPinchConfig: XrHandPinchConfigItem
         rightHandPinchEnabled: boolean
-        rightHandPinchConfig: XRHandPinchConfigItem
+        rightHandPinchConfig: XrHandPinchConfigItem
         requiredFeatures: string[]
         optionalFeatures: string[]
         domOverlay: HTMLDivElement
-        hitTestModeInitial: XRHitTestMode
-        hitTestMode: XRHitTestMode
+        hitTestModeInitial: XrHitTestMode
+        hitTestMode: XrHitTestMode
         hitTestSource: any
         hitTestSourceRequested: boolean
         hitTestResults: any[]
@@ -130,7 +135,7 @@
         orbitcontrols: undefined,
         xr: {
             sessionMode: undefined,
-            //inputType: undefined,
+            //currentVRInputType: undefined,
             inputConfig: undefined,
             controller: undefined,
             controllerConfig: undefined,

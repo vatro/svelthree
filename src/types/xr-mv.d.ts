@@ -147,6 +147,12 @@ declare interface XRSession extends EventTarget {
     end(): Promise<void>
 }
 
+interface XRInputSourceChangeEvent extends Event {
+    session: XRSession
+    removed: Array<XRInputSource>
+    added: Array<XRInputSource>
+}
+
 declare interface XRViewport {
     readonly x: number
     readonly y: number

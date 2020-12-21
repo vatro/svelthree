@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _SvelthreeInteraction_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -386,3 +391,5 @@
             : console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerMove' object is not a function!")
     }
 </script>
+
+

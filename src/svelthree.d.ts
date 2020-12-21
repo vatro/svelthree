@@ -16,6 +16,13 @@ export { default as OrbitControls } from "./components/OrbitControls.svelte"
 export { default as SessionAR } from "./components/SessionAR.svelte"
 export { default as SessionVR } from "./components/SessionVR.svelte"
 export { default as CubeCamera } from "./components/CubeCamera.svelte"
-export { default } from "./utils/XRHandJointIndices"
+export { default as XRHandJointIndices } from "./utils/XRHandJointIndices"
+export * from "./utils/Overridden"
 export { svelthreeStores } from "./stores.js"
+
 export * from "svelthree-three"
+//import * as THREE from "svelthree-three"
+//export { THREE }
+
+// TODO  does this makes sense / Does it have any negative impact on treeshaking / bundling?
+export as namespace SVELTHREE

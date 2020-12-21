@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _Scene_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro

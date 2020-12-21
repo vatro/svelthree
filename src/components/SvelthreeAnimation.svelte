@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _SvelthreeAnimation_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     import { onMount } from "svelte"
     import { SvelthreeAnimationManager } from "../utils/Sv3AnimationManager.svelte"
@@ -78,3 +83,5 @@
         }
     })
 </script>
+
+

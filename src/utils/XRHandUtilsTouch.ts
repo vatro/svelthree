@@ -1,7 +1,7 @@
 import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
 import XRHandTouchRayExt from "./XRHandTouchRayExt"
 import XRHandTouchSphereExt from "./XRHandTouchSphereExt"
-import { Group } from "svelthree-three"
+import { Group, Raycaster, Scene } from "svelthree-three"
 
 export default class XRHandUtilsTouch {
     // Events
@@ -19,12 +19,12 @@ export default class XRHandUtilsTouch {
     public applyEvents(
         leftHand: Group,
         rightHand: Group,
-        touchEvents: XRHandTouchEvents,
+        touchEvents: XrHandTouchEvents,
         listener: (event: Event) => void
     ) {
         for (let i = 0; i < touchEvents.length; i++) {
-            let item: XRHandTouchEventsItem = touchEvents[i]
-            let hand: XRHandEnabled = item.hand
+            let item: XrHandTouchEventsItem = touchEvents[i]
+            let hand: XrHandEnabled = item.hand
 
             if (hand === XRHandTouchDefaults.ENABLED_LEFT) {
                 leftHand.addEventListener(item.name + "start", listener)
@@ -50,7 +50,7 @@ export default class XRHandUtilsTouch {
         }
     }
 
-    private registerEvent(handSpace: Group, item: XRHandTouchEventsItem) {
+    private registerEvent(handSpace: Group, item: XrHandTouchEventsItem) {
         !handSpace.userData.touchEvent ? (handSpace.userData.touchEvent = {}) : null
         !handSpace.userData.touchEvent[item.name] ? (handSpace.userData.touchEvent[item.name] = {}) : null
         handSpace.userData.touchEvent[item.name].requiredTouchingJoints = item.index
@@ -65,13 +65,13 @@ export default class XRHandUtilsTouch {
     public updateXRHandTouch(
         currentScene: Scene,
         raycaster: Raycaster,
-        //handProfile: XRHandProfile,
+        //handProfile: XrHandProfile,
         leftHand: Group,
         rightHand: Group,
         xrHandTouch: XRHandTouchRayExt | XRHandTouchSphereExt,
         xrFrameDelta: number,
         useBVH: boolean,
-        debug: XRHandTouchDebugParams
+        debug: XrHandTouchDebugParams
     ): void {
         //console.log("updateXRHandTouch!")
 
@@ -99,7 +99,7 @@ export default class XRHandUtilsTouch {
         //console.time("updateXRHandTouch hands update")
         // 0.09 - 0.4 (TOUCH AND TOUCH INSIDE) - 1.74 ms (FAST TOUCH CHECK)
         if (leftHand && leftHand.userData.touchEnabled === true) {
-            let params: XRTouchUpdateParams = {
+            let params: XrTouchUpdateParams = {
                 handProfile: leftHand.userData.handProfile,
                 raycaster: raycaster,
                 xrFrameDelta: xrFrameDelta
@@ -110,7 +110,7 @@ export default class XRHandUtilsTouch {
 
         if (rightHand && rightHand.userData.touchEnabled === true) {
             //console.log("updateXRTouchRay right!")
-            let params: XRTouchUpdateParams = {
+            let params: XrTouchUpdateParams = {
                 handProfile: rightHand.userData.handProfile,
                 raycaster: raycaster,
                 xrFrameDelta: xrFrameDelta

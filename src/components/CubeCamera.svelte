@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _CubeCamera_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
@@ -142,3 +147,5 @@
         }
     })
 </script>
+
+

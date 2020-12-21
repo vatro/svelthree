@@ -1,4 +1,4 @@
-import { Mesh, Group, MeshBasicMaterial } from "svelthree-three"
+import { Mesh, Group, MeshBasicMaterial, Scene } from "svelthree-three"
 import XRHandTouchDefaults from "../../defaults/XRHandTouchDefaults"
 
 export default class XRHandTouchJointDebugger {

@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _LoadedGLTF_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -99,3 +104,5 @@
         return content
     }
 </script>
+
+

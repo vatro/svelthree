@@ -4,7 +4,7 @@
      */
 
     import { Object3D, Vector3, Euler } from "svelthree-three"
-    import type { PropPos, PropRot, PropScale, PropLookAt } from "./SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropScale, PropLookAt } from "./SvelthreeTypes"
 
     //hehe?
 

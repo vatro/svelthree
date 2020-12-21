@@ -131,7 +131,7 @@ export class RaycasterRayHelper {
             currentScene: Scene
             scale: number
         },
-        pinchRayMaterial: XRHandPinchRayMaterial,
+        pinchRayMaterial: XrHandPinchRayMaterial,
         pinchRayColor: number,
         handedness: string
     ): void {

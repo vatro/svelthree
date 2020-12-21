@@ -29,7 +29,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    update(handSpace: Group, params: XRTouchUpdateParams): void {
+    update(handSpace: Group, params: XrTouchUpdateParams): void {
         for (let i = 0; i < handSpace.userData.touchEnabledJoints.length; i++) {
             const jointIndex: number = handSpace.userData.touchEnabledJoints[i]
             const joint: Group = handSpace.children[jointIndex] as Group
@@ -126,7 +126,13 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
                         }
 
                         this.addJointToTouchingArray(handSpace, i)
-                        this.dispatchTouch(handSpace, joint, i, sphereTouchingResults)
+                        this.dispatchTouch(
+                            XRHandTouchDefaults.TOUCH_TEST_MODE_SPHERE,
+                            handSpace,
+                            joint,
+                            i,
+                            sphereTouchingResults
+                        )
                     } else {
                         // TODO : tbd // nothing?
                     }
@@ -195,6 +201,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
                                 }
 
                                 if (this.debuggerSphere) {
+                                    // color the last touched / saved faces
                                     this.debuggerSphere.colorSphereUnTouch(
                                         joint.userData.touchObj,
                                         joint.userData.touchIndices
@@ -202,9 +209,15 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
                                 }
                             }
 
+                            this.dispatchUntouch(XRHandTouchDefaults.TOUCH_TEST_MODE_SPHERE, handSpace, joint, i, {
+                                // report the last touched / saved faces in details
+                                mesh: joint.userData.touchObj,
+                                indices: joint.userData.touchIndices,
+                                tris: joint.userData.touchTris
+                            })
+
                             this.resetJointTouchData(joint)
                             this.removeJointFromTouchingArray(handSpace, i)
-                            this.dispatchUntouch(handSpace, joint, i, null) // null details --> TODO  --> consider adding joint.userData.lastTouchIndices & joint.userData.lastTouchTris as detail
                         }
                     }
 
@@ -335,7 +348,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
     */
 
     // override
-    intersectionsPhase1Raycast(params: XRTouchUpdateParams, joint: Group): any {
+    intersectionsPhase1Raycast(params: XrTouchUpdateParams, joint: Group): any {
         return this.doRaycast(
             params.raycaster,
             joint.userData.origin,
@@ -373,8 +386,32 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
     }
 
     //override
-    dispatchTouch(handSpace: Group, joint: Group, i: number, intersect: SphereTouchingResults) {
-        handSpace.dispatchEvent({ type: "touch", detail: { joint: joint, jointIndex: i, intersect: intersect } })
+    dispatchUntouch(
+        touchMode: XrHandTouchTestMode,
+        handSpace: Group,
+        joint: Group,
+        i: number,
+        intersect: SphereTouchingResultsItem
+    ) {
+        handSpace.dispatchEvent({
+            type: "untouch",
+            detail: { touchMode: touchMode, joint: joint, jointIndex: i, intersect: intersect }
+        })
+        console.warn("HAND EVENT: untouch!")
+    }
+
+    //override
+    dispatchTouch(
+        touchMode: XrHandTouchTestMode,
+        handSpace: Group,
+        joint: Group,
+        i: number,
+        intersect: SphereTouchingResults
+    ) {
+        handSpace.dispatchEvent({
+            type: "touch",
+            detail: { touchMode: touchMode, joint: joint, jointIndex: i, intersect: intersect }
+        })
         console.warn("HAND EVENT: touch!")
     }
 

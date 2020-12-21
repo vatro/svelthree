@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _WebGLRenderer_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro

@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _SessionVR_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -18,16 +23,7 @@
     import XRHandTouchRayExt from "../utils/XRHandTouchRayExt"
     import XRHandTouchSphereExt from "../utils/XRHandTouchSphereExt"
     import XRControllerUtils from "../utils/XRControllerUtils"
-    import {
-        Group,
-        XRControllerModelFactory,
-        XRHandModelFactory,
-        XRHandModel,
-        XRControllerModel,
-        Scene,
-        WebXRManager,
-        WebXRController
-    } from "svelthree-three"
+    import { Group, XRControllerModel, Scene, WebXRManager, Object3D } from "svelthree-three"
 
     import XRHandTouchDefaults from "../defaults/XRHandTouchDefaults"
     import XRControllerDefaults from "../defaults/XRControllerDefaults"
@@ -48,23 +44,19 @@
     }
 
     const sessionMode: XRSessionMode = XRDefaults.SESSION_MODE_VR
-    export let requiredFeatures: XRRequiredFeatures[] = undefined
-    const hitTestMode: XRHitTestMode = XRDefaults.DEFAULT_VR_XR_HITTEST_MODE
-    export let optionalFeatures: XROptionalFeatures[] = undefined
+    export let requiredFeatures: XrRequiredFeatures[] = undefined
+    const hitTestMode: XrHitTestMode = XRDefaults.DEFAULT_VR_XR_HITTEST_MODE
+    export let optionalFeatures: XrOptionalFeatures[] = undefined
     export let btnClass: string = undefined
     export let btnTxt: { [key: string]: string } = undefined
     export let domOverlay: HTMLDivElement = undefined
     export let maxControllers: number = XRControllerDefaults.MAX_CONTROLLERS
-    //export let input: SessionVRInputType = XRDefaults.DEFAULT_VR_INPUT_TYPE
     export let inputConfig: SessionVRInputConfig = undefined
-    export let controllerConfig: XRInputConfigGrippable = undefined
-    let pathToHandModels: string = "./models/fbx/"
-    //let handProfile: XRHandProfile = undefined
-
-    export let enablePinch: XRHandPinchConfig = undefined
-    export let enableTouch: XRHandTouchConfig = undefined
-    export let touchEvents: XRHandTouchEvents = undefined
-    export let enableTouchX: XRHandTouchXConfig = undefined
+    export let controllerConfig: XrInputConfigGrippable = undefined
+    export let enablePinch: XrHandPinchConfig = undefined
+    export let enableTouch: XrHandTouchConfig = undefined
+    export let touchEvents: XrHandTouchEvents = undefined
+    export let enableTouchX: XrHandTouchXConfig = undefined
 
     // TODO  Refactor SvelthreeHelpersXR / additional helpers
     let xrHelpers: SvelthreeHelpersXR = new SvelthreeHelpersXR()
@@ -92,17 +84,8 @@
 
     function storeDomOverlay(): void {
         $svelthreeStores[sti].xr.domOverlay = domOverlay
-        //console.warn("SVELTHREE > SessionVR > updateDomOverlay: ", $svelthreeStores[sti].xr.domOverlay)
+        //console.warn("SVELTHREE > SessionVR > storeDomOverlay: ", $svelthreeStores[sti].xr.domOverlay)
     }
-
-    /*
-    $: input ? storeInputType() : null
-
-    function storeInputType(): void {
-        $svelthreeStores[sti].xr.inputType = input
-        //console.warn("SVELTHREE > SessionVR > updateInputType: ", $svelthreeStores[sti].xr.inputType)
-    }
-    */
 
     $: inputConfig ? storeInputConfig() : null
 
@@ -111,19 +94,25 @@
         //console.warn("SVELTHREE > SessionVR > storeInputConfig: ",  $svelthreeStores[sti].xr.inputConfig)
     }
 
-    /*
-    $: handProfile ? storeHandProfile() : null
-
-    function storeHandProfile(): void {
-        $svelthreeStores[sti].xr.handProfile = handProfile
-        //console.warn("SVELTHREE > SessionVR > updateHandProfile: ", $svelthreeStores[sti].xr.handProfile)
-    }
-    */
-
     $: controllerConfig ? storeControllerConfig() : null
 
     function storeControllerConfig(): void {
         $svelthreeStores[sti].xr.controllerConfig = controllerConfig
+    }
+
+    /**
+     * This is being changed by controller's 'connected' handlers and is crucial for
+     * mounting / unmounting the correct interactivity components inside the Mesh component.
+     * @see onTargetRaySpaceConnected
+     * @see onHandSpaceConnected
+     */
+    let currentVRInputType: SessionVRInputType
+
+    $: currentVRInputType ? storeCurrentVRInputType() : null
+
+    function storeCurrentVRInputType(): void {
+        $svelthreeStores[sti].xr.currentVRInputType = currentVRInputType
+        //console.warn("SVELTHREE > SessionVR > storeCurrentVRInputType: ", $svelthreeStores[sti].xr.currentVRInputType)
     }
 
     /*
@@ -133,13 +122,13 @@
     $: enablePinch ? storeAndUpdateEnablePinch() : null
 
     // WHY?  do we store config double and tripple (in the store and in the hands)?
-    // ANSWER  Because we're prototyping and are not yet sure where we'll need this "gloabaly"!
-    // TODO  reconsider / refactor above
+    // ANSWER  Because we're still prototyping and are not yet sure where we'll need this "globally"!
+    // RECONSIDER  above / refactor
     function storeAndUpdateEnablePinch(): void {
         console.warn("SVELTHREE > SessionVR > updateEnablePinch!")
         $svelthreeStores[sti].xr.enablePinch = enablePinch
 
-        let updated: XRHandEnablePinchResult = XRHandUtils.applyEnablePinch($svelthreeStores[sti].xr.enablePinch)
+        let updated: XrHandEnablePinchResult = XRHandUtils.applyEnablePinch($svelthreeStores[sti].xr.enablePinch)
 
         // update store values
         for (const [key, value] of Object.entries(updated)) {
@@ -147,8 +136,13 @@
         }
 
         // TOFIX  it's better to get the hands based on 'xrInputsource.handedness' every time we need them, as we cannot rely they reamin the same
-        leftHand ? setPinchInteractivity(leftHand) : null
-        rightHand ? setPinchInteractivity(rightHand) : null
+        if (rendererAvailable) {
+            const leftHand: Group = getHandSpaceLeft()
+            const rightHand: Group = getHandSpaceRight()
+
+            leftHand ? setPinchInteractivity(leftHand) : null
+            rightHand ? setPinchInteractivity(rightHand) : null
+        }
     }
 
     /*
@@ -164,12 +158,12 @@
         console.warn("SVELTHREE > SessionVR > updateEnableTouch!")
         $svelthreeStores[sti].xr.enableTouch = enableTouch
 
-        let updated: XRHandEnableTouchResult
+        let updated: XrHandEnableTouchResult
 
         if ($svelthreeStores[sti].xr.enableTouch.hands) {
             updated = XRHandUtils.applyEnableTouch($svelthreeStores[sti].xr.enableTouch.hands)
         } else {
-            let hands: XRHandTouchConfigHands = XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT
+            let hands: XrHandTouchConfigHands = XRHandTouchDefaults.ENABLETOUCH_HANDS_DEFAULT
             updated = XRHandUtils.applyEnableTouch(hands)
         }
 
@@ -178,9 +172,13 @@
             $svelthreeStores[sti].xr[key] = value
         }
 
-        // TOFIX  it's better to get the hands based on 'xrInputsource.handedness' every time we need them, as we cannot rely they reamin the same
-        leftHand ? setTouchInteractivity(leftHand) : null
-        rightHand ? setTouchInteractivity(rightHand) : null
+        if(rendererAvailable) {
+            const leftHand: Group = getHandSpaceLeft()
+            const rightHand: Group = getHandSpaceRight()
+
+            leftHand ? setTouchInteractivity(leftHand) : null
+            rightHand ? setTouchInteractivity(rightHand) : null
+        }
     }
 
     $: touchEvents ? updateTouchEvents() : null
@@ -211,12 +209,12 @@
      * CONTROLLER EVENTS: Universal Event dispatcher for controller of input type "controller"
      *
      * Dispatches CONTROLLER Events from SessionVR's components scope.
-     * IMPORTANT  In contrast to events being dispatched by interactive intersected Objects, the 'XRControllerEventSession' dispatcher
+     * IMPORTANT  In contrast to events being dispatched by interactive intersected Objects, the 'XrControllerEventSession' dispatcher
      * will ALWAYS dispatch the event even if the controller target ray doesn't intersect an object.
      * @see XRControllerUtils.getRayIntersections is being executed just before dispatching an Event:
      */
 
-    const dispatchControllerEventFromSession = createEventDispatcher<XRControllerEventSessionDispatcher>()
+    const dispatchControllerEventFromSession = createEventDispatcher<XrControllerEventSessionDispatcher>()
 
     function dispatchControllerEvent(e) {
         if ($svelthreeStores[sti].raycaster) {
@@ -237,7 +235,7 @@
                 targetObj = null
             }
 
-            let eventType: XRControllerEventType | XRControllerEventTypeMissed = e.type
+            let eventType: XrControllerEventType | XrControllerEventTypeMissed = e.type
 
             if (intersections === []) {
                 eventType === "select" ? (eventType = "missed_all_select") : null
@@ -247,7 +245,7 @@
                 eventType === "squeeze" ? (eventType = "missed_interactive_squeeze") : null
             }
 
-            const eventDetail: XRControllerEventDetailSession = {
+            const eventDetail: XrControllerEventDetailSession = {
                 xrInputSource: e.target.userData.xrInputSource,
                 controllerSpace: e.target,
                 controllerSpaceType: e.target.userData.spaceType,
@@ -264,51 +262,32 @@
         }
     }
 
-    let leftHand: Group
-    let rightHand: Group
+    function addHandInteraction(handSpace: Group) {
+        prepareHandForInteraction(handSpace)
 
-    function addHandInteraction(e: XRControllerSpaceEvent) {
-        // let hand0 = $svelthreeStores[sti].renderer.xr.getHand(0) // Group
-        // console.log(hand0)
-        // debugger
+        enablePinch !== undefined ? setPinchInteractivity(handSpace) : null
+        enableTouch !== undefined ? setTouchInteractivity(handSpace) : null
 
-        //if ( e.data.hand && ! (e.target as XRHandModel).motionController ) {
-        if (e.data.hand) {
-            //let handModel: XRHandModel = e.target.children[25] as XRHandModel
-            let handGroup: Group = e.target
+        // TODO  touchEvents
+        if (touchEvents !== undefined) {
+            applyHandTouchEvents()
+        }
 
-            console.log("-------- addHandInteraction -----------")
-            //console.log("handModel: ", handModel)
-            console.log("handGroup: ", handGroup)
-
-            prepareHandForInteraction(handGroup)
-
-            enablePinch !== undefined ? setPinchInteractivity(e.target) : null
-            enableTouch !== undefined ? setTouchInteractivity(e.target) : null
-
-            if (touchEvents !== undefined) {
-                applyHandTouchEvents()
-            }
-
-            if (enableTouchX !== undefined) {
-                applyHandTouchEventsX()
-            }
+        // TODO  enableTouchX
+        if (enableTouchX !== undefined) {
+            applyHandTouchEventsX()
         }
     }
 
     // WHY?  do we store config double and tripple (in the store and in the hands)?
-    // ANSWER  Because we're prototyping and are not yet sure where we'll need this "gloabaly"!
+    // ANSWER  Because we're prototyping and are not yet sure where we'll need this "globally"!
     // TODO  reconsider / refactor above
+
     function prepareHandForInteraction(handSpace: Group) {
-        console.log("------ prepareHandForInteraction! ----------")
         XRHandUtils.addName(handSpace)
-        console.log("After addName: ", handSpace)
         XRHandUtils.addUserDataHandedness(handSpace)
-        console.log("After addUserDataHandedness: ", handSpace)
 
         let handInputSource: XRInputSource = handSpace.userData.xrInputSource
-
-        console.log("handInputSource (handModel.userData.xrInputSource): ", handInputSource)
 
         if (handInputSource.handedness === XRControllerDefaults.HANDEDNESS_LEFT) {
             handSpace.userData.pinchEnabled = $svelthreeStores[sti].xr.leftHandPinchEnabled
@@ -317,6 +296,7 @@
             handSpace.userData.touchEnabled = $svelthreeStores[sti].xr.leftHandTouchEnabled
             handSpace.userData.touchEnabledJoints = $svelthreeStores[sti].xr.leftHandTouchEnabledJoints
         }
+
         if (handInputSource.handedness === XRControllerDefaults.HANDEDNESS_RIGHT) {
             handSpace.userData.pinchEnabled = $svelthreeStores[sti].xr.rightHandPinchEnabled
             handSpace.userData.pinchConfig = $svelthreeStores[sti].xr.rightHandPinchConfig
@@ -324,15 +304,6 @@
             handSpace.userData.touchEnabled = $svelthreeStores[sti].xr.rightHandTouchEnabled
             handSpace.userData.touchEnabledJoints = $svelthreeStores[sti].xr.rightHandTouchEnabledJoints
         }
-
-        assignHandToGlobalInstance(handSpace)
-    }
-
-    function assignHandToGlobalInstance(handSpace: Group) {
-        let handInputSource: XRInputSource = handSpace.userData.xrInputSource
-
-        handInputSource.handedness === XRControllerDefaults.HANDEDNESS_LEFT ? (leftHand = handSpace) : null
-        handInputSource.handedness === XRControllerDefaults.HANDEDNESS_RIGHT ? (rightHand = handSpace) : null
     }
 
     // PINCH INTERACTIVITY
@@ -353,6 +324,9 @@
     }
 
     function verifyXRPinchUpdating() {
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+
         if (leftHand.userData.pinchEnabled === false && rightHand.userData.pinchEnabled === false) {
             doUpdatePinchRays = false
         }
@@ -376,6 +350,9 @@
     }
 
     function verifyXRTouchUpdating() {
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+
         if (leftHand && !rightHand) {
             if (leftHand.userData.touchEnabled === false) {
                 doUpdateXRTouch = false
@@ -392,12 +369,18 @@
     }
 
     function applyHandTouchEvents() {
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+
         XRHandUtils.TOUCH.applyEvents(leftHand, rightHand, $svelthreeStores[sti].xr.touchEvents, dispatchHandTouchEvent)
     }
 
     // TOUCHX INTERACTIVITY
 
     function applyHandTouchEventsX() {
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+
         XRHandUtils.TOUCHX.applyEventsX(
             leftHand,
             rightHand,
@@ -422,6 +405,9 @@
                 XRHandUtils.TOUCHX.unregisterEventsX(hand)
             }
         }
+
+        doUpdatePinchRays = false
+        doUpdateXRTouch = false
     }
 
     /*
@@ -492,6 +478,9 @@
     */
 
     function updatePinchRays(): void {
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+
         if (leftHand && leftHand.userData.pinchEnabled) {
             xrHandPinch === undefined ? createXRHandPinchInstance() : null
             xrHandPinch.updatePinchRay(leftHand, currentScene, $svelthreeStores[sti].raycaster)
@@ -516,6 +505,11 @@
     */
 
     function updateXRTouch() {
+        console.time("TODO --> fast enough? --> GET LEFT / RIGHT HAND")
+        const leftHand: Group = getHandSpaceLeft()
+        const rightHand: Group = getHandSpaceRight()
+        console.timeEnd("TODO --> fast enough? --> GET LEFT / RIGHT HAND")
+
         if (enableTouch.mode) {
             let xrHandTouch: XRHandTouchRayExt | XRHandTouchSphereExt
 
@@ -534,7 +528,7 @@
                     break
             }
 
-            const updateArgs: XRTouchUpdateArgs = [
+            const updateArgs: XrTouchUpdateArgs = [
                 currentScene,
                 $svelthreeStores[sti].raycaster,
                 //handProfile,
@@ -620,6 +614,30 @@
     -------------- CREATE / ADD CONTROLLER MODELS ---------------- 
     */
 
+    let currentSession: XRSession = null
+    $: splashVR && splashVR.currentSession ? (currentSession = splashVR.currentSession) : null
+
+    $: if (currentSession) {
+        console.warn("SVELTHREE > SessionVR > currentSession: ", currentSession)
+    }
+
+    /**
+     * IMPORTANT  THIS RUNS THROUGH THE WEBXR MANAGER!
+     * IMPORTANT  an 'XRInputSourceChangeEvent' is being dispatched TWICE at input change via
+     * e.g. Oculus Quest (grippable to hands and vice versa):
+     * FIRST dispatch:
+     * - at init / only one dispatch (no 'added inputs'): adds inputs to 'added'
+     * - subsequent (runs again): 'added' inputs are being moved to 'removed' / 'added' is empty, 'removed' containes removed input sources --> SECOND
+     * SECOND: adds inputs to 'added'
+     */
+    function onInputSourceChange(e: XRInputSourceChangeEvent) {
+        const session: XRSession = e.session
+        const removed: XRInputSource[] = e.removed
+        const added: XRInputSource[] = e.added
+
+        //debugger
+    }
+
     /**
      * Gets available controller instances (three.js),
      * It then pushes those controllers to the store --> '$svelthreeStores[sti].xr.controllers'
@@ -643,23 +661,7 @@
             "SVELTHREE > SessionVR > getControllers! $svelthreeStores[sti].xr.controllers: ",
             $svelthreeStores[sti].xr.controllers
         )
-
-        //check
-        /*
-        let controllerXRM_0 = $svelthreeStores[sti].renderer.xr.getControllers[0]
-        let controllerXRM_1 = $svelthreeStores[sti].renderer.xr.getControllers[1]
-        let controllerStore_0 = $svelthreeStores[sti].xr.controllers[0]
-        let controllerStore_1 = $svelthreeStores[sti].xr.controllers[1]
-
-        console.log(controllerXRM_0 === controllerStore_0) // true
-        console.log(controllerXRM_1 === controllerStore_1) // true
-
-        debugger
-        */
     }
-
-    let controllerModelFactory: XRControllerModelFactory = new XRControllerModelFactory()
-    let handModelFactory: XRHandModelFactory = new XRHandModelFactory().setPath(pathToHandModels)
 
     function addControllers() {
         console.warn("SVELTHREE > SessionVR > addControllers!")
@@ -668,212 +670,241 @@
         console.warn("SVELTHREE > SessionVR > addControllers! currentScene:", currentScene)
 
         for (let i = 0; i < maxControllers; i++) {
-            //for (let i = 0; i < $svelthreeStores[sti].renderer.xr.getControllers().length; i++) {
-            //if ($svelthreeStores[sti].renderer.xr.getControllers()[i].parent !== currentScene) {
-
-            /*
-                switch (input) {
-                    case XRDefaults.VR_INPUT_TYPE_CONTROLLER:
-                        addController(i, currentScene)
-                        break
-                    case XRDefaults.VR_INPUT_TYPE_HAND:
-                        addHand(i, currentScene)
-                        break
-                    case XRDefaults.VR_INPUT_TYPE_HYBRID:
-                        addController(i, currentScene)
-                        addHand(i, currentScene)
-                        break
-                    default:
-                        // input has default value
-                        break
-                }
-                */
-
-            addGrippable(i, currentScene)
-            addHand(i, currentScene)
-
-            //}
+            createAllControllerSpaces(i)
         }
     }
 
-    /**
-     * Reactive HAND detection
-     */
+    function createAllControllerSpaces(i: number) {
+        console.warn("SVELTHREE > SessionVR > createAllControllerSpaces!")
 
-    /**
-     * TODO  Back to the roots: test controllers more / extend visualizations!
-     */
-    function addGrippable(i: number, currentScene: Scene) {
         /**
          * Getting controller TARGET RAY space (:Group)
-         * @see storeControllers
-         * @see (svelthree-three).WebXRManager.getController
-         * @see (svelthree-three).WebXRController.getTargetRaySpace
          */
         const targetRaySpace: Group = $svelthreeStores[sti].renderer.xr.getController(i)
         targetRaySpace.userData.controllerIndex = i
 
-        // targetRaySpace welche uuid?
-        //debugger
-
-        /**
-         * Adding a 'controllerRay' (:Line) to controller TARGET RAY space
-         */
-        // add standard ray first, config (if provided) will be applied on connect
-        // XRControllerUtils.addRayToControllerTargetRaySpace(targetRaySpace)
-
-        //debugger
-
         /**
          * Adding controller GRIP space (:Group) to the Scene
-         * These are currently NOT being being stored
-         * @see (svelthree-three).WebXRManager.getControllerGrip
-         * @see (svelthree-three).WebXRController.getGripSpace
          */
-        // const gripSpace: Group = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
-        // gripSpace.userData.controllerIndex = i
+        const gripSpace: Group = $svelthreeStores[sti].renderer.xr.getControllerGrip(i)
+        gripSpace.userData.controllerIndex = i
 
         /**
-         * Creating and adding a controller GRIP MODEL to controller GRIP SPACE
+         * Adding controller HAND space (:Group) to the Scene
          */
-        // gripSpace.add(controllerModelFactory.createControllerModel(gripSpace))
-        // const gripSpaceModel: XRControllerModel = controllerModelFactory.createControllerModel(gripSpace)
+        const handSpace: Group = $svelthreeStores[sti].renderer.xr.getHand(i)
+        handSpace.userData.controllerIndex = i
 
-        // gripSpace.add(gripSpaceModel)
+        targetRaySpace.addEventListener("connected", onTargetRaySpaceConnected)
+        gripSpace.addEventListener("connected", onGripSpaceConnected)
+        handSpace.addEventListener("connected", onHandSpaceConnected)
 
-        // gripSpace welche uuid?
-        //debugger
-
-        /**
-         * Adding controller GRIP SPACE (:Group) incl. the previously added GRIP MODEL to Scene
-         */
-
-        currentScene.add(targetRaySpace)
-        console.warn("SVELTHREE > SessionVR > addController! targetRaySpace:", targetRaySpace)
-
-        /*
-        currentScene.add(gripSpace)
-        console.warn("SVELTHREE > SessionVR > addController! grip:", gripSpace)
-        */
-
-        // connected / disconnected Listeners
-        /**
-         *  IMPORTANT
-         * WebXRController dispatches events through available / created "spaces" (Groups)
-         * @see WebXRController.dispatchEvent
-         * "connected" and "disconnected" Events are being dispatched on "inputsourceschange" Event
-         * @see WebXRManager : `session.addEventListener( 'inputsourceschange', updateInputSources )`
-         * @see WebXRManager.updateInputSources :
-         * `controller.dispatchEvent( { type: 'disconnected', data: inputSource } )`
-         * `controller.dispatchEvent( { type: 'connected', data: inputSource } )`
-         *
-         * Conclusions:
-         *
-         * CONTROLLER:
-         * The controller has two spaces "targetRay" and "grip". If we add listeners to both, the same
-         * events will be dispatched by both spaces (Groups). This may be usefull if we want handle events
-         * differently on these two. E.g. we could change the appearance of the ray and the grip Groups (e.target)
-         * based on controller events. So it makes sense to add all events to both of them and and dispatch them via
-         * @see SvelthreeInteractionVRController
-         *
-         * HAND:
-         * ...
-         */
-
-        // debugger
-
-        targetRaySpace.addEventListener("connected", onConnectedControllerTargetRaySpace)
-        //gripSpace.addEventListener("connected", onConnectedControllerGripSpace)
-        targetRaySpace.addEventListener("disconnected", onDisconnectedControllerTargetRaySpace)
-        //gripSpace.addEventListener("disconnected", onDisconnectedControllerGripSpace)
+        targetRaySpace.addEventListener("disconnected", onTargetRaySpaceDisconnected)
+        gripSpace.addEventListener("disconnected", onGripSpaceDisconnected)
+        handSpace.addEventListener("disconnected", onHandSpaceDisconnected)
     }
 
-    // {type: "connected", data: XRInputSource, target: Group}
-    function onConnectedControllerTargetRaySpace(e: XRControllerSpaceEvent) {
-        console.log("onConnectedControllerTargetRaySpace --> e: ", e)
-        e.target.userData.xrInputSource = e.data
-        e.target.userData.spaceType = "targetray"
+    function setCurrentVRInputTypeTo(type: SessionVRInputType) {
+        currentVRInputType = type
+    }
 
-        let handedness: XRHandedness = e.data.handedness
-        let targetRaySpace: Group = e.target
+    /**
+     * Check 'inputConfig' for targetRay configuration and apply it,
+     * also add grippable interaction (only to targetRaySpace, not gripSpace)
+     * @see inputConfig
+     */
+    function onTargetRaySpaceConnected(e: XrControllerSpaceEvent) {
+        const xrInputSource = e.data
+        const targetRaySpace: Group = e.target
 
-        let grippableConfig: XRInputConfigGrippable
+        if (xrInputSource.hand) {
+            XRControllerUtils.tryRemovingSpaceFromScene(targetRaySpace, currentScene)
+            return
+        }
 
-        inputConfig ? (grippableConfig = XRHandUtils.getInputConfigGrippable(inputConfig)) : null
+        console.log("onTargetRaySpaceConnected --> e: ", e)
 
-        const manager: WebXRManager = $svelthreeStores[sti].renderer.xr
+        const handedness: XRHandedness = e.data.handedness
 
-        console.log("grippableConfig: ", grippableConfig)
+        targetRaySpace.userData.xrInputSource = xrInputSource
+        targetRaySpace.userData.spaceType = "targetray"
+
+        let grippableConfig: XrInputConfigGrippable
+
+        inputConfig ? (grippableConfig = XRControllerUtils.getInputConfigGrippable(inputConfig)) : null
 
         if (grippableConfig) {
-            if (XRControllerUtils.applyGrippableConfig(grippableConfig, handedness, targetRaySpace, true)) {
-                let index: number = targetRaySpace.userData.controllerIndex
-                let xrInputSource: XRInputSource = e.data
-
-                const gripSpace: Group = $svelthreeStores[sti].renderer.xr.getControllerGrip(index)
-                gripSpace.userData.controllerIndex = index
-
-                debugger
-
-                //const gripSpaceModel: XRControllerModel = controllerModelFactory.createControllerModel(gripSpace, xrInputSource)
-                const gripSpaceModel: XRControllerModel = controllerModelFactory.createControllerModel(
-                    gripSpace,
-                    xrInputSource
-                )
-
-                gripSpace.add(gripSpaceModel)
-                currentScene.add(gripSpace)
-
-                addTargetRaySpaceListeners(e)
-            } else {
-                // remove standard ray and don't add interaction if no grip-config was found for this controller
-                // XRControllerUtils.clearControllerSpace(targetRaySpace)
-
-                let controller: WebXRController = manager.getControllers()[targetRaySpace.userData.controllerIndex]
-                controller.getTargetRaySpace = null
-                controller.getGripSpace = null
-
-                console.warn("XXX applyGrippableConfig failed!")
-                console.log("controller: ", controller)
-                console.log("targetRaySpace: ", targetRaySpace)
-                console.log("targetRaySpace.userData.controllerIndex: ", targetRaySpace.userData.controllerIndex)
-            }
-        } else {
-            console.warn("XXX no grippableConfig!")
-            console.log("inputConfig: ", inputConfig)
+            XRControllerUtils.applyTargetRayConfig(grippableConfig, handedness, targetRaySpace, true)
+            setCurrentVRInputTypeTo("grippable")
+            addTargetRaySpaceListeners(targetRaySpace)
         }
+
+        XRControllerUtils.tryAddingSpaceToScene(targetRaySpace, currentScene)
+
+        debugger
     }
 
-    /*
-    function onConnectedControllerGripSpace(e: XRControllerSpaceEvent) {
-        console.log("onConnectedControllerGripSpace --> e: ", e)
-    }
-    */
-
-    function onDisconnectedControllerTargetRaySpace(e: XRControllerSpaceEvent) {
-        console.log("onDisconnectedControllerTargetRaySpace --> e: ", e)
-
-        removeTargetRaySpaceListeners(e)
-
-        e.target.userData.xrInputSource = null
-        e.target.userData.controllerSpaceType = null
-    }
-
-    /*
-    function onDisconnectedControllerGripSpace(e: XRControllerSpaceEvent) {
-        console.log("onDisconnectedControllerGripSpace --> e: ", e)
-    }
-    */
-
-    function addTargetRaySpaceListeners(e: XRControllerSpaceEvent) {
+    function onTargetRaySpaceDisconnected(e: XrControllerSpaceEvent) {
         const targetRaySpace: Group = e.target
-        targetRaySpace ? XRControllerUtils.addListeners(targetRaySpace, dispatchControllerEvent) : null
+        removeTargetRaySpaceListeners(targetRaySpace)
+        XRControllerUtils.clearControllerSpace(targetRaySpace)
     }
 
-    function removeTargetRaySpaceListeners(e: XRControllerSpaceEvent) {
-        const targetRaySpace: Group = e.target
-        targetRaySpace ? XRControllerUtils.removeListeners(targetRaySpace, dispatchControllerEvent) : null
+    function addTargetRaySpaceListeners(targetRaySpace: Group) {
+        XRControllerUtils.addListeners(targetRaySpace, dispatchControllerEvent)
     }
+
+    function removeTargetRaySpaceListeners(targetRaySpace: Group) {
+        XRControllerUtils.removeListeners(targetRaySpace, dispatchControllerEvent)
+    }
+
+    function onGripSpaceConnected(e: XrControllerSpaceEvent) {
+        const xrInputSource = e.data
+        const gripSpace: Group = e.target
+
+        if (xrInputSource.hand) {
+            XRControllerUtils.tryRemovingSpaceFromScene(gripSpace, currentScene)
+            return
+        }
+
+        console.log("onGripSpaceConnected --> e: ", e)
+
+        // TODO  recreate gripModel if config changed
+
+        gripSpace.userData.xrInputSource = xrInputSource
+        gripSpace.userData.spaceType = "grip"
+
+        const handedness: XRHandedness = xrInputSource.handedness
+
+        let inputConfigGrippable: XrInputConfigGrippable
+
+        inputConfig ? (inputConfigGrippable = XRControllerUtils.getInputConfigGrippable(inputConfig)) : null
+
+        if (inputConfigGrippable) {
+            //let gripConfig: XrControllerSpaceModelConfig
+
+            // TODO  verify grippableConfig: only 1x "both" || max 1x of each "left" or "right"
+
+            const useGrip: boolean = XRControllerUtils.applyGrippableConfig(inputConfigGrippable, gripSpace, handedness)
+
+            if (useGrip) {
+                const addGripModel: boolean = XRControllerUtils.addGripModelCheck(gripSpace)
+
+                if (addGripModel) {
+                    // TODO  We could pass a custom GLTF-Loader to the XRControllerModelFactory, but it doesn't seem to be implemented fully in 119 (?)
+
+                    const gripModel: XRControllerModel = XRControllerUtils.addNewXRControllerModelToSpace(gripSpace)
+
+                    if (gripModel) {
+                        // TODO  We could do something with the gripModel here, e.g. we can add some visual helpers or change the model appearance
+                    }
+
+                    // Load the gripModel
+                    gripSpace.removeEventListener("connected", onGripSpaceConnected)
+                    gripSpace.dispatchEvent({ type: "connected", data: xrInputSource })
+                    gripSpace.addEventListener("connected", onGripSpaceConnected)
+                } else {
+                    // If we've provided a custom grip configuration (not implemented yet) we want to delete the standard one
+                    if (gripSpace.userData.gripConfig) {
+                        XRControllerUtils.removeAllExistingXRControllerModelsFromSpace(gripSpace)
+                    }
+
+                    // TODO  We could do something here with the provided custom grip configuration (not implemented yet)
+                }
+
+                setCurrentVRInputTypeTo("grippable")
+                // RECONSIDER  We're currently not adding interaction Listeners to gripSpace
+            } else {
+                XRControllerUtils.removeAllExistingXRControllerModelsFromSpace(gripSpace)
+                XRControllerUtils.clearControllerSpace(gripSpace)
+            }
+        }
+
+        XRControllerUtils.tryAddingSpaceToScene(gripSpace, currentScene)
+    }
+
+    function onGripSpaceDisconnected(e: XrControllerSpaceEvent) {
+        // RECONSIDER  Interaction listeners are being added to target ray space only
+        // IMPORTANT  if using three built in controller models, these manage themselves on 'connected' ad 'disconnected'
+        // RECONSIDER  Do we want to remove the space?! no, actually not
+        // currentScene.remove(e.target)
+    }
+
+    function onHandSpaceConnected(e: XrControllerSpaceEvent) {
+        const xrInputSource = e.data
+        const handSpace: Group = e.target
+
+        if (!xrInputSource.hand) {
+            XRControllerUtils.tryRemovingSpaceFromScene(handSpace, currentScene)
+            return
+        }
+
+        console.log("onHandSpaceConnected --> e: ", e)
+
+        const handedness: XRHandedness = e.data.handedness
+
+        handSpace.userData.xrInputSource = e.data
+        handSpace.userData.spaceType = "hand"
+
+        let inputConfigHand: XrInputConfigHand
+
+        inputConfig ? (inputConfigHand = XRHandUtils.getInputConfigHand(inputConfig)) : null
+
+        // TODO  Implement options (_low)
+        if (inputConfigHand) {
+            const useHand: boolean = XRHandUtils.applyHandConfig(inputConfigHand, handedness, handSpace)
+
+            if (useHand) {
+                const addXRHandModel: boolean = XRHandUtils.addXRHandModelCheck(handSpace)
+
+                if (addXRHandModel) {
+                    const handModel = XRHandUtils.addNewXRHandModelToSpace(handSpace)
+
+                    // TOFIX  Hand helpers are a mess, something changed, find out what and fix it.
+                    handHelpers ? xrHelpers.addHandHelpers(handModel, handedness) : null
+
+                    // Load the handModel
+                    handSpace.removeEventListener("connected", onHandSpaceConnected)
+                    handSpace.dispatchEvent({ type: "connected", data: xrInputSource })
+                    handSpace.addEventListener("connected", onHandSpaceConnected)
+                }
+
+                setCurrentVRInputTypeTo("hand")
+                addHandInteraction(handSpace)
+            } else {
+                XRHandUtils.removeAllExistingXRHandModelsFromSpace(handSpace)
+                XRControllerUtils.clearControllerSpace(handSpace)
+            }
+        }
+
+        XRControllerUtils.tryAddingSpaceToScene(handSpace, currentScene)
+    }
+
+    function onHandSpaceDisconnected(e: XrControllerSpaceEvent) {
+        // remove listener from disconnected space
+        const handSpace: Group = e.target
+        removeHandSpaceListeners(handSpace)
+
+        //  TODO  remove debugger stuff
+
+        // [!] if using standard hand model, these manage itself
+
+        // RECONSIDER  Do we want to remove the space?! no, actually not
+        // currentScene.remove(e.target)
+    }
+
+    function removeHandSpaceListeners(handSpace: Group) {
+        XRHandUtils.PINCH.removeListeners(handSpace, dispatchHandPinchEvent)
+        XRHandUtils.TOUCH.removeListeners(handSpace, dispatchHandTouchEvent)
+
+        XRHandUtils.TOUCH.unregisterEvents(handSpace)
+        XRHandUtils.TOUCHX.unregisterEventsX(handSpace)
+
+        doUpdatePinchRays = false
+        doUpdateXRTouch = false
+    }
+
+    // CONTROLLER SPACE GETTERS
 
     export function getControllerTargetRayLeft(): Group {
         const manager: WebXRManager = $svelthreeStores[sti].renderer.xr
@@ -899,81 +930,16 @@
         return XRControllerUtils.getGripSpaceByHandedness(manager, handedness)
     }
 
-    /*
-    -------------------------------------------------------- 
-    */
-
-    /*
-    -------------- CREATE / ADD HAND MODELS ---------------- 
-    */
-
-    /**
-     * TODO  Describe what happens here in detail
-     * TODO  What happens if we're in hand mode but grab the controllers?! (I think I tested that allready)
-     */
-    function addHand(i: number, currentScene: Scene) {
-        let handSpace: Group = $svelthreeStores[sti].renderer.xr.getHand(i)
-        handSpace.userData.controllerIndex = i
-
-        console.warn("SVELTHREE > SessionVR > addHand!:", handSpace)
-
-        handSpace.addEventListener("connected", onConnectedHandSpace)
-        handSpace.addEventListener("disconnected", onDisconnectedHandSpace)
-    }
-
-    function onConnectedHandSpace(e: XRControllerSpaceEvent) {
-        console.log("onConnectedHandSpace --> e: ", e)
-        e.target.userData.xrInputSource = e.data
-        e.target.userData.spaceType = "hand"
-
-        let handedness: XRHandedness = e.data.handedness
-        let handSpace: Group = e.target
-
-        let inputConfigHand: XRInputConfigHand
-
-        inputConfig ? (inputConfigHand = XRHandUtils.getInputConfigHand(inputConfig)) : null
-
-        let handModel: XRHandModel
-
+    export function getHandSpaceLeft(): Group {
         const manager: WebXRManager = $svelthreeStores[sti].renderer.xr
-
-        // TODO  Implement options (_low)
-        if (inputConfigHand) {
-            if (XRHandUtils.applyHandConfig(inputConfigHand, handedness, handSpace)) {
-                let xrInputSource: XRInputSource = e.data
-
-                handModelFactory.setPath(handSpace.userData.pathToHandModels)
-                handModel = handModelFactory.createHandModel(
-                    handSpace,
-                    handSpace.userData.handProfile,
-                    null,
-                    xrInputSource
-                )
-
-                // TOFIX  Hand helpers are a mess, something changed, find out what and fix it.
-                handHelpers ? xrHelpers.addHandHelpers(handModel, handedness) : null
-
-                handSpace.add(handModel)
-                currentScene.add(handSpace)
-
-                addHandInteraction(e)
-            } else {
-                console.warn("XXX applyHandConfig failed!")
-                console.log("inputConfigHand: ", inputConfigHand)
-                // don't add handModel and don't add hand-interaction if no hand-config was found for this controller
-            }
-        } else {
-            let controller: WebXRController = manager.getControllers()[handSpace.userData.controllerIndex]
-            controller.getHandSpace = null
-
-            console.warn("XXX no inputConfigHand!")
-            console.log("inputConfig: ", inputConfig)
-        }
+        const handedness: XRHandedness = "left"
+        return XRHandUtils.getHandSpaceByHandedness(manager, handedness)
     }
 
-    function onDisconnectedHandSpace(e: XRControllerSpaceEvent) {
-        console.log("onDisconnectedHandSpace --> e: ", e)
-        //removeHandInteraction(e)
+    export function getHandSpaceRight(): Group {
+        const manager: WebXRManager = $svelthreeStores[sti].renderer.xr
+        const handedness: XRHandedness = "right"
+        return XRHandUtils.getHandSpaceByHandedness(manager, handedness)
     }
 
     /*
@@ -1030,6 +996,7 @@
          */
 
         splashVR.onSessionStarted(session)
+        session.addEventListener("inputsourceschange", onInputSourceChange)
         session.addEventListener("end", onSessionEnded)
         $svelthreeStores[sti].renderer.xr.setSession(session)
 

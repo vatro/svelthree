@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _Empty_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -8,7 +13,7 @@
     import { svelthreeStores } from "../stores.js"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes"
     import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"

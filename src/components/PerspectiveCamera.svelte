@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _PerspectiveCamera_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -6,7 +11,7 @@
     import { PerspectiveCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes"
 
     export let scene: Scene
     export let id: string = undefined
@@ -28,22 +33,13 @@
     // TODO  Implement
     export let matrix: PropMatrix4 = undefined
 
-    //props object can be filled with all available Theejs-PerspectiveCamera parameters and props
-    //PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
-
-    // TOFIX  (compiles) if possible --> Type '{ [key: string]: any; }' must have a '[Symbol.iterator]()' method that returns an iterator.
-    // WHY?  not just hardcode contructor arguments?  ANSWER  Avoiding maintaning THREE constructor changes, let THREE report constructor API Errors.
-    export let config: { [key: string]: any } = undefined
+    export let params: ConstructorParameters<typeof PerspectiveCamera> = undefined
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
     let cam: PerspectiveCamera
-    config && config.length > 0
-        ? // TOFIX  (compiles) if possible --> Expected 4-6 arguments, but got 0 or more.
-          // WHY?  not just hardcode contructor arguments?  ANSWER  Avoiding maintaning THREE constructor changes, let THREE report constructor API Errors.
-          (cam = new PerspectiveCamera(...config))
-        : (cam = new PerspectiveCamera())
+    params && params.length > 0 ? (cam = new PerspectiveCamera(...params)) : (cam = new PerspectiveCamera())
 
     export let helper = false
 
@@ -103,21 +99,9 @@
         return id
     }
 
-    /*
-    export function getCamera() {
-        return cam;
-    }
-     */
+    let camera: Camera
 
-    /** TODO  how to type Svelte components?
-     * type SvelteComponent = import('*.svelte').default
-     * */
-
-    // TODO  do I have to write an Interface by myself?
-    let camera: Camera // typeof = 'object'
-
-    export function getCamera(): Camera {
-        // TODO  keep an eye on it / fix. compiles without errors, so leave it.
+    export function getCamera(): THREE.Camera {
         return camera.getCamera()
     }
 

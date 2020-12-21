@@ -1,3 +1,8 @@
+<!-- 
+@component
+This is a **svelthree** _Camera_ Component.  
+// TODO : Describe in detail.
+-->
 <script lang="typescript">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
@@ -9,7 +14,7 @@
     import { isValidMatrix4 } from "../utils/PropUtils.svelte"
     import { svelthreeStores } from "../stores.js"
     import { Scene, Camera } from "svelthree-three"
-    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes.svelte"
+    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
     let ani: any
