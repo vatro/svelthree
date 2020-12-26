@@ -17,6 +17,26 @@ export { default as SessionAR } from "./components/SessionAR.svelte"
 export { default as SessionVR } from "./components/SessionVR.svelte"
 export { default as CubeCamera } from "./components/CubeCamera.svelte"
 export { default as XRHandJointIndices } from "./utils/XRHandJointIndices"
-export *  from "./utils/Overridden"
 export { svelthreeStores } from "./stores.js"
+
+/** exports all THREE modules */
 export * from "svelthree-three"
+
+/** exports all THREE modules 'Foo' overridden by Svelte components as '_Foo'
+ * so users can e.g. import _Mesh from 'svelthree' and create a native THREE Mesh instance
+ */
+export { Mesh as _Mesh } from "svelthree-three"
+export { Light as _Light } from "svelthree-three"
+export { AmbientLight as _AmbientLight } from "svelthree-three"
+export { HemisphereLight as _HemisphereLight } from "svelthree-three"
+export { DirectionalLight as _DirectionalLight } from "svelthree-three"
+export { PointLight as _PointLight } from "svelthree-three"
+export { RectAreaLight as _RectAreaLight } from "svelthree-three"
+export { SpotLight as _SpotLight } from "svelthree-three"
+export { Camera as _Camera } from "svelthree-three"
+export { PerspectiveCamera as _PerspectiveCamera } from "svelthree-three"
+export { OrthographicCamera as _OrthographicCamera } from "svelthree-three"
+export { CubeCamera as _CubeCamera } from "svelthree-three"
+export { Scene as _Scene } from "svelthree-three"
+export { OrbitControls as _OrbitControls } from "svelthree-three"
+export { WebGLRenderer as _WebGLRenderer } from "svelthree-three"
