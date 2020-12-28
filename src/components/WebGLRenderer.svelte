@@ -12,19 +12,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
     import { get_current_component } from "svelte/internal"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
-    import {
-        WebGLRenderer,
-        PCFSoftShadowMap,
-        Scene,
-        OrthographicCamera,
-        PerspectiveCamera,
-        Raycaster,
-        Object3D,
-        Vector3,
-        Quaternion,
-        Matrix4
-    } from "svelthree-three"
-    import type { ShadowMapType } from "svelthree-three"
+    import { WebGLRenderer, PCFSoftShadowMap, Scene, Camera, Raycaster, Object3D } from "svelthree-three"
     import WebXR from "./WebXR.svelte"
     import { createEventDispatcher } from "svelte"
     import { SvelteComponentDev } from "svelte/internal"
@@ -54,7 +42,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
      */
 
     export let enableShadowMap = false
-    export let shadowMapType: ShadowMapType = PCFSoftShadowMap
+    export let shadowMapType: THREE.ShadowMapType = PCFSoftShadowMap
 
     let sceneToRenderId: string
     export { sceneToRenderId as sceneId }
@@ -63,7 +51,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
     export { camToRenderId as camId }
 
     let currentScene: Scene = undefined
-    let currentCam: OrthographicCamera | PerspectiveCamera = undefined
+    let currentCam: Camera = undefined
 
     let currentSceneId = ""
     let currentCamId = ""
@@ -133,28 +121,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
         }
     }
 
-    //Reactive handling Canvas Resize by calling Canvas.doResize(w, h)
     let storeCanvasDimW: number
     let storeCanvasDimH: number
-    // IMPORTANT!: the endpoint has to be a value not an object!!!
     $: storeCanvasDimW = $svelthreeStores[sti].canvas.dim.w
     $: storeCanvasDimH = $svelthreeStores[sti].canvas.dim.h
     $: (storeCanvasDimW || storeCanvasDimH) && canvas
         ? (console.info("SVELTHREE > WebGLRenderer : before resize renderer 1"),
-          resizeRenderer(storeCanvasDimW, storeCanvasDimH),
-          updateCameraAspect(storeCanvasDimW, storeCanvasDimH))
+          resizeRenderer(storeCanvasDimW, storeCanvasDimH))
         : null
-
-    // TODO  check, this is NOT working! Do we need this at all? Examine changing canvas via dom without this
-    //
-    //Reactive handling Canvas Resize via DOM (e.g. devtools)
-    /*
-    let devCanvasDimW
-    let devCanvasDimH
-    $: devCanvasDimW = $svelthreeStores[sti].canvas.dom ? $svelthreeStores[sti].canvas.dom.width :undefined
-    $: devCanvasDimH = $svelthreeStores[sti].canvas.dom ?  $svelthreeStores[sti].canvas.dom.height  :undefined
-    $: (devCanvasDimW || devCanvasDimH) && canvas ? updateCanvasDimInStore() : null // triggers above
-    */
 
     $: renderer ? startAnimating() : null
 
@@ -226,14 +200,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
         renderer ? renderer.setSize(tW, tH, false) : null
     }
 
-    function updateCameraAspect(tW: number, tH: number): void {
-        console.info("SVELTHREE > WebGLRenderer : updateCameraAspect!")
-        currentCam
-            ? (currentCam.type === "PerspectiveCamera" ? (currentCam.aspect = tW / tH) : null,
-              currentCam.updateProjectionMatrix())
-            : null
-    }
-
     function getSceneToRender(): Scene {
         console.info("SVELTHREE > WebGLRenderer : getSceneToRender!")
         if ($svelthreeStores[sti].scenes.length > 0) {
@@ -265,7 +231,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
         }
     }
 
-    function getCamToRender(): PerspectiveCamera | OrthographicCamera {
+    function getCamToRender(): Camera {
         console.info("SVELTHREE > WebGLRenderer : getCamToRender!")
         if ($svelthreeStores[sti].cameras.length > 0) {
             if (camToRenderId === undefined) {
@@ -514,7 +480,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
         return renderer
     }
 
-    export function getCurrentCamera(): PerspectiveCamera | OrthographicCamera {
+    export function getCurrentCamera(): Camera {
         return currentCam
     }
 
