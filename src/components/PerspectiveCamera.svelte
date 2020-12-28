@@ -11,9 +11,13 @@ This is a **svelthree** _PerspectiveCamera_ Component.
     import { PerspectiveCamera, CameraHelper, Scene } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes"
+    import { svelthreeStores } from "../stores.js"
+    import StoreUtils from "../utils/StoreUtils"
 
     export let scene: Scene
+
+    const sti: number = StoreUtils.getSTIfromScene(scene, "PerspectiveCamera")
+
     export let id: string = undefined
     if (!id) {
         console.warn(
@@ -85,6 +89,22 @@ This is a **svelthree** _PerspectiveCamera_ Component.
             camHelper ? camHelper.update() : null
             requestAnimationFrame(updateHelper)
         }
+    }
+
+    let canvas: HTMLCanvasElement = undefined
+    $: canvas = $svelthreeStores[sti].canvas.dom
+
+    let canvasW: number
+    let canvasH: number
+
+    $: canvasW = $svelthreeStores[sti].canvas.dim.w
+    $: canvasH = $svelthreeStores[sti].canvas.dim.h
+    $: (canvasW || canvasH) && canvas ? updateCameraAspect() : null
+
+    function updateCameraAspect(): void {
+        console.info("SVELTHREE > OrthographicCamera : updateCameraAspect!")
+        cam.aspect = canvasW / canvasH
+        cam.updateProjectionMatrix()
     }
 
     /**
