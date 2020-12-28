@@ -187,8 +187,11 @@ This is a **svelthree** _Canvas_ Component.
         $svelthreeStores[sti].canvas.dom === undefined ? ($svelthreeStores[sti].canvas.dom = c) : null
     }
 
+    $: w ? (svelthreeStoreBody.canvas.dim.w = w) : null
+    $: h ? (svelthreeStoreBody.canvas.dim.h = h) : null
+
     let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: Intersection[]) => void
-    export let useBVH: boolean
+    export let useBVH: boolean = undefined
     $: if (useBVH) {
         $svelthreeStores[sti].useBVH = useBVH
 
@@ -212,7 +215,7 @@ This is a **svelthree** _Canvas_ Component.
         }
     }
 
-    export let interactive: boolean
+    export let interactive: boolean = undefined
     let isInteractive = false
     let raycaster: Raycaster
 
@@ -300,19 +303,29 @@ This is a **svelthree** _Canvas_ Component.
      * Public methods
      */
 
-    export function getCanvas(): HTMLCanvasElement {
+    export function resize(w: number, h: number) {
+        $svelthreeStores[sti].canvas.dim = { w: w, h: h }
+    }
+
+    export function getDomElement(): HTMLCanvasElement {
         return $svelthreeStores[sti].canvas.dom
     }
 
-    export function getDimensions(): { w: number; h: number } {
+    export function getDomElementDimensions(): { w: number; h: number } {
         return {
             w: $svelthreeStores[sti].canvas.dom.width,
             h: $svelthreeStores[sti].canvas.dom.height
         }
     }
 
-    export function doResize(w: number, h: number) {
-        $svelthreeStores[sti].canvas.dim = { w: w, h: h }
+    export function resizeStyle(w: number, h: number) {
+        $svelthreeStores[sti].canvas.dom.style.width = `${w}px`
+        $svelthreeStores[sti].canvas.dom.style.height = `${h}px`
+    }
+
+    export function resizeAll(w: number, h: number) {
+        resize(w, h)
+        resizeStyle(w, h)
     }
 </script>
 
