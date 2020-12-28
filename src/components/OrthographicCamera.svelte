@@ -9,12 +9,17 @@ This is a **svelthree** _OrthographicCamera_ Component.
      */
 
     import { OrthographicCamera, CameraHelper, Scene } from "svelthree-three"
+    import { svelthreeStores } from "../stores.js"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropRot, PropLookAt } from "../utils/SvelthreeTypes"
+    import StoreUtils from "../utils/StoreUtils"
 
     export let scene: Scene
+
+    const sti: number = StoreUtils.getSTIfromScene(scene, "OrthographicCamera")
+
     export let id: string = undefined
+
     if (!id) {
         console.warn(
             "SVELTHREE > OrthographicCamera : you have to provide an 'id' prop (not empty String) for Cameras in order to assign them to a 'WebGLRenderer' component!",
@@ -29,10 +34,19 @@ This is a **svelthree** _OrthographicCamera_ Component.
     export let pos: PropPos = undefined
     export let rot: PropRot = undefined
     export let lookAt: PropLookAt = undefined
-    export let frustumSize = 1000 //default frustum size
-    export let aspect = 1 //default aspect
+    export let frustumSize = 2.5 //default frustum size
+    export let aspect = 1 //default aspect (width to height)
     export let near = 0.1 //default near
     export let far = 2000 //default far
+
+    const defaultParams: ConstructorParameters<typeof OrthographicCamera> = [
+        (frustumSize * aspect) / -2, // left
+        (frustumSize * aspect) / 2, // right
+        frustumSize / 2, // top
+        frustumSize / -2, // bottom
+        near,
+        far
+    ]
 
     // TODO  Implement
     export let matrix = undefined
@@ -44,17 +58,13 @@ This is a **svelthree** _OrthographicCamera_ Component.
 
     let cam: OrthographicCamera = undefined
 
+    cam = params && params.length > 0 ? new OrthographicCamera(...params) : new OrthographicCamera(...defaultParams)
+
+    /*
     params && params.length > 0
         ? (cam = new OrthographicCamera(...params))
-        : // TODO  INCONSISTENCY  we said we don't want to hardcode constructor and now we're doing it as default init config!
-          (cam = new OrthographicCamera(
-              (frustumSize * aspect) / -2,
-              (frustumSize * aspect) / 2,
-              frustumSize / 2,
-              frustumSize / -2,
-              near,
-              far
-          ))
+        : (cam = new OrthographicCamera(...defaultParams))
+        */
 
     export let helper = undefined
 
@@ -100,6 +110,28 @@ This is a **svelthree** _OrthographicCamera_ Component.
             camHelper ? camHelper.update() : null
             updateHelper_rAF = requestAnimationFrame(updateHelper)
         }
+    }
+
+    let canvas: HTMLCanvasElement = undefined
+    $: canvas = $svelthreeStores[sti].canvas.dom
+
+    let canvasW: number
+    let canvasH: number
+
+    $: canvasW = $svelthreeStores[sti].canvas.dim.w
+    $: canvasH = $svelthreeStores[sti].canvas.dim.h
+    $: (canvasW || canvasH) && canvas ? updateCameraAspect() : null
+
+    function updateCameraAspect(): void {
+        console.info("SVELTHREE > OrthographicCamera : updateCameraAspect!")
+        let aspect = canvasW / canvasH
+
+        cam.left = (frustumSize * aspect) / -2 // left
+        cam.right = (frustumSize * aspect) / 2 // right
+        cam.top = frustumSize / 2 // top
+        cam.bottom = frustumSize / -2 // bottom
+
+        cam.updateProjectionMatrix()
     }
 
     /**
