@@ -19,10 +19,7 @@ This is a **svelthree** _Mesh_ Component.
     import { svelthreeStores } from "../stores.js"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
-
-    import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes"
     import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
     import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"

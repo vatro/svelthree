@@ -3,15 +3,14 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import { Object3D, Vector3, Euler } from "svelthree-three"
-    import type { PropPos, PropRot, PropScale, PropLookAt } from "./SvelthreeTypes"
+    import { Vector3, Euler } from "svelthree-three"
 
     //hehe?
 
     export class Object3DUtils {
-        obj: Object3D
+        obj: THREE.Object3D
 
-        constructor(obj: Object3D) {
+        constructor(obj: THREE.Object3D) {
             this.obj = obj
         }
 

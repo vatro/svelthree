@@ -23,8 +23,6 @@ This is a **svelthree** _Canvas_ Component.
         BufferGeometry
     } from "svelthree-three"
 
-    import type { Intersection } from "svelthree-three"
-
     //BVH
     import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from "../../node_modules/three-mesh-bvh/src"
 
@@ -190,7 +188,7 @@ This is a **svelthree** _Canvas_ Component.
     $: w ? (svelthreeStoreBody.canvas.dim.w = w) : null
     $: h ? (svelthreeStoreBody.canvas.dim.h = h) : null
 
-    let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: Intersection[]) => void
+    let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: THREE.Intersection[]) => void
     export let useBVH: boolean = undefined
     $: if (useBVH) {
         $svelthreeStores[sti].useBVH = useBVH

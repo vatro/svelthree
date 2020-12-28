@@ -13,7 +13,6 @@ This is a **svelthree** _Light_ Component.
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
     import { LightUtils } from "../utils/LightUtils.svelte"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import type { PropColor, PropPos } from "../utils/SvelthreeTypes"
     import { Light, Scene, Object3D } from "svelthree-three"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
     import StoreUtils from "../utils/StoreUtils"

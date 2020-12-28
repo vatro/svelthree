@@ -11,7 +11,6 @@ This is a **svelthree** _DirectionalLight_ Component.
     import { DirectionalLight, DirectionalLightHelper, Scene } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropColor } from "../utils/SvelthreeTypes"
 
     /**
      *  TODO  keep an eye on the issue:

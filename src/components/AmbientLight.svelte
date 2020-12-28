@@ -11,7 +11,6 @@ This is a **svelthree** _AmbientLight_ Component.
     import { onMount } from "svelte"
     import { AmbientLight, Scene } from "svelthree-three"
     import Light from "./Light.svelte"
-    import type { PropColor } from "../utils/SvelthreeTypes"
 
     export let props: { [key: string]: any } = undefined
     export let color: PropColor = undefined

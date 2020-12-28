@@ -9,7 +9,6 @@ This is a **svelthree** _LoadedGLTF_ Component.
      */
 
     import { GLTFLoader, DRACOLoader, LoadingManager, Group } from "svelthree-three"
-    import type { GLTF } from "svelthree-three"
     import { createEventDispatcher } from "svelte"
 
     const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
@@ -43,7 +42,7 @@ This is a **svelthree** _LoadedGLTF_ Component.
 
     let loader: GLTFLoader
     let dracoLoader: DRACOLoader
-    let content: GLTF
+    let content: THREE.GLTF
 
     manager ? (loader = new GLTFLoader()) : (loader = new GLTFLoader(manager))
 
@@ -67,7 +66,7 @@ This is a **svelthree** _LoadedGLTF_ Component.
         //loaded = false // we could display something else here when loading?
 
         if (async) {
-            loader.loadAsync(path, onProgress).then((loadedGLTF: GLTF) => {
+            loader.loadAsync(path, onProgress).then((loadedGLTF: THREE.GLTF) => {
                 content = loadedGLTF
                 dispatch("loaded")
             })
@@ -100,7 +99,7 @@ This is a **svelthree** _LoadedGLTF_ Component.
         return content.scenes
     }
 
-    export function getContent(): GLTF {
+    export function getContent(): THREE.GLTF {
         return content
     }
 </script>

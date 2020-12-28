@@ -153,12 +153,12 @@
             }
 
             if (this.objTypeStr.includes("Material")) {
-                let obj =  this.obj as THREE.Material
+                let obj = this.obj as THREE.Material
                 obj.needsUpdate = true
             }
 
             if (this.objTypeStr.includes("Camera")) {
-                let obj =  this.obj as THREE.PerspectiveCamera | THREE.OrthographicCamera
+                let obj = this.obj as THREE.PerspectiveCamera | THREE.OrthographicCamera
                 obj.updateProjectionMatrix()
             }
         }

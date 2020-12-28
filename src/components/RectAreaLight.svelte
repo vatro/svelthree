@@ -11,7 +11,6 @@ This is a **svelthree** _RectAreaLight_ Component.
     import { RectAreaLight, RectAreaLightHelper, Scene, Object3D } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
-    import type { PropPos, PropColor } from "../utils/SvelthreeTypes"
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined

@@ -14,7 +14,6 @@ This is a **svelthree** _Camera_ Component.
     import { isValidMatrix4 } from "../utils/PropUtils.svelte"
     import { svelthreeStores } from "../stores.js"
     import { Scene, Camera } from "svelthree-three"
-    import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
     import StoreUtils from "../utils/StoreUtils"
 
