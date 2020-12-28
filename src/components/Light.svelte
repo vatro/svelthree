@@ -16,39 +16,13 @@ This is a **svelthree** _Light_ Component.
     import type { PropColor, PropPos } from "../utils/SvelthreeTypes"
     import { Light, Scene, Object3D } from "svelthree-three"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
+    import StoreUtils from "../utils/StoreUtils"
 
     let ani: any
 
     // construction
     export let scene: Scene
-    let sti: number
-
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn("SVELTHREE > Light : You have to provide a valid 'scene' prop of type 'Scene'!", {
-                scene: scene
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > Light : You have to provide a {scene} prop!", { scene: scene })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn("SVELTHREE > Light : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
-                scene: scene,
-                userData: scene.userData,
-                sti: scene.userData.sti
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    }
+    const sti: number = StoreUtils.getSTIfromScene(scene, "Light")
 
     export let animation: (
         obj: any,

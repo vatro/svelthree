@@ -9,27 +9,13 @@ This is a **svelthree** _CubeCamera_ Component.
     import { WebGLCubeRenderTarget, CubeCamera, Mesh, Vector3 } from "svelthree-three"
     //import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
+    import StoreUtils from "../utils/StoreUtils"
 
     let self = get_current_component()
     export let scene = undefined
     export let parent: Mesh = undefined
-    let sti: number
 
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn("SVELTHREE > CubeCamera : You have to provide a valid 'scene' prop of type 'Scene'!", {
-                scene: scene
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > CubeCamera : You have to provide a {scene} prop!", {
-            scene: scene
-        })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
+    const sti: number = StoreUtils.getSTIfromScene(scene, "CubeCamera")
 
     export let near: number = 1
     export let far: number = 1000
@@ -119,22 +105,6 @@ This is a **svelthree** _CubeCamera_ Component.
             let scene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
             cubeCamera.update(renderer, scene)
             parent.visible = true
-        }
-    }
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn(
-                "SVELTHREE > CubeCamera : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
-            throw new Error("SVELTHREE Exception (see warning above)")
         }
     }
 

@@ -16,26 +16,13 @@ This is a **svelthree** _Camera_ Component.
     import { Scene, Camera } from "svelthree-three"
     import type { PropPos, PropRot, PropLookAt, PropMatrix4 } from "../utils/SvelthreeTypes"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
+    import StoreUtils from "../utils/StoreUtils"
 
     let ani: any
 
     // construction
     export let scene: Scene
-    let sti: number
-
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn("SVELTHREE > Camera : You have to provide a valid 'scene' prop of type 'Scene'!", {
-                scene: scene
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > Camera : You have to provide a {scene} prop!", { scene: scene })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
+    const sti: number = StoreUtils.getSTIfromScene(scene, "Camera")
 
     export let animation: (
         obj: any,
@@ -126,19 +113,6 @@ This is a **svelthree** _Camera_ Component.
                   }
               }
     )
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn("SVELTHREE > Camera : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
-                scene: scene,
-                userData: scene.userData,
-                sti: scene.userData.sti
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    }
 
     // TODO  implement updating Matrix
     function tryMatrixUpdate(): void {

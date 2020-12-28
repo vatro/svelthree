@@ -12,6 +12,7 @@ This is a **svelthree** _OrbitControls_ Component.
     import { svelthreeStores } from "../stores.js"
     import { OrbitControls, Scene } from "svelthree-three"
     import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
+    import StoreUtils from "../utils/StoreUtils"
 
     export let scene: Scene
     export let enableDamping = false
@@ -22,21 +23,7 @@ This is a **svelthree** _OrbitControls_ Component.
 
     let ocPropIterator: UniversalPropIterator
 
-    let sti: number
-
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn("SVELTHREE > OrbitControls : You have to provide a valid 'scene' prop of type 'Scene'!", {
-                scene: scene
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > OrbitControls : You have to provide a {scene} prop!", { scene: scene })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
+    const sti: number = StoreUtils.getSTIfromScene(scene, "Mesh")
 
     let orbitcontrolsCreated = false
 
@@ -79,22 +66,6 @@ This is a **svelthree** _OrbitControls_ Component.
 
     function updateAutoRotate(): void {
         $svelthreeStores[sti].orbitcontrols ? ($svelthreeStores[sti].orbitcontrols.autoRotate = autoRotate) : null
-    }
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn(
-                "SVELTHREE > OrbitControls : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
     }
 
     onMount(() => {

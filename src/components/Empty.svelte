@@ -15,6 +15,7 @@ This is a **svelthree** _Empty_ Component.
     import { Object3DUtils } from "../utils/Object3DUtils.svelte"
     import type { PropPos, PropRot, PropScale, PropMatrix4 } from "../utils/SvelthreeTypes"
     import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
+    import StoreUtils from "../utils/StoreUtils"
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
@@ -29,21 +30,7 @@ This is a **svelthree** _Empty_ Component.
     export let aniauto: boolean = undefined
 
     export let scene: Scene = undefined
-    let sti: number
-
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn("SVELTHREE > Empty : You have to provide a valid 'scene' prop of type 'Scene'!", {
-                scene: scene
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > Empty : You have to provide a {scene} prop!", { scene: scene })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
+    const sti: number = StoreUtils.getSTIfromScene(scene, "Empty")
 
     let empty: Object3D = new Object3D()
     empty.name = name
@@ -157,19 +144,6 @@ This is a **svelthree** _Empty_ Component.
                   }
               }
     )
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn("SVELTHREE > Empty : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!", {
-                scene: scene,
-                userData: scene.userData,
-                sti: scene.userData.sti
-            })
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    }
 
     // TODO  implement updating Matrix
     function tryMatrixUpdate(): void {
