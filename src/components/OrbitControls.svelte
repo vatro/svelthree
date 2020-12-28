@@ -23,7 +23,7 @@ This is a **svelthree** _OrbitControls_ Component.
 
     let ocPropIterator: UniversalPropIterator
 
-    const sti: number = StoreUtils.getSTIfromScene(scene, "Mesh")
+    const sti: number = StoreUtils.getSTIfromScene(scene, "OrbitControls")
 
     let orbitcontrolsCreated = false
 
