@@ -3,45 +3,24 @@
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import {
-        Color,
-        Vector3,
-        Object3D,
-        Material,
-        WebGLRenderer,
-        //WebGLCubeRenderTarget,
-        OrbitControls,
-        CubeCamera,
-        Scene
-    } from "svelthree-three"
+    import { Color, Vector3, Object3D } from "svelthree-three"
     import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
 
     export class UniversalPropIterator {
-        obj: Scene | Object3D | Material | Material[] | WebGLRenderer | OrbitControls | CubeCamera
-        //| WebGLCubeRenderTarget
+        obj: any
         objTypeStr: string
         dlTarget: Object3D
         props: object
 
-        //TODO: implement proper handling of type Material[]
-        constructor(
-            obj:
-                | Object3D
-                | Material
-                | Material[]
-                | WebGLRenderer
-                //| WebGLCubeRenderTarget
-                | OrbitControls
-                | CubeCamera
-        ) {
+        // TODO  implement proper handling of type Material[]
+        constructor(obj: any) {
             this.obj = obj
+            this.objTypeStr = obj["type"]
 
-            if (obj["type"]) {
-                this.objTypeStr = obj["type"]
-            } else {
+            if (!this.objTypeStr) {
                 switch (this.obj.constructor.name) {
                     /**
-                     * TODO : Updating WebGLCubeRenderTarget is not working as initally expected,
+                     * TODO  Updating WebGLCubeRenderTarget is not working as initally expected,
                      * but we'll keep this code here (does no harm), in case we missed something
                      * @see CubeCamera.svelte
                      */
@@ -51,12 +30,13 @@
                     default:
                         this.objTypeStr = ""
                         console.info(
-                            "SVELTHREE TODO > UniversalPropIterator > constructor : obj has no 'type' property, probably of type 'Material[]' or WebGLRenderer",
+                            "SVELTHREE  TODO  > UniversalPropIterator > constructor : obj has no 'type' property, probably of type 'Material[]' or WebGLRenderer",
                             obj
                         )
                         break
                 }
             }
+
             this.dlTarget = undefined
         }
 
@@ -123,7 +103,7 @@
                         )
                         */
 
-                        //TODO: Does Three check if props are equal and not change / set them if? Are there any serious drawbacks at all (performance) if no equality check?
+                        // TODO  Does Three check if props are equal and not change / set them if? Are there any serious drawbacks at all (performance) if no equality check?
                         p === "scale" || p === "position" || p === "rotation"
                             ? this.setFromVector3OrArray(p)
                             : p === "color" || p === "groundColor"
@@ -144,7 +124,7 @@
                             : null
                     } else {
                         /**
-                         * TODO : Updating WebGLCubeRenderTarget is not working as initally expected,
+                         * TODO  Updating WebGLCubeRenderTarget is not working as initally expected,
                          * but we'll keep this code here (does no harm), in case we missed something
                          * @see CubeCamera.svelte
                          */
@@ -160,7 +140,7 @@
                             this.obj["texture"][p] = this.props[p]
                         } else {
                             console.error(
-                                "SVELTHREE > " +
+                                "SVELTHREE > UniversalPropIterator > " +
                                     this.objTypeStr +
                                     " : No such property in " +
                                     this.objTypeStr +
@@ -173,7 +153,13 @@
             }
 
             if (this.objTypeStr.includes("Material")) {
-                this.obj["needsUpdate"] = true
+                let obj =  this.obj as THREE.Material
+                obj.needsUpdate = true
+            }
+
+            if (this.objTypeStr.includes("Camera")) {
+                let obj =  this.obj as THREE.PerspectiveCamera | THREE.OrthographicCamera
+                obj.updateProjectionMatrix()
             }
         }
     }
