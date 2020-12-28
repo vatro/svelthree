@@ -172,7 +172,7 @@ This is a **svelthree** _SessionVR_ Component.
             $svelthreeStores[sti].xr[key] = value
         }
 
-        if(rendererAvailable) {
+        if (rendererAvailable) {
             const leftHand: Group = getHandSpaceLeft()
             const rightHand: Group = getHandSpaceRight()
 
