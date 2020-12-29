@@ -104,7 +104,7 @@ This is a **svelthree** _PerspectiveCamera_ Component.
     $: (canvasW || canvasH) && canvas ? updateCameraAspect() : null
 
     function updateCameraAspect(): void {
-        console.info("SVELTHREE > OrthographicCamera : updateCameraAspect!")
+        console.info("SVELTHREE > PerspectiveCamera : updateCameraAspect!")
         cam.aspect = canvasW / canvasH
         cam.updateProjectionMatrix()
     }
