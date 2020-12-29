@@ -68,9 +68,9 @@ This is a **svelthree** _Camera_ Component.
     // shorthand props can be set directly as props
 
     // TODO : document default values
-    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] | number[] = [0, 0, 2] //default position off [0,0,0] to prevent camera inside object on initialization
-    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = [0, 0, 0] //default rotation
-    export let lookAt: Vector3 | Parameters<Vector3["set"]> | number[] = [0, 0, 0] //default lookAt
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] | number[] = undefined
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = undefined
+    export let lookAt: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
 
     // TODO  implement updating Matrix
     export let matrix: THREE.Matrix4 = undefined
@@ -78,23 +78,52 @@ This is a **svelthree** _Camera_ Component.
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    $: !matrix && pos ? (Object3DUtils.tryPosUpdate(cam, pos), tryControlsUpdate()) : null
-    $: !matrix && pos ? Object3DUtils.tryRotUpdate(cam, rot) : null
-    $: !matrix && pos ? Object3DUtils.tryLookAtUpdate(cam, lookAt) : null
+    $: if (!matrix && pos) {
+        Object3DUtils.tryPosUpdate(cam, pos)
+        tryControlsUpdate()
+    }
+
+    $: if (!matrix && rot) {
+        Object3DUtils.tryRotUpdate(cam, rot)
+    }
+
+    $: if (!matrix && lookAt) {
+        Object3DUtils.tryLookAtUpdate(cam, lookAt)
+    }
 
     // TODO  implement updating Matrix
-    $: PropUtils.isValidMatrix4(matrix)
-        ? (console.warn("SVELTHREE > Camera : Matrix provided, will ignore 'pos' or 'rot' props if any provided!"),
-          tryMatrixUpdate())
-        : null
+    $: if (matrix && PropUtils.isValidMatrix4(matrix)) {
+        console.warn("SVELTHREE > Camera : Matrix provided, will ignore 'pos' or 'rot' props if any provided!")
+        tryMatrixUpdate()
+    }
 
-    $: props
-        ? Object.keys(props).length > 0
-            ? camPropIterator
-                ? camPropIterator.tryPropsUpdate(props)
-                : null
-            : null
-        : null
+    $: if (props && camPropIterator) {
+        if (Object.keys(props).length > 0) {
+            camPropIterator.tryPropsUpdate(props)
+        }
+    }
+
+    // apply default values
+
+    if (!matrix) {
+        if (!pos) {
+            if (!props || (props && !props.position)) {
+                Object3DUtils.tryPosUpdate(cam, [0, 0, 2])
+            }
+        }
+
+        if (!rot) {
+            if (!props || (props && !props.rotation)) {
+                Object3DUtils.tryRotUpdate(cam, [0, 0, 0])
+            }
+        }
+
+        if (!lookAt) {
+            if (!props || (props && !props.lookAt)) {
+                Object3DUtils.tryLookAtUpdate(cam, [0, 0, 0])
+            }
+        }
+    }
 
     export let fnOnMount: any = undefined
 
