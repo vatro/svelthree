@@ -10,7 +10,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
     import { svelthreeStores } from "../stores.js"
     import { WebGLRenderer, PCFSoftShadowMap, Scene, Camera, Raycaster, Object3D } from "svelthree-three"
     import WebXR from "./WebXR.svelte"

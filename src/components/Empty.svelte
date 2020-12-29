@@ -9,11 +9,11 @@ This is a **svelthree** _Empty_ Component.
      */
 
     import { onMount } from "svelte"
-    import { Object3D, Scene } from "svelthree-three"
+    import { Euler, Object3D, Scene, Vector3 } from "svelthree-three"
     import { svelthreeStores } from "../stores.js"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-    import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
+    import Object3DUtils from "../utils/Object3DUtils"
+    import PropUtils from "../utils/PropUtils"
     import StoreUtils from "../utils/StoreUtils"
 
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
@@ -33,7 +33,6 @@ This is a **svelthree** _Empty_ Component.
 
     let empty: Object3D = new Object3D()
     empty.name = name
-    let object3DUtils: Object3DUtils = new Object3DUtils(empty)
     let emptyPropIterator: UniversalPropIterator = new UniversalPropIterator(empty)
 
     scene.add(empty)
@@ -89,20 +88,20 @@ This is a **svelthree** _Empty_ Component.
         onSceneReactivated?: () => void
     } = undefined
 
-    export let pos: PropPos = [0, 0, 0]
-    export let rot: PropRot = [0, 0, 0]
-    export let scale: PropScale = [1, 1, 1]
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = [0, 0, 0]
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number]
+    export let scale: Vector3 | Parameters<Vector3["set"]> = [1, 1, 1]
 
     // TODO  Implement
-    export let matrix: PropMatrix4 = undefined
+    export let matrix: THREE.Matrix4 = undefined
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    $: !matrix ? (isValidArray3Prop(pos) ? object3DUtils.tryPosUpdate(pos) : null) : null
-    $: !matrix ? (isValidArray3Prop(rot) ? object3DUtils.tryRotUpdate(rot) : null) : null
-    $: !matrix ? (isValidArray3Prop(scale) ? object3DUtils.tryScaleUpdate(scale) : null) : null
-    $: isValidMatrix4(matrix)
+    $: !matrix ? (PropUtils.isValidArray3Prop(pos) ? Object3DUtils.tryPosUpdate(empty, pos) : null) : null
+    $: !matrix ? (PropUtils.isValidArray3Prop(rot) ? Object3DUtils.tryRotUpdate(empty, rot) : null) : null
+    $: !matrix ? (PropUtils.isValidArray3Prop(scale) ? Object3DUtils.tryScaleUpdate(empty, scale) : null) : null
+    $: PropUtils.isValidMatrix4(matrix)
         ? (console.warn(
               "SVELTHREE > Empty : Matrix provided, will ignore 'pos', 'rot' or 'scale' props if any provided!"
           ),

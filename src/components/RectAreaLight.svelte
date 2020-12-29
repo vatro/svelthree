@@ -8,7 +8,7 @@ This is a **svelthree** _RectAreaLight_ Component.
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import { RectAreaLight, RectAreaLightHelper, Scene, Object3D } from "svelthree-three"
+    import { RectAreaLight, RectAreaLightHelper, Scene, Object3D, Vector3 } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
 
@@ -28,8 +28,8 @@ This is a **svelthree** _RectAreaLight_ Component.
      * - You have to include RectAreaLightUniformsLib into your scene and call init().
      */
 
-    export let pos: PropPos = undefined
-    export let color: PropColor = undefined
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let intensity: number = undefined
     export let scene: Scene
 

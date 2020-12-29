@@ -8,7 +8,7 @@ This is a **svelthree** _OrthographicCamera_ Component.
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import { OrthographicCamera, CameraHelper, Scene } from "svelthree-three"
+    import { OrthographicCamera, CameraHelper, Scene, Vector3, Euler } from "svelthree-three"
     import { svelthreeStores } from "../stores.js"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
@@ -31,9 +31,9 @@ This is a **svelthree** _OrthographicCamera_ Component.
     export let animation: any = undefined
     export let aniauto = false
 
-    export let pos: PropPos = undefined
-    export let rot: PropRot = undefined
-    export let lookAt: PropLookAt = undefined
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = undefined
+    export let lookAt: Vector3 | Parameters<Vector3["set"]> = undefined
     export let frustumSize = 2.5 //default frustum size
     export let aspect = 1 //default aspect (width to height)
     export let near = 0.1 //default near
@@ -56,9 +56,8 @@ This is a **svelthree** _OrthographicCamera_ Component.
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    let cam: OrthographicCamera = undefined
-
-    cam = params && params.length > 0 ? new OrthographicCamera(...params) : new OrthographicCamera(...defaultParams)
+    const cam =
+        params && params.length > 0 ? new OrthographicCamera(...params) : new OrthographicCamera(...defaultParams)
 
     /*
     params && params.length > 0

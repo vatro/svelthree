@@ -7,7 +7,7 @@ This is a **svelthree** _CubeCamera_ Component.
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
     import { WebGLCubeRenderTarget, CubeCamera, Mesh, Vector3 } from "svelthree-three"
-    //import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
+    //import UniversalPropIterator from "../utils/UniversalPropIterator.svelte"
     import { svelthreeStores } from "../stores.js"
     import StoreUtils from "../utils/StoreUtils"
 

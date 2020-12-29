@@ -1,18 +1,16 @@
 <!-- 
+@author Vatroslav Vrbanic | https://github.com/vatro
 @component
 This is a **svelthree** _PerspectiveCamera_ Component.  
 // TODO : Describe in detail.
 -->
 <script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
-
-    import { PerspectiveCamera, CameraHelper, Scene } from "svelthree-three"
+    import { PerspectiveCamera, CameraHelper, Scene, Vector3, Euler } from "svelthree-three"
     import Camera from "./Camera.svelte"
     import { onMount } from "svelte"
     import { svelthreeStores } from "../stores.js"
     import StoreUtils from "../utils/StoreUtils"
+    import ExposedPropKeys from "../constants/ExposedPropKeys"
 
     export let scene: Scene
 
@@ -27,28 +25,32 @@ This is a **svelthree** _PerspectiveCamera_ Component.
         throw new Error("SVELTHREE Exception (see warning above)")
     }
 
-    export let animation: any = undefined
-    export let aniauto = false
-
-    export let pos: PropPos = undefined
-    export let rot: PropRot = undefined
-    export let lookAt: PropLookAt = undefined
-
-    // TODO  Implement
-    export let matrix: PropMatrix4 = undefined
-
     export let params: ConstructorParameters<typeof PerspectiveCamera> = undefined
-
-    //props object can be filled with anything, ideally available THREE props of course.
-    export let props: { [key: string]: any } = undefined
 
     let cam: PerspectiveCamera
     params && params.length > 0 ? (cam = new PerspectiveCamera(...params)) : (cam = new PerspectiveCamera())
 
+    export let animation: any = undefined
+    export let aniauto = false
+
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = undefined
+    export let lookAt: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+
+    // TODO  Implement
+    export let matrix: THREE.Matrix4 = undefined
+
+    //props object can be filled with anything, ideally available THREE props of course.
+    type PerspectiveCameraProps = OnlyExposedProps<
+        PerspectiveCamera,
+        typeof ExposedPropKeys.perspectiveCamera[number]
+    > & { lookAt: Vector3 | Parameters<Vector3["set"]> | number[] } & Object3DProps
+
+    export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined
+
     export let helper = false
 
     let camHelper: CameraHelper = undefined
-
     $: !camHelper && cam && helper ? createHelper() : null
 
     onMount(() => {

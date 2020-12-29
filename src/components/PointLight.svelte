@@ -8,7 +8,7 @@ This is a **svelthree** _PointLight_ Component.
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import { PointLight, PointLightHelper, Scene, Object3D } from "svelthree-three"
+    import { PointLight, PointLightHelper, Scene, Object3D, Vector3 } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
 
@@ -20,8 +20,8 @@ This is a **svelthree** _PointLight_ Component.
     export let animation: any = undefined
     export let aniauto: boolean = undefined
 
-    export let pos: PropPos = undefined
-    export let color: PropColor = undefined
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let intensity: number = undefined
     export let shadowMapSize: number = undefined
     export let shadowBias: number = undefined

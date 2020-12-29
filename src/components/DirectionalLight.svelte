@@ -8,7 +8,7 @@ This is a **svelthree** _DirectionalLight_ Component.
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
 
-    import { DirectionalLight, DirectionalLightHelper, Scene } from "svelthree-three"
+    import { DirectionalLight, DirectionalLightHelper, Scene, Vector3 } from "svelthree-three"
     import Light from "./Light.svelte"
     import { onMount } from "svelte"
 
@@ -30,8 +30,10 @@ This is a **svelthree** _DirectionalLight_ Component.
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    export let pos: PropPos = undefined
-    export let color: PropColor = undefined
+    type DirectionalLightProps = number
+
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let intensity: number = undefined
     export let shadowMapSize: number = undefined
     export let shadowBias: number = undefined

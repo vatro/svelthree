@@ -7,20 +7,15 @@ This is a **svelthree** _Mesh_ Component.
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */
-    /**
-     *
-     * Doesn't work
-     *
-     */
 
     import { onMount } from "svelte"
     import { get_current_component } from "svelte/internal"
-    import { Mesh, Object3D, Scene, Material, BufferGeometry, Geometry } from "svelthree-three"
+    import { Mesh, Object3D, Scene, Material, BufferGeometry, Geometry, Vector3, Euler } from "svelthree-three"
     import { svelthreeStores } from "../stores.js"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import { Object3DUtils } from "../utils/Object3DUtils.svelte"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
+    import Object3DUtils from "../utils/Object3DUtils"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
-    import { isValidArray3Prop, isValidMatrix4 } from "../utils/PropUtils.svelte"
+    import PropUtils from "../utils/PropUtils"
     import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
     import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
     import SvelthreeInteractionVRGrippable from "./SvelthreeInteractionVRGrippable.svelte"
@@ -81,31 +76,42 @@ This is a **svelthree** _Mesh_ Component.
     let generate = false
     export let mesh: Mesh = undefined
 
-    let object3DUtils: Object3DUtils
     let meshPropIterator: UniversalPropIterator
     let matPropIterator: UniversalPropIterator
 
     export let material: Material | Material[] = undefined
     export let geometry: Geometry | BufferGeometry = undefined
 
-    mesh ? ((generate = false), onMeshProvided()) : (generate = true)
+    if (mesh) {
+        generate = false
+        onMeshProvided()
+    } else {
+        generate = true
+    }
 
     function onMeshProvided(): void {
         // check if mesh is really a Mesh then do the rest
         if (mesh.type === "Mesh") {
-            mesh.geometry ? (geometry = mesh.geometry) : null
-            mesh.material
-                ? (material = mesh.material)
-                : console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh: mesh })
-            console.info("SVELTHREE > Mesh : Saved geometry:", {
-                geometry: geometry
-            })
-            console.info("SVELTHREE > Mesh : Saved material:", {
-                material: material
-            })
-            ;(mesh.userData.initScale = mesh.scale.x), (object3DUtils = new Object3DUtils(mesh))
+            if (mesh.geometry) {
+                geometry = mesh.geometry
+            }
+
+            if (mesh.material) {
+                material = mesh.material
+            } else {
+                console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh: mesh })
+            }
+
+            console.info("SVELTHREE > Mesh : Saved geometry:", { geometry: geometry })
+            console.info("SVELTHREE > Mesh : Saved material:", { material: material })
+
+            mesh.userData.initScale = mesh.scale.x
+
             meshPropIterator = new UniversalPropIterator(mesh)
-            material ? (matPropIterator = new UniversalPropIterator(material)) : null
+
+            if (material) {
+                matPropIterator = new UniversalPropIterator(material)
+            }
         }
     }
 
@@ -169,18 +175,19 @@ This is a **svelthree** _Mesh_ Component.
     //we know mesh has material if material is available and !generate, it was referenced onMeshProvided()
     $: material && !generate ? (material !== mesh.material ? tryMaterialUpdate() : null) : null
 
-    $: geometry && material && !mesh && generate
-        ? ((mesh = new Mesh(geometry, material)),
-          (mesh.name = name),
-          ((mesh.userData.initScale = mesh.scale.x), (mesh.userData.svelthreeComponent = self)),
-          console.info("SVELTHREE > Mesh : " + geometry.type + " created!", {
-              mesh: mesh
-          }),
-          console.info("SVELTHREE > Mesh : saved 'geometry' (generated):", geometry),
-          console.info("SVELTHREE > Mesh : saved 'material' (generated):", material),
-          (object3DUtils = new Object3DUtils(mesh)),
-          (meshPropIterator = new UniversalPropIterator(mesh)))
-        : null
+    $: if (geometry && material && !mesh && generate) {
+        mesh = new Mesh(geometry, material)
+
+        mesh.name = name
+        mesh.userData.initScale = mesh.scale.x
+        mesh.userData.svelthreeComponent = self
+
+        console.info("SVELTHREE > Mesh : " + geometry.type + " created!", { mesh: mesh })
+        console.info("SVELTHREE > Mesh : saved 'geometry' (generated):", geometry)
+        console.info("SVELTHREE > Mesh : saved 'material' (generated):", material)
+
+        meshPropIterator = new UniversalPropIterator(mesh)
+    }
 
     // This statement is being triggered on creation / recreation
     $: mesh ? tryAddingMesh() : console.error("SVELTHREE > Mesh : mesh was not created!")
@@ -221,29 +228,29 @@ This is a **svelthree** _Mesh_ Component.
     } = undefined
 
     export let mat: { [key: string]: any } = undefined
-    export let pos: PropPos = undefined
-    export let rot: PropRot = undefined
-    export let scale: PropScale = undefined
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = undefined
+    export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
     export let castShadow: boolean = undefined
     export let receiveShadow: boolean = undefined
 
     // TODO  Implement
-    export let matrix: PropMatrix4 = undefined
+    export let matrix: THREE.Matrix4 = undefined
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
     //reactive updating props
-    $: !matrix ? (pos ? (isValidArray3Prop(pos) ? object3DUtils.tryPosUpdate(pos) : null) : null) : null
-    $: !matrix ? (rot ? (isValidArray3Prop(rot) ? object3DUtils.tryRotUpdate(rot) : null) : null) : null
+    $: !matrix ? (pos ? (PropUtils.isValidArray3Prop(pos) ? Object3DUtils.tryPosUpdate(mesh, pos) : null) : null) : null
+    $: !matrix ? (rot ? (PropUtils.isValidArray3Prop(rot) ? Object3DUtils.tryRotUpdate(mesh, rot) : null) : null) : null
     $: !matrix
         ? scale
-            ? isValidArray3Prop(scale)
-                ? (object3DUtils.tryScaleUpdate(scale), (mesh.userData.initScale = mesh.scale.x))
+            ? PropUtils.isValidArray3Prop(scale)
+                ? (Object3DUtils.tryScaleUpdate(mesh, scale), (mesh.userData.initScale = mesh.scale.x))
                 : null
             : null
         : null
-    $: isValidMatrix4(matrix)
+    $: PropUtils.isValidMatrix4(matrix)
         ? (console.warn(
               "SVELTHREE > Mesh : Matrix provided, will ignore 'pos', 'rot' or 'scale' props if any provided!"
           ),

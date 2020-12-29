@@ -4,7 +4,7 @@
      */
 
     import { Color, Light } from "svelthree-three"
-    import { isValidArray3Prop, isArray } from "./PropUtils.svelte"
+    import PropUtils from "./PropUtils"
 
     export class LightUtils {
         light: Light
@@ -22,8 +22,8 @@
         tryColorUpdate(color: any) {
             console.info("color", color)
             this.light
-                ? isArray(color)
-                    ? isValidArray3Prop(color)
+                ? PropUtils.isArray(color)
+                    ? PropUtils.isValidArray3Prop(color)
                         ? (this.light.color = new Color(color[0], color[1], color[2]))
                         : null
                     : (this.light.color = new Color(color))

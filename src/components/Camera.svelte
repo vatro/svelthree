@@ -9,11 +9,11 @@ This is a **svelthree** _Camera_ Component.
      */
 
     import { onMount } from "svelte"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-    import { isValidMatrix4 } from "../utils/PropUtils.svelte"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
+    import Object3DUtils from "../utils/Object3DUtils"
+    import PropUtils from "../utils/PropUtils"
     import { svelthreeStores } from "../stores.js"
-    import { Scene, Camera } from "svelthree-three"
+    import { Scene, Camera, Euler, Vector3 } from "svelthree-three"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
     import StoreUtils from "../utils/StoreUtils"
 
@@ -37,11 +37,9 @@ This is a **svelthree** _Camera_ Component.
     export let id: string = undefined
 
     export let cam: Camera
-    let object3DUtils: Object3DUtils
     let camPropIterator: UniversalPropIterator
 
     if (cam) {
-        object3DUtils = new Object3DUtils(cam)
         camPropIterator = new UniversalPropIterator(cam)
     } else {
         console.warn("SVELTHREE > Camera : camera was not provided by parent component!", { cam: cam })
@@ -49,6 +47,7 @@ This is a **svelthree** _Camera_ Component.
     }
 
     scene.add(cam)
+
     console.info("SVELTHREE > Camera : " + cam.type + " was added to scene!", {
         cam: cam,
         scene: scene,
@@ -69,24 +68,22 @@ This is a **svelthree** _Camera_ Component.
     // shorthand props can be set directly as props
 
     // TODO : document default values
-    export let pos: PropPos = [0, 0, 2] //default position off [0,0,0] to prevent camera inside object on initialization
-    export let rot: PropRot = [0, 0, 0]
-    export let lookAt: PropLookAt = [0, 0, 0] //default lookAt
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] | number[] = [0, 0, 2] //default position off [0,0,0] to prevent camera inside object on initialization
+    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = [0, 0, 0] //default rotation
+    export let lookAt: Vector3 | Parameters<Vector3["set"]> | number[] = [0, 0, 0] //default lookAt
 
     // TODO  implement updating Matrix
-    export let matrix: PropMatrix4 = undefined
+    export let matrix: THREE.Matrix4 = undefined
 
     //props object can be filled with anything, ideally available THREE props of course.
     export let props: { [key: string]: any } = undefined
 
-    $: !matrix ? (object3DUtils.tryPosUpdate(pos), tryControlsUpdate()) : null
-
-    $: !matrix ? object3DUtils.tryRotUpdate(rot) : null
-
-    $: !matrix ? object3DUtils.tryLookAtUpdate(lookAt) : null
+    $: !matrix && pos ? (Object3DUtils.tryPosUpdate(cam, pos), tryControlsUpdate()) : null
+    $: !matrix && pos ? Object3DUtils.tryRotUpdate(cam, rot) : null
+    $: !matrix && pos ? Object3DUtils.tryLookAtUpdate(cam, lookAt) : null
 
     // TODO  implement updating Matrix
-    $: isValidMatrix4(matrix)
+    $: PropUtils.isValidMatrix4(matrix)
         ? (console.warn("SVELTHREE > Camera : Matrix provided, will ignore 'pos' or 'rot' props if any provided!"),
           tryMatrixUpdate())
         : null

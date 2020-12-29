@@ -10,10 +10,10 @@ This is a **svelthree** _Light_ Component.
 
     import { onMount } from "svelte"
     import { svelthreeStores } from "../stores.js"
-    import { Object3DUtils } from "../utils/Object3DUtils.svelte"
+    import Object3DUtils from "../utils/Object3DUtils"
     import { LightUtils } from "../utils/LightUtils.svelte"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import { Light, Scene, Object3D } from "svelthree-three"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
+    import { Light, Scene, Object3D, Vector3 } from "svelthree-three"
     import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
     import StoreUtils from "../utils/StoreUtils"
 
@@ -39,11 +39,9 @@ This is a **svelthree** _Light_ Component.
     export let parentForUs: Object3D = undefined
     export let light: Light = undefined
     let lightUtils: LightUtils
-    let object3DUtils: Object3DUtils
     let uniPropIterator: UniversalPropIterator
 
     if (light) {
-        object3DUtils = new Object3DUtils(light)
         uniPropIterator = new UniversalPropIterator(light)
         lightUtils = new LightUtils(light)
     } else {
@@ -91,8 +89,8 @@ This is a **svelthree** _Light_ Component.
 
     //props
     // shorthand props can be set directly as props
-    export let pos: PropPos = [0, 1, 0] //default position off [0,0,0] to prevent light inside object on initialization
-    export let color: PropColor = undefined
+    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = [0, 1, 0] //default position off [0,0,0] to prevent light inside object on initialization
+    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let intensity: number = 0 // 0 == 1
     export let shadowMapSize: number = undefined
     export let shadowBias: number = undefined
@@ -101,7 +99,7 @@ This is a **svelthree** _Light_ Component.
     //props object can be filled with all available Theejs-Mesh props
     export let props: { [key: string]: any } = undefined
 
-    $: pos && pos.length > 0 ? object3DUtils.tryPosUpdate(pos) : null
+    $: pos && pos.length > 0 ? Object3DUtils.tryPosUpdate(light, pos) : null
     $: intensity ? lightUtils.tryIntensityUpdate(intensity) : null
     $: color ? lightUtils.tryColorUpdate(color) : null
 

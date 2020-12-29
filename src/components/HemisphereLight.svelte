@@ -19,8 +19,8 @@ This is a **svelthree** _HemisphereLight_ Component.
     export let animation: any = undefined
     export let aniauto: boolean = undefined
 
-    export let groundColor: PropColor = undefined
-    export let skyColor: PropColor = undefined
+    export let groundColor: THREE.Vector3 | THREE.Color | number | number[] = undefined
+    export let skyColor: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let helperSphereSize: number = 0.5
     export let intensity: number = undefined
 

@@ -1,19 +1,28 @@
 <!-- 
+@author Vatroslav Vrbanic | https://github.com/vatro
 @component
 This is a **svelthree** _AmbientLight_ Component.  
 // TODO : Describe in detail.
 -->
 <script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
-
     import { onMount } from "svelte"
     import { AmbientLight, Scene } from "svelthree-three"
     import Light from "./Light.svelte"
+    import ExposedPropKeys from "../constants/ExposedPropKeys"
 
-    export let props: { [key: string]: any } = undefined
-    export let color: PropColor = undefined
+    export let scene: Scene
+
+    export let params: ConstructorParameters<typeof AmbientLight> = undefined
+    const light = params && params.length > 0 ? new AmbientLight(...params) : new AmbientLight()
+
+    type AmbientLightProps = OnlyExposedAndOverwrittenProps<
+        AmbientLight,
+        typeof ExposedPropKeys.ambientLight[number],
+        { color: THREE.Vector3 | THREE.Color | number | number[] }
+    >
+
+    export let props: { [P in keyof AmbientLightProps]: AmbientLightProps[P] } = undefined
+    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
     export let intensity: number = undefined
 
     /**
@@ -21,10 +30,6 @@ This is a **svelthree** _AmbientLight_ Component.
      * AmbientLight cannot be used to cast shadows as it doesn't have a direction.
      * Position is also irrelevant.
      */
-
-    export let scene: Scene
-
-    let light = new AmbientLight()
 
     export function getLight(): AmbientLight {
         return light

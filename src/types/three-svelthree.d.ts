@@ -23,3 +23,14 @@ declare type RaycasterIntersectObject = {
     uv2: THREE.Vector2
     instanceId: number
 }
+
+type Object3DProps = {
+    position?: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | number[]
+    up?: THREE.Vector3
+    scale?: THREE.Vector3
+    rotation?: THREE.Euler | Parameters<THREE.Euler["set"]> | [number, number, number]
+    matrix?: THREE.Matrix4
+    quaternion?: THREE.Quaternion
+    layers?: THREE.Layers
+    //dispose?: (() => void) | null;
+}

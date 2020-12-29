@@ -11,7 +11,7 @@ This is a **svelthree** _OrbitControls_ Component.
     import { onMount } from "svelte"
     import { svelthreeStores } from "../stores.js"
     import { OrbitControls, Scene } from "svelthree-three"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
+    import UniversalPropIterator from "../utils/UniversalPropIterator"
     import StoreUtils from "../utils/StoreUtils"
 
     export let scene: Scene
