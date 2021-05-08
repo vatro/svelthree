@@ -15,6 +15,7 @@
   "devDependencies": {
     "@types/three": "^0.127.1",
     "prettier": "^2.2.1",
+    "svelte": "^3.38.2",
     "svelte-check": "^1.2.5",
     "svelte-preprocess": "^4.6.9",
     "three": "^0.128.0",
