@@ -6,12 +6,21 @@ This is a **svelthree** _WebGLRenderer_ Component.
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount, tick } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
-	import { Camera, Object3D, PCFSoftShadowMap, Raycaster, Scene, WebGLRenderer } from "three"
+	import {
+		Camera,
+		Object3D,
+		PCFSoftShadowMap,
+		Raycaster,
+		Scene,
+		WebGLRenderer,
+		XRAnimationLoopCallback,
+		XRFrame,
+		XRSession
+	} from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import { Propeller, PropUtils } from "../utils"
 	import { XRHitTestAR } from "../xr"
-	import type { XRFrame, XRSession } from "../xr/types-webxr"
 
 	const css_rs = "color: red;font-weight:bold;"
 	const css_ba = "color: blue;font-weight:bold;"
@@ -535,36 +544,29 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	function animate(): void {
 		//console.info("SVELTHREE > WebGLRenderer > animate!")
 		if (renderer.xr.enabled === false) {
-			render()
+			renderStandard()
 		} else {
-			renderer.setAnimationLoop(render)
+			renderer.setAnimationLoop(renderXR)
 		}
 	}
 
 	let xrHitTestAR: XRHitTestAR
 
-	// TODO  timestamp and frame types? timestamp / time unused. --> see onAnimationFrame() in WebXRManager.js
-	async function render(timestamp?: any, frame?: XRFrame): Promise<void> {
+	async function renderStandard(): Promise<void> {
 		if (doAnimate) {
-			if (logOnce) {
-				logOnce = false
-				if (logInfo) console.info("SVELTHREE > WebGLRenderer > animate!", currentScene, currentCam, canvas)
-			}
+			logOnce ? doLogOnce("renderStandard") : null
 
-			// Intersections / Raycaster using Camera and pointer.pos (NonXR)
-			if (renderer.xr.enabled === false) {
-				isInteractive
-					? (raycaster.setFromCamera($svelthreeStores[sti].pointer.pos, currentCam),
-					  (toTest = currentScene.children.filter((child) => child.type === "Mesh")),
-					  ($svelthreeStores[sti].allIntersections = raycaster.intersectObjects(toTest, true)))
-					: null
+			isInteractive
+				? (raycaster.setFromCamera($svelthreeStores[sti].pointer.pos, currentCam),
+				  (toTest = currentScene.children.filter((child) => child.type === "Mesh")),
+				  ($svelthreeStores[sti].allIntersections = raycaster.intersectObjects(toTest, true)))
+				: null
 
-				isInteractive ? checkCursor() : null
+			isInteractive ? checkCursor() : null
 
-				// OrbitControls (NonXR)
-				// required if controls.enableDamping or controls.autoRotate are set to true
-				$svelthreeStores[sti].orbitcontrols ? $svelthreeStores[sti].orbitcontrols.update() : null
-			}
+			// OrbitControls (NonXR)
+			// required if controls.enableDamping or controls.autoRotate are set to true
+			$svelthreeStores[sti].orbitcontrols ? $svelthreeStores[sti].orbitcontrols.update() : null
 
 			// update cube cameras
 			if ($svelthreeStores[sti].cubeCameras.length > 0) {
@@ -583,8 +585,74 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			//
 			await tick()
 
-			if (renderer.xr.enabled === true) {
-				renderXR(timestamp, frame)
+			if (resizeRendererOnNextFrame) {
+				renderer.setSize(storeCanvasDimW, storeCanvasDimH, true)
+				resizeRendererOnNextFrame = false
+			}
+
+			renderer.render(currentScene, currentCam)
+
+			dispatch("after_render")
+
+			rAF = requestAnimationFrame(animate)
+		}
+	}
+
+	let lastTimeStamp: number
+
+	async function renderXR(time: number, frame: XRFrame): Promise<void> {
+		if (doAnimate) {
+			logOnce ? doLogOnce("renderXR") : null
+
+			updateCubeCameras()
+
+			dispatch("before_render")
+			dispatch("before_render_int")
+			dispatch("before_render_scene")
+
+			// VERY IMPORTANT  THREE  SVELTE :
+			// inserting await tick() here enables cross-referencing:
+			//
+			await tick()
+
+			if (frame) {
+				let delta: number
+
+				if (lastTimeStamp) {
+					delta = time - lastTimeStamp
+					lastTimeStamp = time
+				} else {
+					lastTimeStamp = time
+					delta = 0
+				}
+
+				$svelthreeStores[sti].xr.currentFrame = {
+					timestamp: time,
+					delta: delta,
+					frame: frame
+				}
+
+				dispatch("xrframe", {
+					timestamp: time,
+					delta: delta,
+					frame: frame
+				})
+
+				switch ($svelthreeStores[sti].xr.sessionMode) {
+					case XRDefaults.SESSION_MODE_INLINE:
+						console.error(
+							"SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'inline' is not yet implemented!"
+						)
+						break
+					case XRDefaults.SESSION_MODE_AR:
+						//renderAR(timestamp, frame)
+						renderAR(frame)
+						break
+					case XRDefaults.SESSION_MODE_VR:
+						break
+					default:
+						break
+				}
 			}
 
 			if (resizeRendererOnNextFrame) {
@@ -602,46 +670,19 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
-	let lastTimeStamp: number
+	function doLogOnce(renderMode: string): void {
+		logOnce = false
+		if (logInfo) {
+			console.info(`SVELTHREE > WebGLRenderer > animate : ${renderMode}`, currentScene, currentCam, canvas)
+		}
+	}
 
-	function renderXR(timestamp: number = undefined, frame: XRFrame = undefined): void {
-		if (frame) {
-			let delta: number
-
-			if (lastTimeStamp) {
-				delta = timestamp - lastTimeStamp
-				lastTimeStamp = timestamp
-			} else {
-				lastTimeStamp = timestamp
-				delta = 0
-			}
-
-			$svelthreeStores[sti].xr.currentFrame = {
-				timestamp: timestamp,
-				delta: delta,
-				frame: frame
-			}
-
-			dispatch("xrframe", {
-				timestamp: timestamp,
-				delta: delta,
-				frame: frame
-			})
-
-			switch ($svelthreeStores[sti].xr.sessionMode) {
-				case XRDefaults.SESSION_MODE_INLINE:
-					console.error(
-						"SVELTHREE > WebGLRenderer > renderXR : XRSessionMode 'inline' is not yet implemented!"
-					)
-					break
-				case XRDefaults.SESSION_MODE_AR:
-					//renderAR(timestamp, frame)
-					renderAR(frame)
-					break
-				case XRDefaults.SESSION_MODE_VR:
-					break
-				default:
-					break
+	function updateCubeCameras(): void {
+		// update cube cameras
+		if ($svelthreeStores[sti].cubeCameras.length > 0) {
+			for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
+				let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
+				cubeCamComponent.doUpdate()
 			}
 		}
 	}
