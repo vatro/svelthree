@@ -1,101 +1,151 @@
 <!-- 
 @component
 This is a **svelthree** _RectAreaLight_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
+<script lang="ts">
+	import { onMount } from "svelte"
+	import {
+		Color,
+		Euler,
+		Matrix4,
+		Object3D,
+		Quaternion,
+		RectAreaLight,
+		RectAreaLightHelper,
+		Scene,
+		Vector3
+	} from "svelthree-three"
+	import { Light } from "../components-internal"
+	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 
-    import { RectAreaLight, RectAreaLightHelper, Scene, Object3D, Vector3 } from "svelthree-three"
-    import Light from "./Light.svelte"
-    import { onMount } from "svelte"
+	type RectAreaLightProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<RectAreaLight, PropBlackList>,
+		{
+			lookAt: Vector3 | Parameters<Vector3["set"]>
+			position?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
 
-    //props object can be filled with anything, ideally available THREE props of course.
-    export let props: { [key: string]: any } = undefined
+	export let props: { [P in keyof RectAreaLightProps]: RectAreaLightProps[P] } = undefined
 
-    export let parent: Object3D = undefined
-    export let name: string = undefined
-    export let animation: any = undefined
-    export let aniauto: boolean = undefined
+	export let parent: Object3D = undefined
+	export let name: string = undefined
 
-    /*
-     * @see https://threejs.org/docs/#api/en/lights/RectAreaLight
-     * Important Notes:
-     * - There is no shadow support.
-     * - Only MeshStandardMaterial and MeshPhysicalMaterial are supported.
-     * - You have to include RectAreaLightUniformsLib into your scene and call init().
-     */
+	export let animation: SvelthreeAnimationFunction = undefined
+	export let aniauto: boolean = undefined
 
-    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
-    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
-    export let intensity: number = undefined
-    export let scene: Scene
+	/*
+     @see https://threejs.org/docs/#api/en/lights/RectAreaLight
+     Important Notes:
+     - There is no shadow support.
+     - Only MeshStandardMaterial and MeshPhysicalMaterial are supported.
+     - You have to include RectAreaLightUniformsLib into your scene and call init().
+    */
 
-    let light: RectAreaLight = new RectAreaLight()
-    light.name = name
+	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let rot:
+		| Euler
+		| Parameters<Euler["set"]>
+		| Quaternion
+		| Parameters<Quaternion["set"]>
+		| Vector3
+		| Parameters<Vector3["set"]> = undefined
+	export let quat: Quaternion = undefined
 
-    export let helper = false
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-    let lightHelper: RectAreaLightHelper
-    $: !lightHelper && light && helper ? createHelper() : null
+	/**
+	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
+	 */
+	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
 
-    function createHelper() {
-        lightHelper = new RectAreaLightHelper(light, "aqua")
+	export let color: Color | string | [r: number, g: number, b: number] | Vector3 = undefined
+	export let intensity: number = undefined
 
-        // RectAreaLightHelper must be added as a child of the light
-        light.add(lightHelper)
-        lightHelper.visible = false
-        console.info("SVELTHREE > " + light.type + " : HELPER added!", {
-            lightHelper: lightHelper,
-            scene: scene,
-            total: scene.children.length
-        })
-    }
+	export let scene: Scene
 
-    onMount(() => {
-        console.info("SVELTHREE > onMount : " + light.type)
-        startUpdatingHelper()
-        return () => {
-            console.info("SVELTHREE > onDestroy : " + light.type)
-            stopUpdatingHelper()
-        }
-    })
+	let light: RectAreaLight = new RectAreaLight()
+	light.name = name
 
-    let doUpdateHelper = false
-    let updateHelper_rAF = 0
+	export let helper: boolean = undefined
 
-    function startUpdatingHelper(): void {
-        doUpdateHelper = true
-        updateHelper_rAF = requestAnimationFrame(updateHelper)
-    }
+	let lightHelper: RectAreaLightHelper
+	$: !lightHelper && light && helper ? createHelper() : null
 
-    function stopUpdatingHelper(): void {
-        doUpdateHelper = false
-        cancelAnimationFrame(updateHelper_rAF)
-    }
+	function createHelper() {
+		lightHelper = new RectAreaLightHelper(light, "aqua")
 
-    function updateHelper(): void {
-        if (doUpdateHelper) {
-            lightHelper ? lightHelper.update() : null
-            updateHelper_rAF = requestAnimationFrame(updateHelper)
-        }
-    }
+		// RectAreaLightHelper must be added as a child of the light
+		light.add(lightHelper)
+		lightHelper.visible = false
+		console.info("SVELTHREE > " + light.type + " : HELPER added!", {
+			lightHelper: lightHelper,
+			scene: scene,
+			total: scene.children.length
+		})
+	}
 
-    /**
-     * Public methods
-     */
+	onMount(() => {
+		console.info("SVELTHREE > onMount : " + light.type)
+		startUpdatingHelper()
+		return () => {
+			console.info("SVELTHREE > onDestroy : " + light.type)
+			stopUpdatingHelper()
+		}
+	})
 
-    export function getLight(): RectAreaLight {
-        return light
-    }
+	let doUpdateHelper = false
+	let updateHelper_rAF = 0
 
-    export function getHelper(): RectAreaLightHelper {
-        return lightHelper
-    }
+	function startUpdatingHelper(): void {
+		doUpdateHelper = true
+		updateHelper_rAF = requestAnimationFrame(updateHelper)
+	}
+
+	function stopUpdatingHelper(): void {
+		doUpdateHelper = false
+		cancelAnimationFrame(updateHelper_rAF)
+	}
+
+	function updateHelper(): void {
+		if (doUpdateHelper) {
+			lightHelper ? lightHelper.update() : null
+			updateHelper_rAF = requestAnimationFrame(updateHelper)
+		}
+	}
+
+	// public methods
+
+	export function getLight(): RectAreaLight {
+		return light
+	}
+
+	export function getHelper(): RectAreaLightHelper {
+		return lightHelper
+	}
 </script>
 
-<!-- cannot use {...$$props} see https://github.com/sveltejs/svelte/issues/4993 -->
-<!-- TOFIX  as soon as landed (not in 3.24.0), see https://github.com/sveltejs/svelte/pull/5123  -->
-<Light {scene} {parent} {light} {props} {pos} {color} {intensity} {animation} {aniauto} />
+<Light
+	{scene}
+	{parent}
+	{light}
+	{props}
+	{pos}
+	{rot}
+	{quat}
+	{lookAt}
+	{matrix}
+	{color}
+	{intensity}
+	{animation}
+	{aniauto} />

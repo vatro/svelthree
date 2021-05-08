@@ -1,116 +1,183 @@
 <!-- 
 @component
 This is a **svelthree** _SpotLight_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
+<script lang="ts">
+	// #region --- Imports
 
-    import { SpotLight, SpotLightHelper, Scene, Object3D, Vector3 } from "svelthree-three"
-    import Light from "./Light.svelte"
-    import { onMount } from "svelte"
+	import { onMount } from "svelte"
+	import type { Matrix4, SpotLightShadow } from "svelthree-three"
+	import { Color, Object3D, Scene, SpotLight, SpotLightHelper, Vector3 } from "svelthree-three"
+	import { Light, SvelthreeLightWithShadow } from "../components-internal"
+	import type {
+		LightShadowCamProps,
+		LightShadowProps,
+		OnlyWritableNonFunctionPropsPlus,
+		PropBlackList,
+		SvelthreeAnimationFunction
+	} from "../types-extra"
+	import { LightUtils, PropUtils } from "../utils"
 
-    /**
-     *  TODO  keep an eye on the issue:
-     * Unfortunately spreading {...$$props} to Child component doesn't work as expected,
-     * @see https://discord.com/channels/457912077277855764/506988048375087114/719602785112293376
-     * @see https://github.com/sveltejs/svelte/issues/4993
-     *  TOFIX  as soon as landed (not in 3.24.0), see https://github.com/sveltejs/svelte/pull/5123
-     */
+	// #endregion
 
-    /**
-     * @see https://threejs.org/docs/#api/en/lights/SpotLight
-     */
+	// #region --- Required Attributes
 
-    //props object can be filled with anything, ideally available THREE props of course.
-    export let props: { [key: string]: any } = undefined
+	export let scene: Scene
 
-    export let parent: Object3D = undefined
-    export let name: string = undefined
-    export let animation: any = undefined
-    export let aniauto: boolean = undefined
+	// #endregion
 
-    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
-    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
-    export let intensity: number = undefined
-    export let shadowMapSize: number = undefined
-    export let shadowBias: number = undefined
-    export let castShadow: boolean = undefined
-    export let scene: Scene
+	// #region --- Initialization
 
-    let light: SpotLight = new SpotLight()
-    light.name = name
+	let light: SpotLight
+	light = new SpotLight()
 
-    export function getLight(): SpotLight {
-        return light
-    }
+	// #endregion
 
-    export let helper: boolean = undefined
+	// #region --- Optional Attributes
 
-    let lightHelper: SpotLightHelper
-    $: !lightHelper && light && helper ? createHelper() : null
+	export let parent: Object3D = undefined
+	export let parentForUs: Object3D = undefined
+	export let name: string = undefined
 
-    onMount(() => {
-        console.info("SVELTHREE > onMount : SpotLight")
-        startUpdatingHelper()
-        return () => {
-            console.info("SVELTHREE > onDestroy : SpotLight")
-            stopUpdatingHelper()
-        }
-    })
+	/**
+	 * `matrixAutoUpdate` shorthand attribute.
+	 */
+	export let mau: boolean = undefined
 
-    function createHelper(): void {
-        lightHelper = new SpotLightHelper(light, "aqua")
-        scene.add(lightHelper)
-        lightHelper.visible = false
-        console.info("SVELTHREE > " + light.type + " HELPER added!", {
-            lightHelper: lightHelper,
-            scene: scene,
-            total: scene.children.length
-        })
-    }
+	type SpotLightProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<SpotLight, PropBlackList>,
+		{
+			// CUSTOM  actually no `lookAt` on SpotlLight, we're using custom solution!
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
 
-    let doUpdateHelper = false
-    let updateHelper_rAF = 0
+			position?: Vector3 | Parameters<Vector3["set"]>
 
-    function startUpdatingHelper(): void {
-        doUpdateHelper = true
-        updateHelper_rAF = requestAnimationFrame(updateHelper)
-    }
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//rotation?: never
 
-    function stopUpdatingHelper(): void {
-        doUpdateHelper = false
-        cancelAnimationFrame(updateHelper_rAF)
-    }
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//quaternion?: never
 
-    function updateHelper(): void {
-        if (doUpdateHelper) {
-            lightHelper ? lightHelper.update() : null
-            updateHelper_rAF = requestAnimationFrame(updateHelper)
-        }
-    }
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
 
-    /**
-     * Public methods
-     */
+	export let props: { [P in keyof SpotLightProps]: SpotLightProps[P] } = undefined
 
-    export function getHelper(): SpotLightHelper {
-        return lightHelper
-    }
+	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
+
+	// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+	//export let rot: never
+
+	// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+	//export let quat: never
+
+	// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
+
+	/**
+	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
+	 */
+	// TODO  can I manipulate the matrix?
+	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
+
+	export let color: Color | string | [r: number, g: number, b: number] | Vector3 = undefined
+	export let intensity: number = undefined
+	export let shadowMapSize: number = undefined
+	export let shadowBias: number = undefined
+
+	/**
+	 * 👉 [SpotLight.castShadow](https://threejs.org/docs/#api/en/lights/SpotLight.castShadow )
+	 * *"If set to true light will cast dynamic shadows.
+	 * 🔺 WARNING: This is expensive and requires tweaking to get shadows looking right.
+	 * See the [SpotLightShadow](https://threejs.org/docs/#api/en/lights/shadows/SpotLightShadow) for details. The default is false."*
+	 */
+	export let castShadow: boolean = undefined
+
+	export let shadowProps: {
+		[P in keyof LightShadowProps<SpotLightShadow>]: LightShadowProps<SpotLightShadow>[P]
+	} = undefined
+
+	export let shadowCameraProps: {
+		[P in keyof LightShadowCamProps<typeof light.shadow.camera>]: LightShadowCamProps<typeof light.shadow.camera>[P]
+	} = undefined
+
+	// SpotLight specific shorthand attributes
+	// ☝️ These do not depend on matrix-update, that's why we put them here and not in Light!
+	export let angle: number = undefined
+	export let decay: number = undefined
+	export let distance: number = undefined
+	export let penumbra: number = undefined
+	export let power: number = undefined
+
+	$: angle ? PropUtils.applyValueToProp(light, angle, "angle") : null
+	$: decay ? PropUtils.applyValueToProp(light, decay, "decay") : null
+	$: distance ? PropUtils.applyValueToProp(light, distance, "distance") : null
+	$: penumbra ? PropUtils.applyValueToProp(light, penumbra, "penumbra") : null
+	$: power ? PropUtils.applyValueToProp(light, power, "power") : null
+
+	export let helper: boolean = undefined
+
+	// #endregion
+
+	// Helper
+
+	$: light && !light.userData.helper && helper ? LightUtils.addHelper(light, scene, new SpotLightHelper(light)) : null
+	$: light && light.userData.helper && !helper ? LightUtils.removeHelper(light, scene) : null
+
+	// Animation
+
+	export let animation: SvelthreeAnimationFunction = undefined
+	export let aniauto: boolean = undefined
+
+	// TODO  PARENTING LOGIC!
+
+	// #region --- Public Methods
+
+	export function getLight(): SpotLight {
+		return light
+	}
+
+	export function getHelper(): SpotLightHelper {
+		return light.userData.helper as SpotLightHelper
+	}
+
+	export function setHelperAttr(enabled: boolean): void {
+		helper = enabled
+	}
+
+	export function getHelperAttr(): boolean {
+		return helper
+	}
+
+	// #endregion
+
+	// #region --- Lifecycle
+
+	onMount(() => {
+		console.info(`SVELTHREE > onMount : ${light.type}`)
+		return () => {
+			console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			LightUtils.removeHelper(light, scene)
+		}
+	})
+
+	// #endregion
 </script>
 
+<SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
 <Light
-    {scene}
-    {parent}
-    {light}
-    {props}
-    {pos}
-    {color}
-    {intensity}
-    {shadowMapSize}
-    {shadowBias}
-    {castShadow}
-    {animation}
-    {aniauto} />
+	{scene}
+	{parent}
+	{light}
+	{mau}
+	{helper}
+	{props}
+	{pos}
+	{lookAt}
+	{matrix}
+	{color}
+	{intensity}
+	{animation}
+	{aniauto} />

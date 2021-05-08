@@ -2,68 +2,59 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { Object3D, Vector3, Euler } from "svelthree-three"
-
+import type { Object3D } from "svelthree-three"
+import PropUtils from "./PropUtils"
+/*
+ * Containes public static methods for updating Object3D properties via component shorthand attributes.
+ */
 export default class Object3DUtils {
-    public static tryPosUpdate(obj: Object3D, p: Vector3 | [number, number, number] | number[]) {
-        obj
-            ? p.constructor === Vector3
-                ? obj["position"].copy(p)
-                : Array.isArray(p) && p.length === 3
-                ? obj["position"].set(p[0], p[1], p[2])
-                : console.error(
-                      "SVELTHREE > Object3DUtils > prop " +
-                          p.toString() +
-                          " has to be an Array(3) or valid THREE.Vector3!",
-                      { obj: obj, p: p }
-                  )
-            : null
-    }
+	/**
+	 * Updates *Object3D.position*  via `pos` component attribute (shorthand).
+	 */
+	public static tryPosUpdate(obj: Object3D, val: any) {
+		PropUtils.setPositionFromValue(obj, val)
+	}
 
-    public static tryRotUpdate(obj: Object3D, p: Euler | Parameters<Euler["set"]> | [number, number, number]) {
-        obj
-            ? p.constructor === Euler
-                ? obj["rotation"].copy(p)
-                : Array.isArray(p) && p.length === 3
-                ? obj["rotation"].set(p[0], p[1], p[2])
-                : Array.isArray(p) && p.length === 4
-                ? obj["rotation"].set(p[0], p[1], p[2], p[3])
-                : console.error(
-                      "SVELTHREE > Object3DUtils > prop " +
-                          p.toString() +
-                          " has to be Array(3 || 4) or valid THREE.Euler!",
-                      { obj: obj, p: p }
-                  )
-            : null
-    }
+	/**
+	 * Updates *Object3D.rotation*  via `rot` component attribute (shorthand).
+	 */
+	public static tryRotUpdate(obj: Object3D, val: any): void {
+		PropUtils.setRotationFromValue(obj, val)
+	}
 
-    public static tryScaleUpdate(obj: Object3D, p: Vector3 | Parameters<Vector3["set"]>) {
-        obj
-            ? p.constructor === Vector3
-                ? obj["scale"].copy(p)
-                : Array.isArray(p)
-                ? obj["scale"].set(p[0], p[1], p[2])
-                : console.error(
-                      "SVELTHREE > Object3DUtils > prop " +
-                          p.toString() +
-                          " has to be an Array(3) or valid THREE.Vector3!",
-                      { obj: obj, p: p }
-                  )
-            : null
-    }
+	/**
+	 * Updates *Object3D.quat*  via `quat` component attribute (shorthand).
+	 */
+	public static tryQuternionUpdate(obj: Object3D, val: any): void {
+		PropUtils.setRotationFromValue(obj, val)
+	}
 
-    public static tryLookAtUpdate(obj: Object3D, p: Vector3 | Parameters<Vector3["set"]> | number[]) {
-        obj.lookAt
-            ? p.constructor === Vector3
-                ? obj.lookAt(p)
-                : Array.isArray(p) && p.length === 3
-                ? obj.lookAt(p[0], p[1], p[2])
-                : console.error(
-                      "SVELTHREE > Object3DUtils > prop " +
-                          p.toString() +
-                          " has to be an Array(3) or valid THREE.Vector3!",
-                      { obj: obj, p: p }
-                  )
-            : null
-    }
+	/**
+	 * Updates *Object3D.scale*  via `scale` component attribute (shorthand).
+	 */
+	public static tryScaleUpdate(obj: Object3D, val: any) {
+		PropUtils.setScaleFromValue(obj, val)
+	}
+
+	/**
+	 * Updates *Object3D.lookAt*  via `lookAt` component attribute (shorthand).
+	 */
+	public static tryLookAtUpdate(obj: Object3D, val: any) {
+		//console.log("Object3DUtils tryLookAtUpdate!!!")
+		PropUtils.setLookAtFromValue(obj, val)
+	}
+
+	/**
+	 * Updates *Object3D.matrix*  via `matrix` component attribute (shorthand).
+	 */
+	public static tryMatrixUpdate(obj: Object3D, val: any) {
+		PropUtils.setMatrixFromValue(obj, val)
+	}
+
+	/**
+	 * Updates *Object3D.matrix*  via `quat` component attribute (shorthand).
+	 */
+	public static tryQuaternionUpdate(obj: Object3D, val: any) {
+		PropUtils.setQuaternionFromValue(obj, val)
+	}
 }

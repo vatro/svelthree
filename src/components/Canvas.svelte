@@ -1,332 +1,425 @@
 <!-- 
 @component
 This is a **svelthree** _Canvas_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
+<script lang="ts">
+	// #region --- Imports
 
-    import { onMount } from "svelte"
-    import { svelthreeStores } from "../stores.js"
-    import {
-        WebGLRenderer,
-        WebXRController,
-        Camera,
-        Scene,
-        Raycaster,
-        Vector2,
-        Vector3,
-        OrbitControls,
-        Mesh,
-        BufferGeometry
-    } from "svelthree-three"
+	import { afterUpdate, beforeUpdate, onMount } from "svelte"
+	import type { SvelteComponentDev } from "svelte/internal"
+	import {
+		BufferGeometry,
+		Camera,
+		Mesh,
+		OrbitControls,
+		Raycaster,
+		Scene,
+		Vector2,
+		Vector3,
+		WebGLRenderer,
+		WebXRController
+	} from "svelthree-three"
+	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
+	import { svelthreeStores } from "../stores"
+	import type {
+		XrHandPinchConfig,
+		XrHandPinchConfigItem,
+		XrHandTouchConfig,
+		XrHandTouchEvents,
+		XrHandTouchXConfig,
+		XrHitTestMode,
+		XrInputConfigGrippable,
+		XrSessionVRInputConfig
+	} from "../xr/types-svelthree"
+	import type { XRFrame, XRHitTestSource } from "../xr/types-webxr"
 
-    //BVH
-    import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from "../../node_modules/three-mesh-bvh/src"
+	const css_rs = "color: red;font-weight:bold;"
+	const css_ba = "color: blue;font-weight:bold;"
+	const css_aa = "color: green;font-weight:bold;"
+	export let logInfo: boolean = false
+	export let logRS: boolean = false
+	export let logLC: boolean = false
 
-    import { SvelteComponentDev } from "svelte/internal"
+	// #endregion
 
-    export let w: number
-    export let h: number
+	// #region --- Required Attributes
 
-    export let style: string = undefined
-    let clazz: string = undefined
-    export { clazz as class }
+	export let w: number
+	export let h: number
 
-    interface StoreCanvas {
-        dom: HTMLCanvasElement
-        dim: { w: number; h: number }
-        interactive: boolean
-    }
+	// #endregion
 
-    interface StorePointer {
-        pos: Vector2
-        event: PointerEvent
-        isOverCanvas: boolean
-        unprojected: Vector3
-    }
+	// #region --- Optional Attributes
 
-    interface SvelthreeXRFrame {
-        timestamp: number
-        delta: number
-        frame: XRFrame
-    }
+	export let style: string = undefined
+	let clazz: string = undefined
+	export { clazz as class }
+	export let interactive: boolean = undefined
 
-    interface XR {
-        sessionMode: string
-        //currentVRInputType: SessionVRInputType
-        inputConfig: SessionVRInputConfig
-        controller: WebXRController // AR
-        controllerConfig: XrInputConfigGrippable
-        controllers: WebXRController[] //VR
-        enablePinch: XrHandPinchConfig
-        //handProfile: XrHandProfile
-        enableTouch: XrHandTouchConfig
-        touchEvents: XrHandTouchEvents
-        enableTouchX: XrHandTouchXConfig
-        leftHandTouchEnabled: boolean
-        leftHandTouchEnabledJoints: number[]
-        rightHandTouchEnabled: boolean
-        rightHandTouchEnabledJoints: number[]
-        leftHandPinchEnabled: boolean
-        leftHandPinchConfig: XrHandPinchConfigItem
-        rightHandPinchEnabled: boolean
-        rightHandPinchConfig: XrHandPinchConfigItem
-        requiredFeatures: string[]
-        optionalFeatures: string[]
-        domOverlay: HTMLDivElement
-        hitTestModeInitial: XrHitTestMode
-        hitTestMode: XrHitTestMode
-        hitTestSource: any
-        hitTestSourceRequested: boolean
-        hitTestResults: any[]
-        reticle: Mesh
-        currentFrame: SvelthreeXRFrame
-    }
+	// #endregion
 
-    interface StoreBody {
-        id: number
-        canvas: StoreCanvas
-        scenes: Scene[]
-        // this will always be +1 real index, because index '0' means 'false',
-        // so change from 'undefined' to '0' will not be triggered.
-        currentSceneIndex: number
-        cameras: Camera[]
-        cubeCameras: SvelteComponentDev[]
-        activeCamera: Camera
-        renderer: WebGLRenderer
-        rendererComponent: SvelteComponentDev
-        raycaster: Raycaster
-        allIntersections: any[]
-        pointer: StorePointer
-        orbitcontrols: OrbitControls
-        xr: XR
-        useBVH: boolean
-    }
+	// #region --- Store Body and Types
 
-    const svelthreeStoreBody: StoreBody = {
-        id: undefined,
-        canvas: {
-            dom: undefined,
-            dim: { w: undefined, h: undefined },
-            interactive: false
-        },
-        scenes: [],
-        // this will always be +1 real index, because index '0' means 'false',
-        // so change from 'undefined' to '0' will not be triggered.
-        currentSceneIndex: undefined,
-        cameras: [],
-        cubeCameras: [],
-        activeCamera: undefined,
-        renderer: undefined,
-        rendererComponent: undefined,
-        raycaster: undefined,
-        allIntersections: undefined,
-        pointer: {
-            pos: new Vector2(-1, -1),
-            event: undefined,
-            isOverCanvas: false,
-            unprojected: new Vector3()
-        },
-        orbitcontrols: undefined,
-        xr: {
-            sessionMode: undefined,
-            //currentVRInputType: undefined,
-            inputConfig: undefined,
-            controller: undefined,
-            controllerConfig: undefined,
-            controllers: [],
-            enablePinch: undefined,
-            //handProfile: undefined,
-            enableTouch: undefined,
-            touchEvents: undefined,
-            enableTouchX: undefined,
-            leftHandTouchEnabled: undefined,
-            leftHandTouchEnabledJoints: undefined,
-            rightHandTouchEnabled: undefined,
-            rightHandTouchEnabledJoints: undefined,
-            leftHandPinchEnabled: false,
-            leftHandPinchConfig: undefined,
-            rightHandPinchEnabled: false,
-            rightHandPinchConfig: undefined,
-            requiredFeatures: [],
-            optionalFeatures: [],
-            domOverlay: undefined,
-            hitTestModeInitial: undefined,
-            hitTestMode: undefined,
-            hitTestSource: null,
-            hitTestSourceRequested: false,
-            hitTestResults: undefined,
-            reticle: undefined,
-            currentFrame: {
-                timestamp: 0,
-                delta: 0,
-                frame: undefined
-            }
-        },
-        useBVH: false
-    }
+	interface StoreCanvas {
+		dom: HTMLCanvasElement
+		dim: { w: number; h: number }
+		interactive: boolean
+	}
 
-    svelthreeStoreBody.canvas.dim.w = w
-    svelthreeStoreBody.canvas.dim.h = h
+	interface StorePointer {
+		pos: Vector2
+		event: PointerEvent
+		isOverCanvas: boolean
+		unprojected: Vector3
+	}
 
-    let sti: number
+	interface SvelthreeXRFrame {
+		timestamp: number
+		delta: number
+		frame: XRFrame
+	}
 
-    //create new store
-    $svelthreeStores = [...$svelthreeStores, svelthreeStoreBody]
-    sti = $svelthreeStores.length - 1
+	interface XR {
+		sessionMode: string
+		inputConfig: XrSessionVRInputConfig
+		controller: WebXRController // AR
+		controllerConfig: XrInputConfigGrippable
+		controllers: WebXRController[] //VR
+		enablePinch: XrHandPinchConfig
+		enableTouch: XrHandTouchConfig
+		touchEvents: XrHandTouchEvents
+		enableTouchX: XrHandTouchXConfig
+		leftHandTouchEnabled: boolean
+		leftHandTouchEnabledJoints: number[]
+		rightHandTouchEnabled: boolean
+		rightHandTouchEnabledJoints: number[]
+		leftHandPinchEnabled: boolean
+		leftHandPinchConfig: XrHandPinchConfigItem
+		rightHandPinchEnabled: boolean
+		rightHandPinchConfig: XrHandPinchConfigItem
+		requiredFeatures: string[]
+		optionalFeatures: string[]
+		domOverlay: HTMLDivElement
+		hitTestModeInitial: XrHitTestMode
+		hitTestMode: XrHitTestMode
+		hitTestSource: XRHitTestSource
+		hitTestSourceRequested: boolean
+		hitTestResults: any[]
+		reticle: Mesh
+		currentFrame: SvelthreeXRFrame
+	}
 
-    let c: HTMLElement
-    $: c ? addCanvasToStore() : null
+	interface StoreBody {
+		id: number
+		canvas: StoreCanvas
+		scenes: Scene[]
 
-    function addCanvasToStore(): void {
-        $svelthreeStores[sti].canvas.dom === undefined ? ($svelthreeStores[sti].canvas.dom = c) : null
-    }
+		// IMPORTANT !
+		// 'currentSceneIndex' will always be +1 real index, because index '0' means 'false',
+		// so change from 'undefined' to '0' will not be triggered.
+		currentSceneIndex: number
 
-    $: w ? (svelthreeStoreBody.canvas.dim.w = w) : null
-    $: h ? (svelthreeStoreBody.canvas.dim.h = h) : null
+		cameras: Camera[]
+		cubeCameras: SvelteComponentDev[]
+		activeCamera: Camera
+		renderer: WebGLRenderer
+		rendererComponent: SvelteComponentDev
+		raycaster: Raycaster
+		allIntersections: any[]
+		pointer: StorePointer
+		orbitcontrols: OrbitControls
+		xr: XR
+		useBVH: boolean
+	}
 
-    let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: THREE.Intersection[]) => void
-    export let useBVH: boolean = undefined
-    $: if (useBVH) {
-        $svelthreeStores[sti].useBVH = useBVH
+	const svelthreeStoreBody: StoreBody = {
+		id: undefined,
+		canvas: {
+			dom: undefined,
+			dim: { w: undefined, h: undefined },
+			interactive: false
+		},
+		scenes: [],
 
-        if (!BufferGeometry.prototype["computeBoundsTree"]) {
-            //backup original raycast function
-            originalThreeRaycastFunction = Mesh.prototype.raycast
+		// IMPORTANT !
+		// 'currentSceneIndex' will always be +1 real index, because index '0' means 'false',
+		// so change from 'undefined' to '0' will not be triggered.
+		currentSceneIndex: undefined,
 
-            BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree
-            BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree
-            Mesh.prototype.raycast = acceleratedRaycast
-        }
-    } else {
-        $svelthreeStores[sti].useBVH = useBVH
+		cameras: [],
+		cubeCameras: [],
+		activeCamera: undefined,
+		renderer: undefined,
+		rendererComponent: undefined,
+		raycaster: undefined,
+		allIntersections: undefined,
+		pointer: {
+			pos: new Vector2(-1, -1),
+			event: undefined,
+			isOverCanvas: false,
+			unprojected: new Vector3()
+		},
+		orbitcontrols: undefined,
+		xr: {
+			sessionMode: undefined,
+			inputConfig: undefined,
+			controller: undefined,
+			controllerConfig: undefined,
+			controllers: [],
+			enablePinch: undefined,
+			enableTouch: undefined,
+			touchEvents: undefined,
+			enableTouchX: undefined,
+			leftHandTouchEnabled: undefined,
+			leftHandTouchEnabledJoints: undefined,
+			rightHandTouchEnabled: undefined,
+			rightHandTouchEnabledJoints: undefined,
+			leftHandPinchEnabled: false,
+			leftHandPinchConfig: undefined,
+			rightHandPinchEnabled: false,
+			rightHandPinchConfig: undefined,
+			requiredFeatures: [],
+			optionalFeatures: [],
+			domOverlay: undefined,
+			hitTestModeInitial: undefined,
+			hitTestMode: undefined,
+			hitTestSource: null,
+			hitTestSourceRequested: false,
+			hitTestResults: undefined,
+			reticle: undefined,
+			currentFrame: {
+				timestamp: 0,
+				delta: 0,
+				frame: undefined
+			}
+		},
+		useBVH: false
+	}
 
-        if (BufferGeometry.prototype["computeBoundsTree"]) {
-            BufferGeometry.prototype["computeBoundsTree"] = undefined
-            BufferGeometry.prototype["disposeBoundsTree"] = undefined
+	// #endregion
 
-            //restore original raycast function
-            Mesh.prototype.raycast = originalThreeRaycastFunction
-        }
-    }
+	// #region --- Initialization
 
-    export let interactive: boolean = undefined
-    let isInteractive = false
-    let raycaster: Raycaster
+	// store required width & height properties
+	svelthreeStoreBody.canvas.dim.w = w
+	svelthreeStoreBody.canvas.dim.h = h
 
-    // reactive create raycaster
-    $: if (isInteractive && !raycaster && c && $svelthreeStores[sti].renderer) {
-        raycaster = new Raycaster()
-        $svelthreeStores[sti].raycaster = raycaster
-        $svelthreeStores[sti].canvas.interactive = true
+	// create new store
+	$svelthreeStores = [...$svelthreeStores, svelthreeStoreBody]
 
-        if ($svelthreeStores[sti].renderer.xr.enabled === false) {
-            startUpdatingPointer()
-        }
+	// declare store index
+	let sti: number
 
-        console.info("SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ", $svelthreeStores[sti])
-    }
+	// set store index
+	sti = $svelthreeStores.length - 1
 
-    // reactive remove raycaster
-    $: if (!isInteractive && raycaster && $svelthreeStores[sti].renderer) {
-        $svelthreeStores[sti].canvas.interactive = false
-        $svelthreeStores[sti].raycaster = undefined
-        raycaster = null
+	// #endregion
 
-        if ($svelthreeStores[sti].renderer.xr.enabled === false) {
-            stopUpdatingPointer()
-        }
+	// #region --- Reactiveness
 
-        console.info("SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ", $svelthreeStores[sti])
-    }
+	// store DOM Canvas Element when available
 
-    let didMount: boolean
+	let c: HTMLElement
+	$: c ? storeCanvasDom() : null
 
-    $: didMount ? (isInteractive = interactive) : null
+	function storeCanvasDom(): void {
+		$svelthreeStores[sti].canvas.dom === undefined ? ($svelthreeStores[sti].canvas.dom = c) : null
+	}
 
-    function startUpdatingPointer(): void {
-        window.addEventListener("pointermove", updatePointer, false)
-    }
+	// store required width & height properties on change
 
-    function updatePointer(e: PointerEvent): void {
-        let rect: ClientRect = c.getBoundingClientRect()
+	$: w ? (svelthreeStoreBody.canvas.dim.w = w) : null
+	$: h ? (svelthreeStoreBody.canvas.dim.h = h) : null
 
-        $svelthreeStores[sti].pointer.pos.x = ((e.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
-        $svelthreeStores[sti].pointer.pos.y = -((e.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
+	// --- BVH
 
-        e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom
-            ? ($svelthreeStores[sti].pointer.isOverCanvas = true)
-            : ($svelthreeStores[sti].pointer.isOverCanvas = false)
+	let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: THREE.Intersection[]) => void
+	export let useBVH: boolean = undefined
 
-        // calculate unprojected Point
-        // see https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z
-        let v: Vector3 = new Vector3($svelthreeStores[sti].pointer.pos.x, $svelthreeStores[sti].pointer.pos.y, 0.5)
-        let t: Vector3 = new Vector3()
-        v.unproject($svelthreeStores[sti].activeCamera)
-        v.sub($svelthreeStores[sti].activeCamera.position).normalize()
-        let d = -$svelthreeStores[sti].activeCamera.position.z / v.z
-        t.copy($svelthreeStores[sti].activeCamera.position).add(v.multiplyScalar(d))
-        $svelthreeStores[sti].pointer.unprojected.copy(t)
+	$: if (useBVH) {
+		if (logRS) console.log("%c---> Canvas > reactive statement! useBVH", `${css_rs}`, useBVH)
 
-        /**
-         *  IMPORTANT: we save this event in SvelthreeInteraction.svelte for construction of:
-         *  'pointerenter', 'pointerover', 'pointerout', 'pointerleave' & 'pointermove'
-         */
-        $svelthreeStores[sti].pointer.event = e
-    }
+		$svelthreeStores[sti].useBVH = useBVH
 
-    function stopUpdatingPointer(): void {
-        window.removeEventListener("pointermove", updatePointer)
-    }
+		//if (!BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
+		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") < 0) {
+			// backup original raycast function
+			originalThreeRaycastFunction = Mesh.prototype.raycast
 
-    onMount(() => {
-        didMount = true
-        console.info("SVELTHREE > onMount : Canvas, $svelthreeStores[sti]: ", $svelthreeStores[sti])
+			// TODO  this doesn't work, understand why and why you did it in the first place.
+			//Object.defineProperty(BufferGeometry.prototype, "computeBoundsTree", computeBoundsTree)
+			//Object.defineProperty(BufferGeometry.prototype, "disposeBoundsTree", disposeBoundsTree)
 
-        return () => {
-            console.info("SVELTHREE > onDestroy : Canvas")
-            stopUpdatingPointer()
-            // if canvas is being removed set the the whole store to 'null'
-            // this way we don't have to handle anything, other store 'sti' will remain valid
-            // any newly added canvas will create a new store at the next highest index
-            // the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
-            $svelthreeStores[sti] = null
-        }
-    })
+			BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree
+			BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree
 
-    /**
-     * Public methods
-     */
+			Mesh.prototype.raycast = acceleratedRaycast
 
-    export function resize(w: number, h: number) {
-        $svelthreeStores[sti].canvas.dim = { w: w, h: h }
-    }
+			//console.log(Object.keys(BufferGeometry.prototype))
+		}
+	} else {
+		if (logRS) console.log("%c---> Canvas > reactive statement! useBVH", `${css_rs}`, useBVH)
+		$svelthreeStores[sti].useBVH = useBVH
 
-    export function getDomElement(): HTMLCanvasElement {
-        return $svelthreeStores[sti].canvas.dom
-    }
+		if (BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
+			BufferGeometry.prototype["computeBoundsTree"] = undefined
+			BufferGeometry.prototype["disposeBoundsTree"] = undefined
 
-    export function getDomElementDimensions(): { w: number; h: number } {
-        return {
-            w: $svelthreeStores[sti].canvas.dom.width,
-            h: $svelthreeStores[sti].canvas.dom.height
-        }
-    }
+			// restore original raycast function
+			Mesh.prototype.raycast = originalThreeRaycastFunction
+		}
+	}
 
-    export function resizeStyle(w: number, h: number) {
-        $svelthreeStores[sti].canvas.dom.style.width = `${w}px`
-        $svelthreeStores[sti].canvas.dom.style.height = `${h}px`
-    }
+	// --- Interactivity
 
-    export function resizeAll(w: number, h: number) {
-        resize(w, h)
-        resizeStyle(w, h)
-    }
+	let didMount: boolean
+	let isInteractive = false
+	let raycaster: Raycaster
+
+	// initialize interaction on mount
+	$: didMount ? (isInteractive = interactive) : null
+
+	// reactive create raycaster
+	$: isInteractive && !raycaster && c && $svelthreeStores[sti].renderer ? createRaycaster() : null
+
+	function createRaycaster() {
+		if (logRS) console.log("%c---> Canvas > reactive statement! createRaycaster!", `${css_rs}`, { isInteractive })
+		raycaster = new Raycaster()
+		$svelthreeStores[sti].raycaster = raycaster
+		$svelthreeStores[sti].canvas.interactive = true
+
+		if ($svelthreeStores[sti].renderer.xr.enabled === false) {
+			startUpdatingPointer()
+		}
+
+		if (logInfo)
+			console.info(
+				"SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
+				$svelthreeStores[sti]
+			)
+	}
+
+	// reactive remove raycaster
+	$: !isInteractive && raycaster && $svelthreeStores[sti].renderer ? removeRaycaster() : null
+
+	function removeRaycaster() {
+		if (logRS) console.log("%c---> Canvas > reactive statement! removeRaycaster!", `${css_rs}`, { isInteractive })
+		$svelthreeStores[sti].canvas.interactive = false
+		$svelthreeStores[sti].raycaster = undefined
+		raycaster = null
+
+		// start updating mouse position (if not xr)
+		if ($svelthreeStores[sti].renderer.xr.enabled === false) {
+			stopUpdatingPointer()
+		}
+
+		if (logInfo)
+			console.info("SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ", $svelthreeStores[sti])
+	}
+
+	// start updating mouse position (if not xr)
+	function startUpdatingPointer(): void {
+		if (logRS)
+			console.log("%c---> Canvas > reactive statement! createRaycaster > startUpdatingPointer!", `${css_rs}`)
+		window.addEventListener("pointermove", updatePointer, false)
+	}
+
+	function stopUpdatingPointer(): void {
+		if (logRS)
+			console.log("%c---> Canvas > reactive statement! removeRaycaster > stopUpdatingPointer!", `${css_rs}`)
+		window.removeEventListener("pointermove", updatePointer)
+	}
+
+	function updatePointer(e: PointerEvent): void {
+		let rect: ClientRect = c.getBoundingClientRect()
+
+		$svelthreeStores[sti].pointer.pos.x = ((e.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1
+		$svelthreeStores[sti].pointer.pos.y = -((e.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1
+
+		e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom
+			? ($svelthreeStores[sti].pointer.isOverCanvas = true)
+			: ($svelthreeStores[sti].pointer.isOverCanvas = false)
+
+		// calculate unprojected Point
+		// see https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z
+		let v: Vector3 = new Vector3($svelthreeStores[sti].pointer.pos.x, $svelthreeStores[sti].pointer.pos.y, 0.5)
+		let t: Vector3 = new Vector3()
+		v.unproject($svelthreeStores[sti].activeCamera)
+		v.sub($svelthreeStores[sti].activeCamera.position).normalize()
+		let d = -$svelthreeStores[sti].activeCamera.position.z / v.z
+		t.copy($svelthreeStores[sti].activeCamera.position).add(v.multiplyScalar(d))
+		$svelthreeStores[sti].pointer.unprojected.copy(t)
+
+		/*
+         IMPORTANT  we save this event in SvelthreeInteraction.svelte for construction of:
+         'pointerenter', 'pointerover', 'pointerout', 'pointerleave' & 'pointermove'
+        */
+		$svelthreeStores[sti].pointer.event = e
+	}
+
+	onMount(() => {
+		didMount = true
+		if (logLC) logCurrentState(`--> Canvas > onMount`, null)
+		if (logInfo) console.info("SVELTHREE > onMount : Canvas, $svelthreeStores[sti]: ", $svelthreeStores[sti])
+
+		return () => {
+			if (logInfo) console.info("SVELTHREE > onDestroy : Canvas")
+			stopUpdatingPointer()
+			// if canvas is being removed set the the whole store to 'null'
+			// this way we don't have to handle anything, other store 'sti' will remain valid
+			// any newly added canvas will create a new store at the next highest index
+			// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
+			$svelthreeStores[sti] = null
+		}
+	})
+
+	// #endregion
+
+	// #region --- Public Methods
+
+	export function getDomElement(): HTMLCanvasElement {
+		return $svelthreeStores[sti].canvas.dom
+	}
+
+	export function getDomElementDimensions(): { w: number; h: number } {
+		return {
+			w: $svelthreeStores[sti].canvas.dom.width,
+			h: $svelthreeStores[sti].canvas.dom.height
+		}
+	}
+
+	export function resize(w: number, h: number) {
+		$svelthreeStores[sti].canvas.dim = { w: w, h: h }
+	}
+
+	let updateTime
+	let timeBefore
+	let timeAfter
+	let dirty = false
+
+	beforeUpdate(() => {
+		if (!dirty) {
+			timeBefore = performance.now()
+			dirty = true
+		}
+		if (logLC) logCurrentState("%c--> Canvas > beforeUpdate", css_ba)
+	})
+
+	afterUpdate(() => {
+		if (dirty) {
+			timeAfter = performance.now()
+			dirty = false
+			updateTime = timeAfter - timeBefore
+		}
+		if (logLC) logCurrentState("%c--> Canvas > afterUpdate", css_aa, updateTime)
+	})
+
+	function logCurrentState(prefix: string, css: string, upt?: number) {
+		console.log(`${prefix}!`, `${css}`, upt ? "update time: " + upt : "")
+	}
 </script>
 
 <canvas bind:this={c} width={w} height={h} {style} class={clazz}>
-    <slot {sti} />
+	<slot {sti} />
 </canvas>

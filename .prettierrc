@@ -2,9 +2,11 @@
     "trailingComma": "none",
     "tabWidth": 4,
     "semi": false,
+    "endOfLine": "crlf",
     "singleQuote": false,
     "jsxBracketSameLine": true,
     "printWidth": 120,
+    
 
     "svelteSortOrder" : "scripts-styles-markup",
     "svelteStrictMode": false,

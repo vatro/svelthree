@@ -1,60 +1,30 @@
 {
+    "extends": "@tsconfig/svelte/tsconfig.json",
+    "display": "svelthree",
+
+   
     "compilerOptions": {
-        // @see https://github.com/sveltejs/language-tools/blob/master/docs/preprocessors/typescript.md#getting-it-to-work-for-your-build 
-        "moduleResolution": "node",
-        "target": "es2018",
-        "module": "ES2020", //enables dynmaic imports
-        //This fixes wrong code line highlighting (svelte errors)!
-        "sourceMap": true,
+        "target": "ESNext",
 
-        // This should be irelevant as we're compiling via Rollup, not tsc, default is false
-        //"allowJs": false,
+        "strict": true,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "strictFunctionTypes": true,
 
-        // I see no difference / impact when setting "strict" true / false, default is false, leave it.
-        //"strict": false,
-
-        // It works with 'rollup-plugin-typescript2' but then importing Sv3InputTypes.ts "fails"
-        // @see https://github.com/ezolenko/rollup-plugin-typescript2/issues/172
-
-        // The attempt to export *.d.ts from *.svelte ts-code failed, see rollup.config.
-        // @see https://github.com/rollup/plugins/issues/243
-        // @see https://github.com/supermacro/neverthrow/pull/60
-        // TODO: Keep an eye on how to emit a d.ts files from a .svelte component using typescript.
-        // I believe this is currently not possible. (?)
-        
-        // If we set this to true, we get 'undefined' Errors! So we would have to add 'undefined' to every Type we initially set as 'undefined'
-        // turning them into Union-Types, which we don't want.
-        //"strict": true,
-
-        /*
-        "declaration": true,
-        "declarationDir": "./dist/types",
-        "emitDeclarationOnly": true,
-        "rootDir": "./src",
-        */
-
-        // Emitting *.d.ts only via tsc
-        /*
         "declaration": true,
         "emitDeclarationOnly": true,
-        */
-        
-        // @see https://stackoverflow.com/questions/43874096/difference-in-the-lib-property-in-tsconfig-json-between-es6-and-es2017/43892665#43892665
-        
-        // commented out trying to fix bundle bug 
-        /*"lib": [
-            //trying to fix bundle bug (importing from .mjs)
-            "es2017", "DOM"
-        ],*/
-        "types": [
-            "svelte"
-        ],
-        "baseUrl": "."
+        "declarationDir": "types"
     },
     "include": [
         "src/**/*"
-      ],
+    ],
     "exclude": [
-        "src/utils/__depr/*.ts"
+        "node_modules/*",
+        "__sapper__/*",
+        "public/*",
+        "dist/*",
+        "docs/*",
+        "src/utils/__depr/*.ts",
+        "src/utils/__tests/*.ts"
     ]
 }

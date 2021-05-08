@@ -1,139 +1,190 @@
 <!-- 
-@author Vatroslav Vrbanic | https://github.com/vatro
 @component
 This is a **svelthree** _PerspectiveCamera_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    import { PerspectiveCamera, CameraHelper, Scene, Vector3, Euler } from "svelthree-three"
-    import Camera from "./Camera.svelte"
-    import { onMount } from "svelte"
-    import { svelthreeStores } from "../stores.js"
-    import StoreUtils from "../utils/StoreUtils"
-    import ExposedPropKeys from "../constants/ExposedPropKeys"
+<script lang="ts">
+	// #region --- Imports
 
-    export let scene: Scene
+	import { onMount } from "svelte"
+	import type { Object3D } from "svelthree-three"
+	import { CameraHelper, Euler, Matrix4, PerspectiveCamera, Quaternion, Scene, Vector3 } from "svelthree-three"
+	import { Camera } from "../components-internal"
+	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
+	import { svelthreeStores } from "../stores"
+	import { CameraUtils, StoreUtils } from "../utils"
 
-    const sti: number = StoreUtils.getSTIfromScene(scene, "PerspectiveCamera")
+	// #endregion
 
-    export let id: string = undefined
-    if (!id) {
-        console.warn(
-            "SVELTHREE > PerspectiveCamera : you have to provide an 'id' prop (not empty String) for Cameras in order to assign them to a 'WebGLRenderer' component!",
-            { id: id }
-        )
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
+	// #region --- Required Attributes
+	export let scene: Scene
+	const sti: number = StoreUtils.getSTIfromScene(scene, "PerspectiveCamera")
 
-    export let params: ConstructorParameters<typeof PerspectiveCamera> = undefined
+	export let id: string = undefined
 
-    let cam: PerspectiveCamera
-    params && params.length > 0 ? (cam = new PerspectiveCamera(...params)) : (cam = new PerspectiveCamera())
+	if (!id) {
+		console.warn(
+			"SVELTHREE > PerspectiveCamera : you have to provide an 'id' prop (not empty String) for Cameras in order to assign them to a 'WebGLRenderer' component!",
+			{ id: id }
+		)
+		throw new Error("SVELTHREE Exception (see warning above)")
+	}
 
-    export let animation: any = undefined
-    export let aniauto = false
+	// #endregion
 
-    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
-    export let rot: Euler | Parameters<Euler["set"]> | [number, number, number] = undefined
-    export let lookAt: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
+	// #region --- Optional Attributes
 
-    // TODO  Implement
-    export let matrix: THREE.Matrix4 = undefined
+	/**
+	 * Initializes the PerspectiveCamera with user provided three.js-native
+	 * [PerspectiveCamera](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera) constructor parameters.
+	 *
+	 * Usage: `params={[...]}`
+	 *
+	 * ☝️ *If not provided three.js default parameters will be used.*
+	 */
+	export let params: ConstructorParameters<typeof PerspectiveCamera> = undefined
 
-    //props object can be filled with anything, ideally available THREE props of course.
-    type PerspectiveCameraProps = OnlyExposedProps<
-        PerspectiveCamera,
-        typeof ExposedPropKeys.perspectiveCamera[number]
-    > & { lookAt: Vector3 | Parameters<Vector3["set"]> | number[] } & Object3DProps
+	export let mau: boolean = undefined
 
-    export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined
+	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let rot:
+		| Euler
+		| Parameters<Euler["set"]>
+		| Quaternion
+		| Parameters<Quaternion["set"]>
+		| Vector3
+		| Parameters<Vector3["set"]> = undefined
+	export let quat: Quaternion = undefined
 
-    export let helper = false
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-    let camHelper: CameraHelper = undefined
-    $: !camHelper && cam && helper ? createHelper() : null
+	/**
+	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
+	 */
+	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
 
-    onMount(() => {
-        console.info("SVELTHREE > onMount : " + cam.type)
-        startUpdatingHelper()
-        return () => {
-            console.info("SVELTHREE > onDestroy : " + cam.type)
-            stopUpdatingHelper()
-        }
-    })
+	type PerspectiveCameraProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<PerspectiveCamera, PropBlackList>,
+		{
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
+			position?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
 
-    function createHelper(): void {
-        camHelper = new CameraHelper(cam)
-        scene.add(camHelper)
-        camHelper.visible = false
-        console.info("SVELTHREE > " + cam.type + " : HELPER added!", {
-            camHelper: camHelper,
-            scene: scene,
-            total: scene.children.length
-        })
-    }
+	/** Writable, non-function PerspectiveCamera properties only incl. an additional `lookAt` property. */
+	export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined
 
-    let doUpdateHelper = false
-    let updateHelper_rAF = 0
+	export let animation: SvelthreeAnimationFunction = undefined
+	export let aniauto = false
 
-    function startUpdatingHelper() {
-        doUpdateHelper = true
-        updateHelper_rAF = requestAnimationFrame(updateHelper)
-    }
+	/** Creates and adds a CameraHelper. */
+	export let helper: boolean = undefined
 
-    function stopUpdatingHelper(): void {
-        doUpdateHelper = false
-        cancelAnimationFrame(updateHelper_rAF)
-    }
+	$: cam && !cam.userData.helper && helper ? CameraUtils.createHelper(cam, scene) : null
+	$: cam && cam.userData.helper && !helper ? CameraUtils.removeHelper(cam, scene) : null
 
-    function updateHelper(): void {
-        if (doUpdateHelper) {
-            camHelper ? camHelper.update() : null
-            requestAnimationFrame(updateHelper)
-        }
-    }
+	// #endregion
 
-    let canvas: HTMLCanvasElement = undefined
-    $: canvas = $svelthreeStores[sti].canvas.dom
+	// #region --- Initialization
 
-    let canvasW: number
-    let canvasH: number
+	// Camera component's reference
+	let camera: Camera
 
-    $: canvasW = $svelthreeStores[sti].canvas.dim.w
-    $: canvasH = $svelthreeStores[sti].canvas.dim.h
-    $: (canvasW || canvasH) && canvas ? updateCameraAspect() : null
+	let cam: PerspectiveCamera
 
-    function updateCameraAspect(): void {
-        console.info("SVELTHREE > PerspectiveCamera : updateCameraAspect!")
-        cam.aspect = canvasW / canvasH
-        cam.updateProjectionMatrix()
-    }
+	if (params && params.length > 0) {
+		cam = new PerspectiveCamera(...params)
+	} else {
+		cam = new PerspectiveCamera()
+	}
 
-    /**
-     * Public methods
-     */
+	// #endregion
 
-    export function getHelper(): CameraHelper {
-        return camHelper
-    }
+	// #region --- Reactiveness
 
-    export function getId(): string {
-        return id
-    }
+	let canvas: HTMLCanvasElement = undefined
+	$: canvas = $svelthreeStores[sti].canvas.dom
 
-    let camera: Camera
+	let canvasW: number
+	let canvasH: number
 
-    export function getCamera(): THREE.Camera {
-        return camera.getCamera()
-    }
+	$: canvasW = $svelthreeStores[sti].canvas.dim.w
+	$: canvasH = $svelthreeStores[sti].canvas.dim.h
 
-    export function getIndexInCameras(): number {
-        return camera.getIndexInCameras()
-    }
+	// Executed on Canvas dimensions change
+	$: if ((canvasW || canvasH) && canvas) {
+		CameraUtils.updatePerspCam(cam, canvasW, canvasH)
+	}
 
-    export function getSTI(): number {
-        return camera.getSTI()
-    }
+	// #endregion
+
+	// #region --- Public Methods
+
+	export function getId(): string {
+		return id
+	}
+
+	export function getSTI(): number {
+		return sti
+	}
+
+	export function getCamera(): THREE.Camera {
+		return camera.getCamera()
+	}
+
+	export function getIndexInCameras(): number {
+		return camera.getIndexInCameras()
+	}
+
+	export function getHelper(): CameraHelper {
+		return cam.userData.helper as CameraHelper
+	}
+
+	export function setHelperAttr(enabled: boolean): void {
+		helper = enabled
+	}
+
+	export function getHelperAttr(): boolean {
+		return helper
+	}
+
+	// #endregion
+
+	// #region --- Lifecycle
+
+	onMount(() => {
+		console.info("SVELTHREE > onMount : " + cam.type)
+		return () => {
+			console.info("SVELTHREE > onDestroy : " + cam.type)
+			CameraUtils.removeHelper(cam, scene)
+		}
+	})
+
+	// #endregion
 </script>
 
-<Camera bind:this={camera} {scene} {cam} {id} {pos} {rot} {lookAt} {matrix} {props} {animation} {aniauto} />
+<Camera
+	bind:this={camera}
+	{scene}
+	{sti}
+	{cam}
+	{id}
+	{mau}
+	{helper}
+	{pos}
+	{rot}
+	{quat}
+	{lookAt}
+	{matrix}
+	{props}
+	{animation}
+	{aniauto} />

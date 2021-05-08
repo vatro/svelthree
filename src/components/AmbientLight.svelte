@@ -1,48 +1,45 @@
 <!-- 
-@author Vatroslav Vrbanic | https://github.com/vatro
 @component
 This is a **svelthree** _AmbientLight_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    import { onMount } from "svelte"
-    import { AmbientLight, Scene } from "svelthree-three"
-    import Light from "./Light.svelte"
-    import ExposedPropKeys from "../constants/ExposedPropKeys"
+<script lang="ts">
+	/*
+     @see https://threejs.org/docs/#api/en/lights/AmbientLight
+     AmbientLight cannot be used to cast shadows as it doesn't have a direction.
+     Position is also irrelevant.
+    */
 
-    export let scene: Scene
+	import { onMount } from "svelte"
+	import { AmbientLight, Color, Scene, Vector3 } from "svelthree-three"
+	import { Light } from "../components-internal"
+	import type { OnlyWritableNonFunctionPropsOverwritten } from "../types-extra"
 
-    export let params: ConstructorParameters<typeof AmbientLight> = undefined
-    const light = params && params.length > 0 ? new AmbientLight(...params) : new AmbientLight()
+	export let scene: Scene
 
-    type AmbientLightProps = OnlyExposedAndOverwrittenProps<
-        AmbientLight,
-        typeof ExposedPropKeys.ambientLight[number],
-        { color: THREE.Vector3 | THREE.Color | number | number[] }
-    >
+	export let params: ConstructorParameters<typeof AmbientLight> = undefined
+	const light = params && params.length > 0 ? new AmbientLight(...params) : new AmbientLight()
 
-    export let props: { [P in keyof AmbientLightProps]: AmbientLightProps[P] } = undefined
-    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
-    export let intensity: number = undefined
+	type AmbientLightProps = OnlyWritableNonFunctionPropsOverwritten<
+		AmbientLight,
+		{ color: Vector3 | Color | number | number[] }
+	>
 
-    /**
-     * @see https://threejs.org/docs/#api/en/lights/AmbientLight
-     * AmbientLight cannot be used to cast shadows as it doesn't have a direction.
-     * Position is also irrelevant.
-     */
+	/** Writable, non-function AmbientLight properties only incl. type-enhanced 'color' property. */
+	export let props: { [P in keyof AmbientLightProps]: AmbientLightProps[P] } = undefined
+	export let color: Color | string | [r: number, g: number, b: number] | Vector3 = undefined
+	export let intensity: number = undefined
 
-    export function getLight(): AmbientLight {
-        return light
-    }
+	export function getLight(): AmbientLight {
+		return light
+	}
 
-    onMount(() => {
-        console.info("SVELTHREE > onMount : AmbientLight")
-        return () => {
-            console.info("SVELTHREE > onDestroy : AmbientLight!")
-        }
-    })
+	onMount(() => {
+		console.info("SVELTHREE > onMount : AmbientLight")
+		return () => {
+			console.info("SVELTHREE > onDestroy : AmbientLight!")
+		}
+	})
 </script>
 
-<!-- cannot use {...$$props} see https://github.com/sveltejs/svelte/issues/4993 -->
-<!-- TOFIX  as soon as landed (not in 3.24.0), see https://github.com/sveltejs/svelte/pull/5123  -->
 <Light {scene} {light} {props} {color} {intensity} />

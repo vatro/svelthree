@@ -1,84 +1,138 @@
 <!-- 
 @component
 This is a **svelthree** _PointLight_ Component.  
-// TODO : Describe in detail.
+ TODO  Link to Docs.
 -->
-<script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
+<script lang="ts">
+	import { onMount } from "svelte"
+	import type { LightShadow } from "svelthree-three"
+	import {
+		Color,
+		Euler,
+		Matrix4,
+		Object3D,
+		PointLight,
+		PointLightHelper,
+		Quaternion,
+		Scene,
+		Vector3
+	} from "svelthree-three"
+	import { Light, SvelthreeLightHelper, SvelthreeLightWithShadow } from "../components-internal"
+	import type {
+		LightShadowCamProps,
+		LightShadowProps,
+		OnlyWritableNonFunctionPropsPlus,
+		PropBlackList,
+		SvelthreeAnimationFunction
+	} from "../types-extra"
+	import { LightUtils } from "../utils"
 
-    import { PointLight, PointLightHelper, Scene, Object3D, Vector3 } from "svelthree-three"
-    import Light from "./Light.svelte"
-    import { onMount } from "svelte"
+	type PointLightProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<PointLight, PropBlackList>,
+		{
+			//lookAt: Vector3 | Parameters<Vector3["set"]>
+			position?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
 
-    //props object can be filled with anything, ideally available THREE props of course.
-    export let props: { [key: string]: any } = undefined
+	export let props: { [P in keyof PointLightProps]: PointLightProps[P] } = undefined
+	export let parent: Object3D = undefined
+	export let name: string = undefined
 
-    export let parent: Object3D = undefined
-    export let name: string = undefined
-    export let animation: any = undefined
-    export let aniauto: boolean = undefined
+	export let animation: SvelthreeAnimationFunction = undefined
+	export let aniauto: boolean = undefined
 
-    export let pos: Vector3 | Parameters<Vector3["set"]> | number[] = undefined
-    export let color: THREE.Vector3 | THREE.Color | number | number[] = undefined
-    export let intensity: number = undefined
-    export let shadowMapSize: number = undefined
-    export let shadowBias: number = undefined
-    export let castShadow = false
-    export let scene: Scene
+	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let rot:
+		| Euler
+		| Parameters<Euler["set"]>
+		| Quaternion
+		| Parameters<Quaternion["set"]>
+		| Vector3
+		| Parameters<Vector3["set"]> = undefined
+	export let quat: Quaternion = undefined
 
-    let light: PointLight = new PointLight()
-    light.name = name
+	/**
+	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
+	 */
+	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
 
-    export let helper = false
+	export let color: Color | string | [r: number, g: number, b: number] | Vector3 = undefined
+	export let intensity: number = undefined
+	export let shadowMapSize: number = undefined
+	export let shadowBias: number = undefined
+	export let castShadow: boolean = undefined
 
-    let lightHelper: PointLightHelper
-    $: !lightHelper && light && helper ? createHelper() : null
+	export let scene: Scene
 
-    function createHelper() {
-        lightHelper = new PointLightHelper(light, 0.1, "aqua")
-        scene.add(lightHelper)
-        lightHelper.visible = false
-        console.info("SVELTHREE > " + light.type + " : HELPER added!", {
-            lightHelper: lightHelper,
-            scene: scene,
-            total: scene.children.length
-        })
-    }
+	let light: PointLight = new PointLight()
+	light.name = name
 
-    onMount(() => {
-        console.info("SVELTHREE > onMount : " + light.type)
-        return () => {
-            console.info("SVELTHREE > onDestroy : " + light.type)
-        }
-    })
+	export let shadowProps: { [P in keyof LightShadowProps<LightShadow>]: LightShadowProps<LightShadow>[P] } = undefined
 
-    /**
-     * Public methods
-     */
+	export let shadowCameraProps: {
+		[P in keyof LightShadowCamProps<typeof light.shadow.camera>]: LightShadowCamProps<typeof light.shadow.camera>[P]
+	} = undefined
 
-    export function getLight(): PointLight {
-        return light
-    }
+	export let helper: boolean = undefined
 
-    export function getHelper(): PointLightHelper {
-        return lightHelper
-    }
+	let lightHelperComponent: SvelthreeLightHelper
+	let lightHelper: PointLightHelper
+	$: !lightHelper && light && helper ? createHelper() : null
+
+	function createHelper(): void {
+		lightHelper = new PointLightHelper(light, 0.1, "aqua")
+		LightUtils.addHelper(light, scene, lightHelper)
+	}
+
+	onMount(() => {
+		console.info(`SVELTHREE > onMount : ${light.type}`)
+		return () => {
+			console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			if (lightHelper && lightHelperComponent) {
+				lightHelperComponent.removeHelper()
+			}
+		}
+	})
+
+	// public methods
+
+	export function getLight(): PointLight {
+		return light
+	}
+
+	export function getHelper(): PointLightHelper {
+		return lightHelper
+	}
+
+	export function setHelperAttr(enabled: boolean): void {
+		helper = enabled
+	}
+
+	export function getHelperAttr(): boolean {
+		return helper
+	}
+
+	export function startUpdatingHelper(): void {
+		lightHelperComponent.startHelperUpdating()
+	}
+
+	export function stopUpdatingHelper(): void {
+		lightHelperComponent.stopHelperUpdating()
+	}
 </script>
 
-<!-- cannot use {...$$props} see https://github.com/sveltejs/svelte/issues/4993 -->
-<!-- TOFIX  as soon as landed (not in 3.24.0), see https://github.com/sveltejs/svelte/pull/5123  -->
-<Light
-    {scene}
-    {parent}
-    {light}
-    {props}
-    {pos}
-    {color}
-    {intensity}
-    {shadowMapSize}
-    {shadowBias}
-    {castShadow}
-    {animation}
-    {aniauto} />
+<SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
+<Light {scene} {parent} {light} {props} {pos} {rot} {quat} {matrix} {color} {intensity} {animation} {aniauto} />
+{#if helper}
+	<SvelthreeLightHelper bind:this={lightHelperComponent} {scene} {helper} {light} bind:lightHelper />
+{/if}

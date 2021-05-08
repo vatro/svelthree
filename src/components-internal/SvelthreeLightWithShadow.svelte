@@ -1,0 +1,40 @@
+<!-- 
+@component
+This is an internal _SvelthreeLightWithShadow_ Component.
+-->
+<script lang="ts">
+	import type { LightWithShadow } from "../types-extra"
+	import { PropUtils, SvelthreeProps } from "../utils"
+
+	export let light: LightWithShadow
+
+	export let shadowMapSize: number = undefined
+	export let shadowBias: number = undefined
+
+	export let shadowCameraProps: { [key: string]: any } = undefined
+	export let shadowProps: { [key: string]: any } = undefined
+
+	let propsShadowCamera: SvelthreeProps
+	let propsShadow: SvelthreeProps
+
+	$: light && !propsShadowCamera ? (propsShadowCamera = new SvelthreeProps(light.shadow.camera)) : null
+	$: light && !propsShadow ? (propsShadow = new SvelthreeProps(light.shadow)) : null
+
+	$: shadowCameraProps && propsShadowCamera ? propsShadowCamera.update(shadowCameraProps) : null
+	$: shadowProps && propsShadow ? propsShadow.update(shadowProps) : null
+
+	/**
+	 * 👉 [DirectionalLight.castShadow](https://threejs.org/docs/#api/en/lights/DirectionalLight.castShadow )
+	 * *If set to true light will cast dynamic shadows.
+	 * 🔺 WARNING: This is expensive and requires tweaking to get shadows looking right.
+	 * See the [DirectionalLightShadow](https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow) for details. The default is false."*
+	 */
+	export let castShadow: boolean = undefined
+
+	$: shadowMapSize ? PropUtils.setShadowMapSize(light, shadowMapSize) : null
+	$: shadowBias ? PropUtils.setShadowBias(light, shadowBias) : null
+	$: castShadow ? PropUtils.setCastShadow(light, castShadow) : null
+</script>
+
+<!-- <SvelthreeProps props={shadowCameraProps} obj={light.shadow.camera} /> -->
+<!-- <SvelthreeProps props={shadowProps} obj={light.shadow} /> -->
