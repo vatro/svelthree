@@ -1,4 +1,5 @@
-<svelte:options accessors useAccMod accessorsAsync />
+<!-- for usage with the modified Svelte version -->
+<!-- <svelte:options accessors useAccMod accessorsAsync /> -->
 
 <!--
 @component
