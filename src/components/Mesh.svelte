@@ -11,7 +11,6 @@ This is a **svelthree** _Mesh_ Component.
 	import {
 		BufferGeometry,
 		Euler,
-		Geometry,
 		Material,
 		Matrix4,
 		Mesh,
@@ -94,7 +93,7 @@ This is a **svelthree** _Mesh_ Component.
 	export let mesh: Mesh = undefined
 
 	export let material: Material | Material[] = undefined
-	export let geometry: Geometry | BufferGeometry = undefined
+	export let geometry: BufferGeometry = undefined
 
 	if (mesh) {
 		generate = false
@@ -589,7 +588,7 @@ This is a **svelthree** _Mesh_ Component.
 	}
 
 	function tryGeometryUpdate(): void {
-		mesh.geometry = geometry as Geometry | BufferGeometry
+		mesh.geometry = geometry as BufferGeometry
 		if (logInfo) console.info("SVELTHREE > Mesh : Geometry updated!")
 	}
 
