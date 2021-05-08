@@ -9,19 +9,13 @@
   "scripts": {
     "svelte-check": "svelte-check",
     "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
-    "local-tsc": "tsc",
-    "declarations": "tsc --declaration --emitDeclarationOnly --removeComments true --declarationDir ./types",
     "docs": "typedoc --out docs src",
-    "svelthree-three-types": "node generate-svelthree-three-types.js",
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
-    "@tsconfig/svelte": "^1.0.10",
-    "copy-dir": "^1.3.0",
     "prettier": "^2.2.1",
     "svelte-check": "^1.2.5",
     "svelte-preprocess": "^4.6.9",
-    "tslib": "^2.1.0",
     "typescript": "^4.2.3"
   },
   "dependencies": {
