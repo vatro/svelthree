@@ -11,7 +11,7 @@ This is a **svelthree** _SessionVR_ Component.
     */
 
 	import { createEventDispatcher, onMount } from "svelte"
-	import type { Group, Object3D, Scene, WebXRManager, XRControllerModel } from "svelthree-three"
+	import type { Group, Object3D, Scene, WebXRManager, XRControllerModel } from "three"
 	import { XRControllerDefaults, XRDefaults, XRHandTouchDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import { SplashVR, SvelthreeHelpersXR, XRHandPinch, XRHandTouchRayExt, XRHandTouchSphereExt } from "../xr"

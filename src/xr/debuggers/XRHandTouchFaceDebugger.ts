@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { BufferGeometry, Color } from "svelthree-three"
+import { BufferGeometry, Color } from "three"
 import { XRHandTouchDefaults } from "../constants"
 
 interface Indexable {
@@ -16,7 +16,7 @@ export default class XRHandTouchFaceDebugger {
 	touchThroughExitCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCHTHROUGH_EXIT_COL)
 	scratchCol = new Color(XRHandTouchDefaults.DBG_FACE_SCRATCH_COL)
 
-	constructor() {}
+	constructor() { }
 
 	initialize(colors: { [key: string]: number }) {
 		if (colors) {

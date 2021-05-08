@@ -18,7 +18,7 @@ This is an internal **svelthree** _Camera_ Component.
 		Quaternion,
 		Scene,
 		Vector3
-	} from "svelthree-three"
+	} from "three"
 	import type { SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { CameraUtils, PropUtils, SvelthreeProps } from "../utils"

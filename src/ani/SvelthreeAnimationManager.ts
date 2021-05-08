@@ -1,4 +1,4 @@
-import type { Object3D, Scene } from "svelthree-three"
+import type { Object3D, Scene } from "three"
 import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
 
 // TODO  TOFIX  This seems to be a MESS, DEBUG! (switching Scenes)
@@ -49,8 +49,8 @@ export default class SvelthreeAnimationManager {
 		//if animation is a function it has not been initiated / started yet (otherwise object)
 		!this.scene.userData.isActive
 			? console.warn(
-					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
-			  )
+				"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
+			)
 			: null
 		this.animation = this.animation.initiate(this.obj, ...arguments)
 		console.info(
@@ -68,8 +68,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneReactivated
 			? this.animation.onSceneReactivated()
 			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
-			  )
+				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
+			)
 	}
 
 	//inactive / deactivated
@@ -86,8 +86,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneDeactivated
 			? this.animation.onSceneDeactivated()
 			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
-			  )
+				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
+			)
 	}
 
 	// --------- user initiated actions ---------
@@ -114,13 +114,13 @@ export default class SvelthreeAnimationManager {
 		 * check aniauto change in a demo...
 		 */
 		/*
-            try {
-                console.warn("SVELTHREE > SvelthreeAnimationManager > trying this.animation.onDestroy() : this.animation", this.animation)
-                this.animation.onDestroy()
-            } catch (error) {
-                throw new Error("SVELTHREE Exception, " + error)
-            }
-            */
+			try {
+				console.warn("SVELTHREE > SvelthreeAnimationManager > trying this.animation.onDestroy() : this.animation", this.animation)
+				this.animation.onDestroy()
+			} catch (error) {
+				throw new Error("SVELTHREE Exception, " + error)
+			}
+			*/
 
 		// WORKAROUND:
 		// Don't try / check, just check if this.animation has 'onDestroy', if not just throw a warning, not exception.

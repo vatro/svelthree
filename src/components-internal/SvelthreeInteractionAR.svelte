@@ -6,7 +6,7 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 <script lang="ts">
 	import { onMount } from "svelte"
 	import type { SvelteComponentDev } from "svelte/internal"
-	import type { Group, Object3D } from "svelthree-three"
+	import type { Group, Object3D } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 

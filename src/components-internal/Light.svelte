@@ -7,7 +7,7 @@ This is a **svelthree** _Light_ Component.
 -->
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
-	import type { Color, Euler, Light, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "svelthree-three"
+	import type { Color, Euler, Light, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "three"
 	import type { SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { LightUtils, PropUtils, StoreUtils, SvelthreeProps } from "../utils"

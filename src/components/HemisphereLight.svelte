@@ -11,7 +11,7 @@ This is a **svelthree** _HemisphereLight_ Component.
     */
 
 	import { onMount } from "svelte"
-	import { HemisphereLight, HemisphereLightHelper, Object3D, Scene } from "svelthree-three"
+	import { HemisphereLight, HemisphereLightHelper, Object3D, Scene } from "three"
 	import { Light } from "../components-internal"
 	import type { SvelthreeAnimationFunction } from "../types-extra"
 	import { LightUtils } from "../utils"

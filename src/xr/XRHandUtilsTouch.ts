@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group, Raycaster, Scene } from "svelthree-three"
+import type { Group, Raycaster, Scene } from "three"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrHandEnabled, XrHandTouchDebugParams, XrHandTouchEvents, XrHandTouchEventsItem, XrTouchUpdateParams } from "./types-svelthree"
 import type XRHandTouchRayExt from "./XRHandTouchRayExt"

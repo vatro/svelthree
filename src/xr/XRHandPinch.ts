@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { Vector3, Object3D, Scene, Raycaster, Group } from "svelthree-three"
+import { Vector3, Object3D, Scene, Raycaster, Group } from "three"
 
 import { RaycasterRayHelper } from "./RaycasterRayHelper"
 import { XRHandTouchDefaults } from "./constants"

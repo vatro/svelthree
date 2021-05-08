@@ -5,7 +5,7 @@ This is a **svelthree** _Scene_ Component.
 -->
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
-	import { Color, Scene } from "svelthree-three"
+	import { Color, Scene } from "three"
 	import { svelthreeStores } from "../stores"
 
 	const css_rs = "color: red;font-weight:bold;"

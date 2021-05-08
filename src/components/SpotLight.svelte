@@ -7,8 +7,8 @@ This is a **svelthree** _SpotLight_ Component.
 	// #region --- Imports
 
 	import { onMount } from "svelte"
-	import type { Matrix4, SpotLightShadow } from "svelthree-three"
-	import { Color, Object3D, Scene, SpotLight, SpotLightHelper, Vector3 } from "svelthree-three"
+	import type { Matrix4, SpotLightShadow } from "three"
+	import { Color, Object3D, Scene, SpotLight, SpotLightHelper, Vector3 } from "three"
 	import { Light, SvelthreeLightWithShadow } from "../components-internal"
 	import type {
 		LightShadowCamProps,

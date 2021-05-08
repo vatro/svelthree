@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { Group, Matrix3, Object3D, Raycaster, Scene, Vector3 } from "svelthree-three"
+import { Group, Matrix3, Object3D, Raycaster, Scene, Vector3 } from "three"
 import { XRControllerDefaults, XRDefaults, XRHandJointIndices, XRHandTouchDefaults } from "./constants"
 import {
 	XRHandTouchFaceDebugger,
@@ -34,7 +34,7 @@ export default class XRHandTouch {
 	jointDebugger: XRHandTouchJointDebugger
 	faceDebugger: XRHandTouchFaceDebugger
 
-	constructor() {}
+	constructor() { }
 
 	updateToTest(currentScene: Scene) {
 		this.currentScene = currentScene
@@ -211,8 +211,8 @@ export default class XRHandTouch {
 			let intersectionsPhase1: any[]
 
 			/*
-            "Joint Direction Raycast" - Phase 1
-            */
+			"Joint Direction Raycast" - Phase 1
+			*/
 			switch (joint.userData.touch) {
 				case false:
 					if (this.debug) {
@@ -238,23 +238,23 @@ export default class XRHandTouch {
 					// DIRECTIONAL RAY INTERSECTS --> dispatch 'TOUCH' or just SAVE 'joint.userData.lastIntersect'
 					if (intersectionsPhase1.length > 0) {
 						/*
-                        TODO  Currently the 'isInTouchDistance' method is being overridden by both modes, but may need only the RAY mode method.
+						TODO  Currently the 'isInTouchDistance' method is being overridden by both modes, but may need only the RAY mode method.
 
-                        SPHERE Mode:
-                        'isInTouchDistance' is only being used here, using the sphere intersection check it on every frame might be more expensive.
-                        TODO  Compare performance between RAY and SPHERE mode distance check
-                        Since we're keeping the reference to the raycasted face in order to have the 'center face' anyway, we could safely replace it
-                        with the RAY mode method. Especially if we ...
-                        TODO  Consider setting 'touchDistance' to 'touchSphereRadius' or vice versa by default!
-                         */
+						SPHERE Mode:
+						'isInTouchDistance' is only being used here, using the sphere intersection check it on every frame might be more expensive.
+						TODO  Compare performance between RAY and SPHERE mode distance check
+						Since we're keeping the reference to the raycasted face in order to have the 'center face' anyway, we could safely replace it
+						with the RAY mode method. Especially if we ...
+						TODO  Consider setting 'touchDistance' to 'touchSphereRadius' or vice versa by default!
+						 */
 
 						if (this.isInTouchDistance(intersectionsPhase1, joint)) {
 							/*
-                            Reaching this block means:
-                            - the 'touch' event occurred OUTSIDE (joint is not inside the object)
-                            - on next frame 'case true:' block is being executed performing 'touchingOutsideCheck'
+							Reaching this block means:
+							- the 'touch' event occurred OUTSIDE (joint is not inside the object)
+							- on next frame 'case true:' block is being executed performing 'touchingOutsideCheck'
 
-                             */
+							 */
 
 							joint.userData.touch = true
 							joint.userData.touchObj = intersectionsPhase1[0].object
@@ -284,87 +284,87 @@ export default class XRHandTouch {
 						}
 					} else {
 						/*
-                          Reaching this block means:
-                          - the directional joint ray didn't intersect something, which could again mean:
-                            [!] It cannot mean joint entered the object while 'touching', because this block is part of (joint.userData.touch === FALSE) block!
+						  Reaching this block means:
+						  - the directional joint ray didn't intersect something, which could again mean:
+							[!] It cannot mean joint entered the object while 'touching', because this block is part of (joint.userData.touch === FALSE) block!
 
-                            a) Joint is NOT TOUCHING YET but is INSIDE the object --> 'FAST TOUCH': should dispatch 'touch' event!
-                               In this case 'joint.userData.touch' should be set to TRUE
+							a) Joint is NOT TOUCHING YET but is INSIDE the object --> 'FAST TOUCH': should dispatch 'touch' event!
+							   In this case 'joint.userData.touch' should be set to TRUE
 
-                            b) Joint is NOT TOUCHING, it went through the object and is now OUTSIDE the object again --> 'TOUCH THROUGH': should dispatch 'touchthrough' event!
-                               In this case 'joint.userData.touch' should still be / set to FALSE
+							b) Joint is NOT TOUCHING, it went through the object and is now OUTSIDE the object again --> 'TOUCH THROUGH': should dispatch 'touchthrough' event!
+							   In this case 'joint.userData.touch' should still be / set to FALSE
 
-                            c) Joint is NOT TOUCHING and it didn't enter / exit the object
+							c) Joint is NOT TOUCHING and it didn't enter / exit the object
 
-                         */
+						 */
 
 						if (joint.userData.lastIntersect !== undefined) {
 							/*
-                            Reaching this block means:
-                            Joint direction ray DID intersect something before reaching this block, but no 'touch' event was dispatched, because it was too fast:
-                            It was outside of 'touchDistance' at the moment of intersection, so only the intersection (joint.userData.lastIntersect) was saved,
-                            see above 'if (intersectionsPhase1.length > 0) {}' --> 'ELSE {...}'
-                            On the next frame though (NOW) it's suddenly (because too fast) either INSIDE or OUTSIDE the object [see above: a) or b) or c)]
-                             */
+							Reaching this block means:
+							Joint direction ray DID intersect something before reaching this block, but no 'touch' event was dispatched, because it was too fast:
+							It was outside of 'touchDistance' at the moment of intersection, so only the intersection (joint.userData.lastIntersect) was saved,
+							see above 'if (intersectionsPhase1.length > 0) {}' --> 'ELSE {...}'
+							On the next frame though (NOW) it's suddenly (because too fast) either INSIDE or OUTSIDE the object [see above: a) or b) or c)]
+							 */
 
 							/*
-                            Increase speedFac limit to prevent fast touch detection at lower motion speed.
-                            Higher 'SPEEDFAC_LIMIT_LOW' will allow only faster joints (longer directional rays) to enter the 'FAST TOUCH' check block otherwise
-                            nothing will happen and 'joint.userData.lastIntersect'
-                            they will be internally specified as 'CANCELED TOUCH', which means:
-                            TODO  CONFIRM THIS!!!
-                            TOFIX  Atm we're getting 'glitches' identified as 'scratches'
-                            a joint was fast approaching (long directional ray) the object, initially caught / saved the intersection (directional ray intersected object),
-                            but on next frame it got slower (shrinking the directional ray) still outside of 'touchDistance', or moved in the opposite direction.
-                             */
+							Increase speedFac limit to prevent fast touch detection at lower motion speed.
+							Higher 'SPEEDFAC_LIMIT_LOW' will allow only faster joints (longer directional rays) to enter the 'FAST TOUCH' check block otherwise
+							nothing will happen and 'joint.userData.lastIntersect'
+							they will be internally specified as 'CANCELED TOUCH', which means:
+							TODO  CONFIRM THIS!!!
+							TOFIX  Atm we're getting 'glitches' identified as 'scratches'
+							a joint was fast approaching (long directional ray) the object, initially caught / saved the intersection (directional ray intersected object),
+							but on next frame it got slower (shrinking the directional ray) still outside of 'touchDistance', or moved in the opposite direction.
+							 */
 							if (joint.userData.speedFac > XRHandTouchDefaults.SPEEDFAC_LIMIT_LOW) {
 								/*
-                                TODO  Find upper speedFac limit value for adding unintentional super fast touches detection (resulting from tracking glitches)
-                                We want to detect "real" scratches but sort out tracking glitches.
-                                if (joint.userData.speedFac < XRHandTouchDefaults.SPEEDFAC_LIMIT_HIGH) {
-                                TODO  or maybe just limit the LENGTH of the ray (means NOT using XRHandTouchDefaults.SPEEDFAC_LIMIT_HIGH)
+								TODO  Find upper speedFac limit value for adding unintentional super fast touches detection (resulting from tracking glitches)
+								We want to detect "real" scratches but sort out tracking glitches.
+								if (joint.userData.speedFac < XRHandTouchDefaults.SPEEDFAC_LIMIT_HIGH) {
+								TODO  or maybe just limit the LENGTH of the ray (means NOT using XRHandTouchDefaults.SPEEDFAC_LIMIT_HIGH)
 
-                                 */
+								 */
 
 								// TODO  Check FAST TOUCH check performance (old version was 5 ms, which was too expensive)
 								console.time("FAST TOUCH - TEST")
 
 								/*
-                                TO SOLVE:
-                                --------
-                                Directional ray didn't intersect (intersectionsPhase1.length === 0) but in the previous frame it did.
-                                SPECIFY AND HANDLE THE LOCATION OF THE JOINT!
+								TO SOLVE:
+								--------
+								Directional ray didn't intersect (intersectionsPhase1.length === 0) but in the previous frame it did.
+								SPECIFY AND HANDLE THE LOCATION OF THE JOINT!
 
-                                 */
-
-								/*
-                                SOLUTION CONCEPT:
-                                ----------------
-
-                                1. Shoot a slightly shorter ray from joint's origin to 'lastIntersect'-point
-                                    a) Calculate ray's direction and length
-                                    b) Raycast with slightly shorter than calculated ray (*0.99) in order to detect empty space inside the object
-
-                                2. Check intersection with lastTouchPoint object
-                                    if true (intersection.length > 0) then
-                                    a) OUTSIDE the object and behind the 'lastIntersect'-face --> the RAY from joint's origin to 'lastIntersect'-point INTERSECTS!
-
-                                if false (intersection.length === 0) then
-
-                                    b) INSIDE the object (behind the face):
-                                       --> the RAY from joint's origin to 'lastIntersect'-point DOESN'T INTERSECT!
-                                           + the RAY and the 'lastIntersect'-FACE-NORMAL should be pointing into SAME DIRECTION (dotProd > 0 --> same direction)
-
-                                    c) OUTSIDE the object (not inside and did not enter space behind the face, so we cannot be on the other side either):
-                                       --> the RAY from joint's origin to 'lastIntersect'-point DOESN'T INTERSECT!
-                                           + the RAY and the 'lastIntersect'-FACE-NORMAL should be pointing into DIFFERENT DIRECTIONS (dotProd < 0 --> facing)
-
-                                 */
+								 */
 
 								/*
-                                APPLIED SOLUTION:
-                                ----------------
-                                */
+								SOLUTION CONCEPT:
+								----------------
+
+								1. Shoot a slightly shorter ray from joint's origin to 'lastIntersect'-point
+									a) Calculate ray's direction and length
+									b) Raycast with slightly shorter than calculated ray (*0.99) in order to detect empty space inside the object
+
+								2. Check intersection with lastTouchPoint object
+									if true (intersection.length > 0) then
+									a) OUTSIDE the object and behind the 'lastIntersect'-face --> the RAY from joint's origin to 'lastIntersect'-point INTERSECTS!
+
+								if false (intersection.length === 0) then
+
+									b) INSIDE the object (behind the face):
+									   --> the RAY from joint's origin to 'lastIntersect'-point DOESN'T INTERSECT!
+										   + the RAY and the 'lastIntersect'-FACE-NORMAL should be pointing into SAME DIRECTION (dotProd > 0 --> same direction)
+
+									c) OUTSIDE the object (not inside and did not enter space behind the face, so we cannot be on the other side either):
+									   --> the RAY from joint's origin to 'lastIntersect'-point DOESN'T INTERSECT!
+										   + the RAY and the 'lastIntersect'-FACE-NORMAL should be pointing into DIFFERENT DIRECTIONS (dotProd < 0 --> facing)
+
+								 */
+
+								/*
+								APPLIED SOLUTION:
+								----------------
+								*/
 
 								// 1 a) Calculate ray's direction and length
 								const untouchTestRaycasterDir: Vector3 = new Vector3()
@@ -538,9 +538,9 @@ export default class XRHandTouch {
 								}
 								// TODO  see above: Find upper speedFac limit value for adding unintentional superfast touches detection
 								/*}
-                                else {
-                                    console.warn("SPEED TOO HIGH --> NO FAST TOUCH!")
-                                }*/
+								else {
+									console.warn("SPEED TOO HIGH --> NO FAST TOUCH!")
+								}*/
 
 								console.timeEnd("FAST TOUCH - TEST")
 							} else {
@@ -601,9 +601,9 @@ export default class XRHandTouch {
 	 */
 	touchingOutsideCheck(joint: Group, i: number, raycaster: Raycaster, handSpace: Group): void {
 		/*
-        Raycasting from OUTSIDE (touching)
-        Raycast using negative normal ray of touched face! (in order to get real distance)
-        */
+		Raycasting from OUTSIDE (touching)
+		Raycast using negative normal ray of touched face! (in order to get real distance)
+		*/
 
 		if (!joint.userData.raycasterTouchingDir) {
 			joint.userData.raycasterTouchingDir = this.getNegativeNormalRay(joint)
@@ -625,8 +625,8 @@ export default class XRHandTouch {
 		}
 
 		/*
-        Perform raycast via "NORMAL direction ray" and analyze intersection
-         */
+		Perform raycast via "NORMAL direction ray" and analyze intersection
+		 */
 
 		// INTERSECTS:
 		if (intersectionsPhase2.length > 0) {
@@ -719,10 +719,10 @@ export default class XRHandTouch {
 		let testRaycasterLength: number
 
 		/*
-        Cast a ray from joint's origin to 'joint.userData.lastTouchPoint' (being set every time a 'touch' event was dispatched) if available. It's always available
-        on first run, but is then being set to undefined, because we actually want to check for intersections of a ray between joint's current (origin) and previous (lastOrigin)
-        position in order to verify that the joint is still inside the object (ray not intersecting --> empty space inside object)
-         */
+		Cast a ray from joint's origin to 'joint.userData.lastTouchPoint' (being set every time a 'touch' event was dispatched) if available. It's always available
+		on first run, but is then being set to undefined, because we actually want to check for intersections of a ray between joint's current (origin) and previous (lastOrigin)
+		position in order to verify that the joint is still inside the object (ray not intersecting --> empty space inside object)
+		 */
 
 		// RAYCAST : origin --> lastTouchPoint (on first run)
 		if (joint.userData.lastTouchPoint) {
@@ -811,7 +811,7 @@ export default class XRHandTouch {
 		logMessage: String,
 		raycaster?: Raycaster,
 		origin?: Vector3
-	) {}
+	) { }
 
 	/**
 	 * RAY Mode only!
@@ -882,7 +882,7 @@ export default class XRHandTouch {
 	 */
 	doRaycast(raycaster: Raycaster, origin: Vector3, direction: Vector3, near: number = 0, far: number = 0.04): any[] {
 		if (this.useBVH) {
-			;(raycaster as RaycasterBVH).firstHitOnly = true
+			; (raycaster as RaycasterBVH).firstHitOnly = true
 		}
 		raycaster.set(origin, direction)
 		raycaster.near = near
@@ -903,7 +903,7 @@ export default class XRHandTouch {
 		far: number = 0.04
 	): any[] {
 		if (this.useBVH) {
-			;(raycaster as RaycasterBVH).firstHitOnly = true
+			; (raycaster as RaycasterBVH).firstHitOnly = true
 		}
 
 		raycaster.set(origin, direction)

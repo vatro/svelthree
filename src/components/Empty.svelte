@@ -5,7 +5,7 @@ This is a **svelthree** _Empty_ Component.
 -->
 <script lang="ts">
 	import { afterUpdate, onMount } from "svelte"
-	import { Euler, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "svelthree-three"
+	import { Euler, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "three"
 	import { SvelthreeAnimation } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"

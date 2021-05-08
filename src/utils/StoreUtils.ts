@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Scene } from "svelthree-three"
+import type { Scene } from "three"
 
 export default class StoreUtils {
 	public static getSTIfromScene(scene: Scene, component: string): number {

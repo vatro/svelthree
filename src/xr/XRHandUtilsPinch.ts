@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group } from "svelthree-three"
+import type { Group } from "three"
 
 export default class XRHandUtilsPinch {
 	// event: Event --> Custom three.js Event defined inside WebXRController.js

@@ -11,7 +11,7 @@ This is a **svelthree** _AmbientLight_ Component.
     */
 
 	import { onMount } from "svelte"
-	import { AmbientLight, Color, Scene, Vector3 } from "svelthree-three"
+	import { AmbientLight, Color, Scene, Vector3 } from "three"
 	import { Light } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsOverwritten } from "../types-extra"
 

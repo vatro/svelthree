@@ -19,7 +19,7 @@ This is a **svelthree** _Canvas_ Component.
 		Vector3,
 		WebGLRenderer,
 		WebXRController
-	} from "svelthree-three"
+	} from "three"
 	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
 	import { svelthreeStores } from "../stores"
 	import type {

@@ -3,8 +3,8 @@
  */
 
 import { has_prop } from "svelte/internal"
-import type { Light, Scene } from "svelthree-three"
-import { Color, Object3D } from "svelthree-three"
+import type { Light, Scene } from "three"
+import { Color, Object3D } from "three"
 import type { LightWithShadow } from "../types-extra"
 import PropUtils from "./PropUtils"
 

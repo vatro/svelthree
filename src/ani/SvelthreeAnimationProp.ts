@@ -1,4 +1,4 @@
-import type { Object3D } from "svelthree-three"
+import type { Object3D } from "three"
 import type { SvelthreeAnimationFunction } from "../types-extra"
 
 export default class SvelthreeAnimationProp {

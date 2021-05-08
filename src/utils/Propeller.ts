@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { WebGLCubeRenderTarget } from "svelthree-three"
+import type { WebGLCubeRenderTarget } from "three"
 import PropUtils from "./PropUtils"
 import { has_prop } from "svelte/internal"
 import type { ComplexValueType } from "../types-extra"
@@ -61,13 +61,13 @@ export default class Propeller {
 				default:
 					if (objType === "WebGLCubeRenderTarget") {
 						/*
-                                        console.info(
-                                            "SVELTHREE > " +
-                                                this.objTypeStr +
-                                                " : properties provided via 'props' will override other shorthand props!, p:",
-                                            p
-                                        )
-                                        */
+										console.info(
+											"SVELTHREE > " +
+												this.objTypeStr +
+												" : properties provided via 'props' will override other shorthand props!, p:",
+											p
+										)
+										*/
 						let cubeRenderTarget = obj as WebGLCubeRenderTarget
 						cubeRenderTarget.texture[key] = value
 					} else {

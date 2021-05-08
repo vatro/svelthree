@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { Mesh, Group, MeshBasicMaterial, Scene } from "svelthree-three"
+import { Mesh, Group, MeshBasicMaterial, Scene } from "three"
 import { XRHandTouchDefaults } from "../constants"
 
 interface MaterialWithColorProperty extends THREE.Material {
@@ -23,7 +23,7 @@ export default class XRHandTouchJointDebugger {
 		color: this.normalCol
 	})
 
-	constructor() {}
+	constructor() { }
 
 	initialize(currentScene: Scene, colors: { [key: string]: number }) {
 		this.currentScene = currentScene

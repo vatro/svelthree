@@ -6,8 +6,8 @@ This is a **svelthree** _Mesh_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount,  } from "svelte"
-	import { get_current_component  } from "svelte/internal"
+	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import {
 		BufferGeometry,
 		Euler,
@@ -19,7 +19,7 @@ This is a **svelthree** _Mesh_ Component.
 		Quaternion,
 		Scene,
 		Vector3
-	} from "svelthree-three"
+	} from "three"
 	import {
 		SvelthreeAnimation,
 		SvelthreeInteraction,

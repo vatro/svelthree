@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group } from "svelthree-three"
+import type { Group } from "three"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrHandTouchEnabled, XrHandTouchXConfig, XrHandTouchXConfigItem } from "./types-svelthree"
 

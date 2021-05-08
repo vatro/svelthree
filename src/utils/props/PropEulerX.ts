@@ -1,4 +1,4 @@
-import type { Euler } from "svelthree-three"
+import type { Euler } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
 

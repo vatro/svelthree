@@ -1,4 +1,4 @@
-import { Vector3 } from "svelthree-three"
+import { Vector3 } from "three"
 
 declare type XRHandRayConfig = {
 	origin: Vector3

@@ -2,8 +2,8 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group, Mesh, Object3D } from "svelthree-three"
-import { Sphere, Vector3 } from "svelthree-three"
+import type { Group, Mesh, Object3D } from "three"
+import { Sphere, Vector3 } from "three"
 import { sphereIntersectTriangle } from "three-mesh-bvh/src/Utils/MathUtilities"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrHandTouchTestMode, XrTouchUpdateParams } from "./types-svelthree"
@@ -17,7 +17,7 @@ interface SphereTouchingResultsItem {
 	tris: SeparatingAxisTriangle[]
 }
 
-interface SphereTouchingResults extends Array<SphereTouchingResultsItem> {}
+interface SphereTouchingResults extends Array<SphereTouchingResultsItem> { }
 
 export default class XRHandTouchSphereExt extends XRHandTouch {
 	touchSphere: Sphere
@@ -64,16 +64,16 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 			// SPHERE CLEANUP: we don't want to use direction at all in sphere mode
 			// TODO  maybe save direction and speed?
 			/*
-            if (joint.userData.origin && joint.userData.direction) {
-                joint.userData.direction = this.getJointDirection(joint, currentOrigin)
-                joint.userData.speedFac = this.calculateSpeedFac(joint, currentOrigin, params.xrFrameDelta)
-                joint.userData.origin = currentOrigin
-            } else {
-                joint.userData.origin = currentOrigin
-                joint.userData.direction = new Vector3(0, 0, 0)
-                joint.userData.speedFac = 0
-            }
-            */
+			if (joint.userData.origin && joint.userData.direction) {
+				joint.userData.direction = this.getJointDirection(joint, currentOrigin)
+				joint.userData.speedFac = this.calculateSpeedFac(joint, currentOrigin, params.xrFrameDelta)
+				joint.userData.origin = currentOrigin
+			} else {
+				joint.userData.origin = currentOrigin
+				joint.userData.direction = new Vector3(0, 0, 0)
+				joint.userData.speedFac = 0
+			}
+			*/
 			if (joint.userData.origin && joint.userData.direction) {
 				//joint.userData.direction = this.getJointDirection(joint, currentOrigin)
 				//joint.userData.speedFac = this.calculateSpeedFac(joint, currentOrigin, params.xrFrameDelta)
@@ -316,43 +316,43 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 	 * @see https://github.com/gkjohnson/three-mesh-bvh/issues/154
 	 */
 	/*
-    checkSphereIntersection(joint: Group, mesh: Mesh): number[] {
-        console.log("checkSphereIntersection!")
-        // TODO test @see https://github.com/gkjohnson/three-mesh-bvh/issues/154 solution
+	checkSphereIntersection(joint: Group, mesh: Mesh): number[] {
+		console.log("checkSphereIntersection!")
+		// TODO test @see https://github.com/gkjohnson/three-mesh-bvh/issues/154 solution
     
-        const inverseMatrix = new Matrix4();
-        inverseMatrix.getInverse(mesh.matrixWorld);
+		const inverseMatrix = new Matrix4();
+		inverseMatrix.getInverse(mesh.matrixWorld);
     
-        this.touchSphere = new Sphere(joint.userData.origin, this.touchSphereRadius)
+		this.touchSphere = new Sphere(joint.userData.origin, this.touchSphereRadius)
     
-        this.touchSphere.applyMatrix4(inverseMatrix)
-        const bvh = mesh.geometry['boundsTree'] || undefined
+		this.touchSphere.applyMatrix4(inverseMatrix)
+		const bvh = mesh.geometry['boundsTree'] || undefined
     
-        const indices: number[] = [];
+		const indices: number[] = [];
     
-        console.time("bvh.shapecast")
+		console.time("bvh.shapecast")
     
-        // @see https://github.com/gkjohnson/three-mesh-bvh/issues/154
-        if (bvh) {
-            bvh.shapecast(
-                mesh,
-                box => this.touchSphere.intersectsBox(box),
-                (tri, a, b, c) => {
+		// @see https://github.com/gkjohnson/three-mesh-bvh/issues/154
+		if (bvh) {
+			bvh.shapecast(
+				mesh,
+				box => this.touchSphere.intersectsBox(box),
+				(tri, a, b, c) => {
     
-                    if (sphereIntersectTriangle(this.touchSphere, tri)) {
-                        indices.push(a, b, c);
-                    }
+					if (sphereIntersectTriangle(this.touchSphere, tri)) {
+						indices.push(a, b, c);
+					}
     
-                    return false
-                }
-            )
-        }
+					return false
+				}
+			)
+		}
     
-        console.timeEnd("bvh.shapecast")
+		console.timeEnd("bvh.shapecast")
     
-        return indices
-    }
-    */
+		return indices
+	}
+	*/
 
 	// override
 	intersectionsPhase1Raycast(params: XrTouchUpdateParams, joint: Group): any {

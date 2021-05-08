@@ -13,7 +13,7 @@ This is a **svelthree** _SessionAR_ Component.
     */
 
 	import { createEventDispatcher, onMount } from "svelte"
-	import { Object3D, Quaternion, Vector3 } from "svelthree-three"
+	import { Object3D, Quaternion, Vector3 } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import type { XrHitTestMode, XrOptionalFeatures, XrRequiredFeatures } from "../xr/types-svelthree"

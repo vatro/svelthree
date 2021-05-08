@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color, Scene } from "svelthree-three"
+import { Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, BufferGeometry, Color, Scene } from "three"
 import { XRHandTouchDefaults } from "../constants"
 import type { XrHandTouchSphereDebuggerConfig } from "../types-svelthree"
 

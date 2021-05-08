@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { BufferGeometry, Line, LineDashedMaterial, Scene, Vector3 } from "svelthree-three"
+import { BufferGeometry, Line, LineDashedMaterial, Scene, Vector3 } from "three"
 import { XRControllerDefaults } from "./constants"
 import type { XrHandPinchRayMaterial } from "./types-svelthree"
 

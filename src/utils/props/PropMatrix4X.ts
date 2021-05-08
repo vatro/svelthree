@@ -1,4 +1,4 @@
-import type { Matrix4 } from "svelthree-three"
+import type { Matrix4 } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
 

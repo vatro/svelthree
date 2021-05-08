@@ -5,7 +5,7 @@ This is a **svelthree** _LoadedGLTF_ Component.
 -->
 <script lang="ts">
 	import { createEventDispatcher } from "svelte"
-	import { DRACOLoader, GLTFLoader, Group, LoadingManager } from "svelthree-three"
+	import { DRACOLoader, GLTFLoader, Group, LoadingManager } from "three"
 
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 

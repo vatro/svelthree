@@ -15,7 +15,7 @@ This is a **svelthree** _RectAreaLight_ Component.
 		RectAreaLightHelper,
 		Scene,
 		Vector3
-	} from "svelthree-three"
+	} from "three"
 	import { Light } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 

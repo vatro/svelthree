@@ -2,8 +2,8 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { OrthographicCamera, PerspectiveCamera, Scene } from "svelthree-three"
-import { CameraHelper } from "svelthree-three"
+import type { OrthographicCamera, PerspectiveCamera, Scene } from "three"
+import { CameraHelper } from "three"
 import { CameraValues } from "../constants"
 
 export default class CameraUtils {

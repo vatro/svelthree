@@ -1,4 +1,4 @@
-import type { Quaternion } from "svelthree-three"
+import type { Quaternion } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
 

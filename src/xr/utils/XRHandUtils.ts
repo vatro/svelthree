@@ -1,4 +1,4 @@
-import { Group, WebXRController, WebXRManager, XRHandModel, XRHandModelFactory } from "svelthree-three"
+import { Group, WebXRController, WebXRManager, XRHandModel, XRHandModelFactory } from "three"
 import { XRControllerDefaults, XRHandTouchDefaults } from "../constants"
 import type { XrHandEnablePinchResult, XrHandEnableTouchResult, XrHandPinchConfig, XrHandPinchConfigItem, XrHandTouchConfigHands, XrHandTouchConfigHandsItem, XrHandTouchEnabled, XrInputConfigHand, XrSessionVRInputConfig } from "../types-svelthree"
 import type { XRHandedness, XRInputSource } from "../types-webxr"
@@ -44,7 +44,7 @@ export default class XRHandUtils {
 
 			if (item.hand === XRHandTouchDefaults.ENABLED_BOTH) {
 				/* We have to clone the materials here, otherwise ray color change
-                of one hand will also affect the ray color of the other hand */
+				of one hand will also affect the ray color of the other hand */
 
 				result.leftHandPinchConfig = { ...item }
 				result.rightHandPinchConfig = { ...item }

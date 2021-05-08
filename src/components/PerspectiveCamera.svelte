@@ -7,8 +7,8 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	// #region --- Imports
 
 	import { onMount } from "svelte"
-	import type { Object3D } from "svelthree-three"
-	import { CameraHelper, Euler, Matrix4, PerspectiveCamera, Quaternion, Scene, Vector3 } from "svelthree-three"
+	import type { Object3D } from "three"
+	import { CameraHelper, Euler, Matrix4, PerspectiveCamera, Quaternion, Scene, Vector3 } from "three"
 	import { Camera } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"

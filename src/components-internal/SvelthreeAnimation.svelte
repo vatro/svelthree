@@ -5,7 +5,7 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 -->
 <script lang="ts">
 	import { onMount } from "svelte"
-	import type { Object3D, Scene } from "svelthree-three"
+	import type { Object3D, Scene } from "three"
 	import { SvelthreeAnimationManager, SvelthreeAnimationProp } from "../ani"
 
 	export let animationEnabled: boolean = undefined

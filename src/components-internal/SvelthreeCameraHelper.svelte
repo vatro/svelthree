@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte"
-	import type { CameraHelper, OrthographicCamera, PerspectiveCamera, Scene } from "svelthree-three"
+	import type { CameraHelper, OrthographicCamera, PerspectiveCamera, Scene } from "three"
 
 	export let scene: Scene
 	export let helper: boolean

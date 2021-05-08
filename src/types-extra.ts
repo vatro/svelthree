@@ -34,7 +34,7 @@ export type Quaternion = THREE.Quaternion | Parameters<THREE.Quaternion["set"]>
 // export type PropLookAt = THREE.Vector3 | Array3
 // export type PropMatrix4 = THREE.Matrix4
 
-//import { Face3, Vector2, Vector3 } from "svelthree-three"
+//import { Face3, Vector2, Vector3 } from "three"
 /*
 /**
  * @see https://threejs.org/docs/#api/en/core/Raycaster.intersectObject

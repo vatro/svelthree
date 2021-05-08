@@ -1,4 +1,4 @@
-import type { Color } from "svelthree-three"
+import type { Color } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
 

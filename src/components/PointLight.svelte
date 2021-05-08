@@ -5,18 +5,8 @@ This is a **svelthree** _PointLight_ Component.
 -->
 <script lang="ts">
 	import { onMount } from "svelte"
-	import type { LightShadow } from "svelthree-three"
-	import {
-		Color,
-		Euler,
-		Matrix4,
-		Object3D,
-		PointLight,
-		PointLightHelper,
-		Quaternion,
-		Scene,
-		Vector3
-	} from "svelthree-three"
+	import type { LightShadow } from "three"
+	import { Color, Euler, Matrix4, Object3D, PointLight, PointLightHelper, Quaternion, Scene, Vector3 } from "three"
 	import { Light, SvelthreeLightHelper, SvelthreeLightWithShadow } from "../components-internal"
 	import type {
 		LightShadowCamProps,

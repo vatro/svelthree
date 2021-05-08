@@ -15,13 +15,13 @@ import {
 	GLTFLoader,
 	Raycaster,
 	Scene
-} from "svelthree-three"
+} from "three"
 import { XRControllerDefaults } from "../constants"
 import type { XrControllerTargetRayConfig, XrInputConfigGrippable, XrInputConfigGrippableItem, XrSessionVRInputConfig } from "../types-svelthree"
 import type { XRHandedness, XRInputSource } from "../types-webxr"
 
 export default class XRControllerUtils {
-	constructor() {}
+	constructor() { }
 
 	public static addListeners(targetRaySpace: Group, listener: (event: Event) => void) {
 		targetRaySpace.addEventListener("select", listener)

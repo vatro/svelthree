@@ -6,7 +6,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 <script lang="ts">
 	import { onMount } from "svelte"
 	import type { SvelteComponentDev } from "svelte/internal"
-	import type { Group, Object3D, WebGLRenderer, WebXRManager } from "svelthree-three"
+	import type { Group, Object3D, WebGLRenderer, WebXRManager } from "three"
 	import { svelthreeStores } from "../stores"
 
 	export let interactionEnabled: boolean

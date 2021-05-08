@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Object3D } from "svelthree-three"
+import type { Object3D } from "three"
 import PropUtils from "./PropUtils"
 /*
  * Containes public static methods for updating Object3D properties via component shorthand attributes.

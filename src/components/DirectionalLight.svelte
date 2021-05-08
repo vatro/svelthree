@@ -7,8 +7,8 @@ This is a **svelthree** _DirectionalLight_ Component.
 	// #region --- Imports
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
-	import type { Color, DirectionalLightShadow, Matrix4, Object3D, Scene, Vector3 } from "svelthree-three"
-	import { DirectionalLight, DirectionalLightHelper } from "svelthree-three"
+	import type { Color, DirectionalLightShadow, Matrix4, Object3D, Scene, Vector3 } from "three"
+	import { DirectionalLight, DirectionalLightHelper } from "three"
 	import { Light, SvelthreeLightWithShadow } from "../components-internal"
 	import type {
 		LightShadowCamProps,

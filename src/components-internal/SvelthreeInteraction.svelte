@@ -6,7 +6,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 <script lang="ts">
 	import { onMount } from "svelte"
 	import type { SvelteComponentDev } from "svelte/internal"
-	import { Object3D, Raycaster, Vector3 } from "svelthree-three"
+	import { Object3D, Raycaster, Vector3 } from "three"
 	import { svelthreeStores } from "../stores"
 
 	export let interactionEnabled: boolean

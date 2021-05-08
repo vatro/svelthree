@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { BufferGeometry, Group, Line, LineBasicMaterial, Scene, Vector3 } from "svelthree-three"
+import { BufferGeometry, Group, Line, LineBasicMaterial, Scene, Vector3 } from "three"
 import { XRHandTouchDefaults } from "../constants"
 import type { XrHandTouchRayDebuggerConfig } from "../types-svelthree"
 
@@ -115,13 +115,13 @@ export default class XRHandTouchRayDebugger {
 		let line = new Line(lineGeom, this.tentacleTouchingRayMat)
 
 		/*
-            //somehow doesn't work --> ???
-            this.debugPointMeshGeom.merge(p1Geom, 0)
-            this.debugPointMeshGeom.merge(p1Geom, this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
-            console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
-            this.debugPointMeshGeom.merge(p2Geom, this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
-            console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
-            */
+			//somehow doesn't work --> ???
+			this.debugPointMeshGeom.merge(p1Geom, 0)
+			this.debugPointMeshGeom.merge(p1Geom, this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
+			console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*this.debugPointsCounter)
+			this.debugPointMeshGeom.merge(p2Geom, this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
+			console.warn("merge at: " + this.debugPointGeom.attributes.position.count*3*(this.debugPointsCounter + 1))
+			*/
 		this.currentScene.add(line)
 		//this.debugPointsCounter +=2
 
@@ -178,31 +178,31 @@ export default class XRHandTouchRayDebugger {
 // TODO: what to do with this?!
 /*
  updateToTest(currentScene: Scene) {
-      this.currentScene = currentScene
+	  this.currentScene = currentScene
 
 
-        if(this.debugMeshesAdded === false && this.drawTouchDebuggers) {
-            let MAX_POINTS = 100000;
+		if(this.debugMeshesAdded === false && this.drawTouchDebuggers) {
+			let MAX_POINTS = 100000;
 
-            this.debugPointMeshGeom = new BufferGeometry()
-            let positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-            this.debugPointMeshGeom.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
+			this.debugPointMeshGeom = new BufferGeometry()
+			let positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+			this.debugPointMeshGeom.setAttribute( 'position', new BufferAttribute( positions, 3 ) );
 
-            this.debugPointsMesh = new Mesh( this.debugPointMeshGeom, this.debugPointsMeshMat)
-            //this.debugPointsMesh.name = "debugMesh"
-            this.currentScene.add(this.debugPointsMesh)
+			this.debugPointsMesh = new Mesh( this.debugPointMeshGeom, this.debugPointsMeshMat)
+			//this.debugPointsMesh.name = "debugMesh"
+			this.currentScene.add(this.debugPointsMesh)
 
-            //this.debugLinesMesh.layers.enable( 1 )
-            this.debugPointsMesh.layers.enable( 1 )
-            //this.debugPointsCounter = 0
-            this.debugMeshesAdded = true
-        }
+			//this.debugLinesMesh.layers.enable( 1 )
+			this.debugPointsMesh.layers.enable( 1 )
+			//this.debugPointsCounter = 0
+			this.debugMeshesAdded = true
+		}
 
-        ...
+		...
 
-        this.toTest = currentScene.children.filter(
-            ...
-            //child.name !== "debugMesh"
-            //child.name !== "debugPointCurrent"
-        )
+		this.toTest = currentScene.children.filter(
+			...
+			//child.name !== "debugMesh"
+			//child.name !== "debugPointCurrent"
+		)
 */

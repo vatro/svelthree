@@ -3,8 +3,8 @@
  */
 
 import { not_equal } from "svelte/internal"
-import type { Light, Material, Object3D } from "svelthree-three"
-import { Color, Euler, Matrix4, Quaternion, Vector3 } from "svelthree-three"
+import type { Light, Material, Object3D } from "three"
+import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types-extra"
 import type { default as Empty } from "./components/Empty.svelte"
 

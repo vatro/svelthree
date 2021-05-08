@@ -10,7 +10,7 @@ import {
 	LineDashedMaterial,
 	Vector3,
 	XRHandModel
-} from "svelthree-three"
+} from "three"
 import { XRHandJointIndices, XRHandRayConfigs } from "./constants"
 import type { XRHandedness } from "./types-webxr"
 
@@ -104,35 +104,35 @@ export default class SvelthreeHelpersXR {
 	 */
 
 	/*
-    createTipHelpers() {
-        let tipRayL_geom:BufferGeometry = new BufferGeometry().setFromPoints([
-            new Vector3(0, 0, 0),
-            new Vector3(0, 0, -1)
-        ])
-        this.tipRayL = new Line(tipRayL_geom)
-        this.tipRayL.name = "TipRay Left"
-        this.tipRayL.scale.x = 0.05
+	createTipHelpers() {
+		let tipRayL_geom:BufferGeometry = new BufferGeometry().setFromPoints([
+			new Vector3(0, 0, 0),
+			new Vector3(0, 0, -1)
+		])
+		this.tipRayL = new Line(tipRayL_geom)
+		this.tipRayL.name = "TipRay Left"
+		this.tipRayL.scale.x = 0.05
 
-        let tipRayR_geom:BufferGeometry = new BufferGeometry().setFromPoints([
-            new Vector3(0, 0, 0),
-            new Vector3(0, 0, -1)
-        ])
-        this.tipRayR = new Line(tipRayR_geom)
-        this.tipRayR.name = "TipRay Right"
-        this.tipRayR.scale.x = 0.05
-    }
+		let tipRayR_geom:BufferGeometry = new BufferGeometry().setFromPoints([
+			new Vector3(0, 0, 0),
+			new Vector3(0, 0, -1)
+		])
+		this.tipRayR = new Line(tipRayR_geom)
+		this.tipRayR.name = "TipRay Right"
+		this.tipRayR.scale.x = 0.05
+	}
 
-    createStandardHelpers() {
-        //Normally a ray in three.js would point towards by pointig in negative z axis direction
-        let stdRay_geom:BufferGeometry = new BufferGeometry().setFromPoints([
-            new Vector3(0, 0, 0),
-            new Vector3(0, 0, -1)
-        ])
-        this.stdRay = new Line(stdRay_geom)
-        this.stdRay.name = "StdRay"
-        this.stdRay.scale.z = 0.05
-    }
-    */
+	createStandardHelpers() {
+		//Normally a ray in three.js would point towards by pointig in negative z axis direction
+		let stdRay_geom:BufferGeometry = new BufferGeometry().setFromPoints([
+			new Vector3(0, 0, 0),
+			new Vector3(0, 0, -1)
+		])
+		this.stdRay = new Line(stdRay_geom)
+		this.stdRay.name = "StdRay"
+		this.stdRay.scale.z = 0.05
+	}
+	*/
 
 	//Workaround
 	createTipHelpers() {

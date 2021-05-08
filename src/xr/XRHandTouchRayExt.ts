@@ -2,7 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group, Raycaster, Vector3 } from "svelthree-three"
+import type { Group, Raycaster, Vector3 } from "three"
 import type { RaycasterIntersectObject } from "../types-extra"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrTouchUpdateParams } from "./types-svelthree"
@@ -29,29 +29,29 @@ export default class XRHandTouchRayExt extends XRHandTouch {
 		origin?: Vector3
 	) {
 		/*
-        The joint is IN 'touchDistance' with the currently intersected object / face which at this point
-        can be either the same (initially touched) or a different face of the SAME OBJECT:
-        The first two conditions in the 'XRHandTouch.touchingOutsideCheck' method check only for
-        different face and expect the currently intersected object to be the same as the initially
-        touched / intersected one (see 'joint.userData.touchObj')
-         TODO  can we just us this method for DIFFERENT object?! We're updating ('joint.userData.touchObj = intersectObj.object), so it should be possible
-         TODO  CHECK THE ABOVE TODO!
-        */
+		The joint is IN 'touchDistance' with the currently intersected object / face which at this point
+		can be either the same (initially touched) or a different face of the SAME OBJECT:
+		The first two conditions in the 'XRHandTouch.touchingOutsideCheck' method check only for
+		different face and expect the currently intersected object to be the same as the initially
+		touched / intersected one (see 'joint.userData.touchObj')
+		 TODO  can we just us this method for DIFFERENT object?! We're updating ('joint.userData.touchObj = intersectObj.object), so it should be possible
+		 TODO  CHECK THE ABOVE TODO!
+		*/
 		if (intersectObj.distance < this.touchDistance) {
 			/*
-            Don't dispatch 'untouch'!
-            We update the 'joint.userData', but NOT yet 'joint.userData.raycasterTouchingDir',
-            we leave 'raycasterTouchingDir' as it is / was in the moment of the 'touch' event
-            before trying to switch to preferred "NEGATIVE NORMAL direction ray" raycast in order
-            for it to be used for subsequent raycasts --> real distance on next raycast.
-            */
+			Don't dispatch 'untouch'!
+			We update the 'joint.userData', but NOT yet 'joint.userData.raycasterTouchingDir',
+			we leave 'raycasterTouchingDir' as it is / was in the moment of the 'touch' event
+			before trying to switch to preferred "NEGATIVE NORMAL direction ray" raycast in order
+			for it to be used for subsequent raycasts --> real distance on next raycast.
+			*/
 			joint.userData.touchObj = intersectObj.object
 			joint.userData.touchFaceNormal = intersectObj.face.normal
 			joint.userData.touchFaceIndex = intersectObj.faceIndex
 
 			/*
-            Check if can switch to "NEGATIVE NORMAL direction ray" otherwise keep the old direction!
-            */
+			Check if can switch to "NEGATIVE NORMAL direction ray" otherwise keep the old direction!
+			*/
 
 			// re-raycast using "NEGATIVE NORMAL direction ray"! (in order to be used for subsequent raycasts --> real distance on next raycast)
 			let nnRayHitDirection: Vector3 = this.nnRayIntersectsFace(joint, raycaster, origin, intersectObj)
