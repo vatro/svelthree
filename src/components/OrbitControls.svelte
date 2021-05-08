@@ -5,7 +5,8 @@ This is a **svelthree** _OrbitControls_ Component.
 -->
 <script lang="ts">
 	import { onMount } from "svelte"
-	import { OrbitControls, Scene } from "three"
+	import type { Scene } from "three"
+	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { svelthreeStores } from "../stores"
 	import { StoreUtils, SvelthreeProps } from "../utils"
 
