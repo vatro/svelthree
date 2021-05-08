@@ -12,10 +12,10 @@ This is a **svelthree** _RectAreaLight_ Component.
 		Object3D,
 		Quaternion,
 		RectAreaLight,
-		RectAreaLightHelper,
 		Scene,
 		Vector3
 	} from "three"
+	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper"
 	import { Light } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 
@@ -119,7 +119,7 @@ This is a **svelthree** _RectAreaLight_ Component.
 
 	function updateHelper(): void {
 		if (doUpdateHelper) {
-			lightHelper ? lightHelper.update() : null
+			lightHelper ? lightHelper.updateMatrixWorld() : null
 			updateHelper_rAF = requestAnimationFrame(updateHelper)
 		}
 	}
