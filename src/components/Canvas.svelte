@@ -12,7 +12,6 @@ This is a **svelthree** _Canvas_ Component.
 		BufferGeometry,
 		Camera,
 		Mesh,
-		OrbitControls,
 		Raycaster,
 		Scene,
 		Vector2,
@@ -20,6 +19,7 @@ This is a **svelthree** _Canvas_ Component.
 		WebGLRenderer,
 		WebXRController
 	} from "three"
+	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
 	import { svelthreeStores } from "../stores"
 	import type {
