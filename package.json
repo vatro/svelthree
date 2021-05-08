@@ -13,9 +13,11 @@
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
+    "@types/three": "^0.127.1",
     "prettier": "^2.2.1",
     "svelte-check": "^1.2.5",
     "svelte-preprocess": "^4.6.9",
+    "three": "^0.128.0",
     "typescript": "^4.2.3"
   },
   "dependencies": {
