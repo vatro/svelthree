@@ -94,16 +94,6 @@ export interface XRInputSourceEvent extends Event {
 	readonly inputSource: XRInputSource
 }
 
-export interface XRFrame {
-	readonly session: XRSession
-	getViewerPose(referenceSpace?: XRReferenceSpace): XRViewerPose
-	getPose(space: XRSpace, referenceSpace: XRReferenceSpace): XRPose
-	getHitTestResults(hitTestSource: XRHitTestSource): Array<XRHitTestResult>
-	getHitTestResultsForTransientInput(
-		hitTestSource: XRTransientInputHitTestSource
-	): Array<XRTransientInputHitTestResult>
-}
-
 type XRFrameRequestCallback = (time: number, frame: XRFrame) => void
 
 export interface XRRenderState {
@@ -128,20 +118,6 @@ export interface XRHitTestOptionsInit {
 export interface XRTransientInputHitTestOptionsInit {
 	profile: string
 	offsetRay?: XRRay
-}
-
-export interface XRSession extends EventTarget {
-	renderState: XRRenderState
-	updateRenderState(state?: XRRenderStateInit): any
-	requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>
-	requestHitTestSource(options: XRHitTestOptionsInit): Promise<XRHitTestSource>
-	requestHitTestSourceForTransientInput(
-		options: XRTransientInputHitTestOptionsInit
-	): Promise<XRTransientInputHitTestSource>
-	inputSources: Array<XRInputSource>
-	requestAnimationFrame(callback: XRFrameRequestCallback): number
-	cancelAnimationFrame(id: number): void
-	end(): Promise<void>
 }
 
 /* --strictFunctionTypes:true version */
