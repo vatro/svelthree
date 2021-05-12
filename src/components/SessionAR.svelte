@@ -13,11 +13,11 @@ This is a **svelthree** _SessionAR_ Component.
     */
 
 	import { createEventDispatcher, onMount } from "svelte"
-	import { Object3D, Quaternion, Vector3 } from "three"
+	import { Object3D, Quaternion, Vector3, XRSession } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import type { XrHitTestMode, XrOptionalFeatures, XrRequiredFeatures } from "../xr/types-svelthree"
-	import type { XRSession, XRSessionMode } from "../xr/types-webxr"
+	import type { XRSessionMode } from "../xr/types-webxr"
 
 	let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
