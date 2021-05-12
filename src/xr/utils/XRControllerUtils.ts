@@ -281,7 +281,7 @@ export default class XRControllerUtils {
 		for (let i = 0; i < manager.getControllers().length; i++) {
 			const controller: WebXRController = manager.getControllers()[i]
 
-			// we can get gripSpace directly from controller in order to prevent using manager.getControllerGrip(i), which will create a new handSpace, but we may not want that.
+			// we can get gripSpace directly from controller in order to prevent using manager.getControllerGrip(i), which will create a new gripSpace, but we may not want that.
 			let gripSpaceAvailable: boolean = controller.hasOwnProperty("_grip") ? true : false
 
 			if (gripSpaceAvailable) {
