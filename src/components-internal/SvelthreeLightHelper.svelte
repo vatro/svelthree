@@ -5,10 +5,10 @@
 		HemisphereLightHelper,
 		Light,
 		PointLightHelper,
-		RectAreaLightHelper,
 		Scene,
 		SpotLightHelper
 	} from "three"
+	import type { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper"
 
 	type LightHelper =
 		| DirectionalLightHelper
@@ -70,7 +70,7 @@
 		if (doUpdateHelper) {
 			if (lightHelper) {
 				//console.log("SVELTHREE > SvelthreeLightHelper > " + light.type + " updateHelper!")
-				lightHelper.update()
+				lightHelper.updateMatrixWorld()
 				updateHelper_rAF = requestAnimationFrame(updateHelper)
 			}
 		}
