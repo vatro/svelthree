@@ -157,6 +157,7 @@ export default class XRHandUtils {
 		return false
 	}
 
+	// TOFIX  missing xr.getControllers() see https://github.com/mrdoob/three.js/pull/21815
 	public static getHandSpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
 		for (let i = 0; i < manager.getControllers().length; i++) {
 			const controller: WebXRController = manager.getControllers()[i]

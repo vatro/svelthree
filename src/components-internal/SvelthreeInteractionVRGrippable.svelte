@@ -35,6 +35,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 		webXRManager = $svelthreeStores[sti].renderer.xr
 	}
 
+	// TOFIX  missing xr.getControllers() see https://github.com/mrdoob/three.js/pull/21815
 	$: if ($svelthreeStores[sti].renderer.xr.getControllers().length > 0) {
 		controllersTotal = $svelthreeStores[sti].renderer.xr.getControllers().length
 	}

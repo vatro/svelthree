@@ -86,6 +86,7 @@ export default class XRControllerUtils {
 		return raycaster.intersectObjects(toTest, true)
 	}
 
+	// TOFIX  missing xr.getControllers() see https://github.com/mrdoob/three.js/pull/21815
 	public static createControllers(maxControllers: number, xr: WebXRManager): WebXRController[] {
 		const controllers: WebXRController[] = []
 
@@ -269,6 +270,7 @@ export default class XRControllerUtils {
 		}
 	}
 
+	// TOFIX  missing xr.getControllers() see https://github.com/mrdoob/three.js/pull/21815
 	public static getTargetRaySpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
 		for (let i = 0; i < manager.getControllers().length; i++) {
 			const targetRaySpace: Group = manager.getController(i)
@@ -282,6 +284,7 @@ export default class XRControllerUtils {
 		return null
 	}
 
+	// TOFIX  missing xr.getControllers() see https://github.com/mrdoob/three.js/pull/21815
 	public static getGripSpaceByHandedness(manager: WebXRManager, handedness: XRHandedness): Group {
 		for (let i = 0; i < manager.getControllers().length; i++) {
 			const controller: WebXRController = manager.getControllers()[i]
