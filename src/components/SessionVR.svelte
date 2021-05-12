@@ -11,7 +11,7 @@ This is a **svelthree** _SessionVR_ Component.
     */
 
 	import { createEventDispatcher, onMount } from "svelte"
-	import type { Group, Object3D, Scene, WebXRManager } from "three"
+	import type { Group, Object3D, Scene, WebXRManager, XRFrame, XRSession } from "three"
 	import type { XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
 	import { XRControllerDefaults, XRDefaults, XRHandTouchDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
@@ -39,11 +39,9 @@ This is a **svelthree** _SessionVR_ Component.
 		XrTouchUpdateArgs
 	} from "../xr/types-svelthree"
 	import type {
-		XRFrame,
 		XRHandedness,
 		XRInputSource,
 		XRInputSourceChangeEvent,
-		XRSession,
 		XRSessionEvent,
 		XRSessionMode
 	} from "../xr/types-webxr"
