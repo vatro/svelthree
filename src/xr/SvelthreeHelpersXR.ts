@@ -2,15 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import {
-	BufferGeometry,
-	Group,
-	Line,
-	LineBasicMaterial,
-	LineDashedMaterial,
-	Vector3,
-	XRHandModel
-} from "three"
+import { BufferGeometry, Group, Line, LineBasicMaterial, LineDashedMaterial, Vector3, XRHandModel } from "three"
 import { XRHandJointIndices, XRHandRayConfigs } from "./constants"
 import type { XRHandedness } from "./types-webxr"
 

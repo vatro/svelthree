@@ -43,7 +43,7 @@ export interface XRRigidTransform {
 	readonly inverse: XRRigidTransform
 }
 
-export interface XRSpace extends EventTarget { }
+export interface XRSpace extends EventTarget {}
 
 export interface XRReferenceSpace extends XRSpace {
 	getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace
@@ -142,7 +142,7 @@ export interface XRViewport {
 	readonly height: number
 }
 
-export interface XRLayer { }
+export interface XRLayer {}
 
 export interface XRWebGLLayerInit {
 	antialias?: boolean
@@ -195,7 +195,7 @@ export interface XRSessionEvent extends Event {
 	readonly session: XRSession
 }
 
-export interface XRJointSpace extends XRSpace { }
+export interface XRJointSpace extends XRSpace {}
 
 export interface XRJointPose extends XRPose {
 	radius: number | undefined

@@ -16,7 +16,7 @@ export default class XRHandTouchFaceDebugger {
 	touchThroughExitCol = new Color(XRHandTouchDefaults.DBG_FACE_TOUCHTHROUGH_EXIT_COL)
 	scratchCol = new Color(XRHandTouchDefaults.DBG_FACE_SCRATCH_COL)
 
-	constructor() { }
+	constructor() {}
 
 	initialize(colors: { [key: string]: number }) {
 		if (colors) {

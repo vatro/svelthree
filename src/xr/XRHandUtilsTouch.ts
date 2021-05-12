@@ -4,7 +4,13 @@
 
 import type { Group, Raycaster, Scene } from "three"
 import { XRHandTouchDefaults } from "./constants"
-import type { XrHandEnabled, XrHandTouchDebugParams, XrHandTouchEvents, XrHandTouchEventsItem, XrTouchUpdateParams } from "./types-svelthree"
+import type {
+	XrHandEnabled,
+	XrHandTouchDebugParams,
+	XrHandTouchEvents,
+	XrHandTouchEventsItem,
+	XrTouchUpdateParams
+} from "./types-svelthree"
 import type XRHandTouchRayExt from "./XRHandTouchRayExt"
 import type XRHandTouchSphereExt from "./XRHandTouchSphereExt"
 

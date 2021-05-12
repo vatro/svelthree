@@ -49,8 +49,8 @@ export default class SvelthreeAnimationManager {
 		//if animation is a function it has not been initiated / started yet (otherwise object)
 		!this.scene.userData.isActive
 			? console.warn(
-				"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
-			)
+					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
+			  )
 			: null
 		this.animation = this.animation.initiate(this.obj, ...arguments)
 		console.info(
@@ -68,8 +68,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneReactivated
 			? this.animation.onSceneReactivated()
 			: console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
-			)
+					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
+			  )
 	}
 
 	//inactive / deactivated
@@ -86,8 +86,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneDeactivated
 			? this.animation.onSceneDeactivated()
 			: console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
-			)
+					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
+			  )
 	}
 
 	// --------- user initiated actions ---------

@@ -25,7 +25,7 @@ export interface XrSessionVRInputConfigItem {
 	config: XrInputConfigGrippable | XrInputConfigHand
 }
 
-export interface XrSessionVRInputConfig extends Array<XrSessionVRInputConfigItem> { }
+export interface XrSessionVRInputConfig extends Array<XrSessionVRInputConfigItem> {}
 
 export type XrHandProfile = "boxes" | "spheres" | "oculus"
 export type XrHandTouchEnabled = "left" | "right" | "both"
@@ -36,7 +36,7 @@ export interface XrHandTouchConfigHandsItem {
 	index: number[]
 }
 
-export interface XrHandTouchConfigHands extends Array<XrHandTouchConfigHandsItem> { }
+export interface XrHandTouchConfigHands extends Array<XrHandTouchConfigHandsItem> {}
 
 /* --------- VR PINCH -------- */
 
@@ -63,7 +63,7 @@ export interface XrHandPinchConfigItem {
 	}
 }
 
-export interface XrHandPinchConfig extends Array<XrHandPinchConfigItem> { }
+export interface XrHandPinchConfig extends Array<XrHandPinchConfigItem> {}
 
 export interface XrHandEnablePinchResult {
 	leftHandPinchEnabled: boolean
@@ -88,7 +88,7 @@ export interface XrInputConfigHandItem {
 	pathToHandModels: string
 }
 
-export interface XrInputConfigHand extends Array<XrInputConfigHandItem> { }
+export interface XrInputConfigHand extends Array<XrInputConfigHandItem> {}
 
 // VR HAND TOUCH - Configuration
 
@@ -143,7 +143,7 @@ export interface XrHandTouchEventsItem {
 	index: number[]
 }
 
-export interface XrHandTouchEvents extends Array<XrHandTouchEventsItem> { }
+export interface XrHandTouchEvents extends Array<XrHandTouchEventsItem> {}
 
 // VR HAND TOUCH - Debugger Configuration
 
@@ -168,7 +168,7 @@ export interface XrHandTouchDebugConfigItem {
 	config?: XrHandTouchRayDebuggerConfig | XrHandTouchSphereDebuggerConfig
 }
 
-export interface XrHandTouchDebugConfig extends Array<XrHandTouchDebugConfigItem> { }
+export interface XrHandTouchDebugConfig extends Array<XrHandTouchDebugConfigItem> {}
 
 export interface XrHandTouchDebugParams {
 	enabled: boolean
@@ -201,7 +201,7 @@ export interface XrHandTouchXIndexItem {
 	right: number[] | number[]
 }
 
-export interface XrHandTouchXIndexPairs extends Array<XrHandTouchXIndexItem> { }
+export interface XrHandTouchXIndexPairs extends Array<XrHandTouchXIndexItem> {}
 
 export interface XrHandTouchXConfigItem {
 	hand: XrHandTouchEnabled
@@ -211,7 +211,7 @@ export interface XrHandTouchXConfigItem {
 	indexPairs: XrHandTouchXIndexPairs
 }
 
-export interface XrHandTouchXConfig extends Array<XrHandTouchXConfigItem> { }
+export interface XrHandTouchXConfig extends Array<XrHandTouchXConfigItem> {}
 
 // CONTROLLER Config
 
@@ -243,7 +243,7 @@ export interface XrInputConfigGrippableItem {
 /**
  * [{}]
  */
-export interface XrInputConfigGrippable extends Array<XrInputConfigGrippableItem> { }
+export interface XrInputConfigGrippable extends Array<XrInputConfigGrippableItem> {}
 
 // CONTROLLER EVENTS
 

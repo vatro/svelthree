@@ -1,5 +1,5 @@
 export type Constructor<T = object> = {
-	new(...args: any[]): T
+	new (...args: any[]): T
 	prototype: T
 }
 
@@ -70,7 +70,6 @@ export type Object3DProps = {
 	layers?: THREE.Layers
 	//dispose?: (() => void) | null;
 }
-
 
 export type Params<T> = T extends new (...params: any) => any ? ConstructorParameters<T> : T
 

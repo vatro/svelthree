@@ -23,7 +23,7 @@ export default class XRHandTouchJointDebugger {
 		color: this.normalCol
 	})
 
-	constructor() { }
+	constructor() {}
 
 	initialize(currentScene: Scene, colors: { [key: string]: number }) {
 		this.currentScene = currentScene

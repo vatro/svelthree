@@ -19,11 +19,16 @@ import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { XRControllerModelFactory, XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
 
 import { XRControllerDefaults } from "../constants"
-import type { XrControllerTargetRayConfig, XrInputConfigGrippable, XrInputConfigGrippableItem, XrSessionVRInputConfig } from "../types-svelthree"
+import type {
+	XrControllerTargetRayConfig,
+	XrInputConfigGrippable,
+	XrInputConfigGrippableItem,
+	XrSessionVRInputConfig
+} from "../types-svelthree"
 import type { XRHandedness, XRInputSource } from "../types-webxr"
 
 export default class XRControllerUtils {
-	constructor() { }
+	constructor() {}
 
 	public static addListeners(targetRaySpace: Group, listener: (event: Event) => void) {
 		targetRaySpace.addEventListener("select", listener)

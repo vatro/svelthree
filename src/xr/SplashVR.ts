@@ -102,7 +102,6 @@ export default class SplashVR {
 
 		this.button.onclick = () => {
 			if (this.currentSession === null) {
-
 				//@ts-ignore
 				navigator.xr
 					.requestSession(this.sessionMode, {

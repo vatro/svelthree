@@ -131,27 +131,27 @@ export default class PropUtils {
 
 					PropUtils.isArray3Nums(val)
 						? // IMPORTANT  no Speed up
-						//? (obj.rotation.set(val[0], val[1], val[2]), obj.matrixAutoUpdate = true, obj.matrixWorldNeedsUpdate = true) //PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
-						PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
+						  //? (obj.rotation.set(val[0], val[1], val[2]), obj.matrixAutoUpdate = true, obj.matrixWorldNeedsUpdate = true) //PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
+						  PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
 						: PropUtils.isEulerParamsArray(val)
-							? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
-							: PropUtils.isQuaternionParamsArray(val)
-								? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
-								: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
-									obj: obj,
-									value: val
-								})
+						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
+						: PropUtils.isQuaternionParamsArray(val)
+						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
+						: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
+								obj: obj,
+								value: val
+						  })
 				} else {
 					PropUtils.isEuler(val)
 						? PropUtils.setRotEuler(obj, val)
 						: PropUtils.isVector3(val)
-							? PropUtils.setRotVector3(obj, val)
-							: PropUtils.isQuaternion(val)
-								? PropUtils.setRotQuaternion(obj, val)
-								: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
-									obj: obj,
-									value: val
-								})
+						? PropUtils.setRotVector3(obj, val)
+						: PropUtils.isQuaternion(val)
+						? PropUtils.setRotQuaternion(obj, val)
+						: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
+								obj: obj,
+								value: val
+						  })
 				}
 				break
 			case "Euler":
@@ -268,11 +268,11 @@ export default class PropUtils {
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
-						? PropUtils.setPositionFromVector3(obj, val as Vector3)
-						: console.error("SVELTHREE > PropUtils > setPositionFromValue : invalid 'position' value!", {
+					? PropUtils.setPositionFromVector3(obj, val as Vector3)
+					: console.error("SVELTHREE > PropUtils > setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
 							value: val
-						})
+					  })
 				break
 			case "Array3Nums":
 				PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
@@ -317,11 +317,11 @@ export default class PropUtils {
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
-						? PropUtils.setScaleFromVector3(obj, val as Vector3)
-						: console.error("SVELTHREE > PropUtils > setScaleFromValue : invalid 'scale' value!", {
+					? PropUtils.setScaleFromVector3(obj, val as Vector3)
+					: console.error("SVELTHREE > PropUtils > setScaleFromValue : invalid 'scale' value!", {
 							obj: obj,
 							value: val
-						})
+					  })
 				break
 			case "Array3Nums":
 				PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
@@ -562,15 +562,15 @@ export default class PropUtils {
 		PropUtils.isArray3Nums(val)
 			? PropUtils.setColorFromArray(obj, val, key)
 			: !isNaN(val)
-				? PropUtils.setColorFromNumber(obj, val, key)
-				: PropUtils.isColor(val)
-					? PropUtils.setColorFromColor(obj, val, key)
-					: typeof val === "string"
-						? PropUtils.setColorFromString(obj, val, key)
-						: console.error(`SVELTHREE > PropUtils > setColorFromValueKey : invalid '${key}' value!`, {
-							obj: obj,
-							value: val
-						})
+			? PropUtils.setColorFromNumber(obj, val, key)
+			: PropUtils.isColor(val)
+			? PropUtils.setColorFromColor(obj, val, key)
+			: typeof val === "string"
+			? PropUtils.setColorFromString(obj, val, key)
+			: console.error(`SVELTHREE > PropUtils > setColorFromValueKey : invalid '${key}' value!`, {
+					obj: obj,
+					value: val
+			  })
 	}
 
 	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {

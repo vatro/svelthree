@@ -17,7 +17,7 @@ interface SphereTouchingResultsItem {
 	tris: SeparatingAxisTriangle[]
 }
 
-interface SphereTouchingResults extends Array<SphereTouchingResultsItem> { }
+interface SphereTouchingResults extends Array<SphereTouchingResultsItem> {}
 
 export default class XRHandTouchSphereExt extends XRHandTouch {
 	touchSphere: Sphere

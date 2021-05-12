@@ -20,7 +20,7 @@ export { default as CubeCamera } from "./components/CubeCamera.svelte"
 export { XRHandJointIndices } from "./constants"
 export { svelthreeStores } from "./stores"
 
-//export all THREE modules
+// export all THREE modules
 export * from "three"
 
 /** export all THREE modules 'Foo' overridden by Svelte components as '_Foo'

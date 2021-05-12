@@ -10,7 +10,13 @@ import {
 	XRHandTouchRayDebugger,
 	XRHandTouchSphereDebugger
 } from "./debuggers"
-import type { XrHandTouchDebugParams, XrHandTouchRayDebuggerConfig, XrHandTouchSphereDebuggerConfig, XrHandTouchTestMode, XrTouchUpdateParams } from "./types-svelthree"
+import type {
+	XrHandTouchDebugParams,
+	XrHandTouchRayDebuggerConfig,
+	XrHandTouchSphereDebuggerConfig,
+	XrHandTouchTestMode,
+	XrTouchUpdateParams
+} from "./types-svelthree"
 
 interface RaycasterBVH extends Raycaster {
 	firstHitOnly?: boolean
@@ -34,7 +40,7 @@ export default class XRHandTouch {
 	jointDebugger: XRHandTouchJointDebugger
 	faceDebugger: XRHandTouchFaceDebugger
 
-	constructor() { }
+	constructor() {}
 
 	updateToTest(currentScene: Scene) {
 		this.currentScene = currentScene
@@ -811,7 +817,7 @@ export default class XRHandTouch {
 		logMessage: String,
 		raycaster?: Raycaster,
 		origin?: Vector3
-	) { }
+	) {}
 
 	/**
 	 * RAY Mode only!
@@ -882,7 +888,7 @@ export default class XRHandTouch {
 	 */
 	doRaycast(raycaster: Raycaster, origin: Vector3, direction: Vector3, near: number = 0, far: number = 0.04): any[] {
 		if (this.useBVH) {
-			; (raycaster as RaycasterBVH).firstHitOnly = true
+			;(raycaster as RaycasterBVH).firstHitOnly = true
 		}
 		raycaster.set(origin, direction)
 		raycaster.near = near
@@ -903,7 +909,7 @@ export default class XRHandTouch {
 		far: number = 0.04
 	): any[] {
 		if (this.useBVH) {
-			; (raycaster as RaycasterBVH).firstHitOnly = true
+			;(raycaster as RaycasterBVH).firstHitOnly = true
 		}
 
 		raycaster.set(origin, direction)
