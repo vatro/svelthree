@@ -2,9 +2,9 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { EventDispatcher } from "three"
+import { EventDispatcher, XRSession } from "three"
 import type { XrOptionalFeatures, XrRequiredFeatures } from "./types-svelthree"
-import type { XRSession, XRSessionMode } from "./types-webxr"
+import type { XRSessionMode } from "./types-webxr"
 
 export default class SplashVR {
 	private button: HTMLButtonElement
