@@ -17,7 +17,8 @@ This is a **svelthree** _Canvas_ Component.
 		Vector2,
 		Vector3,
 		WebGLRenderer,
-		WebXRController
+		WebXRController,
+		XRFrame
 	} from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
@@ -32,7 +33,7 @@ This is a **svelthree** _Canvas_ Component.
 		XrInputConfigGrippable,
 		XrSessionVRInputConfig
 	} from "../xr/types-svelthree"
-	import type { XRFrame, XRHitTestSource } from "../xr/types-webxr"
+	import type { XRHitTestSource } from "../xr/types-webxr"
 
 	const css_rs = "color: red;font-weight:bold;"
 	const css_ba = "color: blue;font-weight:bold;"
