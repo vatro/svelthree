@@ -1,6 +1,17 @@
-import { Group, WebXRController, WebXRManager, XRHandModel, XRHandModelFactory } from "three"
+import type { Group, WebXRController, WebXRManager } from "three"
+import { XRHandModelFactory, XRHandModel } from "three/examples/jsm/webxr/XRHandModelFactory"
 import { XRControllerDefaults, XRHandTouchDefaults } from "../constants"
-import type { XrHandEnablePinchResult, XrHandEnableTouchResult, XrHandPinchConfig, XrHandPinchConfigItem, XrHandTouchConfigHands, XrHandTouchConfigHandsItem, XrHandTouchEnabled, XrInputConfigHand, XrSessionVRInputConfig } from "../types-svelthree"
+import type {
+	XrHandEnablePinchResult,
+	XrHandEnableTouchResult,
+	XrHandPinchConfig,
+	XrHandPinchConfigItem,
+	XrHandTouchConfigHands,
+	XrHandTouchConfigHandsItem,
+	XrHandTouchEnabled,
+	XrInputConfigHand,
+	XrSessionVRInputConfig
+} from "../types-svelthree"
 import type { XRHandedness, XRInputSource } from "../types-webxr"
 import XRHandUtilsPinch from "../XRHandUtilsPinch"
 import XRHandUtilsTouch from "../XRHandUtilsTouch"

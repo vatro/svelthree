@@ -4,12 +4,14 @@ This is a **svelthree** _WebXR_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
+	import type { XRFrame, XRSession } from "three"
+
 	// TODO  revrite as TS!
 	/*
      This component is for internal usage by WebGLRenderer component
     */
 	import { svelthreeStores } from "../stores"
-	import type { XRFrame, XRHitTestSource, XRReferenceSpace, XRSession } from "./types-webxr"
+	import type { XRHitTestSource, XRReferenceSpace } from "./types-webxr"
 	export let sti: number
 
 	/*
@@ -84,4 +86,5 @@ This is a **svelthree** _WebXR_ Component.
 		$svelthreeStores[sti].xr.hitTestSourceRequested = false
 		$svelthreeStores[sti].xr.hitTestSource = null
 	}
+
 </script>

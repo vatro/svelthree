@@ -10,12 +10,14 @@ import {
 	LineBasicMaterial,
 	Line,
 	LineDashedMaterial,
-	XRControllerModel,
-	XRControllerModelFactory,
-	GLTFLoader,
 	Raycaster,
 	Scene
 } from "three"
+
+import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+
+import { XRControllerModelFactory, XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
+
 import { XRControllerDefaults } from "../constants"
 import type { XrControllerTargetRayConfig, XrInputConfigGrippable, XrInputConfigGrippableItem, XrSessionVRInputConfig } from "../types-svelthree"
 import type { XRHandedness, XRInputSource } from "../types-webxr"
