@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.119.1",
+  "version": "0.128.1",
   "description": "Svelte powered three.js development",
   "svelte": "src/index.ts",
   "types": "src/index.d.ts",
@@ -16,15 +16,15 @@
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.9",
-    "@types/three": "^0.127.1",
-    "prettier": "^2.2.1",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.10",
+    "@types/three": "^0.128.0",
+    "prettier": "^2.3.0",
     "svelte": "^3.38.2",
-    "svelte-check": "^1.5.2",
+    "svelte-check": "^1.5.4",
     "svelte-preprocess": "^4.7.3",
     "three": "^0.128.0",
     "typescript": "^4.2.4",
-    "vite": "^2.2.4"
+    "vite": "^2.3.2"
   },
   "dependencies": {
     "three-mesh-bvh": "git+https://github.com/gkjohnson/three-mesh-bvh.git"
