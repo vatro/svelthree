@@ -125,7 +125,7 @@ This is an internal **svelthree** _Camera_ Component.
 	 */
 	function onProps() {
 		if (frustumSize !== undefined) {
-			CameraUtils.logOrthoCamFrustumWarnings(props.left, props.right, props.top, props.bottom)
+			//CameraUtils.logOrthoCamFrustumWarnings(props.left, props.right, props.top, props.bottom)
 		}
 	}
 
