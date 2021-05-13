@@ -16,10 +16,9 @@ This is a **svelthree** _Canvas_ Component.
 		Scene,
 		Vector2,
 		Vector3,
-		WebGLRenderer,
-		WebXRController,
-		XRFrame
+		WebGLRenderer
 	} from "three"
+	import type { WebXRController, XRFrame } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
 	import { svelthreeStores } from "../stores"

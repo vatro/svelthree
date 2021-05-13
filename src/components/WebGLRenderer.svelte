@@ -12,11 +12,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		PCFSoftShadowMap,
 		Raycaster,
 		Scene,
-		WebGLRenderer,
-		XRAnimationLoopCallback,
-		XRFrame,
-		XRSession
+		WebGLRenderer
 	} from "three"
+	import type { XRAnimationLoopCallback, XRFrame, XRSession } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import { Propeller, PropUtils } from "../utils"

@@ -1,5 +1,6 @@
 import type { Group, WebXRController, WebXRManager } from "three"
-import { XRHandModelFactory, XRHandModel } from "three/examples/jsm/webxr/XRHandModelFactory"
+import { XRHandModelFactory } from "three/examples/jsm/webxr/XRHandModelFactory"
+import type { XRHandModel } from "three/examples/jsm/webxr/XRHandModelFactory"
 import { XRControllerDefaults, XRHandTouchDefaults } from "../constants"
 import type {
 	XrHandEnablePinchResult,

@@ -4,7 +4,6 @@ import {
 	Matrix4,
 	Object3D,
 	WebXRManager,
-	WebXRController,
 	BufferGeometry,
 	Vector3,
 	LineBasicMaterial,
@@ -14,9 +13,12 @@ import {
 	Scene
 } from "three"
 
+import type { WebXRController } from "three"
+
 import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 
-import { XRControllerModelFactory, XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
+import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory"
+import type { XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
 
 import { XRControllerDefaults } from "../constants"
 import type {

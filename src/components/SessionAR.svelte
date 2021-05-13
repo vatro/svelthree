@@ -13,7 +13,8 @@ This is a **svelthree** _SessionAR_ Component.
     */
 
 	import { createEventDispatcher, onMount } from "svelte"
-	import { Object3D, Quaternion, Vector3, XRSession } from "three"
+	import { Object3D, Quaternion, Vector3 } from "three"
+	import type { XRSession } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import type { XrHitTestMode, XrOptionalFeatures, XrRequiredFeatures } from "../xr/types-svelthree"
@@ -359,4 +360,5 @@ This is a **svelthree** _SessionAR_ Component.
 	export function sethitTestMode(mode: XrHitTestMode) {
 		hitTestMode = mode
 	}
+
 </script>

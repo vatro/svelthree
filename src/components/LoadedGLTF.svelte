@@ -7,7 +7,8 @@ This is a **svelthree** _LoadedGLTF_ Component.
 	import { createEventDispatcher } from "svelte"
 	import type { Group, LoadingManager } from "three"
 	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
-	import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -97,4 +98,5 @@ This is a **svelthree** _LoadedGLTF_ Component.
 	export function getContent(): GLTF {
 		return content
 	}
+
 </script>
