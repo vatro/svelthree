@@ -136,7 +136,7 @@ This is a **svelthree** _Light_ Component.
 				light["target"] = target.getMesh()
 			} else if ((target as Object3D).isObject3D) {
 				light["target"] = target
-			} else if (isBool(target)) {
+			} else if (typeof target === "boolean") {
 				scene.add(light["target"])
 			}
 		}
@@ -151,13 +151,6 @@ This is a **svelthree** _Light_ Component.
 
 	function isMesh(t: Object3D | Empty | Mesh | boolean): t is Mesh {
 		if (t.hasOwnProperty("getMesh")) {
-			return true
-		}
-		return false
-	}
-
-	function isBool(t: Object3D | Empty | Mesh | boolean): boolean {
-		if (typeof t === "boolean") {
 			return true
 		}
 		return false
