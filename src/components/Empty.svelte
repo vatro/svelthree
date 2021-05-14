@@ -47,31 +47,33 @@ This is a **svelthree** _Empty_ Component.
 	export let scene: Scene
 	const sti: number = StoreUtils.getSTIfromScene(scene, "Empty")
 
-	let empty: Object3D = new Object3D()
-	empty.name = name
+	let empty: Object3D = undefined
+	$: empty === undefined ? createEmpty() : null
 
-	$: empty.userData.matrixAutoUpdate = mau
+	function createEmpty(): void {
+		console.info("SVELTHREE > createEmpty!")
+		empty = new Object3D()
+		empty.name = name
+	}
 
-	scene.add(empty)
-
-	console.info("SVELTHREE > EMPTY added!", {
-		empty: empty,
-		scene: scene,
-		total: scene.children.length
-	})
+	// we can do this, because 'userData.matrixAutoUpdate' can be 'undefined'
+	$: if (empty) {
+		empty.matrixAutoUpdate = mau ? true : false
+	}
 
 	// determining parent immediately
-
-	if (!parent) {
-		parentForSlot = empty
-	} else {
-		if (parent !== empty) {
-			parentForUs = parent
+	$: if (empty) {
+		if (!parent) {
 			parentForSlot = empty
+		} else {
+			if (parent !== empty) {
+				parentForUs = parent
+				parentForSlot = empty
+			}
 		}
 	}
 
-	addEmpty()
+	$: empty ? addEmpty() : null
 
 	function addEmpty(): void {
 		if (!parentForUs) {
@@ -211,6 +213,7 @@ This is a **svelthree** _Empty_ Component.
 	export function startAni(): void {
 		ani.startAni()
 	}
+
 </script>
 
 <slot {scene} parent={parentForSlot} />
