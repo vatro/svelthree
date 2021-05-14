@@ -11,7 +11,8 @@ This is a **svelthree** _Light_ Component.
 	import type { SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { LightUtils, PropUtils, StoreUtils, SvelthreeProps } from "../utils"
-	import type { default as Empty } from "./Empty.svelte"
+	import type { default as Empty } from "../components/Empty.svelte"
+	import type { default as Mesh } from "../components/Mesh.svelte"
 	import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
 
 	const css_rs = "color: red;font-weight:bold;"
@@ -106,7 +107,7 @@ This is a **svelthree** _Light_ Component.
 
 	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-	export let target: Object3D | Empty = undefined
+	export let target: Object3D | Empty | Mesh | boolean = undefined
 
 	/**
 	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
@@ -122,6 +123,46 @@ This is a **svelthree** _Light_ Component.
         Triggers a Light Helper update if the position of the target has changed
     */
 
+	let updateTarget = false
+	$: !matrix && light && target ? (updateTarget = true) : null
+
+	function doUpdateTarget() {
+		updateTarget = false
+
+		if (light.hasOwnProperty("target")) {
+			if (isEmpty(target)) {
+				light["target"] = target.getEmpty()
+			} else if (isMesh(target)) {
+				light["target"] = target.getMesh()
+			} else if ((target as Object3D).isObject3D) {
+				light["target"] = target
+			} else if (isBool(target)) {
+				scene.add(light["target"])
+			}
+		}
+	}
+
+	function isEmpty(t: Object3D | Empty | Mesh | boolean): t is Empty {
+		if (t.hasOwnProperty("getEmpty")) {
+			return true
+		}
+		return false
+	}
+
+	function isMesh(t: Object3D | Empty | Mesh | boolean): t is Mesh {
+		if (t.hasOwnProperty("getMesh")) {
+			return true
+		}
+		return false
+	}
+
+	function isBool(t: Object3D | Empty | Mesh | boolean): boolean {
+		if (typeof t === "boolean") {
+			return true
+		}
+		return false
+	}
+
 	let targetPos: [number, number, number] = [0, 0, 0]
 	let targetPosPrev: [number, number, number] = undefined
 
@@ -135,7 +176,6 @@ This is a **svelthree** _Light_ Component.
 
 	function startMonitoringTargetPosition(): void {
 		if (logRS) console.log("%c*--------> Light > reactive statement! startMonitoringTargetPosition!", `${css_rs}`)
-		//console.log("startMonitoringTargetPosition!")
 
 		// IMPORTANT  this does NOT cause a component update! (instead of using requestAnimationFrame)
 		// COOL!  this way the helper is 100% synchronious (not 1 frame late)
@@ -156,6 +196,9 @@ This is a **svelthree** _Light_ Component.
 
 	function checkTargetPosition(): void {
 		// don't check for changes if 'target' is not added to scene (doesn't have parent)
+
+		if (updateTarget) doUpdateTarget()
+
 		if (light["target"]?.isObject3D && light["target"].parent !== null) {
 			targetPos[0] = (light["target"] as Object3D).position.x
 			targetPos[1] = (light["target"] as Object3D).position.y
@@ -346,6 +389,7 @@ This is a **svelthree** _Light_ Component.
 	export function startAni(): void {
 		ani.startAni()
 	}
+
 </script>
 
 <SvelthreeAnimation
