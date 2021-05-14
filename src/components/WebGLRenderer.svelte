@@ -661,10 +661,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			renderer.render(currentScene, currentCam)
 
 			dispatch("after_render")
-
-			if (renderer.xr.enabled === false) {
-				rAF = requestAnimationFrame(animate)
-			}
 		}
 	}
 
