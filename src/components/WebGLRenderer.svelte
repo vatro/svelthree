@@ -6,15 +6,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount, tick } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
-	import {
-		Camera,
-		Object3D,
-		PCFSoftShadowMap,
-		Raycaster,
-		Scene,
-		WebGLRenderer
-	} from "three"
-	import type { XRAnimationLoopCallback, XRFrame, XRSession } from "three"
+	import { Camera, Object3D, PCFSoftShadowMap, Raycaster, Scene, WebGLRenderer } from "three"
+	import type { XRFrame, XRSession } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import { Propeller, PropUtils } from "../utils"
@@ -709,6 +702,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		sceneToRenderId = parameters.sceneId
 		camToRenderId = parameters.camId
 	}
+
 </script>
 
 <XRHitTestAR bind:this={xrHitTestAR} {sti} />
