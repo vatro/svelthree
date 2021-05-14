@@ -18,7 +18,8 @@ This is a **svelthree** _DirectionalLight_ Component.
 		SvelthreeAnimationFunction
 	} from "../types-extra"
 	import { LightUtils } from "../utils"
-	import type { default as Empty } from "./Empty.svelte"
+	import type { Empty } from "."
+	import type { Mesh } from "."
 
 	const css_rs = "color: red;font-weight:bold;"
 	const css_ba = "color: blue;font-weight:bold;"
@@ -82,7 +83,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 	// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
 	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-	export let target: Object3D | Empty = undefined
+	export let target: Object3D | Empty | Mesh | boolean = undefined
 
 	/**
 	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
@@ -184,6 +185,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 	}
 
 	// #endregion
+
 </script>
 
 <SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
