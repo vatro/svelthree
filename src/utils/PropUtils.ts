@@ -396,16 +396,17 @@ export default class PropUtils {
 	}
 
 	/* THREE  IMPORTANT 
-	`LookAt` doesn't work with lights with `target` property (DirectionalLight & SpotLight).
+	`lookAt` doesn't work with lights with `target` property (DirectionalLight & SpotLight).
 	Here we have to manipulate the position of the `target` + before we do that, make sure it's added
 	to the scene. So when manipulating these lights via `lookAt` attribute or `lookAt` in props-object:
    
-		a) `target` object has no parent: get's added to the PARENT OF THE LIGHT + it's position is being set
-		b) `target` object has parent: it's position is being set
+		a) `target` object has no parent: add `target` to the PARENT OF THE LIGHT + set `target` position
+		b) `target` object has parent: set `target` position
 
-	CAVEATS?:
-	-  TODO  TEST: user sets `target` attribute or `target` prop and tries to use `lookAt` attribute or prop & manipulate the object directly: will interfere with each other
-	-  TODO  TEST: 
+	CAVEATS:
+	- if user sets `target` attribute or `target` prop and tries to use `lookAt` attribute or prop they'll interfere
+	TEST: ... the last one updated will be applied
+
 	*/
 	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
 		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setLookAtFromValue!", { obj, val })
