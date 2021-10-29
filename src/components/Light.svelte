@@ -1,4 +1,4 @@
-<script lang="typescript">
+<script lang="ts">
     /**
      * @author Vatroslav Vrbanic @see https://github.com/vatro
      */

@@ -30,7 +30,7 @@ export default {
     output: [
         /* 
 		The attempt to generate *.d.ts from *.svelte component's ts-code failed.
-		Rollup generates *.d.ts of *.ts files only, not of ts-code inside <script lang="typescript">!
+		Rollup generates *.d.ts of *.ts files only, not of ts-code inside <script lang="ts">!
 		Doing <script lang="typescript" src="Foo.ts">:
 		- component Foo.svelte gets bundled correctly (works)
 		- Foo.d.ts gets exported but is not wrapped into a 'SvelteComponent' class or similar (is completely detached),

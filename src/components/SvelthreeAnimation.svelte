@@ -1,4 +1,4 @@
-<script lang="typescript">
+<script lang="ts">
     import { onMount } from "svelte"
     import { SvelthreeAnimationManager } from "../utils/Sv3AnimationManager.svelte"
     import { Object3D, Scene } from "svelthree-three"
