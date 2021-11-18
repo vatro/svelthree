@@ -2,6 +2,7 @@
 export { default as PerspectiveCamera } from "./components/PerspectiveCamera.svelte"
 export { default as OrthographicCamera } from "./components/OrthographicCamera.svelte"
 export { default as Mesh } from "./components/Mesh.svelte"
+export { default as Points } from "./components/Points.svelte"
 export { default as Empty } from "./components/Empty.svelte"
 export { default as Canvas } from "./components/Canvas.svelte"
 export { default as DirectionalLight } from "./components/DirectionalLight.svelte"
@@ -27,6 +28,7 @@ export * from "three"
  * so users can for example import _Mesh from 'svelthree' and create a native THREE Mesh instance
  */
 export { Mesh as _Mesh } from "three"
+export { Points as _Points } from "three"
 export { Light as _Light } from "three"
 export { AmbientLight as _AmbientLight } from "three"
 export { HemisphereLight as _HemisphereLight } from "three"
