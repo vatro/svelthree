@@ -1,6 +1,3 @@
-<!-- for usage with the modified Svelte version -->
-<!-- <svelte:options accessors useAccMod accessorsAsync /> -->
-
 <!--
 @component
 This is a **svelthree** _Mesh_ Component.
