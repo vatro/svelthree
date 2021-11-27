@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "0.128.1",
+  "version": "0.135.0",
   "description": "Svelte powered three.js development",
   "svelte": "src/index.ts",
   "types": "src/index.d.ts",
@@ -13,21 +13,21 @@
     "svelte-check": "svelte-check",
     "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
     "docs": "typedoc --out docs src",
-    "test": "echo 'No test specified' && exit 1"
+    "test": "echo 'No test specified' && exit 1",
+    "postinstall": "npx svelte-accmod-patch"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.10",
-    "@types/three": "^0.128.0",
-    "prettier": "^2.3.0",
-    "svelte": "^3.38.2",
-    "svelte-check": "^2.0.0",
-    "svelte-preprocess": "^4.7.3",
-    "three": "^0.128.0",
-    "typescript": "^4.3.2",
-    "vite": "^2.3.4"
-  },
-  "dependencies": {
-    "three-mesh-bvh": "git+https://github.com/gkjohnson/three-mesh-bvh.git"
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
+    "@types/three": "^0.134.0",
+    "prettier": "^2.5.0",
+    "svelte": "^3.44.2",
+    "svelte-accmod-patch": "^1.0.0",
+    "svelte-check": "^2.2.10",
+    "svelte-preprocess": "^4.9.8",
+    "three": "^0.135.0",
+    "three-mesh-bvh": "^0.5.2",
+    "typescript": "^4.5.2",
+    "vite": "^2.6.14"
   },
   "author": "Vatroslav Vrbanic",
   "repository": {
