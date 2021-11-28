@@ -2,7 +2,8 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import { EventDispatcher, XRSession } from "three"
+import { EventDispatcher } from "three"
+import type { XRSession } from "three"
 import type { XrOptionalFeatures, XrRequiredFeatures } from "./types-svelthree"
 import type { XRSessionMode } from "./types-webxr"
 

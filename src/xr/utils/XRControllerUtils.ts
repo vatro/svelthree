@@ -1,9 +1,7 @@
 import {
 	Group,
-	Event,
 	Matrix4,
 	Object3D,
-	WebXRManager,
 	BufferGeometry,
 	Vector3,
 	LineBasicMaterial,
@@ -13,12 +11,13 @@ import {
 	Scene
 } from "three"
 
-import type { WebXRController } from "three"
+import type { WebXRManager } from "three"
+import { WebXRController } from "three/src/renderers/webxr/WebXRController"
 
 import type { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory"
-import type { XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
+import { XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
 
 import { XRControllerDefaults } from "../constants"
 import type {
@@ -32,7 +31,7 @@ import type { XRHandedness, XRInputSource } from "../types-webxr"
 export default class XRControllerUtils {
 	constructor() {}
 
-	public static addListeners(targetRaySpace: Group, listener: (event: Event) => void) {
+	public static addListeners(targetRaySpace: Group, listener: (event: THREE.Event) => void) {
 		targetRaySpace.addEventListener("select", listener)
 		targetRaySpace.addEventListener("selectstart", listener)
 		targetRaySpace.addEventListener("selectend", listener)
@@ -41,7 +40,7 @@ export default class XRControllerUtils {
 		targetRaySpace.addEventListener("squeezeend", listener)
 	}
 
-	public static removeListeners(targetRaySpace: Group, listener: (event: Event) => void) {
+	public static removeListeners(targetRaySpace: Group, listener: (event: THREE.Event) => void) {
 		targetRaySpace.removeEventListener("select", listener)
 		targetRaySpace.removeEventListener("selectstart", listener)
 		targetRaySpace.removeEventListener("selectend", listener)

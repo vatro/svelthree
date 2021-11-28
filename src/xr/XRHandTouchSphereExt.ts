@@ -4,12 +4,12 @@
 
 import type { Group, Mesh, Object3D } from "three"
 import { Sphere, Vector3 } from "three"
-import { sphereIntersectTriangle } from "three-mesh-bvh/src/Utils/MathUtilities"
+import { sphereIntersectTriangle } from "three-mesh-bvh/src/math/MathUtilities"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrHandTouchTestMode, XrTouchUpdateParams } from "./types-svelthree"
 import XRHandTouch from "./XRHandTouch"
 
-type SeparatingAxisTriangle = import("three-mesh-bvh/src/Utils/SeparatingAxisTriangle").SeparatingAxisTriangle
+type SeparatingAxisTriangle = import("three-mesh-bvh/src/math/SeparatingAxisTriangle").SeparatingAxisTriangle
 
 interface SphereTouchingResultsItem {
 	mesh: Mesh
@@ -22,7 +22,7 @@ interface SphereTouchingResults extends Array<SphereTouchingResultsItem> {}
 export default class XRHandTouchSphereExt extends XRHandTouch {
 	touchSphere: Sphere
 	// override
-	touchSphereRadius: number
+	touchSphereRadius: number = XRHandTouchDefaults.MODE_SPHERE_RADIUS
 
 	constructor(
 		lerpFactor: number = XRHandTouchDefaults.LERP_FACTOR,
