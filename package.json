@@ -7,14 +7,9 @@
   "module": "dist/svelthree.es.js",
   "main": "dist/svelthree.umd.js",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "build-ssr": "vite --config vite.config.ssr.js build",
-    "build-runtime": "vite --config vite.config.runtime.js build",
-    "serve": "vite preview",
     "svelte-check": "svelte-check",
     "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
-    "docs": "typedoc --out docs src",
     "test": "echo 'No test specified' && exit 1",
     "postinstall": "npx svelte-accmod-patch"
   },
