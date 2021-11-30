@@ -3,6 +3,27 @@
 This is a **svelthree** _DirectionalLight_ Component.  
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type DirectionalLightProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<DirectionalLight, PropBlackList>,
+		{
+			// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
+
+			position?: Vector3 | Parameters<Vector3["set"]>
+
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//rotation?: never
+
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//quaternion?: never
+
+			// TODO  can I manipulate the matrix?
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	// #region --- Imports
 
@@ -53,25 +74,6 @@ This is a **svelthree** _DirectionalLight_ Component.
 	 * `matrixAutoUpdate` shorthand attribute.
 	 */
 	export let mau: boolean = undefined
-
-	type DirectionalLightProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<DirectionalLight, PropBlackList>,
-		{
-			// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
-			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-
-			position?: Vector3 | Parameters<Vector3["set"]>
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//rotation?: never
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//quaternion?: never
-
-			// TODO  can I manipulate the matrix?
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
 
 	export let props: { [P in keyof DirectionalLightProps]: DirectionalLightProps[P] } = undefined
 
@@ -185,7 +187,6 @@ This is a **svelthree** _DirectionalLight_ Component.
 	}
 
 	// #endregion
-
 </script>
 
 <SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />

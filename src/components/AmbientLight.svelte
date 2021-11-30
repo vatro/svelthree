@@ -3,6 +3,13 @@
 This is a **svelthree** _AmbientLight_ Component.  
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type AmbientLightProps = OnlyWritableNonFunctionPropsOverwritten<
+		AmbientLight,
+		{ color: Vector3 | Color | number | number[] }
+	>
+</script>
+
 <script lang="ts">
 	/*
      @see https://threejs.org/docs/#api/en/lights/AmbientLight
@@ -19,11 +26,6 @@ This is a **svelthree** _AmbientLight_ Component.
 
 	export let params: ConstructorParameters<typeof AmbientLight> = undefined
 	const light = params && params.length > 0 ? new AmbientLight(...params) : new AmbientLight()
-
-	type AmbientLightProps = OnlyWritableNonFunctionPropsOverwritten<
-		AmbientLight,
-		{ color: Vector3 | Color | number | number[] }
-	>
 
 	/** Writable, non-function AmbientLight properties only incl. type-enhanced 'color' property. */
 	export let props: { [P in keyof AmbientLightProps]: AmbientLightProps[P] } = undefined

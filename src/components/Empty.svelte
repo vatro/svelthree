@@ -3,6 +3,25 @@
 This is a **svelthree** _Empty_ Component.  
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type EmptyProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<Object3D, PropBlackList>,
+		{
+			position?: Vector3 | Parameters<Vector3["set"]>
+			scale?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	import { afterUpdate, onMount } from "svelte"
 	import { Euler, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "three"
@@ -116,23 +135,6 @@ This is a **svelthree** _Empty_ Component.
 	 */
 	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
 
-	type EmptyProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Object3D, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
 	let sProps: SvelthreeProps
 	$: !sProps && empty ? (sProps = new SvelthreeProps(empty)) : null
 
@@ -213,7 +215,6 @@ This is a **svelthree** _Empty_ Component.
 	export function startAni(): void {
 		ani.startAni()
 	}
-
 </script>
 
 <slot {scene} parent={parentForSlot} />

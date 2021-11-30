@@ -3,21 +3,8 @@
 This is a **svelthree** _PointLight_ Component.  
  TODO  Link to Docs.
 -->
-<script lang="ts">
-	import { onMount } from "svelte"
-	import type { LightShadow } from "three"
-	import { Color, Euler, Matrix4, Object3D, PointLight, PointLightHelper, Quaternion, Scene, Vector3 } from "three"
-	import { Light, SvelthreeLightHelper, SvelthreeLightWithShadow } from "../components-internal"
-	import type {
-		LightShadowCamProps,
-		LightShadowProps,
-		OnlyWritableNonFunctionPropsPlus,
-		PropBlackList,
-		SvelthreeAnimationFunction
-	} from "../types-extra"
-	import { LightUtils } from "../utils"
-
-	type PointLightProps = OnlyWritableNonFunctionPropsPlus<
+<script context="module" lang="ts">
+	export type PointLightProps = OnlyWritableNonFunctionPropsPlus<
 		Omit<PointLight, PropBlackList>,
 		{
 			//lookAt: Vector3 | Parameters<Vector3["set"]>
@@ -33,6 +20,21 @@ This is a **svelthree** _PointLight_ Component.
 			matrix?: Matrix4 | Parameters<Matrix4["set"]>
 		}
 	>
+</script>
+
+<script lang="ts">
+	import { onMount } from "svelte"
+	import type { LightShadow } from "three"
+	import { Color, Euler, Matrix4, Object3D, PointLight, PointLightHelper, Quaternion, Scene, Vector3 } from "three"
+	import { Light, SvelthreeLightHelper, SvelthreeLightWithShadow } from "../components-internal"
+	import type {
+		LightShadowCamProps,
+		LightShadowProps,
+		OnlyWritableNonFunctionPropsPlus,
+		PropBlackList,
+		SvelthreeAnimationFunction
+	} from "../types-extra"
+	import { LightUtils } from "../utils"
 
 	export let props: { [P in keyof PointLightProps]: PointLightProps[P] } = undefined
 	export let parent: Object3D = undefined

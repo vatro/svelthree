@@ -8,6 +8,25 @@ If you use this approach you'll see a warning in the console if you define left,
 - Use `props` attribute only: Camera will be initialized with default constructor values and `props` attribute will mutate it's properties.
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type OrthographicCameraProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<OrthographicCamera, PropBlackList>,
+		{
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
+			position?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	// #region --- Imports
 
@@ -96,23 +115,6 @@ If you use this approach you'll see a warning in the console if you define left,
 	$: cam && !cam.userData.helper && helper ? CameraUtils.createHelper(cam, scene) : null
 	$: cam && cam.userData.helper && !helper ? CameraUtils.removeHelper(cam, scene) : null
 
-	type OrthographicCameraProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<OrthographicCamera, PropBlackList>,
-		{
-			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-			position?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
 	/** Writable, non-function OrthographicCamera properties only incl. an additional `lookAt` property. */
 	export let props: { [P in keyof OrthographicCameraProps]: OrthographicCameraProps[P] } = undefined
 
@@ -123,9 +125,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	// Camera component's reference
 	let camera: Camera
 
-	const defaultParams: ConstructorParameters<typeof OrthographicCamera> = CameraUtils.getOrthoCamDefaultParams(
-		frustumSize
-	)
+	const defaultParams: ConstructorParameters<typeof OrthographicCamera> =
+		CameraUtils.getOrthoCamDefaultParams(frustumSize)
 
 	let cam: OrthographicCamera
 

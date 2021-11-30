@@ -3,6 +3,25 @@
 This is a **svelthree** _PerspectiveCamera_ Component.  
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type PerspectiveCameraProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<PerspectiveCamera, PropBlackList>,
+		{
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
+			position?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	// #region --- Imports
 
@@ -62,23 +81,6 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
 	 */
 	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
-
-	type PerspectiveCameraProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<PerspectiveCamera, PropBlackList>,
-		{
-			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-			position?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
 
 	/** Writable, non-function PerspectiveCamera properties only incl. an additional `lookAt` property. */
 	export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined

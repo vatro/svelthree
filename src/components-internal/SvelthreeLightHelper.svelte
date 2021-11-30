@@ -1,3 +1,12 @@
+<script context="module" lang="ts">
+	export type LightHelper =
+		| DirectionalLightHelper
+		| HemisphereLightHelper
+		| PointLightHelper
+		| SpotLightHelper
+		| RectAreaLightHelper
+</script>
+
 <script lang="ts">
 	import { onMount } from "svelte"
 	import type {
@@ -9,13 +18,6 @@
 		SpotLightHelper
 	} from "three"
 	import type { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper"
-
-	type LightHelper =
-		| DirectionalLightHelper
-		| HemisphereLightHelper
-		| PointLightHelper
-		| SpotLightHelper
-		| RectAreaLightHelper
 
 	export let scene: Scene
 	export let helper: boolean

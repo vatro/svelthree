@@ -3,20 +3,31 @@
 This is a **svelthree** _Mesh_ Component.
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type MeshProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<Mesh, PropBlackList>,
+		{
+			position?: Vector3 | Parameters<Vector3["set"]>
+			scale?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+
+	export type MeshInteractionHandler = (e?: CustomEvent) => void
+</script>
+
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import {
-		BufferGeometry,
-		Euler,
-		Material,
-		Matrix4,
-		Mesh,
-		Object3D,
-		Quaternion,
-		Scene,
-		Vector3
-	} from "three"
+	import { BufferGeometry, Euler, Material, Matrix4, Mesh, Object3D, Quaternion, Scene, Vector3 } from "three"
 	import {
 		SvelthreeAnimation,
 		SvelthreeInteraction,
@@ -226,23 +237,6 @@ This is a **svelthree** _Mesh_ Component.
 	$: if (mesh) {
 		mesh.matrixAutoUpdate = mau ? true : false
 	}
-
-	type MeshProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Mesh, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
 
 	/** `props` shorthand attribute. ☝️ Other shorthand attributes like `pos`, `rot`, `scale` etc. will override corresponding properties inside the `props` object, try to avoid this!*/
 	export let props: { [P in keyof MeshProps]: MeshProps[P] } = undefined
@@ -673,8 +667,6 @@ This is a **svelthree** _Mesh_ Component.
 	}
 
 	// interaction
-
-	type MeshInteractionHandler = (e?: CustomEvent) => void
 
 	export let onClick: MeshInteractionHandler = undefined
 	export let onPointerUp: MeshInteractionHandler = undefined

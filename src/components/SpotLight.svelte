@@ -3,6 +3,26 @@
 This is a **svelthree** _SpotLight_ Component.  
  TODO  Link to Docs.
 -->
+<script context="module" lang="ts">
+	export type SpotLightProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<SpotLight, PropBlackList>,
+		{
+			// CUSTOM  actually no `lookAt` on SpotlLight, we're using custom solution!
+			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
+
+			position?: Vector3 | Parameters<Vector3["set"]>
+
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//rotation?: never
+
+			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
+			//quaternion?: never
+
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	// #region --- Imports
 
@@ -44,24 +64,6 @@ This is a **svelthree** _SpotLight_ Component.
 	 * `matrixAutoUpdate` shorthand attribute.
 	 */
 	export let mau: boolean = undefined
-
-	type SpotLightProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<SpotLight, PropBlackList>,
-		{
-			// CUSTOM  actually no `lookAt` on SpotlLight, we're using custom solution!
-			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-
-			position?: Vector3 | Parameters<Vector3["set"]>
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//rotation?: never
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//quaternion?: never
-
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
 
 	export let props: { [P in keyof SpotLightProps]: SpotLightProps[P] } = undefined
 

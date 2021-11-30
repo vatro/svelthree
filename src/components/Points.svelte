@@ -1,3 +1,24 @@
+<script context="module" lang="ts">
+	export type PointsInteractionHandler = (e?: CustomEvent) => void
+
+	export type PointsProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<Points, PropBlackList>,
+		{
+			position?: Vector3 | Parameters<Vector3["set"]>
+			scale?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+</script>
+
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -231,23 +252,6 @@
 	$: if (points) {
 		points.matrixAutoUpdate = mau ? true : false
 	}
-
-	type PointsProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Points, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
 
 	/** `props` shorthand attribute. ☝️ Other shorthand attributes like `pos`, `rot`, `scale` etc. will override corresponding properties inside the `props` object, try to avoid this!*/
 	export let props: { [P in keyof PointsProps]: PointsProps[P] } = undefined
@@ -675,8 +679,6 @@
 	}
 
 	// interaction
-
-	type PointsInteractionHandler = (e?: CustomEvent) => void
 
 	export let onClick: PointsInteractionHandler = undefined
 	export let onPointerUp: PointsInteractionHandler = undefined
