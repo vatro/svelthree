@@ -1,3 +1,9 @@
+<!--
+`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
+svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
+-->
+<svelte:options accessors />
+
 <!-- 
 @component
 This is a **svelthree** _Canvas_ Component.  
@@ -8,16 +14,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
 	import type { SvelteComponentDev } from "svelte/internal"
-	import {
-		BufferGeometry,
-		Camera,
-		Mesh,
-		Raycaster,
-		Scene,
-		Vector2,
-		Vector3,
-		WebGLRenderer
-	} from "three"
+	import { BufferGeometry, Camera, Mesh, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from "three"
 	import type { WebXRController, XRFrame } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"

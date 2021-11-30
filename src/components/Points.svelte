@@ -1,3 +1,14 @@
+<!--
+`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
+svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
+-->
+<svelte:options accessors />
+
+<!-- 
+@component
+This is a **svelthree** _Points_ Component.  
+ TODO  Link to Docs.
+-->
 <script context="module" lang="ts">
 	export type PointsInteractionHandler = (e?: CustomEvent) => void
 
@@ -745,7 +756,8 @@ This is a **svelthree** _Points_ Component.
 		{animation}
 		{aniauto}
 		obj={points}
-		{scene} />
+		{scene}
+	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
@@ -772,7 +784,8 @@ This is a **svelthree** _Points_ Component.
 				{pinchRemote}
 				{pinchTouch}
 				{pinchHybrid}
-				{xrHandTouch} />
+				{xrHandTouch}
+			/>
 		{/if}
 	{/if}
 {/if}

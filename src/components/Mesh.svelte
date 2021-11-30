@@ -1,4 +1,10 @@
 <!--
+`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
+svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
+-->
+<svelte:options accessors />
+
+<!--
 @component
 This is a **svelthree** _Mesh_ Component.
  TODO  Link to Docs.
@@ -725,7 +731,8 @@ This is a **svelthree** _Mesh_ Component.
 		{animation}
 		{aniauto}
 		obj={mesh}
-		{scene} />
+		{scene}
+	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
@@ -752,7 +759,8 @@ This is a **svelthree** _Mesh_ Component.
 				{pinchRemote}
 				{pinchTouch}
 				{pinchHybrid}
-				{xrHandTouch} />
+				{xrHandTouch}
+			/>
 		{/if}
 	{/if}
 {/if}
