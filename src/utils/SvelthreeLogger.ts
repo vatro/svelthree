@@ -35,14 +35,14 @@ function log_prop_utils(obj: any): boolean {
 					return false
 				}
 			} else {
-				if (obj.type.indexOf("Camera") > -1 && obj.parent === null && !obj.userData.svelthreeComponent) {
+				if (obj.type.includes("Camera") && obj.parent === null && !obj.userData.svelthreeComponent) {
 					//console.warn("[ REMARK ] SvelthreeLogger > PropUtils is (most propbably) about to change change props of an internal Shadow-Camera (OrthographicCamera)...", obj)
 					if (obj.userData.log_dev) {
 						return obj.userData.log_dev.all || obj.userData.log_dev.prop_utils
 					} else {
 						return false
 					}
-				} else if (obj.type.indexOf("Material") > -1) {
+				} else if (obj.type.includes("Material")) {
 					console.warn(
 						"[ TODO ] SvelthreeLogger > Logging of Materials must be set manually by e.g. adding 'log_dev: { prop_utils: false }' to 'userData' ...",
 						obj

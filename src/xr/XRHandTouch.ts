@@ -941,13 +941,13 @@ export default class XRHandTouch {
 			handSpace.userData.jointsTouching = []
 		}
 
-		if (handSpace.userData.jointsTouching.indexOf(i) < 0) {
+		if (!handSpace.userData.jointsTouching.includes(i)) {
 			handSpace.userData.jointsTouching.push[i]
 		}
 	}
 
 	removeJointFromTouchingArray(handSpace: Group, i: number) {
-		if (handSpace.userData.jointsTouching.indexOf(i) > 0) {
+		if (handSpace.userData.jointsTouching.includes(i)) {
 			handSpace.userData.jointsTouching.splice(handSpace.userData.jointsTouching.indexOf(i), 1)
 		}
 	}
@@ -969,7 +969,7 @@ export default class XRHandTouch {
 	getJointOrigin(joint: Group, jointIndex: number, handProfile: string, handedness: string): Vector3 {
 		let origin: Vector3 = new Vector3().setFromMatrixPosition(joint.matrixWorld)
 
-		if (handProfile === XRDefaults.HAND_PROFILE_OCULUS && XRHandJointIndices.TIP.indexOf(jointIndex) > -1) {
+		if (handProfile === XRDefaults.HAND_PROFILE_OCULUS && XRHandJointIndices.TIP.includes(jointIndex)) {
 			const tipOriginOffset: number = this.getTipOriginOffset(handedness)
 			origin = new Vector3(tipOriginOffset, 0, 0).applyMatrix4(joint.matrixWorld)
 		}

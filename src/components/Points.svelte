@@ -306,7 +306,7 @@ This is a **svelthree** _Points_ Component.
 
 		console.warn("SVELTHREE > Points : (BVH) Using BVH!")
 
-		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") > -1) {
+		if (Object.keys(BufferGeometry.prototype).includes("computeBoundsTree")) {
 			if (verbose && log_dev)
 				console.debug(...c_dev(c_name, "Using BVH, points.matrixWorld: ", points.matrixWorld))
 

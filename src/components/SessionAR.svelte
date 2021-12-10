@@ -68,7 +68,7 @@ This is a **svelthree** _SessionAR_ Component.
 
 	function updateHitTestMode(): void {
 		if (hitTestMode === XRDefaults.HITTEST_MODE_REALWORLD) {
-			if (requiredFeatures.indexOf("hit-test") > -1) {
+			if (requiredFeatures.includes("hit-test")) {
 				$svelthreeStores[sti].xr.hitTestMode = hitTestMode
 			} else {
 				console.warn(

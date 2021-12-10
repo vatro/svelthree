@@ -298,7 +298,7 @@ This is a **svelthree** _Mesh_ Component.
 		// Using pre-made functions, see https://github.com/gkjohnson/three-mesh-bvh
 		console.warn("SVELTHREE > Mesh : BVH -> Using BVH!")
 
-		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") > -1) {
+		if (Object.keys(BufferGeometry.prototype).includes("computeBoundsTree")) {
 			if (verbose && log_dev) console.debug(...c_dev(c_name, "Using BVH, mesh.matrixWorld: ", mesh.matrixWorld))
 
 			// TOFIX  TODO  BVH needs more love and documentation!

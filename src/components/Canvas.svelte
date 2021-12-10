@@ -244,7 +244,7 @@ This is a **svelthree** _Canvas_ Component.
 		$svelthreeStores[sti].useBVH = useBVH
 
 		//if (!BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
-		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") < 0) {
+		if (!Object.keys(BufferGeometry.prototype).includes("computeBoundsTree")) {
 			// backup original raycast function
 			originalThreeRaycastFunction = Mesh.prototype.raycast
 
