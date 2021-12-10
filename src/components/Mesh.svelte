@@ -42,7 +42,12 @@ This is a **svelthree** _Mesh_ Component.
 		SvelthreeInteractionVRHands
 	} from "../components-internal"
 	import { XRDefaults } from "../constants"
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
+	import type {
+		OnlyWritableNonFunctionPropsPlus,
+		OnlyWritableNonFunctionProps,
+		PropBlackList,
+		SvelthreeAnimationFunction
+	} from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { PropUtils, StoreUtils, SvelthreeProps } from "../utils"
 	import type { XrSessionVRInputType } from "../xr/types-svelthree"
@@ -112,7 +117,14 @@ This is a **svelthree** _Mesh_ Component.
 	let generate = false
 	export let mesh: Mesh = undefined
 
-	export let material: Material | Material[] = undefined
+	// Generic Material type and props
+	// COOL!  This is possible now! see https://github.com/sveltejs/language-tools/issues/442#issuecomment-977803507
+	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
+	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
+	type AnyMaterial = $$Generic<Material | Material[]>
+	type AnyMaterialProps = OnlyWritableNonFunctionProps<Omit<AnyMaterial, PropBlackList>>
+
+	export let material: AnyMaterial = undefined
 	export let geometry: BufferGeometry = undefined
 
 	if (mesh) {
@@ -130,7 +142,7 @@ This is a **svelthree** _Mesh_ Component.
 			}
 
 			if (mesh.material) {
-				material = mesh.material
+				material = mesh.material as AnyMaterial
 			} else {
 				console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh })
 			}
@@ -227,22 +239,6 @@ This is a **svelthree** _Mesh_ Component.
 		}
 	}
 
-	/*
-     TODO `mat` shorthand attribute:
-
-     Recommended (workaround / see below): Assign a typed object for correct code completion / list of available properties, for example:
-
-     ```javascript
-     const meshStdMatProps: MeshStandardMaterialParameters = { ... }
-     <Mesh mat={meshStdMatProps} />
-     ```
-     It would be nice if we could get correct code completion of available properties based on the `material` attribute value / specified Material
-     Unfortunately this doesn't seem to be possible atm due to [Svelte language-tools limitations](https://github.com/sveltejs/language-tools/issues/442). 🤔
-     Any help / hints concerning this issue are very welcome! 👍
-    */
-
-	/** Shorthand attribute for specifying / mutating **Material properties**. */
-
 	export let mau: boolean = undefined
 
 	$: if (mesh) {
@@ -275,7 +271,12 @@ This is a **svelthree** _Mesh_ Component.
 
 	let sMat: SvelthreeProps
 	$: !sMat && material ? (sMat = new SvelthreeProps(material)) : null
-	export let mat: { [key: string]: any } = undefined
+
+	// Generic Material props
+	// COOL!  This works now! 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
+	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
+	export let mat: { [P in keyof AnyMaterialProps]: AnyMaterialProps[P] } = undefined
+
 	$: mat && sMat ? sMat.update(mat) : null
 
 	// reactive updating props
