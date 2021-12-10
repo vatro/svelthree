@@ -7,6 +7,7 @@ import type { Light, Material, Object3D } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types-extra"
 import type { default as Empty } from "./components/Empty.svelte"
+import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
  * Containes public static methods for checking types of properties.
@@ -26,10 +27,6 @@ export default class PropUtils {
 
 	public static warn(message: string) {
 		console.warn(message)
-	}
-
-	public static log(): boolean {
-		return false
 	}
 
 	public static isPropType(p: any): boolean {
@@ -111,11 +108,11 @@ export default class PropUtils {
 	public static setRotationFromValue(obj: Object3D, val: any, complex?: ComplexValueType): void {
 		/*
 			console.warn(
-				"SVELTHREE > PropUtils > setRotationFromValue! obj.matrixAutoUpdate before!",
+				"[ PropUtils ] -> setRotationFromValue! obj.matrixAutoUpdate before!",
 				obj.matrixAutoUpdate
 			)
 			*/
-		// console.warn("SVELTHREE > PropUtils > setRotationFromValue!")
+		// console.warn("[ PropUtils ] -> setRotationFromValue!")
 		//PropUtils.inferMatrixAutoUpdate(obj, true)
 
 		switch (complex) {
@@ -137,7 +134,7 @@ export default class PropUtils {
 						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
 						: PropUtils.isQuaternionParamsArray(val)
 						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
-						: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
+						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
 								value: val
 						  })
@@ -148,7 +145,7 @@ export default class PropUtils {
 						? PropUtils.setRotVector3(obj, val)
 						: PropUtils.isQuaternion(val)
 						? PropUtils.setRotQuaternion(obj, val)
-						: console.error("SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value!", {
+						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
 								value: val
 						  })
@@ -174,7 +171,7 @@ export default class PropUtils {
 				break
 			default:
 				console.error(
-					"SVELTHREE > PropUtils > setRotationFromValue : invalid 'rotation' value! No such 'ComplexValueType'!",
+					"[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value! No such 'ComplexValueType'!",
 					{
 						obj: obj,
 						value: val,
@@ -189,32 +186,32 @@ export default class PropUtils {
 
 		/*
 			console.warn(
-				"SVELTHREE > PropUtils > setRotationFromValue! obj.matrixAutoUpdate after!",
+				"[ PropUtils ] -> setRotationFromValue! obj.matrixAutoUpdate after!",
 				obj.matrixAutoUpdate
 			)
 			*/
 	}
 
 	public static setRotEuler(obj: Object3D, val: Euler): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotEuler : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotEuler : ", { obj, val })
 		//obj.setRotationFromEuler(val as Euler)
 		PropUtils.executeDecoratedMAU(obj, () => obj.setRotationFromEuler(val as Euler))
 	}
 
 	public static setRotEulerArray(obj: Object3D, val: Parameters<Euler["set"]>): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotEulerArray : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotEulerArray : ", { obj, val })
 		//obj.rotation.set(val[0], val[1], val[2], val[3])
 		PropUtils.executeDecoratedMAU(obj, () => obj.rotation.set(val[0], val[1], val[2], val[3]))
 	}
 
 	public static setRotVector3(obj: Object3D, val: Vector3): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotVector3 : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotVector3 : ", { obj, val })
 		//obj.rotation.set(val.x, val.y, val.z)
 		PropUtils.executeDecoratedMAU(obj, () => obj.rotation.set(val.x, val.y, val.z))
 	}
 
 	public static setRotArray3(obj: Object3D, val: Parameters<Vector3["set"]>): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotQuaternion : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotQuaternion : ", { obj, val })
 		//obj.rotation.set(val[0], val[1], val[2])
 		//console.time("setRotArray3")
 
@@ -238,7 +235,7 @@ export default class PropUtils {
 	}
 
 	public static setRot(obj: Object3D, val: Euler | Parameters<Euler["set"]>): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRot : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRot : ", { obj, val })
 
 		obj.rotation.set(val[0], val[1], val[2])
 		obj.matrixAutoUpdate = true
@@ -246,13 +243,15 @@ export default class PropUtils {
 	}
 
 	public static setRotQuaternion(obj: Object3D, val: Quaternion): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotQuaternion : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotQuaternion : ", { obj, val })
 		//obj.setRotationFromQuaternion(val)
 		PropUtils.executeDecoratedMAU(obj, () => obj.setRotationFromQuaternion(val))
 	}
 
 	public static setRotQuaternionArray(obj: Object3D, val: Parameters<Quaternion["set"]>): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setRotQuaternionArray : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setRotQuaternionArray : ", { obj, val })
+		}
 		//obj.quat.set(val[0], val[1], val[2], val[3])
 		PropUtils.executeDecoratedMAU(obj, () => obj.quaternion.set(val[0], val[1], val[2], val[3]))
 	}
@@ -261,15 +260,17 @@ export default class PropUtils {
 		obj: Object3D,
 		val: Vector3 | Parameters<Vector3["set"]>,
 		complex?: ComplexValueType
-	): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setPositionFromValue : ", { obj, val, complex })
+	): any {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setPositionFromValue : ", { obj, val, complex })
+		}
 		switch (complex) {
 			case undefined:
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
 					? PropUtils.setPositionFromVector3(obj, val as Vector3)
-					: console.error("SVELTHREE > PropUtils > setPositionFromValue : invalid 'position' value!", {
+					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
 							value: val
 					  })
@@ -282,7 +283,7 @@ export default class PropUtils {
 				break
 			default:
 				console.error(
-					"SVELTHREE > PropUtils > setPositionFromValue : invalid 'position' value! No such 'ComplexValueType'!",
+					"[ PropUtils ] -> setPositionFromValue : invalid 'position' value! No such 'ComplexValueType'!",
 					{
 						obj: obj,
 						value: val,
@@ -294,12 +295,16 @@ export default class PropUtils {
 	}
 
 	public static setPositionFromVector3(obj: Object3D, val: Vector3) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setPositionFromVector3 : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setPositionFromVector3 : ", { obj, val })
+		}
 		PropUtils.executeDecoratedMAU(obj, () => obj.position.copy(val))
 	}
 
 	public static setPositionFromArray3(obj: Object3D, val: Parameters<Vector3["set"]>) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setPositionFromArray3 : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setPositionFromArray3 : ", { obj, val })
+		}
 		//console.time("setPositionFromArray3")
 		//if(obj.type?.includes("Camera")) { debugger }
 		PropUtils.executeDecoratedMAU(obj, () => obj.position.set(val[0], val[1], val[2]))
@@ -311,14 +316,16 @@ export default class PropUtils {
 		val: Vector3 | Parameters<Vector3["set"]>,
 		complex?: ComplexValueType
 	): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setScaleFromValue : ", { obj, val, complex })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setScaleFromValue : ", { obj, val, complex })
+		}
 		switch (complex) {
 			case undefined:
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
 					? PropUtils.setScaleFromVector3(obj, val as Vector3)
-					: console.error("SVELTHREE > PropUtils > setScaleFromValue : invalid 'scale' value!", {
+					: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
 							obj: obj,
 							value: val
 					  })
@@ -331,7 +338,7 @@ export default class PropUtils {
 				break
 			default:
 				console.error(
-					"SVELTHREE > PropUtils > setScaleFromValue : invalid 'scale' value! No such 'ComplexValueType'!",
+					"[ PropUtils ] -> setScaleFromValue : invalid 'scale' value! No such 'ComplexValueType'!",
 					{
 						obj: obj,
 						value: val,
@@ -343,19 +350,19 @@ export default class PropUtils {
 	}
 
 	public static setScaleFromVector3(obj: Object3D, val: Vector3) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setScaleFromArray3 : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromArray3 : ", { obj, val })
 		PropUtils.executeDecoratedMAU(obj, () => obj.scale.copy(val as Vector3))
 	}
 
 	public static setScaleFromArray3(obj: Object3D, val: Parameters<Vector3["set"]>) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setScaleFromArray3 : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromArray3 : ", { obj, val })
 		//console.time("setScaleFromArray3")
 		PropUtils.executeDecoratedMAU(obj, () => obj.scale.set(val[0], val[1], val[2]))
 		//console.timeEnd("setScaleFromArray3")
 	}
 
 	public static executeDecoratedMAU(obj: Object3D, fn: () => void) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > executeDecoratedMAU!")
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> executeDecoratedMAU!")
 
 		/*
 		.matrixAutoUpdate : Boolean
@@ -363,21 +370,21 @@ export default class PropUtils {
 		and also recalculates the matrixWorld property. Default is Object3D.DefaultMatrixAutoUpdate (true).
 		*/
 		//PropUtils.inferMatrixAutoUpdate(obj, true)
-		//if (PropUtils.log()) console.log("SVELTHREE > PropUtils > executeDecoratedMAU! AFTER INFER obj.matrixAutoUpdate:", obj.matrixAutoUpdate)
+		//if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> executeDecoratedMAU! AFTER INFER obj.matrixAutoUpdate:", obj.matrixAutoUpdate)
 
 		fn()
 
 		// we got to update matrix if 'matrixAutoUpdate' is false
 		if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 		/*
-		if (PropUtils.log())
-			console.log(
-				"SVELTHREE > PropUtils > executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixAutoUpdate:",
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug(
+				"[ PropUtils ] -> executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixAutoUpdate:",
 				obj.matrixAutoUpdate
 			)
-		if (PropUtils.log())
-			console.log(
-				"SVELTHREE > PropUtils > executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixWorldNeedsUpdate:",
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug(
+				"[ PropUtils ] -> executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixWorldNeedsUpdate:",
 				obj.matrixWorldNeedsUpdate
 			)
 			*/
@@ -409,7 +416,7 @@ export default class PropUtils {
 
 	*/
 	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setLookAtFromValue!", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLookAtFromValue!", { obj, val })
 		//if(obj.type.includes("Camera")) debugger
 
 		// IMPORTANT  update Matrix before setting `lookAt`--> lookAt has to be applied as last.
@@ -441,7 +448,7 @@ export default class PropUtils {
 								// target has no parent, add target to parent of obj
 								obj.parent.add(obj["target"])
 								console.warn(
-									`SVELTHREE > PropUtils > setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
+									`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
 									{ obj, target: obj["target"] }
 								)
 
@@ -450,7 +457,7 @@ export default class PropUtils {
 							} else {
 								// obj has no parent
 								console.error(
-									`SVELTHREE > PropUtils > setLookAtFromValue : 'target' of ${obj.type} couldn't be added to the parent of ${obj.type}! ${obj.type} has no parent!`,
+									`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} couldn't be added to the parent of ${obj.type}! ${obj.type} has no parent!`,
 									{ obj, target: obj["target"] }
 								)
 							}
@@ -460,21 +467,15 @@ export default class PropUtils {
 						}
 					} else {
 						// target is not Object3D
-						console.error(
-							`SVELTHREE > PropUtils > setLookAtFromValue : 'target' has to be an 'Object3D'!`,
-							{
-								obj,
-								target: obj["target"]
-							}
-						)
+						console.error(`[ PropUtils ] -> setLookAtFromValue : 'target' has to be an 'Object3D'!`, {
+							obj,
+							target: obj["target"]
+						})
 					}
 				} else {
-					console.error(
-						`SVELTHREE > PropUtils > setLookAtFromValue : ${obj.type} has no 'target' property!`,
-						{
-							obj
-						}
-					)
+					console.error(`[ PropUtils ] -> setLookAtFromValue : ${obj.type} has no 'target' property!`, {
+						obj
+					})
 				}
 			} else {
 				if (PropUtils.isArray3Nums(tVal)) {
@@ -484,14 +485,14 @@ export default class PropUtils {
 					obj.lookAt(tVal as Vector3)
 					if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 				} else {
-					console.error("SVELTHREE > PropUtils > setLookAtFromValue : invalid 'lookAt' value!", {
+					console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 						obj: obj,
 						value: tVal
 					})
 				}
 			}
 		} else {
-			console.error("SVELTHREE > PropUtils > setLookAtFromValue : invalid 'lookAt' value!", {
+			console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 				obj: obj,
 				value: tVal
 			})
@@ -500,7 +501,7 @@ export default class PropUtils {
 
 	/*
 	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setLookAtFromValue : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLookAtFromValue : ", { obj, val })
 
 		PropUtils.inferMatrixAutoUpdate(obj, true)
 
@@ -511,7 +512,7 @@ export default class PropUtils {
 				// we got to update matrix if 'matrixAutoUpdate' is false
 
 				// obj['target'].matrixAutoUpdate is 'true' by default!
-				// console.log("SVELTHREE > PropUtils > setLookAtFromValue : obj['target'].matrixAutoUpdate ", obj['target'].matrixAutoUpdate)
+				// console.debug("[ PropUtils ] -> setLookAtFromValue : obj['target'].matrixAutoUpdate ", obj['target'].matrixAutoUpdate)
 
 				//if (obj["target"].matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj["target"])
 				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
@@ -544,7 +545,7 @@ export default class PropUtils {
 				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 			}
 		} else {
-			console.error("SVELTHREE > PropUtils > setLookAtFromValue : invalid 'lookAt' value!", {
+			console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 				obj: obj,
 				value: val
 			})
@@ -559,7 +560,9 @@ export default class PropUtils {
 		key: string,
 		complex?: ComplexValueType
 	) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setColorFromValueKey : ", { obj, val, key, complex })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromValueKey : ", { obj, val, key, complex })
+		}
 		PropUtils.isArray3Nums(val)
 			? PropUtils.setColorFromArray(obj, val, key)
 			: !isNaN(val)
@@ -568,64 +571,82 @@ export default class PropUtils {
 			? PropUtils.setColorFromColor(obj, val, key)
 			: typeof val === "string"
 			? PropUtils.setColorFromString(obj, val, key)
-			: console.error(`SVELTHREE > PropUtils > setColorFromValueKey : invalid '${key}' value!`, {
+			: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
 					obj: obj,
 					value: val
 			  })
 	}
 
 	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setColorFromArray : ", { obj, val, key })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromArray : ", { obj, val, key })
+		}
 		obj[key].setRGB(val[0], val[1], val[2])
 	}
 
 	public static setColorFromNumber(obj: Object3D | Material, val: number, key: string) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setColorFromNumber : ", { obj, val, key })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromNumber : ", { obj, val, key })
+		}
 		obj[key].set(val)
 	}
 
 	public static setColorFromColor(obj: Object3D | Material, val: Color, key: string) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setColorFromColor : ", { obj, val, key })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromColor : ", { obj, val, key })
+		}
 		// only copy the received Color in order to prevent circular binding to the prop
 		obj[key].copy(val)
 	}
 
 	public static setColorFromString(obj: Object3D | Material, val: string, key: string) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setColorFromString : ", { obj, val, key })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromString : ", { obj, val, key })
+		}
 		obj[key].set(val)
 	}
 
 	// Light specific
 
 	public static setIntensity(light: Light, val: number) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setIntensity : ", { light, val })
+		if (verbose_mode() && log_prop_utils(light)) console.debug("[ PropUtils ] -> setIntensity : ", { light, val })
 		light.intensity = val
 	}
 
 	public static setShadowMapSize(light: LightWithShadow, shadowMapSize: number) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setShadowMapSize : ", { light, shadowMapSize })
+		if (verbose_mode() && log_prop_utils(light)) {
+			console.debug("[ PropUtils ] -> setShadowMapSize : ", { light, shadowMapSize })
+		}
 		light.shadow.mapSize.width = shadowMapSize
 		light.shadow.mapSize.height = shadowMapSize
 	}
 
 	public static setShadowBias(light: LightWithShadow, shadowBiasSize: number): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setShadowBias : ", { light, shadowBiasSize })
+		if (verbose_mode() && log_prop_utils(light)) {
+			console.debug("[ PropUtils ] -> setShadowBias : ", { light, shadowBiasSize })
+		}
 		light.shadow.bias = shadowBiasSize
 	}
 
 	public static setCastShadow(light: LightWithShadow, castShadow: boolean): void {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setCastShadow : ", { light, castShadow })
+		if (verbose_mode() && log_prop_utils(light)) {
+			console.debug("[ PropUtils ] -> setCastShadow : ", { light, castShadow })
+		}
 		light.castShadow = castShadow
 	}
 
 	public static setShadowCameraProp(light: LightWithShadow, key: string, val: any) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setShadowCameraProp : ", { light, key, val })
+		if (verbose_mode() && log_prop_utils(light)) {
+			console.debug("[ PropUtils ] -> setShadowCameraProp : ", { light, key, val })
+		}
 		light.shadow.camera[key] = val
 		light.shadow.camera.updateProjectionMatrix()
 	}
 
 	public static setShadowProp(light: Light, key: string, val: any) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setShadowProp : ", { light, key, val })
+		if (verbose_mode() && log_prop_utils(light)) {
+			console.debug("[ PropUtils ] -> setShadowProp : ", { light, key, val })
+		}
 		light.shadow[key] = val
 		light.shadow.needsUpdate = true
 	}
@@ -634,11 +655,11 @@ export default class PropUtils {
 	 * ☝️ Expects the value (`target`) to be an instance of Empty.getEmpty() : Object3D component!
 	 */
 	public static setLightTarget(obj: Object3D, val: Object3D | Empty) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setLightTarget : ", { obj, val })
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val })
 		if (!val) {
-			console.warn(`SVELTHREE > PropUtils > setLightTarget : invalid 'target' value!`, { val })
+			console.warn(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
 			/*
-				console.error(`SVELTHREE > PropUtils > setLightTarget : invalid '${key}' value!`, {
+				console.error(`[ PropUtils ] -> setLightTarget : invalid '${key}' value!`, {
 					obj: obj,
 					value: val
 				})
@@ -655,7 +676,7 @@ export default class PropUtils {
 				obj["target"] = obj3d
 				PropUtils.updateMatrixAndWorldMatrix(obj3d)
 			} else {
-				console.error(`SVELTHREE > PropUtils > setLightTarget : invalid 'target' value!`, { val })
+				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
 			}
 		}
 	}
@@ -682,14 +703,14 @@ export default class PropUtils {
 	 * Applying transformations via `position`, `rotation`, `scale` etc. will automatically set `matrixAutoUpdate` to `true` again.
 	 */
 	public static setMatrixFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		// console.warn("SVELTHREE > PropUtils > obj.matrixAutoUpdate before!", obj.matrixAutoUpdate)
-		// console.warn("SVELTHREE > PropUtils > setMatrixFromValue!", {obj:obj, val:val})
+		// console.warn("[ PropUtils ] -> obj.matrixAutoUpdate before!", obj.matrixAutoUpdate)
+		// console.warn("[ PropUtils ] -> setMatrixFromValue!", {obj:obj, val:val})
 
 		if (PropUtils.isMatrix4(val)) {
 			// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
 			//mesh.applyMatrix4(matrix)
 
-			//console.warn("SVELTHREE > PropUtils > setMatrixFromValue! is Matrix4 BEFORE", {obj:obj, val:val, m: obj.matrix})
+			//console.warn("[ PropUtils ] -> setMatrixFromValue! is Matrix4 BEFORE", {obj:obj, val:val, m: obj.matrix})
 
 			// save initial `matrixAutoUpdate` value
 			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
@@ -705,7 +726,7 @@ export default class PropUtils {
 			// mark for matrixWorld update (as if we did updateMatrix())
 			obj.matrixWorldNeedsUpdate = true
 
-			//console.warn("SVELTHREE > PropUtils > setMatrixFromValue! is Matrix4 AFTER", {obj:obj, val:val, m: obj.matrix})
+			//console.warn("[ PropUtils ] -> setMatrixFromValue! is Matrix4 AFTER", {obj:obj, val:val, m: obj.matrix})
 		} else if (PropUtils.isMatrix4ParamsArray(val)) {
 			// save initial `matrixAutoUpdate` value
 			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
@@ -722,19 +743,21 @@ export default class PropUtils {
 			// mark for matrixWorld update (as if we did updateMatrix())
 			obj.matrixWorldNeedsUpdate = true
 		} else {
-			console.error(`SVELTHREE > PropUtils > setMatrixFromValue : invalid 'matrix' value!`, {
+			console.error(`[ PropUtils ] -> setMatrixFromValue : invalid 'matrix' value!`, {
 				obj: obj,
 				value: val
 			})
 		}
 
 		PropUtils.inferMatrixAutoUpdate(obj, false)
-		//console.warn("SVELTHREE > PropUtils > obj.matrixAutoUpdate after!", obj.matrixAutoUpdate)
-		//console.warn("SVELTHREE > PropUtils > setMatrixFromValue! AFTER", { obj: obj, val: val, m: obj.matrix })
+		//console.warn("[ PropUtils ] -> obj.matrixAutoUpdate after!", obj.matrixAutoUpdate)
+		//console.warn("[ PropUtils ] -> setMatrixFromValue! AFTER", { obj: obj, val: val, m: obj.matrix })
 	}
 
 	public static setQuaternionFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > setLightTarget : ", { obj, val, complex })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val, complex })
+		}
 
 		PropUtils.inferMatrixAutoUpdate(obj, true)
 
@@ -750,7 +773,7 @@ export default class PropUtils {
 			// we got to update matrix if 'matrixAutoUpdate' is false
 			if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 		} else {
-			console.error(`SVELTHREE > PropUtils > setQuaternionFromValue : invalid 'quat' value!`, {
+			console.error(`[ PropUtils ] -> setQuaternionFromValue : invalid 'quat' value!`, {
 				obj: obj,
 				value: val
 			})
@@ -758,14 +781,16 @@ export default class PropUtils {
 	}
 
 	public static applyValueToProp(obj: any, val: any, key: string, complex?: ComplexValueType) {
-		if (PropUtils.log()) console.log("SVELTHREE > PropUtils > applyValueToProp : ", { obj, val, key, complex })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> applyValueToProp : ", { obj, val, key, complex })
+		}
 		// v1
 		try {
 			obj[key] = val
 			// TODO  Nail it / write down why we don't need this.
 			//if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 		} catch (error) {
-			console.error(`SVELTHREE > PropUtils > applyValueToProp : failed!`, { obj: obj, value: val, key: key })
+			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj: obj, value: val, key: key })
 			throw new Error("SVELTHREE Exception! " + error)
 		}
 
@@ -795,20 +820,21 @@ export default class PropUtils {
 		updateMethod: any,
 		obj: any
 	): void {
-		if (PropUtils.log())
-			console.log("SVELTHREE > PropUtils > updateProps : ", { keysToUpdate, newProps, updateMethod, obj })
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> updateProps : ", { keysToUpdate, newProps, updateMethod, obj })
+		}
 		for (let i = 0; i < keysToUpdate.length; i++) {
 			const key: string = keysToUpdate[i]
 			const val: any = newProps[key]
 
 			// 👇 condition prevents double updating on complex type value recreation!
 			if (!PropUtils.isPropType(val)) {
-				//console.log(`SVELTHREE > PropUtils > updateProps!`, { key: key, value: val })
+				//console.debug(`[ PropUtils ] -> updateProps!`, { key: key, value: val })
 				updateMethod(obj, key, val)
 			} else {
 				/*
 				console.warn(
-					`SVELTHREE > PropUtils > updateProps > skipped updating "${key}" beacuse it's a complex type handled by a specific Prop component!`,
+					`[ PropUtils ] -> updateProps > skipped updating "${key}" beacuse it's a complex type handled by a specific Prop component!`,
 					{ key: key, value: val }
 				)
 				*/

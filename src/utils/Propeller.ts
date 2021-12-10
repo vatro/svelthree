@@ -6,6 +6,7 @@ import type { WebGLCubeRenderTarget } from "three"
 import PropUtils from "./PropUtils"
 import { has_prop } from "svelte/internal"
 import type { ComplexValueType } from "../types-extra"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class Propeller {
 	public static getObjectType(obj: any): string {
@@ -61,12 +62,12 @@ export default class Propeller {
 				default:
 					if (objType === "WebGLCubeRenderTarget") {
 						/*
-										console.info(
+										if (verbose_mode()) { console.debug(
 											"SVELTHREE > " +
 												this.objTypeStr +
 												" : properties provided via 'props' will override other shorthand props!, p:",
 											p
-										)
+										)}
 										*/
 						let cubeRenderTarget = obj as WebGLCubeRenderTarget
 						cubeRenderTarget.texture[key] = value

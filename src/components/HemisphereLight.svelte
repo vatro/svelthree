@@ -16,11 +16,24 @@ This is a **svelthree** _HemisphereLight_ Component.
      Position is set equal to Object3D.DefaultUp (0, 1, 0), so that the light shines from the top down.
     */
 
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import { HemisphereLight, HemisphereLightHelper, Object3D, Scene } from "three"
 	import { Light } from "../components-internal"
 	import type { SvelthreeAnimationFunction } from "../types-extra"
 	import { LightUtils } from "../utils"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let props: { [key: string]: any } = undefined
 
@@ -48,6 +61,7 @@ This is a **svelthree** _HemisphereLight_ Component.
 
 	let light = new HemisphereLight()
 	light.name = name
+	light.userData.svelthreeComponent = self
 
 	export let helper: boolean = undefined
 
@@ -57,11 +71,19 @@ This is a **svelthree** _HemisphereLight_ Component.
 	$: light && light.userData.helper && !helper ? LightUtils.removeHelper(light, scene) : null
 
 	onMount(() => {
-		console.info(`SVELTHREE > onMount : ${light.type}`)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			LightUtils.removeHelper(light, scene)
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 
 	// public methods
@@ -83,4 +105,4 @@ This is a **svelthree** _HemisphereLight_ Component.
 	}
 </script>
 
-<Light {scene} {parent} {light} {props} {intensity} {animation} {aniauto} />
+<Light {scene} {parent} {light} {props} {intensity} {animation} {aniauto} {log_dev} {log_rs} {log_lc} {log_mau} />

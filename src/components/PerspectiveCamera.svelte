@@ -31,15 +31,28 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 <script lang="ts">
 	// #region --- Imports
 
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
 	import type { Object3D } from "three"
 	import { CameraHelper, Euler, Matrix4, PerspectiveCamera, Quaternion, Scene, Vector3 } from "three"
 	import { Camera } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { CameraUtils, StoreUtils } from "../utils"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
 	// #endregion
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// #region --- Required Attributes
 	export let scene: Scene
@@ -58,6 +71,7 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	// #endregion
 
 	// #region --- Optional Attributes
+	export let name: string = undefined
 
 	/**
 	 * Initializes the PerspectiveCamera with user provided three.js-native
@@ -97,7 +111,20 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	/** Creates and adds a CameraHelper. */
 	export let helper: boolean = undefined
 
-	$: cam && !cam.userData.helper && helper ? CameraUtils.createHelper(cam, scene) : null
+	$: {
+		if (cam && !cam.userData.helper && helper) {
+			const camHelper: CameraHelper = CameraUtils.createHelper(cam, scene)
+
+			if (verbose && log_rs) {
+				console.debug(c_name, `[${cam.type}] + HELPER added!`, {
+					camHelper,
+					scene,
+					total: scene.children.length
+				})
+			}
+		}
+	}
+
 	$: cam && cam.userData.helper && !helper ? CameraUtils.removeHelper(cam, scene) : null
 
 	// #endregion
@@ -114,6 +141,9 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	} else {
 		cam = new PerspectiveCamera()
 	}
+
+	cam.name = name
+	cam.userData.svelthreeComponent = self
 
 	// #endregion
 
@@ -170,11 +200,19 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	// #region --- Lifecycle
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : " + cam.type)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			console.info("SVELTHREE > onDestroy : " + cam.type)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			CameraUtils.removeHelper(cam, scene)
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 
 	// #endregion
@@ -196,4 +234,8 @@ This is a **svelthree** _PerspectiveCamera_ Component.
 	{props}
 	{animation}
 	{aniauto}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

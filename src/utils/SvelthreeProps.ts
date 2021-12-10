@@ -13,6 +13,7 @@ import { not_equal } from "svelte/internal"
 import Propeller from "./Propeller"
 import PropUtils from "./PropUtils"
 import type { ComplexValueType } from "../types-extra"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 type ComplexValueItem = {
 	key: string
@@ -46,7 +47,7 @@ export default class SvelthreeProps {
 	}
 
 	public update(props: { [key: string]: any }) {
-		//console.log("SvelthreeProps2 > onProps!")
+		//if (verbose_mode()) console.debug("SvelthreeProps2 > onProps!")
 		//if(this.obj.type?.includes("Material")) { debugger }
 		//if(this.obj.type?.includes("Camera")) { debugger }
 		if (this.propsPrev) {
@@ -96,7 +97,7 @@ export default class SvelthreeProps {
 	}
 
 	checkProps(props: { [key: string]: any }) {
-		//console.log("SVELTHREE > SvelthreeProps2x > checkProps!")
+		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeProps2x > checkProps!")
 		//if(this.obj.type?.includes("Material")) { debugger }
 		//if(this.obj.type?.includes("Camera")) { debugger }
 		// check complex props
@@ -114,7 +115,7 @@ export default class SvelthreeProps {
 			//v1
 
 			if (not_equal(this.simpleValues[k], props[k])) {
-				//console.log("SVELTHREE > SvelthreeProps2x > checkProps > not_equal!", {k, "this.simpleValues[k]": this.simpleValues[k], "props[k]": props[k]})
+				//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeProps2x > checkProps > not_equal!", {k, "this.simpleValues[k]": this.simpleValues[k], "props[k]": props[k]})
 				Propeller.update(this.obj, k, props[k])
 				this.simpleValues[k] = props[k]
 			}

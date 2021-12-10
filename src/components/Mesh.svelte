@@ -47,17 +47,22 @@ This is a **svelthree** _Mesh_ Component.
 	import { PropUtils, StoreUtils, SvelthreeProps } from "../utils"
 	import type { XrSessionVRInputType } from "../xr/types-svelthree"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// SvelthreeAnimation Component's reference
 	let ani: any
 
-	const self = get_current_component()
 	const dispatch = createEventDispatcher()
 
 	// construction
@@ -127,11 +132,11 @@ This is a **svelthree** _Mesh_ Component.
 			if (mesh.material) {
 				material = mesh.material
 			} else {
-				console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh: mesh })
+				console.warn("SVELTHREE > Mesh : Mesh provided, but has no material!", { mesh })
 			}
 
-			if (logInfo) console.info("SVELTHREE > Mesh : Saved geometry:", { geometry: geometry })
-			if (logInfo) console.info("SVELTHREE > Mesh : Saved material:", { material: material })
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Saved geometry:", { geometry }))
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Saved material:", { material }))
 
 			mesh.userData.initScale = mesh.scale.x
 		}
@@ -180,12 +185,12 @@ This is a **svelthree** _Mesh_ Component.
 	$: geometry && generate ? onGeometryProvided() : null
 
 	function onGeometryProvided() {
-		if (logInfo) console.info("SVELTHREE > Mesh : Geometry provided!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Geometry provided!"))
 		tryGeometryUpdate()
 	}
 
 	$: if (material && generate) {
-		if (logInfo) console.info("SVELTHREE > Mesh : Material provided!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Material provided!"))
 		tryMaterialUpdate()
 	}
 
@@ -204,13 +209,13 @@ This is a **svelthree** _Mesh_ Component.
 		mesh.userData.initScale = mesh.scale.x
 		mesh.userData.svelthreeComponent = self
 
-		if (logInfo) console.info("SVELTHREE > Mesh : " + geometry.type + " created!", { mesh: mesh })
-		if (logInfo) console.info("SVELTHREE > Mesh : saved 'geometry' (generated):", geometry)
-		if (logInfo) console.info("SVELTHREE > Mesh : saved 'material' (generated):", material)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (generated):", geometry))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'material' (generated):", material))
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: mesh ? tryAddingMesh() : console.error("SVELTHREE > Mesh : mesh was not created!")
+	$: mesh ? tryAddingMesh() : console.error("SVELTHREE > Mesh : 'mesh' was not created!")
 
 	export let userData: { [key: string]: any } = undefined
 
@@ -286,15 +291,15 @@ This is a **svelthree** _Mesh_ Component.
 
 	// compute / recompute BVH
 	$: if (useBVH && geometry) {
-		console.log("%c--------> Mesh > reactive statement! useBVH && geometry", `${css_rs}`, useBVH, geometry)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "useBVH && geometry", { useBVH, geometry }))
 
 		// use BVH if enabled
 		// if($svelthreeStores[sti].useBVH) {
 		// Using pre-made functions, see https://github.com/gkjohnson/three-mesh-bvh
-		console.warn("SVELTHREE > Mesh : (BVH) Using BVH!")
+		console.warn("SVELTHREE > Mesh : BVH -> Using BVH!")
 
 		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") > -1) {
-			if (logInfo) console.info("SVELTHREE > Mesh : Using BVH, mesh.matrixWorld: ", mesh.matrixWorld)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Using BVH, mesh.matrixWorld: ", mesh.matrixWorld))
 
 			// TOFIX  TODO  BVH needs more love and documentation!
 			// do we nee to something with the geometry here?! (below was uncommented before, but it broke tryMatrixWorldUpdate --> double transformation )
@@ -302,9 +307,9 @@ This is a **svelthree** _Mesh_ Component.
 
 			const geom: BufferGeometryWithBVH = mesh.geometry as BufferGeometryWithBVH
 			geom.computeBoundsTree()
-			if (logInfo) console.info("SVELTHREE > Mesh : (BVH) computeBoundsTree finished, mesh: ", mesh)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> computeBoundsTree finished -> ", { mesh }))
 		} else {
-			console.error("SVELTHREE > Mesh : (BVH) mesh.geometry.computeBoundsTree not available!")
+			console.error("SVELTHREE > Mesh : BVH -> mesh.geometry.computeBoundsTree not available!")
 		}
 		//}
 
@@ -317,13 +322,13 @@ This is a **svelthree** _Mesh_ Component.
                 */
 	} else {
 		if (mesh.geometry.hasOwnProperty("boundsTree")) {
-			if (logInfo) console.info("SVELTHREE > Mesh : (BVH) try disposing boundsTree!", mesh)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> try disposing boundsTree! -> ", { mesh }))
 			if (mesh.geometry.hasOwnProperty("disposeBoundsTree")) {
 				const geom: BufferGeometryWithBVH = mesh.geometry as BufferGeometryWithBVH
 				geom.disposeBoundsTree()
-				if (logInfo) console.info("SVELTHREE > Mesh : (BVH) boundsTree disposed!", mesh)
+				if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> boundsTree disposed! -> ", { mesh }))
 			} else {
-				console.error("SVELTHREE > Mesh : (BVH) mesh.geometry.disposeBoundsTree not available!")
+				console.error("SVELTHREE > Mesh : BVH -> mesh.geometry.disposeBoundsTree not available!")
 			}
 		}
 	}
@@ -335,7 +340,7 @@ This is a **svelthree** _Mesh_ Component.
 	$: props && sProps ? updateProps() : null
 
 	function updateProps() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! props", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
 		sProps.update(props)
 	}
 
@@ -354,27 +359,26 @@ This is a **svelthree** _Mesh_ Component.
 	// Value Type is being checked in PropUtils.
 
 	const w_sh = PropUtils.getShortHandAttrWarnings("SVELTHREE > Mesh >")
-	const wrn = PropUtils.warn
 
 	// IMPORTANT  shorthand attributes will override `props` attribute!
-	//$: !matrix && mesh && pos ? PropUtils.setPositionFromValue(mesh, pos) : pos && mesh ? wrn(w_sh.pos) : null
+	//$: !matrix && mesh && pos ? PropUtils.setPositionFromValue(mesh, pos) : pos && mesh ? console.warn(w_sh.pos) : null
 
-	$: !matrix && mesh && pos ? setPositionFromValue() : pos && mesh ? wrn(w_sh.pos) : null
+	$: !matrix && mesh && pos ? setPositionFromValue() : pos && mesh ? console.warn(w_sh.pos) : null
 
 	function setPositionFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! pos", `${css_rs}`, pos)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", pos))
 		PropUtils.setPositionFromValue(mesh, pos)
 	}
 
-	//$: !matrix && !quat && mesh && rot ? PropUtils.setRotationFromValue(mesh, rot) : rot && mesh ? wrn(w_sh.rot) : null
-	$: !matrix && !quat && mesh && rot ? setRotationFromValue() : rot && mesh ? wrn(w_sh.rot) : null
+	//$: !matrix && !quat && mesh && rot ? PropUtils.setRotationFromValue(mesh, rot) : rot && mesh ? console.warn(w_sh.rot) : null
+	$: !matrix && !quat && mesh && rot ? setRotationFromValue() : rot && mesh ? console.warn(w_sh.rot) : null
 
 	function setRotationFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! rot", `${css_rs}`, rot)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", rot))
 		PropUtils.setRotationFromValue(mesh, rot)
 	}
 
-	//$: !matrix && !quat && mesh && rot ? PropUtils.setRot(mesh, rot) : rot && mesh ? wrn(w_sh.rot) : null
+	//$: !matrix && !quat && mesh && rot ? PropUtils.setRot(mesh, rot) : rot && mesh ? console.warn(w_sh.rot) : null
 
 	// PERFORMANCE  IMPORTANT  NOT BOTTLENECK --> doin this directly like this doesn't significantly improve performance!
 	/*
@@ -385,19 +389,19 @@ This is a **svelthree** _Mesh_ Component.
     }
     */
 
-	//$: !matrix && mesh && quat ? PropUtils.setQuaternionFromValue(mesh, quat) : quat && mesh ? wrn(w_sh.quat) : null
-	$: !matrix && mesh && quat ? setQuaternionFromValue() : quat && mesh ? wrn(w_sh.quat) : null
+	//$: !matrix && mesh && quat ? PropUtils.setQuaternionFromValue(mesh, quat) : quat && mesh ? console.warn(w_sh.quat) : null
+	$: !matrix && mesh && quat ? setQuaternionFromValue() : quat && mesh ? console.warn(w_sh.quat) : null
 
 	function setQuaternionFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! quat", `${css_rs}`, quat)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "quat", quat))
 		PropUtils.setQuaternionFromValue(mesh, quat)
 	}
 
-	//$: !matrix && mesh && scale ? PropUtils.setScaleFromValue(mesh, scale) : scale && mesh ? wrn(w_sh.scale) : null
-	$: !matrix && mesh && scale ? setScaleFromValue() : scale && mesh ? wrn(w_sh.scale) : null
+	//$: !matrix && mesh && scale ? PropUtils.setScaleFromValue(mesh, scale) : scale && mesh ? console.warn(w_sh.scale) : null
+	$: !matrix && mesh && scale ? setScaleFromValue() : scale && mesh ? console.warn(w_sh.scale) : null
 
 	function setScaleFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! scale", `${css_rs}`, scale)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
 		PropUtils.setScaleFromValue(mesh, scale)
 	}
 
@@ -407,11 +411,11 @@ This is a **svelthree** _Mesh_ Component.
     so why this was working is because we're currently calling `updateMatrix` on every `PropUtils` change
     */
 
-	//$: !matrix && mesh && lookAt ? PropUtils.setLookAtFromValue(mesh, lookAt) : lookAt && mesh ? wrn(w_sh.lookAt) : null
-	$: !matrix && mesh && lookAt ? setLookAtFromValue() : lookAt && mesh ? wrn(w_sh.lookAt) : null
+	//$: !matrix && mesh && lookAt ? PropUtils.setLookAtFromValue(mesh, lookAt) : lookAt && mesh ? console.warn(w_sh.lookAt) : null
+	$: !matrix && mesh && lookAt ? setLookAtFromValue() : lookAt && mesh ? console.warn(w_sh.lookAt) : null
 
 	function setLookAtFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! lookAt", `${css_rs}`, lookAt)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", lookAt))
 		PropUtils.setLookAtFromValue(mesh, lookAt)
 	}
 
@@ -419,7 +423,7 @@ This is a **svelthree** _Mesh_ Component.
 	$: matrix && mesh ? setMatrixFromValue() : null
 
 	function setMatrixFromValue() {
-		if (logRS) console.log("%c--------> Mesh > reactive statement! matrix", `${css_rs}`, matrix)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "matrix", matrix))
 		PropUtils.setMatrixFromValue(mesh, matrix)
 	}
 
@@ -445,17 +449,16 @@ This is a **svelthree** _Mesh_ Component.
 			? () => fnOnMount(self)
 			: () => {
 					if (parent) {
-						if (logInfo) console.info("SVELTHREE > onMount : Mesh, parent: ", parent)
+						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
+						if (verbose && log_dev) console.debug(...c_dev(c_name, "onMount -> parent: ", parent))
 					} else {
-						if (logInfo) console.info("SVELTHREE > onMount : Mesh")
+						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
 					}
-
-					if (logLC) logCurrentState(`----> Mesh > onMount`, null)
 
 					//console.warn("SVELTHREE > onMount : Mesh : mesh.matrixAutoUpdate", mesh.matrixAutoUpdate)
 
 					return () => {
-						if (logInfo) console.info("SVELTHREE > onDestroy : Mesh")
+						if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 						removeMeshFromParent()
 					}
 			  }
@@ -469,12 +472,14 @@ This is a **svelthree** _Mesh_ Component.
 	// TODO  CONFIRM: Reactive statements cause "beforeUpdate" but they don't end in "afterUpdate" (except the prop has been reassigned, then afterUpdate will be triggered)
 	// Nevertheless they are microtasks the scene waits for in order to trigger an "afterUpdate"
 	// Check once again and cinfirm bulletproof / write down!!!
+	// IMPORTANT  Months later: Yes, check the issue described above + also with with acc-mod!
+
 	beforeUpdate(async () => {
 		if (!dirty) {
 			timeBefore = performance.now()
 			dirty = true
 		}
-		if (logLC) logCurrentState("%c------> Mesh > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 		//if(name) { console.warn(`Mesh before update! ${name}`) }
 		//await tick()
 		if (mesh.matrixWorldNeedsUpdate === false) {
@@ -493,7 +498,7 @@ This is a **svelthree** _Mesh_ Component.
 			dirty = false
 			updateTime = timeAfter - timeBefore
 		}
-		if (logLC) logCurrentState("%c------> Mesh > afterUpdate", css_aa, updateTime)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 
 		//  BUG  IMPORTANT  this tick halts everything / causes crash!
 		//await tick()
@@ -510,42 +515,20 @@ This is a **svelthree** _Mesh_ Component.
         */
 	})
 
-	function logCurrentState(prefix: string, css: string, upt?: number) {
-		if (self) {
-			console.log(
-				`${prefix}!`,
-				`${css}`,
-				upt ? "update time: " + upt : "",
-				` pos:`,
-				self.$capture_state()["pos"],
-				` rot:`,
-				self.$capture_state()["rot"],
-				` quat:`,
-				self.$capture_state()["quat"],
-				` scale:`,
-				self.$capture_state()["scale"],
-				` lookAt:`,
-				self.$capture_state()["lookAt"],
-				` matrix:`,
-				self.$capture_state()["matrix"],
-				` props:`,
-				self.$capture_state()["props"]
-			)
-		} else {
-			console.log(`${prefix}! self not available!`)
-		}
-	}
-
 	function tryAddingMesh(): void {
 		if (!parentForUs) {
 			if (mesh.parent !== scene) {
 				scene.add(mesh)
-				if (logInfo)
-					console.info("SVELTHREE > Mesh : " + geometry.type + " was added to scene!", {
-						mesh: mesh,
-						scene: scene,
-						total: scene.children.length
-					})
+
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${geometry.type} was added to scene!`, {
+							mesh,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
 
 				if (arReticle || arReticleAuto) {
 					$svelthreeStores[sti].xr.reticle = mesh
@@ -554,13 +537,18 @@ This is a **svelthree** _Mesh_ Component.
 		} else {
 			if (mesh.parent !== parentForUs) {
 				parentForUs.add(mesh)
-				if (logInfo)
-					console.info("SVELTHREE > Mesh : " + geometry.type + " was added to parent!", {
-						mesh: mesh,
-						parent: parentForUs,
-						scene: scene,
-						total: scene.children.length
-					})
+
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${geometry.type} was added to parent!`, {
+							mesh,
+							parent: parentForUs,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
+
 				if (arReticle || arReticleAuto) {
 					$svelthreeStores[sti].xr.reticle = mesh
 				}
@@ -571,7 +559,7 @@ This is a **svelthree** _Mesh_ Component.
 	function tryMaterialUpdate(): void {
 		if (mesh) {
 			mesh.material = material
-			if (logInfo) console.info("SVELTHREE > Mesh : Material updated!")
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Material updated!"))
 			/*
             if (mat && Object.keys(mat).length > 0) {
                 Propeller.update(material, mat)
@@ -587,7 +575,7 @@ This is a **svelthree** _Mesh_ Component.
 
 	function tryGeometryUpdate(): void {
 		mesh.geometry = geometry as BufferGeometry
-		if (logInfo) console.info("SVELTHREE > Mesh : Geometry updated!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Geometry updated!"))
 	}
 
 	// --- AR Reticle basic auto display and positioning -------
@@ -603,7 +591,17 @@ This is a **svelthree** _Mesh_ Component.
 			let hit = $svelthreeStores[sti].xr.hitTestResults[0]
 			let referenceSpace = $svelthreeStores[sti].renderer.xr.getReferenceSpace()
 
-			//console.log({ hit: hit, referenceSpace: referenceSpace })
+			/*
+			if (verbose && log_rs) {
+				console.debug(
+					...c_rs(
+						c_name,
+						"if (arReticle || arReticleAuto) > handleHitTestResults > if ($svelthreeStores[sti].xr.hitTestResults.length > 0):",
+						{ hit, referenceSpace }
+					)
+				)
+			}
+			*/
 
 			if ($svelthreeStores[sti].xr.reticle) {
 				if (arReticleAuto) {
@@ -640,7 +638,11 @@ This is a **svelthree** _Mesh_ Component.
 	}
 
 	function poseReticle(hit: any = undefined, referenceSpace: any = undefined): void {
-		if (logInfo) console.info("poseReticle!", $svelthreeStores[sti].xr.reticle)
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "poseReticle -> $svelthreeStores[sti].xr.reticle", $svelthreeStores[sti].xr.reticle)
+			)
+		}
 		mesh.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
 	}
 
@@ -732,21 +734,55 @@ This is a **svelthree** _Mesh_ Component.
 		{aniauto}
 		obj={mesh}
 		{scene}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
 	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
+	<SvelthreeInteraction
+		{sti}
+		{dispatch}
+		obj={mesh}
+		parent={self}
+		{interactionEnabled}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
+	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
 	{#if currentXRSessionMode === XRDefaults.SESSION_MODE_AR}
-		<SvelthreeInteractionAR {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
+		<SvelthreeInteractionAR
+			{sti}
+			{dispatch}
+			obj={mesh}
+			parent={self}
+			{interactionEnabled}
+			{log_dev}
+			{log_rs}
+			{log_lc}
+			{log_mau}
+		/>
 	{/if}
 
 	{#if currentXRSessionMode === XRDefaults.SESSION_MODE_VR}
 		{#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_GRIPPABLE}
-			<SvelthreeInteractionVRGrippable {sti} {dispatch} obj={mesh} parent={self} {interactionEnabled} />
+			<SvelthreeInteractionVRGrippable
+				{sti}
+				{dispatch}
+				obj={mesh}
+				parent={self}
+				{interactionEnabled}
+				{log_dev}
+				{log_rs}
+				{log_lc}
+				{log_mau}
+			/>
 		{/if}
 		{#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_HAND}
 			<!-- TODO  get rid of the SvelthreeInteractionVRHands component / create a ts class -->
@@ -760,6 +796,10 @@ This is a **svelthree** _Mesh_ Component.
 				{pinchTouch}
 				{pinchHybrid}
 				{xrHandTouch}
+				{log_dev}
+				{log_rs}
+				{log_lc}
+				{log_mau}
 			/>
 		{/if}
 	{/if}

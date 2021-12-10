@@ -10,13 +10,26 @@ This is a **svelthree** _OrbitControls_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, afterUpdate, beforeUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { Scene } from "three"
 	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { svelthreeStores } from "../stores"
 	import { StoreUtils, SvelthreeProps } from "../utils"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let scene: Scene
+	export let name: string = undefined
 	export let enableDamping = false
 	export let autoRotate = false
 
@@ -40,9 +53,10 @@ This is a **svelthree** _OrbitControls_ Component.
 	$: enableDamping || !enableDamping ? updateEneableDamping() : null
 	$: autoRotate || !autoRotate ? updateAutoRotate() : null
 
+	// TODO  Months later: What?! Remove?
 	/*
     $: if($svelthreeStores[sti].orbitcontrols) {
-        console.log("run 9!")
+        console.debug("run 9!")
         orbitcontrols = $svelthreeStores[sti].orbitcontrols
     }
     */
@@ -65,9 +79,12 @@ This is a **svelthree** _OrbitControls_ Component.
 
 			orbitcontrols = $svelthreeStores[sti].orbitcontrols
 		} catch (error) {
-			console.info(error)
-			console.info($svelthreeStores[sti])
-			console.info(scene, sti)
+			console.error(
+				`SVELTHREE > ${c_name} > Ups, something went wrong while trying to create and add OrbitControls!`,
+				error,
+				$svelthreeStores[sti],
+				{ scene, sti }
+			)
 		}
 	}
 
@@ -80,9 +97,17 @@ This is a **svelthree** _OrbitControls_ Component.
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : OrbitControls")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			console.info("SVELTHREE > onDestroy : OrbitControls")
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 </script>

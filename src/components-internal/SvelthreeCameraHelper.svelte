@@ -5,8 +5,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <svelte:options accessors />
 
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { CameraHelper, OrthographicCamera, PerspectiveCamera, Scene } from "three"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let scene: Scene
 	export let helper: boolean
@@ -23,7 +34,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		stopHelperUpdating()
 		scene.remove(camHelper)
 		camHelper = undefined
-		//console.log("SVELTHREE > SvelthreeCameraHelper > " + cam.type + " HELPER removed!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] HELPER removed!`))
 	}
 
 	let doUpdateHelper = false
@@ -34,11 +45,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	export function startHelperUpdating(): void {
-		//console.log("SVELTHREE > SvelthreeCameraHelper > " + cam.type + " startHelperUpdating!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] startHelperUpdating!`))
 		/*
         if (!doUpdateHelper) {
-            console.warn("SVELTHREE > SvelthreeCameraHelper > startHelperUpdating > camHelper.matrixAutoUpdate:", camHelper.matrixAutoUpdate)
-            console.warn("SVELTHREE > SvelthreeCameraHelper > startHelperUpdating > cam.matrixAutoUpdate:", cam.matrixAutoUpdate)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] startHelperUpdating > camHelper.matrixAutoUpdate:`, camHelper.matrixAutoUpdate))
+			if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] startHelperUpdating > cam.matrixAutoUpdate:`, cam.matrixAutoUpdate))
             doUpdateHelper = true
             updateHelper_rAF = requestAnimationFrame(updateHelper)
         }
@@ -46,7 +57,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	export function stopHelperUpdating(): void {
-		//console.log("SVELTHREE > SvelthreeCameraHelper > " + cam.type + " stopHelperUpdating!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] stopHelperUpdating!`))
 		if (doUpdateHelper) {
 			doUpdateHelper = false
 			cancelAnimationFrame(updateHelper_rAF)
@@ -56,7 +67,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function updateHelper(): void {
 		if (doUpdateHelper) {
 			if (camHelper) {
-				//console.log("SVELTHREE > SvelthreeCameraHelper > " + cam.type + " updateHelper!")
+				//if (verbose && log_dev) console.debug(...c_dev(c_name, `[${cam.type}] updateHelper!`))
 				camHelper.update()
 				debugger
 				updateHelper_rAF = requestAnimationFrame(updateHelper)
@@ -65,12 +76,20 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	onMount(() => {
-		console.info(`SVELTHREE > SvelthreeCameraHelper > onMount : ${cam.type}`)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, `[${cam.type}] onMount`))
 		return () => {
-			console.info(`SVELTHREE > SvelthreeCameraHelper > onDestroy : ${cam.type}`)
+			if (verbose && log_lc) console.info(...c_lc_int(c_name, `[${cam.type}] onDestroy`))
 			if (camHelper) {
 				removeHelper()
 			}
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc) console.info(...c_lc_int(c_name, `[${cam.type}] beforeUpdate`))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc) console.info(...c_lc_int(c_name, `[${cam.type}] afterUpdate`))
 	})
 </script>

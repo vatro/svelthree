@@ -32,7 +32,8 @@ This is a **svelthree** _SpotLight_ Component.
 <script lang="ts">
 	// #region --- Imports
 
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { Matrix4, SpotLightShadow } from "three"
 	import { Color, Object3D, Scene, SpotLight, SpotLightHelper, Vector3 } from "three"
 	import { Light, SvelthreeLightWithShadow } from "../components-internal"
@@ -44,8 +45,19 @@ This is a **svelthree** _SpotLight_ Component.
 		SvelthreeAnimationFunction
 	} from "../types-extra"
 	import { LightUtils, PropUtils } from "../utils"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
 	// #endregion
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// #region --- Required Attributes
 
@@ -57,6 +69,7 @@ This is a **svelthree** _SpotLight_ Component.
 
 	let light: SpotLight
 	light = new SpotLight()
+	light.userData.svelthreeComponent = self
 
 	// #endregion
 
@@ -65,6 +78,8 @@ This is a **svelthree** _SpotLight_ Component.
 	export let parent: Object3D = undefined
 	export let parentForUs: Object3D = undefined
 	export let name: string = undefined
+
+	light.name = name
 
 	/**
 	 * `matrixAutoUpdate` shorthand attribute.
@@ -164,17 +179,42 @@ This is a **svelthree** _SpotLight_ Component.
 	// #region --- Lifecycle
 
 	onMount(() => {
-		console.info(`SVELTHREE > onMount : ${light.type}`)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			LightUtils.removeHelper(light, scene)
+		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+		if (light.matrixWorldNeedsUpdate === false) {
+			light.matrixAutoUpdate = mau
+		}
+		if (verbose && log_mau) {
+			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
 		}
 	})
 
 	// #endregion
 </script>
 
-<SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
+<SvelthreeLightWithShadow
+	{light}
+	{shadowMapSize}
+	{shadowBias}
+	{castShadow}
+	{shadowCameraProps}
+	{shadowProps}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
+/>
 <Light
 	{scene}
 	{parent}
@@ -189,4 +229,8 @@ This is a **svelthree** _SpotLight_ Component.
 	{intensity}
 	{animation}
 	{aniauto}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

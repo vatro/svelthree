@@ -10,6 +10,7 @@ This is a **svelthree** _DirectionalLight_ Component.
  TODO  Link to Docs.
 -->
 <script context="module" lang="ts">
+	// TODO  this isn' right!
 	export type DirectionalLightProps = OnlyWritableNonFunctionPropsPlus<
 		Omit<DirectionalLight, PropBlackList>,
 		{
@@ -47,13 +48,19 @@ This is a **svelthree** _DirectionalLight_ Component.
 	import { LightUtils } from "../utils"
 	import type { Empty } from "."
 	import type { Mesh } from "."
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// #endregion
 
@@ -67,6 +74,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 
 	let light: DirectionalLight
 	light = new DirectionalLight()
+	light.userData.svelthreeComponent = self
 
 	// #endregion
 
@@ -75,6 +83,8 @@ This is a **svelthree** _DirectionalLight_ Component.
 	export let parent: Object3D = undefined
 	export let parentForUs: Object3D = undefined
 	export let name: string = undefined
+
+	light.name = name
 
 	/**
 	 * `matrixAutoUpdate` shorthand attribute.
@@ -129,7 +139,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 	$: light && !light.userData.helper && helper ? addHelper() : null
 
 	function addHelper() {
-		if (logRS) console.log("%c--------> DirectionalLight > reactive statement! props", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
 		LightUtils.addHelper(light, scene, new DirectionalLightHelper(light))
 	}
 
@@ -169,33 +179,42 @@ This is a **svelthree** _DirectionalLight_ Component.
 	// #region --- Lifecycle
 
 	onMount(() => {
-		if (logLC) logCurrentState(`----> DirectionalLight > onMount`, null)
-		if (logInfo) console.info(`SVELTHREE > onMount : ${light.type}`)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			if (logInfo) console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			LightUtils.removeHelper(light, scene)
 		}
 	})
 
 	beforeUpdate(() => {
-		if (logLC) logCurrentState("%c------> DirectionalLight > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(() => {
-		if (logLC) logCurrentState("%c------> DirectionalLight > afterUpdate", css_aa)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 		if (light.matrixWorldNeedsUpdate === false) {
 			light.matrixAutoUpdate = mau
 		}
+		if (verbose && log_mau) {
+			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
+		}
 	})
-
-	function logCurrentState(prefix: string, css: string) {
-		if (logInfo) console.log(`${prefix}!`, `${css}`)
-	}
 
 	// #endregion
 </script>
 
-<SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
+<SvelthreeLightWithShadow
+	{light}
+	{shadowMapSize}
+	{shadowBias}
+	{castShadow}
+	{shadowCameraProps}
+	{shadowProps}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
+/>
 <Light
 	{scene}
 	{parent}
@@ -211,7 +230,8 @@ This is a **svelthree** _DirectionalLight_ Component.
 	{intensity}
 	{animation}
 	{aniauto}
-	{logInfo}
-	{logRS}
-	{logLC}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

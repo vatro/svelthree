@@ -16,7 +16,8 @@ This is a **svelthree** _SessionVR_ Component.
      @see https://github.com/mrdoob/three.js/blob/master/examples/webxr_vr_dragging.html (2 controllers)
     */
 
-	import { createEventDispatcher, onMount } from "svelte"
+	import { createEventDispatcher, onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { Group, Object3D, Scene, WebXRManager, XRFrame, XRSession } from "three"
 	import type { XRControllerModel } from "three/examples/jsm/webxr/XRControllerModelFactory"
 	import { XRControllerDefaults, XRDefaults, XRHandTouchDefaults } from "../constants"
@@ -52,6 +53,17 @@ This is a **svelthree** _SessionVR_ Component.
 		XRSessionMode
 	} from "../xr/types-webxr"
 	import { XRControllerUtils, XRHandUtils } from "../xr/utils"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -88,7 +100,7 @@ This is a **svelthree** _SessionVR_ Component.
 
 	function storeRequiredFeatures(): void {
 		$svelthreeStores[sti].xr.requiredFeatures = [...requiredFeatures]
-		//console.warn("SVELTHREE > SessionVR > updateRequiredFeatures: ",$svelthreeStores[sti].xr.requiredFeatures)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "updateRequiredFeatures! -> $svelthreeStores[sti].xr.requiredFeatures: ", $svelthreeStores[sti].xr.requiredFeatures))
 	}
 
 	$svelthreeStores[sti].xr.hitTestMode = hitTestMode
@@ -98,21 +110,21 @@ This is a **svelthree** _SessionVR_ Component.
 
 	function storeOptionalFeatures(): void {
 		$svelthreeStores[sti].xr.optionalFeatures = [...optionalFeatures]
-		//console.warn("SVELTHREE > SessionVR > updateOptionalFeatures: ", $svelthreeStores[sti].xr.optionalFeatures)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "updateOptionalFeatures! -> $svelthreeStores[sti].xr.optionalFeatures: ", $svelthreeStores[sti].xr.optionalFeatures))
 	}
 
 	$: domOverlay ? storeDomOverlay() : null
 
 	function storeDomOverlay(): void {
 		$svelthreeStores[sti].xr.domOverlay = domOverlay
-		//console.warn("SVELTHREE > SessionVR > storeDomOverlay: ", $svelthreeStores[sti].xr.domOverlay)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "storeDomOverlay! -> $svelthreeStores[sti].xr.domOverlay: ", $svelthreeStores[sti].xr.domOverlay))
 	}
 
 	$: inputConfig ? storeInputConfig() : null
 
 	function storeInputConfig(): void {
 		$svelthreeStores[sti].xr.inputConfig = inputConfig
-		//console.warn("SVELTHREE > SessionVR > storeInputConfig: ",  $svelthreeStores[sti].xr.inputConfig)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "storeInputConfig! -> $svelthreeStores[sti].xr.inputConfig: ", $svelthreeStores[sti].xr.inputConfig))
 	}
 
 	$: controllerConfig ? storeControllerConfig() : null
@@ -133,7 +145,14 @@ This is a **svelthree** _SessionVR_ Component.
 
 	function storeCurrentVRInputType(): void {
 		$svelthreeStores[sti].xr.currentVRInputType = currentVRInputType
-		//console.warn("SVELTHREE > SessionVR > storeCurrentVRInputType: ", $svelthreeStores[sti].xr.currentVRInputType)
+		if (verbose && log_rs)
+			console.debug(
+				...c_rs(
+					c_name,
+					"storeCurrentVRInputType! -> $svelthreeStores[sti].xr.currentVRInputType: ",
+					$svelthreeStores[sti].xr.currentVRInputType
+				)
+			)
 	}
 
 	// --------- REACTIVE PINCH Configuration ---------
@@ -144,7 +163,8 @@ This is a **svelthree** _SessionVR_ Component.
 	// ANSWER  Because we're still prototyping and are not yet sure where we'll need this "globally"!
 	// RECONSIDER  above / refactor
 	function storeAndUpdateEnablePinch(): void {
-		console.warn("SVELTHREE > SessionVR > updateEnablePinch!")
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "storeAndUpdateEnablePinch! -> ", { enablePinch }))
+
 		$svelthreeStores[sti].xr.enablePinch = enablePinch
 
 		let updated: XrHandEnablePinchResult = XRHandUtils.applyEnablePinch($svelthreeStores[sti].xr.enablePinch)
@@ -172,7 +192,8 @@ This is a **svelthree** _SessionVR_ Component.
 	// ANSWER  Because we're prototyping and are not yet sure where we'll need this "gloabaly"!
 	// TODO  reconsider / refactor above
 	function sotreAndUpdateEnableTouch(): void {
-		console.warn("SVELTHREE > SessionVR > updateEnableTouch!")
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "sotreAndUpdateEnableTouch! -> ", { enableTouch }))
+
 		$svelthreeStores[sti].xr.enableTouch = enableTouch
 
 		let updated: XrHandEnableTouchResult
@@ -201,7 +222,8 @@ This is a **svelthree** _SessionVR_ Component.
 	$: touchEvents ? updateTouchEvents() : null
 
 	function updateTouchEvents(): void {
-		console.warn("SVELTHREE > SessionVR > updateTouchEvents!")
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "updateTouchEvents! -> ", { touchEvents }))
+
 		$svelthreeStores[sti].xr.touchEvents = touchEvents
 
 		//renderer is not available on init, so this will not be executed twice, only on reactive update!
@@ -213,7 +235,8 @@ This is a **svelthree** _SessionVR_ Component.
 	$: enableTouchX ? updateEnableTouchX() : null
 
 	function updateEnableTouchX(): void {
-		console.warn("SVELTHREE > SessionVR > updateEnableTouchX!")
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "updateEnableTouchX! -> ", { enableTouchX }))
+
 		$svelthreeStores[sti].xr.enableTouchX = enableTouchX
 
 		// renderer is not available on init, so this will not be executed twice, only on reactive update!
@@ -438,7 +461,8 @@ This is a **svelthree** _SessionVR_ Component.
       WHY?  This way we can listen to pinch events "globaly", not just if a pichable object was piched
     */
 	function dispatchHandPinchEvent(e: THREE.Event) {
-		console.warn("SVELTHREE > SessionVR > dispatchHandPinchEvent : (global) PINCH EVENT! --> ", e.type)
+		if (verbose && log_dev)
+			console.debug(...c_dev(c_name, "dispatchHandPinchEvent : (global) PINCH EVENT! -> ", e.type))
 
 		// TODO  EVENTS: check event TYPE and detail / refine
 		dispatch(e.type, { handedness: e.handedness, target: e.target })
@@ -449,7 +473,8 @@ This is a **svelthree** _SessionVR_ Component.
       WHY?  This way we can define "global" pinch events, not just if a pichable object was piched
     */
 	function dispatchHandTouchEvent(e: THREE.Event) {
-		console.warn("SVELTHREE > SessionVR > dispatchHandTouchEvent : (global) TOUCH EVENT! --> ", e.type)
+		if (verbose && log_dev)
+			console.debug(...c_dev(c_name, "dispatchHandTouchEvent : (global) TOUCH EVENT! -> ", e.type))
 
 		// TODO  EVENTS: check event TYPE and detail / refine
 		dispatch(e.type, { handedness: e.handedness, target: e.target })
@@ -460,7 +485,8 @@ This is a **svelthree** _SessionVR_ Component.
       WHY?  This way we can listen to pinch events "globaly", not just if a pichable object was piched
     */
 	function dispatchHandTouchEventX(e: THREE.Event) {
-		console.warn("SVELTHREE > SessionVR > dispatchHandTouchEventX : (global) TOUCHX EVENT! --> ", e.type)
+		if (verbose && log_dev)
+			console.debug(...c_dev(c_name, "dispatchHandTouchEventX : (global) TOUCHX EVENT! -> ", e.type))
 
 		// TODO  EVENTS: check event TYPE and detail / refine
 		dispatch(e.type, { handedness: e.handedness, target: e.target })
@@ -590,7 +616,7 @@ This is a **svelthree** _SessionVR_ Component.
 	// TODO  Reactive management of switching input type ('input')
 	// this statement will be executed only once the renderer is available and the 'currentSceneIndex' is set
 	$: if (rendererAvailable && currentSceneIndex) {
-		console.warn("SVELTHREE > SessionVR > currentSceneIndex: ", currentSceneIndex)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "currentSceneIndex: ", currentSceneIndex))
 
 		coords ? addGlobalCoords() : null
 		createBareboneControllers()
@@ -614,7 +640,7 @@ This is a **svelthree** _SessionVR_ Component.
 	$: splashVR && splashVR.currentSession ? (currentSession = splashVR.currentSession) : null
 
 	$: if (currentSession) {
-		console.warn("SVELTHREE > SessionVR > currentSession: ", currentSession)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "currentSession: ", currentSession))
 	}
 
 	/*
@@ -664,23 +690,29 @@ This is a **svelthree** _SessionVR_ Component.
      The 'handedness' is infered after the controller connects and is saved inside 'xrInputSource' property
     */
 	function createBareboneControllers() {
-		console.warn("SVELTHREE > SessionVR > createBareboneControllers!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "createBareboneControllers!"))
 
 		$svelthreeStores[sti].xr.controllers = XRControllerUtils.createControllers(
 			maxControllers,
 			$svelthreeStores[sti].renderer.xr
 		)
-		console.warn(
-			"SVELTHREE > SessionVR > getControllers! $svelthreeStores[sti].xr.controllers: ",
-			$svelthreeStores[sti].xr.controllers
-		)
+
+		if (verbose && log_dev)
+			console.debug(
+				...c_dev(
+					c_name,
+					"createBareboneControllers > $svelthreeStores[sti].xr.controllers:",
+					$svelthreeStores[sti].xr.controllers
+				)
+			)
 	}
 
 	function addControllers() {
-		console.warn("SVELTHREE > SessionVR > addControllers!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "addControllers!"))
+
 		let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
-		console.warn("SVELTHREE > SessionVR > addControllers! currentScene:", currentScene)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "ddControllers > currentScene:", currentScene))
 
 		for (let i = 0; i < maxControllers; i++) {
 			createAllControllerSpaces(i)
@@ -688,7 +720,7 @@ This is a **svelthree** _SessionVR_ Component.
 	}
 
 	function createAllControllerSpaces(i: number) {
-		console.warn("SVELTHREE > SessionVR > createAllControllerSpaces!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "createAllControllerSpaces!"))
 
 		// Getting controller TARGET RAY space (:Group)
 		const targetRaySpace: Group = $svelthreeStores[sti].renderer.xr.getController(i)
@@ -731,7 +763,7 @@ This is a **svelthree** _SessionVR_ Component.
 			return
 		}
 
-		//console.log("onTargetRaySpaceConnected --> e: ", e)
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "onTargetRaySpaceConnected! --> e:", e))
 
 		const handedness: XRHandedness = e.data.handedness
 
@@ -776,7 +808,7 @@ This is a **svelthree** _SessionVR_ Component.
 			return
 		}
 
-		//console.log("onGripSpaceConnected --> e: ", e)
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "onGripSpaceConnected! --> e:", e))
 
 		// TODO  recreate gripModel if config changed
 
@@ -848,7 +880,7 @@ This is a **svelthree** _SessionVR_ Component.
 			return
 		}
 
-		//console.log("onHandSpaceConnected --> e: ", e)
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "onHandSpaceConnected! --> e:", e))
 
 		const handedness: XRHandedness = e.data.handedness
 
@@ -960,7 +992,7 @@ This is a **svelthree** _SessionVR_ Component.
 	let vrButtonAdded: boolean = false
 
 	$: if ($svelthreeStores[sti].canvas.dom && !vrButtonAdded && domOverlay) {
-		console.warn(domOverlay)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "(before createSplash!) domOverlay:", domOverlay))
 		createSplash()
 	}
 
@@ -1069,10 +1101,18 @@ This is a **svelthree** _SessionVR_ Component.
 
 	// ----------------------------------------
 
-	// -------------- ON MOUNT ----------------
+	// -------------- Lifecycle ----------------
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : SessionVR")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 </script>
 

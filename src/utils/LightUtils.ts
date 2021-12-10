@@ -7,6 +7,7 @@ import type { Light, Scene } from "three"
 import { Color, Object3D } from "three"
 import type { LightWithShadow } from "../types-extra"
 import PropUtils from "./PropUtils"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 /**
  * Containes public static methods for updating Light (and shadow) properties via component shorthand attributes.
@@ -17,7 +18,7 @@ export default class LightUtils {
 	 * Updates *Light.intensity*  via `intensity` component attribute.
 	 */
 	public static tryIntensityUpdate(light: Light, intensity: number): void {
-		console.info("SVELTHREE > LightUtils > tryIntensityUpdate ", intensity)
+		if (verbose_mode()) console.debug("SVELTHREE > LightUtils > tryIntensityUpdate ", intensity)
 		try {
 			light.intensity = intensity
 		} catch (error) {
@@ -30,16 +31,17 @@ export default class LightUtils {
 	 * Updates *Light.color* via `color` component attribute.
 	 */
 	public static tryColorUpdate(light: Light, color: any): void {
-		console.info("color", color)
+		if (verbose_mode()) console.debug("color", color)
 		try {
 			if (PropUtils.isArray(color)) {
 				if (PropUtils.isArray3Nums(color)) {
 					light.color = new Color(color[0], color[1], color[2])
 				} else {
-					console.error(
-						"SVELTHREE > LightUtils > tryColorUpdate : Prop should be an Array of three (3) values!",
-						color
-					)
+					if (verbose_mode())
+						console.error(
+							"SVELTHREE > LightUtils > tryColorUpdate : Prop should be an Array of three (3) values!",
+							color
+						)
 				}
 			} else if (!isNaN(color)) {
 				light.color = new Color(color)
@@ -58,7 +60,7 @@ export default class LightUtils {
 	 * Updates *Light.shadow.mapSize* via `shadowMapSize` component attribute.
 	 */
 	public static tryShadowMapSizeUpdate(light: LightWithShadow, shadowMapSize: number): void {
-		console.info("SVELTHREE > LightUtils > tryShadowMapSizeUpdate", shadowMapSize)
+		if (verbose_mode()) console.debug("SVELTHREE > LightUtils > tryShadowMapSizeUpdate", shadowMapSize)
 		try {
 			light.shadow.mapSize.width = shadowMapSize
 			light.shadow.mapSize.height = shadowMapSize
@@ -72,7 +74,7 @@ export default class LightUtils {
 	 * Updates *Light.shadow.bias* via `shadowBias` component attribute.
 	 */
 	public static tryShadowBiasUpdate(light: LightWithShadow, shadowBiasSize: number): void {
-		console.info("SVELTHREE > LightUtils > tryShadowBiasUpdate", shadowBiasSize)
+		if (verbose_mode()) console.debug("SVELTHREE > LightUtils > tryShadowBiasUpdate", shadowBiasSize)
 		try {
 			light.shadow.bias = shadowBiasSize
 		} catch (error) {
@@ -85,7 +87,7 @@ export default class LightUtils {
 	 * Updates `Light.castShadow` via `castShadow` component attribute.
 	 */
 	public static tryCastShadowUpdate(light: LightWithShadow, castShadow: boolean): void {
-		console.info("SVELTHREE > LightUtils > tryCastShadowUpdate", castShadow)
+		if (verbose_mode()) console.debug("SVELTHREE > LightUtils > tryCastShadowUpdate", castShadow)
 		try {
 			light.castShadow = castShadow
 		} catch (error) {
@@ -98,10 +100,11 @@ export default class LightUtils {
 	 * Updates `Light.shadow` via `shadowProps` component attribute.
 	 */
 	public static tryShadowPropUpdate(light: Light, key: string, value: any) {
-		console.info("SVELTHREE > LightUtils : tryShadowPropsUpdate", { key: key, value: value })
+		if (verbose_mode()) console.debug("SVELTHREE > LightUtils : tryShadowPropsUpdate", { key: key, value: value })
 		try {
 			if (has_prop(light.shadow, key)) {
-				console.info("SVELTHREE > LightUtils > tryShadowPropsUpdate : updating shadow prop! ", key)
+				if (verbose_mode())
+					console.debug("SVELTHREE > LightUtils > tryShadowPropsUpdate : updating shadow prop! ", key)
 				light.shadow[key] = value
 				light.shadow.needsUpdate = true
 			}
@@ -115,10 +118,12 @@ export default class LightUtils {
 	 * Updates `Light.shadow.camera` via `shadowCameraProps` component attribute.
 	 */
 	public static tryShadowCameraPropUpdate(light: LightWithShadow, key: string, value: any) {
-		console.info("SVELTHREE > LightUtils : tryShadowCameraPropsUpdate", { key: key, value: value })
+		if (verbose_mode())
+			console.debug("SVELTHREE > LightUtils : tryShadowCameraPropsUpdate", { key: key, value: value })
 		try {
 			if (has_prop(light.shadow.camera, key)) {
-				console.info("SVELTHREE > LightUtils > tryShadowCameraPropsUpdate : updating shadow prop!", key)
+				if (verbose_mode())
+					console.debug("SVELTHREE > LightUtils > tryShadowCameraPropsUpdate : updating shadow prop!", key)
 				light.shadow.camera[key] = value
 				light.shadow.camera.updateProjectionMatrix()
 			}
@@ -137,11 +142,12 @@ export default class LightUtils {
 		scene.add(helper)
 		helper.visible = true
 
-		console.info("SVELTHREE > " + light.type + " HELPER added!", {
-			camHelper: light.userData.helper,
-			scene: scene,
-			total: scene.children.length
-		})
+		if (verbose_mode())
+			console.debug("SVELTHREE > " + light.type + " HELPER added!", {
+				camHelper: light.userData.helper,
+				scene: scene,
+				total: scene.children.length
+			})
 	}
 
 	/**

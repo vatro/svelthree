@@ -10,6 +10,7 @@ import {
 	XRHandTouchRayDebugger,
 	XRHandTouchSphereDebugger
 } from "./debuggers"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 import type {
 	XrHandTouchDebugParams,
 	XrHandTouchRayDebuggerConfig,
@@ -285,7 +286,8 @@ export default class XRHandTouch {
 							this.touchingOutsideCheck(joint, i, params.raycaster, handSpace)
 						} else {
 							// save target
-							console.log("INTERSECTION OUTSIDE OF TOUCH DISTANCE --> SAVING TARGET!")
+							if (verbose_mode())
+								console.debug("INTERSECTION OUTSIDE OF TOUCH DISTANCE --> SAVING TARGET!")
 							joint.userData.lastIntersect = intersectionsPhase1[0]
 						}
 					} else {
@@ -766,7 +768,10 @@ export default class XRHandTouch {
 				testRaycast[0].point.distanceTo(joint.userData.origin) > this.touchDistance ||
 				joint.userData.speedFac > 1.1
 			) {
-				console.log("TOUCH AND TOUCH INSIDE TRUE --> OBJECT EXITED (ray between origins intersected a face!)")
+				if (verbose_mode())
+					console.debug(
+						"TOUCH AND TOUCH INSIDE TRUE --> OBJECT EXITED (ray between origins intersected a face!)"
+					)
 
 				if (this.debug) {
 					if (this.faceDebugger) {

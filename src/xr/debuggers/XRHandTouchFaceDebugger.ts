@@ -4,6 +4,7 @@
 
 import { BufferGeometry, Color } from "three"
 import { XRHandTouchDefaults } from "../constants"
+import { verbose_mode } from "../../utils/SvelthreeLogger"
 
 interface Indexable {
 	[key: string]: any
@@ -51,7 +52,11 @@ export default class XRHandTouchFaceDebugger {
 	}
 
 	colorFace(intersected: { [key: string]: any }, color: Color, message: string) {
-		message ? console.log("XRHandTouch : colorFace! " + message) : console.log("XRHandTouch : colorFace!")
+		if (message) {
+			if (verbose_mode()) console.debug("XRHandTouch : colorFace! " + message)
+		} else {
+			if (verbose_mode()) console.debug("XRHandTouch : colorFace!")
+		}
 
 		const geom: BufferGeometry = intersected.object.geometry as BufferGeometry
 		const colorAttr = geom.getAttribute("color")

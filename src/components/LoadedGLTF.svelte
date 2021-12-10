@@ -15,12 +15,25 @@ This is a **svelthree** _LoadedGLTF_ Component.
 	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
 	// @see https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
 
 	// construction
+	export let name: string = undefined
 
 	export let path: string = undefined
 	export let async: boolean = undefined

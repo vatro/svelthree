@@ -10,9 +10,20 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { Object3D, Scene } from "three"
 	import { SvelthreeAnimationManager, SvelthreeAnimationProp } from "../ani"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let animationEnabled: boolean = undefined
 	export let animation: any = undefined
@@ -24,7 +35,7 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 	$: animation && animationEnabled ? createAnimationManager() : null
 
 	function createAnimationManager() {
-		//console.warn("SVELTHREE > createAnimationManager!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "createAnimationManager!"))
 
 		if (!aniManager) {
 			animation = new SvelthreeAnimationProp(animation)
@@ -50,7 +61,7 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 	}
 
 	export function destroyAnimation(): void {
-		//console.warn("SVELTHREE > SvelthreeAnimation > destroyAnimation")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "destroyAnimation!"))
 		if (aniManager) {
 			aniManager.destroyAnimation()
 		} else {
@@ -74,11 +85,19 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 	}
 
 	onMount(() => {
-		//console.warn("SVELTHREE > onMount : SvelthreeAnimation")
+		//if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 
 		return () => {
-			console.info("SVELTHREE > onDestroy : SvelthreeAnimation")
+			//if (verbose && log_lc ) console.info(...c_lc_int(c_name, "onDestroy"))
 			destroyAnimation()
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 </script>

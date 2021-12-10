@@ -29,7 +29,8 @@ This is a **svelthree** _PointLight_ Component.
 </script>
 
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import type { LightShadow } from "three"
 	import { Color, Euler, Matrix4, Object3D, PointLight, PointLightHelper, Quaternion, Scene, Vector3 } from "three"
 	import { Light, SvelthreeLightHelper, SvelthreeLightWithShadow } from "../components-internal"
@@ -41,6 +42,18 @@ This is a **svelthree** _PointLight_ Component.
 		SvelthreeAnimationFunction
 	} from "../types-extra"
 	import { LightUtils } from "../utils"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let props: { [P in keyof PointLightProps]: PointLightProps[P] } = undefined
 	export let parent: Object3D = undefined
@@ -74,6 +87,7 @@ This is a **svelthree** _PointLight_ Component.
 
 	let light: PointLight = new PointLight()
 	light.name = name
+	light.userData.svelthreeComponent = self
 
 	export let shadowProps: { [P in keyof LightShadowProps<LightShadow>]: LightShadowProps<LightShadow>[P] } = undefined
 
@@ -93,13 +107,21 @@ This is a **svelthree** _PointLight_ Component.
 	}
 
 	onMount(() => {
-		console.info(`SVELTHREE > onMount : ${light.type}`)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			console.info(`SVELTHREE > onDestroy : ${light.type}`)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			if (lightHelper && lightHelperComponent) {
 				lightHelperComponent.removeHelper()
 			}
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 
 	// public methods
@@ -129,8 +151,46 @@ This is a **svelthree** _PointLight_ Component.
 	}
 </script>
 
-<SvelthreeLightWithShadow {light} {shadowMapSize} {shadowBias} {castShadow} {shadowCameraProps} {shadowProps} />
-<Light {scene} {parent} {light} {props} {pos} {rot} {quat} {matrix} {color} {intensity} {animation} {aniauto} />
+<SvelthreeLightWithShadow
+	{light}
+	{shadowMapSize}
+	{shadowBias}
+	{castShadow}
+	{shadowCameraProps}
+	{shadowProps}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
+/>
+<Light
+	{scene}
+	{parent}
+	{light}
+	{props}
+	{pos}
+	{rot}
+	{quat}
+	{matrix}
+	{color}
+	{intensity}
+	{animation}
+	{aniauto}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
+/>
 {#if helper}
-	<SvelthreeLightHelper bind:this={lightHelperComponent} {scene} {helper} {light} bind:lightHelper />
+	<SvelthreeLightHelper
+		bind:this={lightHelperComponent}
+		{scene}
+		{helper}
+		{light}
+		bind:lightHelper
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
+	/>
 {/if}

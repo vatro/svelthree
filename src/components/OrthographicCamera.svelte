@@ -43,13 +43,19 @@ If you use this approach you'll see a warning in the console if you define left,
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { CameraUtils, StoreUtils } from "../utils"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// #endregion
 
@@ -73,6 +79,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	// #endregion
 
 	// #region --- Optional Attributes
+	export let name: string = undefined
 
 	/**
      * The value of `frustumSize` is being used for automatic calculation of default left, right, top and bottom frustum planes:
@@ -84,6 +91,7 @@ If you use this approach you'll see a warning in the console if you define left,
      * ```
      * The value of `aspect` is being internally calculated based on current dimensions of the Canvas component (canvas.w / canvas.h).   
     */
+
 	export let frustumSize: number = undefined
 
 	/**
@@ -118,7 +126,20 @@ If you use this approach you'll see a warning in the console if you define left,
 	/** Creates and adds a CameraHelper. */
 	export let helper: boolean = undefined
 
-	$: cam && !cam.userData.helper && helper ? CameraUtils.createHelper(cam, scene) : null
+	$: {
+		if (cam && !cam.userData.helper && helper) {
+			const camHelper: CameraHelper = CameraUtils.createHelper(cam, scene)
+
+			if (verbose && log_rs) {
+				console.debug(c_name, `[${cam.type}] + HELPER added!`, {
+					camHelper,
+					scene,
+					total: scene.children.length
+				})
+			}
+		}
+	}
+
 	$: cam && cam.userData.helper && !helper ? CameraUtils.removeHelper(cam, scene) : null
 
 	/** Writable, non-function OrthographicCamera properties only incl. an additional `lookAt` property. */
@@ -136,10 +157,18 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	let cam: OrthographicCamera
 
-	if (params && params.length > 0) {
-		cam = new OrthographicCamera(...params)
-	} else {
-		cam = new OrthographicCamera(...defaultParams)
+	$: {
+		if (!cam && params && params.length > 0) {
+			cam = new OrthographicCamera(...params)
+			cam.name = name
+			cam.userData.svelthreeComponent = self
+			debugger
+		} else if (!cam) {
+			cam = new OrthographicCamera(...defaultParams)
+			cam.name = name
+			cam.userData.svelthreeComponent = self
+			debugger
+		}
 	}
 
 	// #endregion
@@ -198,25 +227,21 @@ If you use this approach you'll see a warning in the console if you define left,
 	// #region --- Lifecycle
 
 	onMount(() => {
-		if (logLC) logCurrentState(`----> OrthographicCamera > onMount`, null)
-		if (logInfo) console.info("SVELTHREE > onMount : " + cam.type)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		return () => {
-			if (logInfo) console.info("SVELTHREE > onDestroy : " + cam.type)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			CameraUtils.removeHelper(cam, scene)
 		}
 	})
 
 	beforeUpdate(() => {
-		logCurrentState("%c------> OrthographicCamera > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(() => {
-		logCurrentState("%c------> OrthographicCamera > afterUpdate", css_aa)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 
-	function logCurrentState(prefix: string, css: string) {
-		if (logInfo) console.log(`${prefix}!`, `${css}`)
-	}
 	// #endregion
 </script>
 
@@ -237,7 +262,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	{props}
 	{animation}
 	{aniauto}
-	{logInfo}
-	{logRS}
-	{logLC}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

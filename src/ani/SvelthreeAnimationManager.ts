@@ -1,5 +1,6 @@
 import type { Object3D, Scene } from "three"
 import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 // TODO  TOFIX  This seems to be a MESS, DEBUG! (switching Scenes)
 export default class SvelthreeAnimationManager {
@@ -17,24 +18,34 @@ export default class SvelthreeAnimationManager {
 
 	handleCurrentSceneStatus(currentSceneActive: boolean) {
 		if (currentSceneActive) {
-			console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
-			)
+			if (verbose_mode()) {
+				console.debug(
+					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
+				)
+			}
 			if (this.aniauto) {
-				console.warn("SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!")
+				if (verbose_mode()) {
+					console.debug(
+						"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!"
+					)
+				}
 				this.handleSceneActive()
 			}
 		} else {
-			console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
-			)
+			if (verbose_mode()) {
+				console.debug(
+					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
+				)
+			}
 			this.handleSceneInActive()
 		}
 	}
 
 	//active / reactivated
 	handleSceneActive() {
-		console.warn("SVELTHREE > SvelthreeAnimationManager > handleSceneActive!")
+		if (verbose_mode()) {
+			console.debug("SVELTHREE > SvelthreeAnimationManager > handleSceneActive!")
+		}
 		//check if animation has been initiated, if so try to execute 'onSceneReactivated'...
 		if (this.animationInitiated() === true) {
 			this.tryOnSceneReactivated()
@@ -45,7 +56,7 @@ export default class SvelthreeAnimationManager {
 	}
 
 	initiateAnimation(): void {
-		//console.info("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
+		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
 		//if animation is a function it has not been initiated / started yet (otherwise object)
 		!this.scene.userData.isActive
 			? console.warn(
@@ -53,10 +64,11 @@ export default class SvelthreeAnimationManager {
 			  )
 			: null
 		this.animation = this.animation.initiate(this.obj, ...arguments)
-		console.info(
-			"SVELTHREE > SvelthreeAnimationManager > initiateAnimation : after initialization: this.animation:",
-			this.animation
-		)
+		if (verbose_mode())
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > initiateAnimation : after initialization: this.animation:",
+				this.animation
+			)
 		try {
 			this.animation.onStart()
 		} catch (error) {

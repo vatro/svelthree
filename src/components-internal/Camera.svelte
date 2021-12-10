@@ -27,13 +27,17 @@ This is an internal **svelthree** _Camera_ Component.
 	import { svelthreeStores } from "../stores"
 	import { CameraUtils, PropUtils, SvelthreeProps } from "../utils"
 	import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	// #endregion
 
@@ -57,16 +61,21 @@ This is an internal **svelthree** _Camera_ Component.
 
 	scene.add(cam)
 
-	if (logInfo)
-		console.info("SVELTHREE > Camera : " + cam.type + " was added to scene!", {
-			cam: cam,
-			scene: scene,
-			total: scene.children.length
-		})
+	if (verbose && log_dev) {
+		console.debug(
+			...c_dev(c_name, `${cam.type} was added to scene!`, {
+				cam: cam,
+				scene: scene,
+				total: scene.children.length
+			})
+		)
+	}
 
 	cam.userData.id = id
 	cam.userData.isActive = false
 	cam.userData.indexInCameras = $svelthreeStores[sti].cameras.length
+
+	debugger
 
 	$svelthreeStores[sti].cameras.push({
 		camera: cam,
@@ -117,7 +126,7 @@ This is an internal **svelthree** _Camera_ Component.
 	$: props && sProps ? updateProps() : null
 
 	function updateProps() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! props", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "props", props))
 		sProps.update(props)
 	}
 
@@ -149,7 +158,7 @@ This is an internal **svelthree** _Camera_ Component.
 
     // TODO check one more time with orbit controls on
     afterUpdate(() => {
-        console.info("SVELTHREE > Camera : afterUpdate!")
+         if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
         tryOrbitControlsUpdate()
     })
 
@@ -168,40 +177,39 @@ This is an internal **svelthree** _Camera_ Component.
 	//#region --- 'Object3D' Specific Code
 
 	const w_sh = PropUtils.getShortHandAttrWarnings(`SVELTHREE > ${cam.type} >`)
-	const wrn = PropUtils.warn
 
-	//$: !matrix && cam && pos ? PropUtils.setPositionFromValue(cam, pos) : pos && cam ? wrn(w_sh.pos) : null
-	$: !matrix && cam && pos ? setPositionFromValue() : pos && cam ? wrn(w_sh.pos) : null
+	//$: !matrix && cam && pos ? PropUtils.setPositionFromValue(cam, pos) : pos && cam ? console.warn(w_sh.pos) : null
+	$: !matrix && cam && pos ? setPositionFromValue() : pos && cam ? console.warn(w_sh.pos) : null
 
 	function setPositionFromValue() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! pos", `${css_rs}`, pos)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "pos", pos))
 		PropUtils.setPositionFromValue(cam, pos)
 	}
 
-	//$: !matrix && !quat && cam && rot ? PropUtils.setRotationFromValue(cam, rot) : rot && cam ? wrn(w_sh.rot) : null
-	$: !matrix && !quat && cam && rot ? setRotationFromValue() : rot && cam ? wrn(w_sh.rot) : null
+	//$: !matrix && !quat && cam && rot ? PropUtils.setRotationFromValue(cam, rot) : rot && cam ? console.warn(w_sh.rot) : null
+	$: !matrix && !quat && cam && rot ? setRotationFromValue() : rot && cam ? console.warn(w_sh.rot) : null
 
 	function setRotationFromValue() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! rot", `${css_rs}`, rot)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "rot", rot))
 		PropUtils.setRotationFromValue(cam, rot)
 	}
 
-	//$: !matrix && cam && quat ? PropUtils.setQuaternionFromValue(cam, quat) : quat && cam ? wrn(w_sh.quat) : null
-	$: !matrix && cam && quat ? setQuaternionFromValue() : quat && cam ? wrn(w_sh.quat) : null
+	//$: !matrix && cam && quat ? PropUtils.setQuaternionFromValue(cam, quat) : quat && cam ? console.warn(w_sh.quat) : null
+	$: !matrix && cam && quat ? setQuaternionFromValue() : quat && cam ? console.warn(w_sh.quat) : null
 
 	function setQuaternionFromValue() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! quat", `${css_rs}`, quat)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "quat", quat))
 		PropUtils.setQuaternionFromValue(cam, quat)
 	}
 
 	// RECONSIDER  TODO  currently not using 'scale' in cameras
-	//$: !matrix && cam && scale ? PropUtils.setScaleFromValue(cam, scale) : scale && cam ? wrn(w_sh.scale) : null
+	//$: !matrix && cam && scale ? PropUtils.setScaleFromValue(cam, scale) : scale && cam ? console.warn(w_sh.scale) : null
 
-	//$: !matrix && cam && lookAt ? PropUtils.setLookAtFromValue(cam, lookAt) : lookAt && cam ? wrn(w_sh.lookAt) : null
-	$: !matrix && cam && lookAt ? setLookAtFromValue() : lookAt && cam ? wrn(w_sh.lookAt) : null
+	//$: !matrix && cam && lookAt ? PropUtils.setLookAtFromValue(cam, lookAt) : lookAt && cam ? console.warn(w_sh.lookAt) : null
+	$: !matrix && cam && lookAt ? setLookAtFromValue() : lookAt && cam ? console.warn(w_sh.lookAt) : null
 
 	function setLookAtFromValue() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! lookAt", `${css_rs}`, lookAt)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "lookAt", lookAt))
 		PropUtils.setLookAtFromValue(cam, lookAt)
 	}
 
@@ -209,7 +217,7 @@ This is an internal **svelthree** _Camera_ Component.
 	$: matrix && cam ? setMatrixFromValue() : null
 
 	function setMatrixFromValue() {
-		if (logRS) console.log("%c*--------> Camera > reactive statement! matrix", `${css_rs}`, matrix)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "matrix", matrix))
 		PropUtils.setMatrixFromValue(cam, matrix)
 	}
 
@@ -307,31 +315,31 @@ This is an internal **svelthree** _Camera_ Component.
 		fnOnMount
 			? () => fnOnMount(self)
 			: () => {
-					if (logLC) logCurrentState(`*----> Camera > onMount`, null)
-					if (logInfo) console.info("SVELTHREE > onMount : Camera")
-					console.warn("SVELTHREE > onMount : Camera : cam.matrixAutoUpdate", cam.matrixAutoUpdate)
+					if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
+					if (verbose && log_mau) {
+						console.debug(...c_mau(c_name, "onMount : cam.matrixAutoUpdate", cam.matrixAutoUpdate))
+					}
 
 					return () => {
-						if (logInfo) console.info("SVELTHREE > onDestroy : Camera")
+						if (verbose && log_lc) console.info(...c_lc_int(c_name, "onDestroy"))
 						removeCameraFromParent()
 					}
 			  }
 	)
 
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
 	afterUpdate(() => {
-		if (logLC) logCurrentState("%c*------> Camera > afterUpdate", css_aa)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "afterUpdate"))
 		if (cam.matrixWorldNeedsUpdate === false) {
 			cam.matrixAutoUpdate = mau
 		}
+		if (verbose && log_lc && (log_lc.all || log_lc.od)) {
+			console.debug(...c_mau(c_name, "afterUpdate : cam.matrixAutoUpdate", cam.matrixAutoUpdate))
+		}
 	})
-
-	beforeUpdate(() => {
-		if (logLC) logCurrentState("%c*------> Camera > beforeUpdate", css_ba)
-	})
-
-	function logCurrentState(prefix: string, css: string) {
-		console.log(`${prefix}!`, `${css}`)
-	}
 
 	// #endregion
 </script>

@@ -10,11 +10,21 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import type { Group, Object3D, WebGLRenderer, WebXRManager } from "three"
 	import { svelthreeStores } from "../stores"
 	import type { XrControllerEventDetailObj, XrControllerEventType } from "../xr/types-svelthree"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
@@ -123,20 +133,28 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : SvelthreeInteractionVRGrippable")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 
 		// WHY?  do we have to to this? Without it there is no object-based interaction after switching from
 		// controllers --> hands --> controllers
 		applyListeners()
 
 		return () => {
-			console.info("SVELTHREE > onDestroy : SvelthreeInteractionVRGrippable")
+			if (verbose && log_lc) console.info(...c_lc_int(c_name, "onDestroy"))
 
 			obj.userData.interact = false
 			if (renderer && webXRManager) {
 				removeListeners()
 			}
 		}
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 
 	function dispatchOnIntersect(e: THREE.Event): void {
@@ -217,7 +235,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	// --- Internal Actions ---
 
 	function onSelectAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSelectAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectAction!", { e }))
 		typeof parent.onSelect === "function"
 			? parent.onSelect(e)
 			: console.error(
@@ -226,7 +244,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	function onSelectStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSelectStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectStartAction!", { e }))
 		typeof parent.onSelectStart === "function"
 			? parent.onSelectStart(e)
 			: console.error(
@@ -235,7 +253,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	function onSelectEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSelectEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectEndAction!", { e }))
 		typeof parent.onSelectEnd === "function"
 			? parent.onSelectEnd(e)
 			: console.error(
@@ -244,7 +262,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	function onSqueezeAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSqueezeAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSqueezeAction!", { e }))
 		typeof parent.onSqueeze === "function"
 			? parent.onSqueeze(e)
 			: console.error(
@@ -253,7 +271,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	function onSqueezeStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSqueezeStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSqueezeStartAction!", { e }))
 		typeof parent.onSqueezeStart === "function"
 			? parent.onSqueezeStart(e)
 			: console.error(
@@ -262,7 +280,7 @@ This is a **svelthree** _SvelthreeInteractionVRGrippable_ Component.
 	}
 
 	function onSqueezeEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRGrippable :internal onSqueezeEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSqueezeEndAction!", { e }))
 		typeof parent.onSqueezeEnd === "function"
 			? parent.onSqueezeEnd(e)
 			: console.error(

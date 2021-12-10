@@ -19,12 +19,17 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import { Propeller, PropUtils } from "../utils"
 	import { XRHitTestAR } from "../xr"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -34,6 +39,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let renderer: WebGLRenderer
 	let self = get_current_component()
+
+	export let updatesTotal: number = 0
 
 	export let config: { [key: string]: any } = undefined
 
@@ -99,20 +106,16 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function createRenderer(): void {
-		if (logRS)
-			console.log("%c------> WebGLRenderer > reactive statement! > createRenderer! at start", `${css_rs}`, {
-				renderer
-			})
+		if (verbose && log_rs) {
+			console.debug(...c_rs(c_name, "createRenderer! (before creation) -> renderer:", renderer))
+		}
 
 		renderer = new WebGLRenderer({ canvas: $svelthreeStores[sti].canvas.dom, ...config })
 		canvas = $svelthreeStores[sti].canvas.dom
 		$svelthreeStores[sti].renderer = renderer
 		$svelthreeStores[sti].rendererComponent = self
 
-		if (logRS)
-			console.log("%c------> WebGLRenderer > reactive statement! > createRenderer! at end", `${css_rs}`, {
-				renderer
-			})
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRenderer! (after creation) -> renderer:", renderer))
 	}
 
 	/*
@@ -125,13 +128,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	function setShadowMapStatus() {
 		renderer.shadowMap.enabled = enableShadowMap ? true : false
 
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! > setShadowMapStatus!",
-				`${css_rs}`,
-				{ enableShadowMap },
-				{ "renderer.shadowMap.enabled": renderer.shadowMap.enabled }
+		if (verbose && log_rs) {
+			console.debug(
+				...c_rs(c_name, "setShadowMapStatus! ->", {
+					enableShadowMap,
+					"renderer.shadowMap.enabled": renderer.shadowMap.enabled
+				})
 			)
+		}
 	}
 
 	$: renderer && renderer.shadowMap.enabled ? setShadowMapType() : null
@@ -139,13 +143,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	function setShadowMapType() {
 		renderer.shadowMap.type = shadowMapType
 
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! > setShadowMapType!",
-				`${css_rs}`,
-				{ "shadowMap.enabled": renderer.shadowMap.enabled },
-				{ "shadowMap.type": renderer.shadowMap.type }
+		if (verbose && log_rs) {
+			console.debug(
+				...c_rs(c_name, "setShadowMapType! -> renderer.", {
+					"shadowMap.enabled": renderer.shadowMap.enabled,
+					"shadowMap.type": renderer.shadowMap.type
+				})
 			)
+		}
 	}
 
 	/*
@@ -157,7 +162,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	$: renderer && props ? updateProps() : null
 
 	function updateProps() {
-		if (logRS) console.log("%c------> WebGLRenderer > reactive statement! > updateProps!", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "updateProps! ->", { props }))
 
 		// TODO  refactor
 		if (propsPrev === undefined) {
@@ -177,22 +182,15 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	function setXr() {
 		renderer.xr.enabled = xr ? true : false
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! setXr!",
-				`${css_rs}`,
-				{ xr },
-				{ "renderer.xr.enabled": renderer.xr.enabled }
-			)
+		if (verbose && log_rs) {
+			console.debug(...c_rs(c_name, "setXr! ->", { xr, "renderer.xr.enabled": renderer.xr.enabled }))
+		}
 	}
 
 	$: !currentScene && sceneToRenderId ? setCurrentScene() : null
 
 	function setCurrentScene() {
-		if (logRS)
-			console.log("%c------> WebGLRenderer > reactive statement! > setCurrentScene!", `${css_rs}`, {
-				sceneToRenderId
-			})
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "setCurrentScene! ->", { sceneToRenderId }))
 		currentScene = getSceneToRender()
 		activateCurrentScene()
 	}
@@ -200,22 +198,24 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	$: !currentCam && currentSceneId ? setCurrentCam() : null
 
 	function setCurrentCam() {
-		if (logRS)
-			console.log("%c------> WebGLRenderer > reactive statement! > setCurrentCam!", `${css_rs}`, {
-				currentSceneId
-			})
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "setCurrentCam! ->", { currentSceneId }))
+
 		currentCam = getCamToRender()
 		setCurrentCamActive()
 	}
 
 	// TODO  what's this technique? would this trigger on every ... what?
 	$: {
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! [TODO ???] > sceneToRenderId !== currentSceneId",
-				`${css_rs}`,
-				sceneToRenderId !== currentSceneId
+		if (verbose && log_rs) {
+			console.debug(
+				...c_rs(
+					c_name,
+					"[TODO ???] -> sceneToRenderId !== currentSceneId :",
+					sceneToRenderId !== currentSceneId
+				)
 			)
+		}
+
 		if (sceneToRenderId !== currentSceneId) {
 			// won't trigger change if 'currentScene' is not being set, this happens first time onMount()
 			if (currentScene) {
@@ -227,12 +227,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			}
 		}
 
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! [TODO ???] > camToRenderId !== currentCamId",
-				`${css_rs}`,
-				camToRenderId !== currentCamId
+		if (verbose && log_rs) {
+			console.debug(
+				...c_rs(c_name, "[TODO ???] -> camToRenderId !== currentCamId :", camToRenderId !== currentCamId)
 			)
+		}
+
 		if (camToRenderId !== currentCamId) {
 			// won't trigger change if 'currentCam' is not being set, this happens first time onMount()
 			if (currentCam) {
@@ -252,47 +252,40 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	$: storeCanvasDimW = $svelthreeStores[sti].canvas.dim.w
 	$: storeCanvasDimH = $svelthreeStores[sti].canvas.dim.h
 	$: if ((storeCanvasDimW || storeCanvasDimH) && canvas) {
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! [TODO ???] > if storeCanvasDimW || storeCanvasDimH && canvas ",
-				`${css_rs}`,
-				{ storeCanvasDimW },
-				{ storeCanvasDimH }
+		if (verbose && log_rs) {
+			console.debug(
+				...c_rs(c_name, "[TODO ???] -> if storeCanvasDimW || storeCanvasDimH && canvas :", {
+					storeCanvasDimW,
+					storeCanvasDimH
+				})
 			)
-		//console.info("SVELTHREE > WebGLRenderer : resizeRenderer on canvas.dim change!")
+		}
+
+		// resize renderer on canvas.dim change
 		resizeRendererOnNextFrame = true
 	}
 
 	$: if (renderer) {
-		if (logRS)
-			console.log(
-				"%c------> WebGLRenderer > reactive statement! renderer (> startAnimating)",
-				`${css_rs}`,
-				renderer
-			)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "renderer created -> startAnimating ...", { renderer }))
 		startAnimating()
 	}
 
 	onMount(() => {
-		if (logInfo) console.info("SVELTHREE > onMount : WebGLRenderer")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 
 		return () => {
-			if (logInfo) "SVELTHREE > onDestroy : WebGLRenderer"
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			stopAnimating()
 		}
 	})
 
 	beforeUpdate(() => {
-		if (logLC) logCurrentState("%c----> WebGLRenderer > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(() => {
-		if (logLC) logCurrentState("%c----> WebGLRenderer > afterUpdate", css_aa)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
-
-	function logCurrentState(prefix: string, css: string) {
-		console.log(`${prefix}!`, `${css}`)
-	}
 
 	// TODO  understand. STRANGE: if we run this inside reactive statement instead of the ternary version, there are no shadows ---> ???
 	/*
@@ -308,57 +301,65 @@ This is a **svelthree** _WebGLRenderer_ Component.
     */
 
 	function setCurrentCamActive(): void {
-		if (logInfo)
-			console.info("SVELTHREE > WebGLRenderer : setCurrentCamActive", {
-				currentCam: currentCam.type,
-				uuid: currentCam.uuid,
-				isActive: currentCam.userData.isActive
-			})
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "setCurrentCamActive! (before) ->", {
+					currentCam: currentCam.type,
+					uuid: currentCam.uuid,
+					isActive: currentCam.userData.isActive
+				})
+			)
+		}
+
 		currentCam.userData.isActive = true
 		$svelthreeStores[sti].cameras[currentCam.userData.indexInCameras].isActive = true
 		$svelthreeStores[sti].activeCamera = currentCam
-		if (logInfo)
-			console.info(
-				"SVELTHREE > WebGLRenderer : setCurrentCamActive",
-				{
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "setCurrentCamActive! (done) ->", {
 					currentCam: currentCam.type,
 					uuid: currentCam.uuid,
 					isActive: currentCam.userData.isActive
-				},
-				"done!"
+				})
 			)
+		}
 	}
 
 	function setCurrentCamInactive(): void {
-		if (logInfo)
-			console.info("SVELTHREE > WebGLRenderer : setCurrentCamInactive", {
-				currentCam: currentCam.type,
-				uuid: currentCam.uuid,
-				isActive: currentCam.userData.isActive
-			})
-		currentCam.userData.isActive = false
-		$svelthreeStores[sti].cameras[currentCam.userData.indexInCameras].isActive = false
-		if (logInfo)
-			console.info(
-				"SVELTHREE > WebGLRenderer : setCurrentCamInactive",
-				{
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "setCurrentCamInactive! (before) ->", {
 					currentCam: currentCam.type,
 					uuid: currentCam.uuid,
 					isActive: currentCam.userData.isActive
-				},
-				"done!"
+				})
 			)
+		}
+
+		currentCam.userData.isActive = false
+		$svelthreeStores[sti].cameras[currentCam.userData.indexInCameras].isActive = false
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "setCurrentCamActive! (done) ->", {
+					currentCam: currentCam.type,
+					uuid: currentCam.uuid,
+					isActive: currentCam.userData.isActive
+				})
+			)
+		}
 	}
 
 	/*
     function resizeRenderer(tW: number, tH: number, updateStyle:boolean): void {
-        console.info("SVELTHREE > WebGLRenderer : resizeRenderer!")
+        if (verbose && log_dev) console.debug(...c_dev(c_name, "resizeRenderer!"))
         renderer ? renderer.setSize(tW, tH, updateStyle) : null
     }
     */
 
 	function getSceneToRender(): Scene {
-		if (logInfo) console.info("SVELTHREE > WebGLRenderer : getSceneToRender!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "getSceneToRender!"))
 		if ($svelthreeStores[sti].scenes.length > 0) {
 			if (sceneToRenderId === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
@@ -389,7 +390,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function getCamToRender(): Camera {
-		if (logInfo) console.info("SVELTHREE > WebGLRenderer : getCamToRender!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "getCamToRender!"))
 		if ($svelthreeStores[sti].cameras.length > 0) {
 			if (camToRenderId === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
@@ -440,7 +441,13 @@ This is a **svelthree** _WebGLRenderer_ Component.
              $svelthreeStores = $svelthreeStores
             */
 		} else if (currentScene.userData.isActive === undefined) {
-			if (logInfo) console.info(currentScene)
+			if (verbose && log_dev) {
+				console.debug(
+					...c_dev(c_name, "activateCurrentScene! -> if (currentScene.userData.isActive === undefined) :", {
+						currentScene
+					})
+				)
+			}
 
 			currentScene.userData.isActive = true
 			$svelthreeStores[sti].scenes[currentScene.userData.indexInScenes].isActive = true
@@ -459,7 +466,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let rAF: number = undefined
 
 	function startAnimating(): void {
-		console.warn("SVELTHREE > WebGLRenderer > startAnimating!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "startAnimating!"))
 		doAnimate = true
 		animate()
 	}
@@ -480,17 +487,18 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let raycaster: Raycaster
 	$: if (isInteractive) {
 		if (!raycaster) {
-			//console.log("ineractive - raycaster!")
+			//if (verbose && log_rs) console.debug(...c_rs(c_name, "isInteractive === true && !raycaster > set `raycaster` to `$svelthreeStores[sti].raycaster` ..."))
 			raycaster = $svelthreeStores[sti].raycaster
 		}
 	} else {
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "isInteractive === false > set `raycaster` to `null` ..."))
 		raycaster = null
-		//console.log("not ineractive - no raycaster!")
 	}
 
+	// TODO  Months later: What?! Remove?
 	/*
     $: if($svelthreeStores[sti].canvas.interactive) {
-        console.log("run 15!")
+        console.debug("run 15!")
         raycaster = $svelthreeStores[sti].raycaster
         isInteractive = true
     }
@@ -539,7 +547,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let toTest: Object3D[]
 
 	function animate(): void {
-		//console.info("SVELTHREE > WebGLRenderer > animate!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "animate!"))
 		if (renderer.xr.enabled === false) {
 			renderStandard()
 		} else {
@@ -589,6 +597,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			renderer.render(currentScene, currentCam)
 
+			updatesTotal++
 			dispatch("after_render")
 
 			rAF = requestAnimationFrame(animate)
@@ -659,15 +668,21 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			renderer.render(currentScene, currentCam)
 
+			updatesTotal++
 			dispatch("after_render")
 		}
 	}
 
 	function doLogOnce(renderMode: string): void {
 		logOnce = false
-		if (logInfo) {
-			console.info(`SVELTHREE > WebGLRenderer > animate : ${renderMode}`, currentScene, currentCam, canvas)
-		}
+		if (verbose && log_dev)
+			console.debug(
+				...c_dev(c_name, `animate > doLogOnce! -> animate : ${renderMode}`, {
+					currentScene,
+					currentCam,
+					canvas
+				})
+			)
 	}
 
 	function updateCubeCameras(): void {
@@ -710,4 +725,4 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 </script>
 
-<XRHitTestAR bind:this={xrHitTestAR} {sti} />
+<XRHitTestAR bind:this={xrHitTestAR} {sti} {log_dev} {log_rs} {log_lc} {log_mau} />

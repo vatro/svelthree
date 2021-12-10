@@ -8,6 +8,7 @@ import { sphereIntersectTriangle } from "three-mesh-bvh/src/math/MathUtilities"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrHandTouchTestMode, XrTouchUpdateParams } from "./types-svelthree"
 import XRHandTouch from "./XRHandTouch"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 type SeparatingAxisTriangle = import("three-mesh-bvh/src/math/SeparatingAxisTriangle").SeparatingAxisTriangle
 
@@ -96,7 +97,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 			switch (joint.userData.touch) {
 				case false:
-					//console.log("FIRST CHECK!")
+					//if (verbose_mode()) console.debug("FIRST CHECK!")
 					if (this.debug) {
 						if (this.jointDebugger) {
 							this.jointDebugger.unhighlightJoint()
@@ -153,7 +154,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 					// NO INTERSECTION
 					if (sphereTouchingResults2.length === 0) {
-						console.log("WE TOUCHED BEFORE! --> We're touching but NOT INTERSECTING!")
+						if (verbose_mode()) console.debug("WE TOUCHED BEFORE! --> We're touching but NOT INTERSECTING!")
 						// We're touching but NOT INTERSECTING
 						joint.userData.sphereIntersect = false
 
@@ -168,7 +169,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 						// Run this only if we're not
 						// once we're INSIDE 'joint.userData.lastTouchTris' gets 'undefined'
 						if (joint.userData.lastTouchTris !== undefined) {
-							console.log("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!!")
+							if (verbose_mode()) console.debug("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!!")
 							//It should be enough to use just one point here (no need to calculate the center of the triangle)
 							jointNormal = new Vector3()
 								.subVectors(joint.userData.lastTouchTris[0].points[0], joint.userData.origin)
@@ -177,16 +178,18 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 							joint.userData.lastTouchTris[0].getNormal(faceNormal)
 							dotProd = jointNormal.dot(faceNormal)
 
-							console.log("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!! dotProd: ", dotProd)
+							if (verbose_mode())
+								console.debug("WE TOUCHED BEFORE! --> INSIDE / OUTSIDE CHECK!! dotProd: ", dotProd)
 							dotProd > 0 ? (joint.userData.touchInside = true) : (joint.userData.touchInside = false)
 						}
 
 						// a) We're INSIDE ---> do nothing -->  TODO  consider dispatching 'touching'
 						if (joint.userData.touchInside === true) {
-							console.log(
-								"WE TOUCHED BEFORE! --> We're INSIDE ---> do nothing! joint.userData.touchInside: ",
-								joint.userData.touchInside
-							)
+							if (verbose_mode())
+								console.debug(
+									"WE TOUCHED BEFORE! --> We're INSIDE ---> do nothing! joint.userData.touchInside: ",
+									joint.userData.touchInside
+								)
 
 							joint.userData.touch = true
 
@@ -199,7 +202,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 						// b) We're OUTSIDE --> 'untouch'
 						else {
-							console.log("WE TOUCHED BEFORE! --> We're OUTSIDE --> 'untouch'!")
+							if (verbose_mode()) console.debug("WE TOUCHED BEFORE! --> We're OUTSIDE --> 'untouch'!")
 							// do 'untouch'
 
 							if (this.debug) {
@@ -230,7 +233,8 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 					// INTERSECTION : we still touch the surface -->  TODO  consider dispatching 'touching'
 					else {
-						console.log("WE TOUCHED BEFORE! --> INTERSECTION : we still touch the surface!")
+						if (verbose_mode())
+							console.debug("WE TOUCHED BEFORE! --> INTERSECTION : we still touch the surface!")
 
 						joint.userData.sphereIntersect = true
 						joint.userData.touch = true
@@ -262,18 +266,18 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 	 */
 
 	checkSphereIntersection(joint: Group, mesh: Mesh): checkSphereIntersectionResult {
-		//console.log("checkSphereIntersection!")
+		//if (verbose_mode()) console.debug("checkSphereIntersection!")
 
 		// this doesn't work!
 		// this.touchSphere.set(joint.userData.origin, this.touchSphereRadius)
 		this.touchSphere = new Sphere(joint.userData.origin, this.touchSphereRadius)
 
-		//console.log("joint.userData.origin: ", joint.userData.origin)
-		//console.log("this.touchSphere center", this.touchSphere.center)
+		//if (verbose_mode()) console.debug("joint.userData.origin: ", joint.userData.origin)
+		//if (verbose_mode()) console.debug("this.touchSphere center", this.touchSphere.center)
 
 		const bvh = mesh.geometry["boundsTree"] || undefined
 
-		//console.log("bvh: ", bvh)
+		//if (verbose_mode()) console.debug("bvh: ", bvh)
 
 		const indices: number[] = []
 
@@ -294,7 +298,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 					if (sphereIntersectTriangle(this.touchSphere, tri)) {
 						indices.push(a, b, c)
-						//console.log("tri:", tri) // SeparatingAxisTriangle
+						//if (verbose_mode()) console.debug("tri:", tri) // SeparatingAxisTriangle
 						tris.push(tri)
 					}
 
@@ -305,7 +309,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 
 		//console.timeEnd("bvh.shapecast")
 
-		//console.log("indices: ", indices)
+		//if (verbose_mode()) console.debug("indices: ", indices)
 
 		return { indices: indices, tris: tris }
 	}
@@ -317,7 +321,7 @@ export default class XRHandTouchSphereExt extends XRHandTouch {
 	 */
 	/*
 	checkSphereIntersection(joint: Group, mesh: Mesh): number[] {
-		console.log("checkSphereIntersection!")
+		if (verbose_mode()) console.debug("checkSphereIntersection!")
 		// TODO test @see https://github.com/gkjohnson/three-mesh-bvh/issues/154 solution
     
 		const inverseMatrix = new Matrix4();

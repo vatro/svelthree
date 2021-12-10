@@ -10,10 +10,20 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
 	import { svelthreeStores } from "../stores"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
@@ -24,9 +34,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let raycaster: Raycaster
 	$: raycaster = $svelthreeStores[sti].raycaster
 
+	// TODO  Months later: What?! Remove?
 	/*
     $: if($svelthreeStores[sti].raycaster) {
-        console.log("run 12!")
+        console.debug("run 12!")
         raycaster = $svelthreeStores[sti].raycaster
     }
     */
@@ -38,9 +49,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let c: HTMLElement
 	$: c = $svelthreeStores[sti].canvas.dom
 
+	// TODO  Months later: What?! Remove?
 	/*
     $: if($svelthreeStores[sti].canvas.dom) {
-        console.log("run 13!")
+        console.debug("run 13!")
         c = $svelthreeStores[sti].canvas.dom
     }
     */
@@ -97,10 +109,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	onMount(() => {
-		//console.info("SVELTHREE > onMount : SvelthreeInteraction")
+		//if (verbose && log_lc ) console.info(...c_lc_int(c_name, "onMount"))
 
 		return () => {
-			console.info("SVELTHREE > onDestroy : SvelthreeInteraction")
+			if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onDestroy"))
 			obj.userData.interact = false
 
 			if (c) {
@@ -111,6 +123,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				c.removeEventListener("pointermove", tryDispatch)
 			}
 		}
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 
 	let isOverDispatched = false
@@ -349,56 +369,56 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// --- Internal Actions ---
 
 	function onClickAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction :internal onClickAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onClickAction!", { e }))
 		typeof parent.onClick === "function"
 			? parent.onClick(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onClick' object is not a valid function!")
 	}
 
 	function onPointerUpAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerUpAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerUpAction!", { e }))
 		typeof parent.onPointerUp === "function"
 			? parent.onPointerUp(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerUp' object is not a function!")
 	}
 
 	function onPointerDownAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerDownAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerDownAction!", { e }))
 		typeof parent.onPointerDown === "function"
 			? parent.onPointerDown(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerDown' object is not a function!")
 	}
 
 	function onPointerOverAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerOverAction!", e)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerOverAction!", { e }))
 		typeof parent.onPointerOver === "function"
 			? parent.onPointerOver(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOver' object is not a function!")
 	}
 
 	function onPointerOutAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerOutAction!", e)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerOutAction!", { e }))
 		typeof parent.onPointerOut === "function"
 			? parent.onPointerOut(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOut' object is not a function!")
 	}
 
 	function onPointerEnterAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerEnterAction!", e)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerEnterAction!", { e }))
 		typeof parent.onPointerEnter === "function"
 			? parent.onPointerEnter(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerEnter' object is not a function!")
 	}
 
 	function onPointerLeaveAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerLeaveAction!", e)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerLeaveAction!", { e }))
 		typeof parent.onPointerLeave === "function"
 			? parent.onPointerLeave(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerLeave' object is not a function!")
 	}
 
 	function onPointerMoveAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteraction : internal onPointerMoveAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerMoveAction!", { e }))
 		typeof parent.onPointerMove === "function"
 			? parent.onPointerMove(e)
 			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerMove' object is not a function!")

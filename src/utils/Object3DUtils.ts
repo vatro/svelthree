@@ -4,6 +4,7 @@
 
 import type { Object3D } from "three"
 import PropUtils from "./PropUtils"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 /*
  * Containes public static methods for updating Object3D properties via component shorthand attributes.
  */
@@ -40,7 +41,7 @@ export default class Object3DUtils {
 	 * Updates *Object3D.lookAt*  via `lookAt` component attribute (shorthand).
 	 */
 	public static tryLookAtUpdate(obj: Object3D, val: any) {
-		//console.log("Object3DUtils tryLookAtUpdate!!!")
+		//if(verbose_mode()) console.debug("Object3DUtils tryLookAtUpdate!!!")
 		PropUtils.setLookAtFromValue(obj, val)
 	}
 

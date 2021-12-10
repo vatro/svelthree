@@ -18,13 +18,17 @@ This is a **svelthree** _Light_ Component.
 	import type { default as Empty } from "../components/Empty.svelte"
 	import type { default as Mesh } from "../components/Mesh.svelte"
 	import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
+	import { self, get_current_component } from "svelte/internal"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	let ani: any
 
@@ -60,24 +64,30 @@ This is a **svelthree** _Light_ Component.
 			// add to scene if no parent was provided & scene is not parent already
 			if (light.parent !== scene) {
 				scene.add(light)
-				if (logInfo)
-					console.info("SVELTHREE > Light : " + light.type + " was added to scene!", {
-						light: light,
-						scene: scene,
-						total: scene.children.length
-					})
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${light.type} was added to scene!`, {
+							light,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
 			}
 		} else {
 			// add to provided parent if it's not parent already
 			if (light.parent !== parentForUs) {
 				parentForUs.add(light)
-				if (logInfo)
-					console.info("SVELTHREE > Light : " + light.type + " was added to parent!", {
-						light: light,
-						parent: parentForUs,
-						scene: scene,
-						total: scene.children.length
-					})
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${light.type} was added to parent!`, {
+							light,
+							parent: parentForUs,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
 			}
 		}
 	}
@@ -172,11 +182,10 @@ This is a **svelthree** _Light_ Component.
 	let removeTargetPositionListener: () => void
 
 	function startMonitoringTargetPosition(): void {
-		if (logRS) console.log("%c*--------> Light > reactive statement! startMonitoringTargetPosition!", `${css_rs}`)
-
 		// IMPORTANT  this does NOT cause a component update! (instead of using requestAnimationFrame)
 		// COOL!  this way the helper is 100% synchronious (not 1 frame late)
 		if (!removeTargetPositionListener) {
+			if (verbose && log_rs) console.debug(...c_rs_int(c_name, "startMonitoringTargetPosition!"))
 			removeTargetPositionListener = $svelthreeStores[sti].rendererComponent.$on(
 				"before_render_int",
 				checkTargetPosition
@@ -241,7 +250,7 @@ This is a **svelthree** _Light_ Component.
 	$: props && sProps ? updateProps() : null
 
 	function updateProps() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! props", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "props", props))
 		sProps.update(props)
 	}
 
@@ -250,13 +259,12 @@ This is a **svelthree** _Light_ Component.
 	//#region --- 'Object3D' Specific Code
 
 	const w_sh = PropUtils.getShortHandAttrWarnings(`SVELTHREE > ${light.type} >`)
-	const wrn = PropUtils.warn
 
-	//$: !matrix && light && pos ? PropUtils.setPositionFromValue(light, pos) : pos && light ? wrn(w_sh.pos) : null
-	$: !matrix && light && pos ? setPos() : pos && light ? wrn(w_sh.pos) : null
+	//$: !matrix && light && pos ? PropUtils.setPositionFromValue(light, pos) : pos && light ? console.warn(w_sh.pos) : null
+	$: !matrix && light && pos ? setPos() : pos && light ? console.warn(w_sh.pos) : null
 
 	function setPos() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! pos", `${css_rs}`, pos)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "pos", pos))
 		PropUtils.setPositionFromValue(light, pos)
 	}
 
@@ -264,42 +272,42 @@ This is a **svelthree** _Light_ Component.
     $: !matrix && !quat && light && rot
         ? PropUtils.setRotationFromValue(light, rot)
         : rot && light
-        ? wrn(w_sh.rot)
+        ? console.warn(w_sh.rot)
         : null
         */
-	$: !matrix && !quat && light && rot ? setRot() : rot && light ? wrn(w_sh.rot) : null
+	$: !matrix && !quat && light && rot ? setRot() : rot && light ? console.warn(w_sh.rot) : null
 
 	function setRot() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! rot", `${css_rs}`, rot)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "rot", rot))
 		PropUtils.setRotationFromValue(light, rot)
 	}
 
-	//$: !matrix && light && quat ? PropUtils.setQuaternionFromValue(light, quat) : quat && light ? wrn(w_sh.quat) : null
-	$: !matrix && light && quat ? setQuat() : quat && light ? wrn(w_sh.quat) : null
+	//$: !matrix && light && quat ? PropUtils.setQuaternionFromValue(light, quat) : quat && light ? console.warn(w_sh.quat) : null
+	$: !matrix && light && quat ? setQuat() : quat && light ? console.warn(w_sh.quat) : null
 
 	function setQuat() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! quat", `${css_rs}`, quat)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "quat", quat))
 		PropUtils.setQuaternionFromValue(light, quat)
 	}
 
 	// RECONSIDER  TODO  currently not using 'scale' in lights
-	// $: !matrix && light && scale ? PropUtils.setScaleFromValue(light, scale) : scale && light ? wrn(w_sh.scale) : null
+	// $: !matrix && light && scale ? PropUtils.setScaleFromValue(light, scale) : scale && light ? console.warn(w_sh.scale) : null
 
 	/*
     $: if (!matrix && light && lookAt) {
         PropUtils.setLookAtFromValue(light, lookAt)
     } else if (lookAt && light) {
-        wrn(w_sh.lookAt)
+        console.warn(w_sh.lookAt)
     }
     */
 	$: if (!matrix && light && lookAt) {
 		setLookAt()
 	} else if (lookAt && light) {
-		wrn(w_sh.lookAt)
+		console.warn(w_sh.lookAt)
 	}
 
 	function setLookAt() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! lookAt", `${css_rs}`, lookAt)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "lookAt", lookAt))
 		PropUtils.setLookAtFromValue(light, lookAt)
 	}
 
@@ -307,7 +315,7 @@ This is a **svelthree** _Light_ Component.
 	$: matrix && light ? setMatrix() : null
 
 	function setMatrix() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! matrix", `${css_rs}`, matrix)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "matrix", matrix))
 		PropUtils.setMatrixFromValue(light, matrix)
 	}
 
@@ -317,7 +325,7 @@ This is a **svelthree** _Light_ Component.
 	$: intensity ? setIntensity() : null
 
 	function setIntensity() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! intensity", `${css_rs}`, intensity)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "intensity", intensity))
 		PropUtils.setMatrixFromValue(light, intensity)
 	}
 
@@ -325,7 +333,7 @@ This is a **svelthree** _Light_ Component.
 	$: color ? setColor() : null
 
 	function setColor() {
-		if (logRS) console.log("%c*--------> Light > reactive statement! color", `${css_rs}`, color)
+		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "color", color))
 		PropUtils.setColorFromValueKey(light, color, "color")
 	}
 
@@ -345,31 +353,31 @@ This is a **svelthree** _Light_ Component.
 		fnOnMount
 			? () => fnOnMount(self)
 			: () => {
-					if (logLC) logCurrentState(`*----> Light > onMount`, null)
-					if (logInfo) console.info("SVELTHREE > onMount : Light")
-					console.warn("SVELTHREE >  onMount : Light : light.matrixAutoUpdate", light.matrixAutoUpdate)
+					if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
+					if (verbose && log_mau) {
+						console.debug(...c_mau(c_name, "onMount : light.matrixAutoUpdate", light.matrixAutoUpdate))
+					}
 
 					return () => {
-						if (logInfo) console.info("SVELTHREE > onDestroy : Light")
+						if (verbose && log_lc) console.info(...c_lc_int(c_name, "onDestroy"))
 						removeLightFromParent()
 					}
 			  }
 	)
 
 	beforeUpdate(() => {
-		if (logLC) logCurrentState("%c*------> Light > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(() => {
-		if (logLC) logCurrentState("%c*------> Light > afterUpdate", css_aa)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 		if (light.matrixWorldNeedsUpdate === false) {
 			light.matrixAutoUpdate = mau
 		}
+		if (verbose && log_mau) {
+			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
+		}
 	})
-
-	function logCurrentState(prefix: string, css: string) {
-		console.log(`${prefix}!`, `${css}`)
-	}
 
 	// public methods
 

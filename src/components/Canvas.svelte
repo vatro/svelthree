@@ -13,7 +13,7 @@ This is a **svelthree** _Canvas_ Component.
 	// #region --- Imports
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
+	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { BufferGeometry, Camera, Mesh, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from "three"
 	import type { WebXRController, XRFrame } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
@@ -30,13 +30,17 @@ This is a **svelthree** _Canvas_ Component.
 		XrSessionVRInputConfig
 	} from "../xr/types-svelthree"
 	import type { XRHitTestSource } from "../xr/types-webxr"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// #endregion
 
@@ -235,7 +239,7 @@ This is a **svelthree** _Canvas_ Component.
 	export let useBVH: boolean = undefined
 
 	$: if (useBVH) {
-		if (logRS) console.log("%c---> Canvas > reactive statement! useBVH", `${css_rs}`, useBVH)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "Using BVH", { useBVH }))
 
 		$svelthreeStores[sti].useBVH = useBVH
 
@@ -253,10 +257,10 @@ This is a **svelthree** _Canvas_ Component.
 
 			Mesh.prototype.raycast = acceleratedRaycast
 
-			//console.log(Object.keys(BufferGeometry.prototype))
+			//if (verbose && log_rs) console.debug(...c_rs(c_name, "if useBVH -> if Object.keys(BufferGeometry.prototype) ->", Object.keys(BufferGeometry.prototype)))
 		}
 	} else {
-		if (logRS) console.log("%c---> Canvas > reactive statement! useBVH", `${css_rs}`, useBVH)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "Not using BVH", { useBVH }))
 		$svelthreeStores[sti].useBVH = useBVH
 
 		if (BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
@@ -281,7 +285,8 @@ This is a **svelthree** _Canvas_ Component.
 	$: isInteractive && !raycaster && c && $svelthreeStores[sti].renderer ? createRaycaster() : null
 
 	function createRaycaster() {
-		if (logRS) console.log("%c---> Canvas > reactive statement! createRaycaster!", `${css_rs}`, { isInteractive })
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > isInteractive", isInteractive))
+
 		raycaster = new Raycaster()
 		$svelthreeStores[sti].raycaster = raycaster
 		$svelthreeStores[sti].canvas.interactive = true
@@ -290,18 +295,20 @@ This is a **svelthree** _Canvas_ Component.
 			startUpdatingPointer()
 		}
 
-		if (logInfo)
+		if (verbose && log_dev) {
 			console.info(
 				"SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
 				$svelthreeStores[sti]
 			)
+		}
 	}
 
 	// reactive remove raycaster
 	$: !isInteractive && raycaster && $svelthreeStores[sti].renderer ? removeRaycaster() : null
 
 	function removeRaycaster() {
-		if (logRS) console.log("%c---> Canvas > reactive statement! removeRaycaster!", `${css_rs}`, { isInteractive })
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "removeRaycaster > isInteractive", isInteractive))
+
 		$svelthreeStores[sti].canvas.interactive = false
 		$svelthreeStores[sti].raycaster = undefined
 		raycaster = null
@@ -311,20 +318,19 @@ This is a **svelthree** _Canvas_ Component.
 			stopUpdatingPointer()
 		}
 
-		if (logInfo)
-			console.info("SVELTHREE > Canvas : after Raycaster remove, $svelthreeStores[sti]: ", $svelthreeStores[sti])
+		if (verbose && log_rs) {
+			console.debug(...c_rs(c_name, "after Raycaster remove, $svelthreeStores[sti]:", $svelthreeStores[sti]))
+		}
 	}
 
 	// start updating mouse position (if not xr)
 	function startUpdatingPointer(): void {
-		if (logRS)
-			console.log("%c---> Canvas > reactive statement! createRaycaster > startUpdatingPointer!", `${css_rs}`)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > startUpdatingPointer!"))
 		window.addEventListener("pointermove", updatePointer, false)
 	}
 
 	function stopUpdatingPointer(): void {
-		if (logRS)
-			console.log("%c---> Canvas > reactive statement! removeRaycaster > stopUpdatingPointer!", `${css_rs}`)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "removeRaycaster > stopUpdatingPointer!"))
 		window.removeEventListener("pointermove", updatePointer)
 	}
 
@@ -357,11 +363,12 @@ This is a **svelthree** _Canvas_ Component.
 
 	onMount(() => {
 		didMount = true
-		if (logLC) logCurrentState(`--> Canvas > onMount`, null)
-		if (logInfo) console.info("SVELTHREE > onMount : Canvas, $svelthreeStores[sti]: ", $svelthreeStores[sti])
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+		if (verbose && log_dev)
+			console.debug(...c_dev(c_name, "onMount -> $svelthreeStores[sti]", $svelthreeStores[sti]))
 
 		return () => {
-			if (logInfo) console.info("SVELTHREE > onDestroy : Canvas")
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			stopUpdatingPointer()
 			// if canvas is being removed set the the whole store to 'null'
 			// this way we don't have to handle anything, other store 'sti' will remain valid
@@ -390,31 +397,13 @@ This is a **svelthree** _Canvas_ Component.
 		$svelthreeStores[sti].canvas.dim = { w: w, h: h }
 	}
 
-	let updateTime
-	let timeBefore
-	let timeAfter
-	let dirty = false
-
 	beforeUpdate(() => {
-		if (!dirty) {
-			timeBefore = performance.now()
-			dirty = true
-		}
-		if (logLC) logCurrentState("%c--> Canvas > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(() => {
-		if (dirty) {
-			timeAfter = performance.now()
-			dirty = false
-			updateTime = timeAfter - timeBefore
-		}
-		if (logLC) logCurrentState("%c--> Canvas > afterUpdate", css_aa, updateTime)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
-
-	function logCurrentState(prefix: string, css: string, upt?: number) {
-		console.log(`${prefix}!`, `${css}`, upt ? "update time: " + upt : "")
-	}
 </script>
 
 <canvas bind:this={c} width={w} height={h} {style} class={clazz}>

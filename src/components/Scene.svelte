@@ -13,13 +13,18 @@ This is a **svelthree** _Scene_ Component.
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
 	import { Color, Scene } from "three"
 	import { svelthreeStores } from "../stores"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let id: string = undefined
 	if (!id) {
@@ -69,9 +74,11 @@ This is a **svelthree** _Scene_ Component.
 	svelthreeStore.scenes.push({ scene: scene, id: id, isActive: false })
 
 	onMount(() => {
-		if (logLC) logCurrentState("--> Scene > onMount", null)
-		if (logInfo) console.info("SVELTHREE > onMount : Scene", { sti: sti })
-		console.warn("SVELTHREE > onMount : Scene : scene.matrixAutoUpdate:", scene.matrixAutoUpdate)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "sti", sti))
+		if (verbose && log_mau) {
+			console.debug(...c_dev(c_name, "onMount -> scene.matrixAutoUpdate:", scene.matrixAutoUpdate))
+		}
 
 		for (let p in props) {
 			switch (p) {
@@ -84,7 +91,7 @@ This is a **svelthree** _Scene_ Component.
 		//updateSceneMatrixWorld(true)
 
 		return () => {
-			if (logInfo) console.info("SVELTHREE > onDestroy : Scene")
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			// TODO  remove self from svelthreeStore
 		}
 	})
@@ -99,9 +106,9 @@ This is a **svelthree** _Scene_ Component.
 		: stopUpdateOnRenderListener()
 
 	function startUpdateOnRenderListener() {
-		//console.log("startUpdateOnRenderListener call!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "startUpdateOnRenderListener call!"))
 		if (!removeUpdateOnRenderListener) {
-			//console.log("startUpdateOnRenderListener creation!")
+			//if (verbose && log_dev) console.debug(...c_dev(c_name, "startUpdateOnRenderListener creation!"))
 			removeUpdateOnRenderListener = $svelthreeStores[sti].rendererComponent.$on(
 				"before_render_scene",
 				updateSceneMatrixWorldOnRender
@@ -116,7 +123,7 @@ This is a **svelthree** _Scene_ Component.
 	}
 
 	function updateSceneMatrixWorldOnRender() {
-		//console.log("Scene updateSceneMatrixWorld 'render'!")
+		//if (verbose && log_dev) console.debug(...c_dev(c_name, "updateSceneMatrixWorldOnRender! (Scene updateSceneMatrixWorld 'render'!"))
 		updateSceneMatrixWorld()
 	}
 
@@ -136,8 +143,7 @@ This is a **svelthree** _Scene_ Component.
 	let dirty = false
 
 	beforeUpdate(() => {
-		//console.warn("***** Scene beforeUpdate!")
-		if (logLC) logCurrentState("%c----> Scene > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 		if (!dirty) {
 			timeBefore = performance.now()
 		}
@@ -147,6 +153,7 @@ This is a **svelthree** _Scene_ Component.
 	// PERFORMANCE  IMPORTANT  NOT BOTTLENECK --> commenting out doesn't significantly improve performance
 
 	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 		updateSceneMatrices()
 	})
 
@@ -163,7 +170,10 @@ This is a **svelthree** _Scene_ Component.
 
 					timeAfter = performance.now()
 					updateTime = timeAfter - timeBefore
-					if (logLC) logCurrentState("%c----> Scene > afterUpdate", css_aa, updateTime)
+
+					if (verbose && log_dev) {
+						console.debug(...c_dev(c_name, "afterUpdate > updateSceneMatrices! ->", { updateTime }))
+					}
 				}
 			}
 		} else {
@@ -171,10 +181,6 @@ This is a **svelthree** _Scene_ Component.
 				"SVELTHREE Exception! > Oops, 'scene' is not available on 'afterUpdate', this is very wrong!"
 			)
 		}
-	}
-
-	function logCurrentState(prefix: string, css: string, upt?: number) {
-		console.log(`${prefix}!`, `${css}`, upt ? "update time: " + upt : "")
 	}
 
 	// public methods

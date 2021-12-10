@@ -10,16 +10,27 @@ This is a **svelthree** _CubeCamera_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { CubeCamera, Material, Mesh, Scene, Vector3, WebGLCubeRenderTarget } from "three"
 	import { svelthreeStores } from "../stores"
 	import { StoreUtils } from "../utils"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	let self = get_current_component()
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let scene: Scene
 	export let parent: Mesh = undefined
+	export let name: string = undefined
 
 	const sti: number = StoreUtils.getSTIfromScene(scene, "CubeCamera")
 
@@ -64,7 +75,7 @@ This is a **svelthree** _CubeCamera_ Component.
         $: targetProps
             ? Object.keys(targetProps).length > 0
                 ? targetPropsIterator
-                    ? (console.log("REACTIVE!"),
+                    ? (console.debug("REACTIVE!"),
                     targetPropsIterator.tryPropsUpdate(targetProps),
                     (parent.material["envMap"] = cubeCamera.renderTarget.texture),
                     (parent.material["envMap"].needsUpdate = true),
@@ -93,6 +104,9 @@ This is a **svelthree** _CubeCamera_ Component.
 		}
 	}
 
+	cubeCamera.name = name
+	cubeCamera.userData.svelthreeComponent = self
+
 	scene.add(cubeCamera)
 
 	$svelthreeStores[sti].cubeCameras.push(self)
@@ -120,11 +134,20 @@ This is a **svelthree** _CubeCamera_ Component.
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : CubeCamera, parent: ", parent)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "onMount -> parent", parent))
 		return () => {
-			console.info("SVELTHREE > onDestroy : CubeCamera")
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			scene.remove(cubeCamera)
 			$svelthreeStores[sti].cubeCameras[camIndex] = null
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 </script>

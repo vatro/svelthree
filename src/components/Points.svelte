@@ -58,17 +58,22 @@ This is a **svelthree** _Points_ Component.
 	import { PropUtils, StoreUtils, SvelthreeProps } from "../utils"
 	import type { XrSessionVRInputType } from "../xr/types-svelthree"
 
-	const css_rs = "color: red;font-weight:bold;"
-	const css_ba = "color: blue;font-weight:bold;"
-	const css_aa = "color: green;font-weight:bold;"
-	export let logInfo: boolean = false
-	export let logRS: boolean = false
-	export let logLC: boolean = false
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	// SvelthreeAnimation Component's reference
 	let ani: any
 
-	const self = get_current_component()
 	const dispatch = createEventDispatcher()
 
 	// construction
@@ -138,17 +143,11 @@ This is a **svelthree** _Points_ Component.
 			if (points.material) {
 				material = points.material
 			} else {
-				console.warn("SVELTHREE > Points : Points provided, but has no material!", { points: points })
+				console.warn("SVELTHREE > Points : Points provided, but has no material!", { points })
 			}
 
-			if (logInfo)
-				console.info("SVELTHREE > Points : Saved geometry:", {
-					geometry: geometry
-				})
-			if (logInfo)
-				console.info("SVELTHREE > Points : Saved material:", {
-					material: material
-				})
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Saved geometry:", { geometry }))
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Saved material:", { material }))
 
 			points.userData.initScale = points.scale.x
 		}
@@ -197,12 +196,12 @@ This is a **svelthree** _Points_ Component.
 	$: geometry && generate ? onGeometryProvided() : null
 
 	function onGeometryProvided() {
-		if (logInfo) console.info("SVELTHREE > Points : Geometry provided!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Geometry provided!"))
 		tryGeometryUpdate()
 	}
 
 	$: if (material && generate) {
-		if (logInfo) console.info("SVELTHREE > Points : Material provided!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Material provided!"))
 		tryMaterialUpdate()
 	}
 
@@ -221,16 +220,13 @@ This is a **svelthree** _Points_ Component.
 		points.userData.initScale = points.scale.x
 		points.userData.svelthreeComponent = self
 
-		if (logInfo)
-			console.info("SVELTHREE > Points : " + geometry.type + " created!", {
-				points: points
-			})
-		if (logInfo) console.info("SVELTHREE > Points : saved 'geometry' (generated):", geometry)
-		if (logInfo) console.info("SVELTHREE > Points : saved 'material' (generated):", material)
+		if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { points }))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (generated):", geometry))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'material' (generated):", material))
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: points ? tryAddingPoints() : console.error("SVELTHREE > Points : points was not created!")
+	$: points ? tryAddingPoints() : console.error("SVELTHREE > Points : 'points' was not created!")
 
 	export let userData: { [key: string]: any } = undefined
 
@@ -306,12 +302,13 @@ This is a **svelthree** _Points_ Component.
 
 	// compute / recompute BVH
 	$: if (useBVH && geometry) {
-		console.log("%c--------> Points > reactive statement! useBVH && geometry", `${css_rs}`, useBVH, geometry)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "useBVH && geometry", { useBVH, geometry }))
 
 		console.warn("SVELTHREE > Points : (BVH) Using BVH!")
 
 		if (Object.keys(BufferGeometry.prototype).indexOf("computeBoundsTree") > -1) {
-			if (logInfo) console.info("SVELTHREE > Points : Using BVH, points.matrixWorld: ", points.matrixWorld)
+			if (verbose && log_dev)
+				console.debug(...c_dev(c_name, "Using BVH, points.matrixWorld: ", points.matrixWorld))
 
 			// TOFIX  TODO  BVH needs more love and documentation!
 			// do we nee to something with the geometry here?! (below was uncommented before, but it broke tryMatrixWorldUpdate --> double transformation )
@@ -319,7 +316,7 @@ This is a **svelthree** _Points_ Component.
 
 			const geom: BufferGeometryWithBVH = points.geometry as BufferGeometryWithBVH
 			geom.computeBoundsTree()
-			if (logInfo) console.info("SVELTHREE > Points : (BVH) computeBoundsTree finished, points: ", points)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> computeBoundsTree finished -> ", { points }))
 		} else {
 			console.error("SVELTHREE > Points : (BVH) points.geometry.computeBoundsTree not available!")
 		}
@@ -334,11 +331,11 @@ This is a **svelthree** _Points_ Component.
                 */
 	} else {
 		if (points.geometry.hasOwnProperty("boundsTree")) {
-			if (logInfo) console.info("SVELTHREE > Points : (BVH) try disposing boundsTree!", points)
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> try disposing boundsTree! -> ", { points }))
 			if (points.geometry.hasOwnProperty("disposeBoundsTree")) {
 				const geom: BufferGeometryWithBVH = points.geometry as BufferGeometryWithBVH
 				geom.disposeBoundsTree()
-				if (logInfo) console.info("SVELTHREE > Points : (BVH) boundsTree disposed!", points)
+				if (verbose && log_dev) console.debug(...c_dev(c_name, "BVH -> boundsTree disposed! -> ", { points }))
 			} else {
 				console.error("SVELTHREE > Points : (BVH) points.geometry.disposeBoundsTree not available!")
 			}
@@ -352,7 +349,7 @@ This is a **svelthree** _Points_ Component.
 	$: props && sProps ? updateProps() : null
 
 	function updateProps() {
-		if (logRS) console.log("%c--------> Points > reactive statement! props", `${css_rs}`, props)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
 		sProps.update(props)
 	}
 
@@ -371,27 +368,26 @@ This is a **svelthree** _Points_ Component.
 	// Value Type is being checked in PropUtils.
 
 	const w_sh = PropUtils.getShortHandAttrWarnings("SVELTHREE > Points >")
-	const wrn = PropUtils.warn
 
 	// IMPORTANT  shorthand attributes will override `props` attribute!
-	//$: !matrix && points && pos ? PropUtils.setPositionFromValue(points, pos) : pos && points ? wrn(w_sh.pos) : null
+	//$: !matrix && points && pos ? PropUtils.setPositionFromValue(points, pos) : pos && points ? console.warn(w_sh.pos) : null
 
-	$: !matrix && points && pos ? setPositionFromValue() : pos && points ? wrn(w_sh.pos) : null
+	$: !matrix && points && pos ? setPositionFromValue() : pos && points ? console.warn(w_sh.pos) : null
 
 	function setPositionFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! pos", `${css_rs}`, pos)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", pos))
 		PropUtils.setPositionFromValue(points, pos)
 	}
 
-	//$: !matrix && !quat && points && rot ? PropUtils.setRotationFromValue(points, rot) : rot && points ? wrn(w_sh.rot) : null
-	$: !matrix && !quat && points && rot ? setRotationFromValue() : rot && points ? wrn(w_sh.rot) : null
+	//$: !matrix && !quat && points && rot ? PropUtils.setRotationFromValue(points, rot) : rot && points ? console.warn(w_sh.rot) : null
+	$: !matrix && !quat && points && rot ? setRotationFromValue() : rot && points ? console.warn(w_sh.rot) : null
 
 	function setRotationFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! rot", `${css_rs}`, rot)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", rot))
 		PropUtils.setRotationFromValue(points, rot)
 	}
 
-	//$: !matrix && !quat && points && rot ? PropUtils.setRot(points, rot) : rot && points ? wrn(w_sh.rot) : null
+	//$: !matrix && !quat && points && rot ? PropUtils.setRot(points, rot) : rot && points ? console.warn(w_sh.rot) : null
 
 	// PERFORMANCE  IMPORTANT  NOT BOTTLENECK --> doin this directly like this doesn't significantly improve performance!
 	/*
@@ -402,19 +398,19 @@ This is a **svelthree** _Points_ Component.
     }
     */
 
-	//$: !matrix && points && quat ? PropUtils.setQuaternionFromValue(points, quat) : quat && points ? wrn(w_sh.quat) : null
-	$: !matrix && points && quat ? setQuaternionFromValue() : quat && points ? wrn(w_sh.quat) : null
+	//$: !matrix && points && quat ? PropUtils.setQuaternionFromValue(points, quat) : quat && points ? console.warn(w_sh.quat) : null
+	$: !matrix && points && quat ? setQuaternionFromValue() : quat && points ? console.warn(w_sh.quat) : null
 
 	function setQuaternionFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! quat", `${css_rs}`, quat)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "quat", quat))
 		PropUtils.setQuaternionFromValue(points, quat)
 	}
 
-	//$: !matrix && points && scale ? PropUtils.setScaleFromValue(mepointssh, scale) : scale && points ? wrn(w_sh.scale) : null
-	$: !matrix && points && scale ? setScaleFromValue() : scale && points ? wrn(w_sh.scale) : null
+	//$: !matrix && points && scale ? PropUtils.setScaleFromValue(mepointssh, scale) : scale && points ? console.warn(w_sh.scale) : null
+	$: !matrix && points && scale ? setScaleFromValue() : scale && points ? console.warn(w_sh.scale) : null
 
 	function setScaleFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! scale", `${css_rs}`, scale)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
 		PropUtils.setScaleFromValue(points, scale)
 	}
 
@@ -424,11 +420,11 @@ This is a **svelthree** _Points_ Component.
     so why this was working is because we're currently calling `updateMatrix` on every `PropUtils` change
     */
 
-	//$: !matrix && points && lookAt ? PropUtils.setLookAtFromValue(points, lookAt) : lookAt && points ? wrn(w_sh.lookAt) : null
-	$: !matrix && points && lookAt ? setLookAtFromValue() : lookAt && points ? wrn(w_sh.lookAt) : null
+	//$: !matrix && points && lookAt ? PropUtils.setLookAtFromValue(points, lookAt) : lookAt && points ? console.warn(w_sh.lookAt) : null
+	$: !matrix && points && lookAt ? setLookAtFromValue() : lookAt && points ? console.warn(w_sh.lookAt) : null
 
 	function setLookAtFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! lookAt", `${css_rs}`, lookAt)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", lookAt))
 		PropUtils.setLookAtFromValue(points, lookAt)
 	}
 
@@ -436,7 +432,7 @@ This is a **svelthree** _Points_ Component.
 	$: matrix && points ? setMatrixFromValue() : null
 
 	function setMatrixFromValue() {
-		if (logRS) console.log("%c--------> Points > reactive statement! matrix", `${css_rs}`, matrix)
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "matrix", matrix))
 		PropUtils.setMatrixFromValue(points, matrix)
 	}
 
@@ -462,17 +458,16 @@ This is a **svelthree** _Points_ Component.
 			? () => fnOnMount(self)
 			: () => {
 					if (parent) {
-						if (logInfo) console.info("SVELTHREE > onMount : Points, parent: ", parent)
+						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
+						if (verbose && log_dev) console.debug(...c_dev(c_name, "onMount -> parent: ", parent))
 					} else {
-						if (logInfo) console.info("SVELTHREE > onMount : Points")
+						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
 					}
-
-					if (logLC) logCurrentState(`----> Points > onMount`, null)
 
 					//console.warn("SVELTHREE > onMount : Points : points.matrixAutoUpdate", points.matrixAutoUpdate)
 
 					return () => {
-						if (logInfo) console.info("SVELTHREE > onDestroy : Points")
+						if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 						removePointsFromParent()
 					}
 			  }
@@ -491,7 +486,7 @@ This is a **svelthree** _Points_ Component.
 			timeBefore = performance.now()
 			dirty = true
 		}
-		if (logLC) logCurrentState("%c------> Points > beforeUpdate", css_ba)
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 		//if(name) { console.warn(`Points before update! ${name}`) }
 		//await tick()
 		if (points.matrixWorldNeedsUpdate === false) {
@@ -510,7 +505,7 @@ This is a **svelthree** _Points_ Component.
 			dirty = false
 			updateTime = timeAfter - timeBefore
 		}
-		if (logLC) logCurrentState("%c------> Points > afterUpdate", css_aa, updateTime)
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 
 		//  BUG  IMPORTANT  this tick halts everything / causes crash!
 		//await tick()
@@ -527,42 +522,20 @@ This is a **svelthree** _Points_ Component.
         */
 	})
 
-	function logCurrentState(prefix: string, css: string, upt?: number) {
-		if (self) {
-			console.log(
-				`${prefix}!`,
-				`${css}`,
-				upt ? "update time: " + upt : "",
-				` pos:`,
-				self.$capture_state()["pos"],
-				` rot:`,
-				self.$capture_state()["rot"],
-				` quat:`,
-				self.$capture_state()["quat"],
-				` scale:`,
-				self.$capture_state()["scale"],
-				` lookAt:`,
-				self.$capture_state()["lookAt"],
-				` matrix:`,
-				self.$capture_state()["matrix"],
-				` props:`,
-				self.$capture_state()["props"]
-			)
-		} else {
-			console.log(`${prefix}! self not available!`)
-		}
-	}
-
 	function tryAddingPoints(): void {
 		if (!parentForUs) {
 			if (points.parent !== scene) {
 				scene.add(points)
-				if (logInfo)
-					console.info("SVELTHREE > Points : " + geometry.type + " was added to scene!", {
-						points: points,
-						scene: scene,
-						total: scene.children.length
-					})
+
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${geometry.type} was added to scene!`, {
+							points,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
 
 				if (arReticle || arReticleAuto) {
 					$svelthreeStores[sti].xr.reticle = points
@@ -571,13 +544,18 @@ This is a **svelthree** _Points_ Component.
 		} else {
 			if (points.parent !== parentForUs) {
 				parentForUs.add(points)
-				if (logInfo)
-					console.info("SVELTHREE > Points : " + geometry.type + " was added to parent!", {
-						points: points,
-						parent: parentForUs,
-						scene: scene,
-						total: scene.children.length
-					})
+
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${geometry.type} was added to parent!`, {
+							points,
+							parent: parentForUs,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
+
 				if (arReticle || arReticleAuto) {
 					$svelthreeStores[sti].xr.reticle = points
 				}
@@ -588,7 +566,7 @@ This is a **svelthree** _Points_ Component.
 	function tryMaterialUpdate(): void {
 		if (points) {
 			points.material = material
-			if (logInfo) console.info("SVELTHREE > Points : Material updated!")
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "Material updated!"))
 			/*
             if (mat && Object.keys(mat).length > 0) {
                 Propeller.update(material, mat)
@@ -604,7 +582,7 @@ This is a **svelthree** _Points_ Component.
 
 	function tryGeometryUpdate(): void {
 		points.geometry = geometry as BufferGeometry
-		if (logInfo) console.info("SVELTHREE > Points : Geometry updated!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "Geometry updated!"))
 	}
 
 	// --- AR Reticle basic auto display and positioning -------
@@ -620,7 +598,17 @@ This is a **svelthree** _Points_ Component.
 			let hit = $svelthreeStores[sti].xr.hitTestResults[0]
 			let referenceSpace = $svelthreeStores[sti].renderer.xr.getReferenceSpace()
 
-			//console.log({ hit: hit, referenceSpace: referenceSpace })
+			/*
+			if (verbose && log_rs) {
+				console.debug(
+					...c_rs(
+						c_name,
+						"if (arReticle || arReticleAuto) > handleHitTestResults > if ($svelthreeStores[sti].xr.hitTestResults.length > 0):",
+						{ hit, referenceSpace }
+					)
+				)
+			}
+			*/
 
 			if ($svelthreeStores[sti].xr.reticle) {
 				if (arReticleAuto) {
@@ -657,7 +645,11 @@ This is a **svelthree** _Points_ Component.
 	}
 
 	function poseReticle(hit: any = undefined, referenceSpace: any = undefined): void {
-		if (logInfo) console.info("poseReticle!", $svelthreeStores[sti].xr.reticle)
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, "poseReticle -> $svelthreeStores[sti].xr.reticle", $svelthreeStores[sti].xr.reticle)
+			)
+		}
 		points.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
 	}
 
@@ -757,21 +749,55 @@ This is a **svelthree** _Points_ Component.
 		{aniauto}
 		obj={points}
 		{scene}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
 	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction {sti} {dispatch} obj={points} parent={self} {interactionEnabled} />
+	<SvelthreeInteraction
+		{sti}
+		{dispatch}
+		obj={points}
+		parent={self}
+		{interactionEnabled}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
+	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
 	{#if currentXRSessionMode === XRDefaults.SESSION_MODE_AR}
-		<SvelthreeInteractionAR {sti} {dispatch} obj={points} parent={self} {interactionEnabled} />
+		<SvelthreeInteractionAR
+			{sti}
+			{dispatch}
+			obj={points}
+			parent={self}
+			{interactionEnabled}
+			{log_dev}
+			{log_rs}
+			{log_lc}
+			{log_mau}
+		/>
 	{/if}
 
 	{#if currentXRSessionMode === XRDefaults.SESSION_MODE_VR}
 		{#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_GRIPPABLE}
-			<SvelthreeInteractionVRGrippable {sti} {dispatch} obj={points} parent={self} {interactionEnabled} />
+			<SvelthreeInteractionVRGrippable
+				{sti}
+				{dispatch}
+				obj={points}
+				parent={self}
+				{interactionEnabled}
+				{log_dev}
+				{log_rs}
+				{log_lc}
+				{log_mau}
+			/>
 		{/if}
 		{#if currentXRInputType === XRDefaults.VR_INPUT_TYPE_HAND}
 			<!-- TODO  get rid of the SvelthreeInteractionVRHands component / create a ts class -->
@@ -785,6 +811,10 @@ This is a **svelthree** _Points_ Component.
 				{pinchTouch}
 				{pinchHybrid}
 				{xrHandTouch}
+				{log_dev}
+				{log_rs}
+				{log_lc}
+				{log_mau}
 			/>
 		{/if}
 	{/if}

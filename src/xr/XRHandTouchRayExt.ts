@@ -7,6 +7,7 @@ import type { RaycasterIntersectObject } from "../types-extra"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrTouchUpdateParams } from "./types-svelthree"
 import XRHandTouch from "./XRHandTouch"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class XRHandTouchRayExt extends XRHandTouch {
 	constructor(
@@ -83,7 +84,7 @@ export default class XRHandTouchRayExt extends XRHandTouch {
 				}
 			} else {
 				// the joint is OUT OF 'touchDistance' to the currently intersected object / face after "NEGATIVE NORMAL direction ray" raycast check --> dispatch 'untouch'!
-				console.log(logMessage, intersectObj.distance)
+				if (verbose_mode()) console.debug(logMessage, intersectObj.distance)
 				if (this.debug) {
 					if (this.faceDebugger) {
 						this.faceDebugger.colorUnTouch(intersectObj, null)

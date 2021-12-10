@@ -1,6 +1,7 @@
 import { not_equal } from "svelte/internal"
 import type { Array3 } from "../../types-extra"
 import { Propeller } from "./utils"
+import { verbose_mode } from "../../utils/SvelthreeLogger"
 
 export default class PropArray3X {
 	// previous value reference
@@ -15,7 +16,7 @@ export default class PropArray3X {
 			case undefined:
 				this.prev = value
 				// hot!
-				//console.log("PropArray3X > hot undefined!")
+				//if (verbose_mode()) console.debug("PropArray3X > hot undefined!")
 				Propeller.update(obj, key, value, "Array3Nums")
 				//this.prevValues = [...value]
 				this.prevValues = [value[0], value[1], value[2]]
@@ -23,7 +24,7 @@ export default class PropArray3X {
 
 			case value:
 				// same object, perform deep check
-				//console.log("PropArray3X > deep check!")
+				//if (verbose_mode()) console.debug("PropArray3X > deep check!")
 				// v1
 
 				for (let i = 0; i < 3; i++) {
@@ -71,7 +72,7 @@ export default class PropArray3X {
 				break
 			default:
 				// not undefined but !== value --> hot!
-				//console.log("PropArray3X > hot new!")
+				//if (verbose_mode()) console.debug("PropArray3X > hot new!")
 				Propeller.update(obj, key, value, "Array3Nums")
 				// this.prevValues = [...value]
 				this.prevValues = [value[0], value[1], value[2]]

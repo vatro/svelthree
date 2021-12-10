@@ -29,16 +29,34 @@ This is a **svelthree** _RectAreaLight_ Component.
 </script>
 
 <script lang="ts">
-	import { onMount } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import { Color, Euler, Matrix4, Object3D, Quaternion, RectAreaLight, Scene, Vector3 } from "three"
 	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper"
 	import { Light } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	export let props: { [P in keyof RectAreaLightProps]: RectAreaLightProps[P] } = undefined
 
 	export let parent: Object3D = undefined
 	export let name: string = undefined
+
+	/**
+	 * `matrixAutoUpdate` shorthand attribute.
+	 */
+	export let mau: boolean = undefined
 
 	export let animation: SvelthreeAnimationFunction = undefined
 	export let aniauto: boolean = undefined
@@ -75,6 +93,7 @@ This is a **svelthree** _RectAreaLight_ Component.
 
 	let light: RectAreaLight = new RectAreaLight()
 	light.name = name
+	light.userData.svelthreeComponent = self
 
 	export let helper: boolean = undefined
 
@@ -87,20 +106,38 @@ This is a **svelthree** _RectAreaLight_ Component.
 		// RectAreaLightHelper must be added as a child of the light
 		light.add(lightHelper)
 		lightHelper.visible = false
-		console.info("SVELTHREE > " + light.type + " : HELPER added!", {
-			lightHelper: lightHelper,
-			scene: scene,
-			total: scene.children.length
-		})
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${light.type} HELPER added!`, {
+					lightHelper: lightHelper,
+					scene: scene,
+					total: scene.children.length
+				})
+			)
+		}
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : " + light.type)
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		startUpdatingHelper()
 		return () => {
-			console.info("SVELTHREE > onDestroy : " + light.type)
+			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			stopUpdatingHelper()
 		}
+	})
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+		if (light.matrixWorldNeedsUpdate === false) {
+			light.matrixAutoUpdate = mau
+		}
+		if (verbose && log_mau)
+			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
 	})
 
 	let doUpdateHelper = false
@@ -148,4 +185,8 @@ This is a **svelthree** _RectAreaLight_ Component.
 	{intensity}
 	{animation}
 	{aniauto}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

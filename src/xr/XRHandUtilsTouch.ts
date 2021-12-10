@@ -84,7 +84,7 @@ export default class XRHandUtilsTouch {
 		useBVH: boolean,
 		debug: XrHandTouchDebugParams
 	): void {
-		//console.log("updateXRHandTouch!")
+		//if (verbose_mode()) console.debug("updateXRHandTouch!")
 
 		// TODO  Impmlement better performance meassuring (decorators) + meassure again for both modes
 		//console.time("updateXRHandTouch updates")
@@ -115,12 +115,12 @@ export default class XRHandUtilsTouch {
 				raycaster: raycaster,
 				xrFrameDelta: xrFrameDelta
 			}
-			//console.log("updateXRTouchRay left!")
+			//if (verbose_mode()) console.debug("updateXRTouchRay left!")
 			xrHandTouch.update(leftHand, params)
 		}
 
 		if (rightHand && rightHand.userData.touchEnabled === true) {
-			//console.log("updateXRTouchRay right!")
+			//if (verbose_mode()) console.debug("updateXRTouchRay right!")
 			let params: XrTouchUpdateParams = {
 				handProfile: rightHand.userData.handProfile,
 				raycaster: raycaster,

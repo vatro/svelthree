@@ -29,12 +29,25 @@ This is a **svelthree** _Empty_ Component.
 </script>
 
 <script lang="ts">
-	import { afterUpdate, onMount } from "svelte"
+	import { afterUpdate, onMount, beforeUpdate } from "svelte"
 	import { Euler, Matrix4, Object3D, Quaternion, Scene, Vector3 } from "three"
 	import { SvelthreeAnimation } from "../components-internal"
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList, SvelthreeAnimationFunction } from "../types-extra"
 	import { svelthreeStores } from "../stores"
 	import { PropUtils, StoreUtils, SvelthreeProps } from "../utils"
+	import { self, get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	let ani: any
 
@@ -45,24 +58,6 @@ This is a **svelthree** _Empty_ Component.
 	export let name: string = undefined
 
 	export let mau: boolean = undefined
-
-	afterUpdate(() => {
-		if (empty) {
-			if (empty.parent?.constructor === Scene) {
-				// if top level object, update self and kick off update of all children:
-
-				/*
-                if this.matrixWorldNeedsUpdate = false, matrixWorld will be skipped and the
-                function will move to checking all children (without forcing).
-                The first child object with .matrixWorldNeedsUpdate = true will kick off
-                forced update of it's children.
-                
-                see https://github.com/mrdoob/three.js/blob/a43d2386f58ed0929d894923291a0e86909108b3/src/core/Object3D.js#L573-L605
-                */
-				empty.updateMatrixWorld()
-			}
-		}
-	})
 
 	export let parent: Object3D = undefined
 	export let parentForSlot: Object3D = undefined
@@ -76,9 +71,10 @@ This is a **svelthree** _Empty_ Component.
 	$: empty === undefined ? createEmpty() : null
 
 	function createEmpty(): void {
-		console.info("SVELTHREE > createEmpty!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "createEmpty!"))
 		empty = new Object3D()
 		empty.name = name
+		empty.userData.svelthreeComponent = self
 	}
 
 	// we can do this, because 'userData.matrixAutoUpdate' can be 'undefined'
@@ -104,20 +100,28 @@ This is a **svelthree** _Empty_ Component.
 		if (!parentForUs) {
 			if (empty.parent !== scene) {
 				scene.add(empty)
-				console.info("SVELTHREE > EMPTY " + empty.type + " added to scene!", {
-					empty: empty,
-					scene: scene,
-					total: scene.children.length
-				})
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${empty.type} added to scene!`, {
+							empty: empty,
+							scene: scene,
+							total: scene.children.length
+						})
+					)
+				}
 			}
 		} else {
 			if (empty.parent !== parentForUs) {
 				parentForUs.add(empty)
-				console.info("SVELTHREE > EMPTY " + empty.type + " added to parent!", {
-					empty: empty,
-					scene: scene,
-					total: scene.children.length
-				})
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${empty.type} added to parent!`, {
+							empty: empty,
+							scene: scene,
+							total: scene.children.length
+						})
+					)
+				}
 			}
 		}
 	}
@@ -186,13 +190,37 @@ This is a **svelthree** _Empty_ Component.
 		fnOnMount
 			? () => fnOnMount(self)
 			: () => {
-					console.info("SVELTHREE > onMount : Empty")
+					if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
 					return () => {
-						console.info("SVELTHREE > onDestroy : Empty")
+						if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 						removeEmptyFromParent()
 					}
 			  }
 	)
+
+	beforeUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+
+		if (empty) {
+			if (empty.parent?.constructor === Scene) {
+				// if top level object, update self and kick off update of all children:
+
+				/*
+                if this.matrixWorldNeedsUpdate = false, matrixWorld will be skipped and the
+                function will move to checking all children (without forcing).
+                The first child object with .matrixWorldNeedsUpdate = true will kick off
+                forced update of it's children.
+                
+                see https://github.com/mrdoob/three.js/blob/a43d2386f58ed0929d894923291a0e86909108b3/src/core/Object3D.js#L573-L605
+                */
+				empty.updateMatrixWorld()
+			}
+		}
+	})
 
 	// public methods
 
@@ -233,4 +261,8 @@ This is a **svelthree** _Empty_ Component.
 	{aniauto}
 	obj={empty}
 	{scene}
+	{log_dev}
+	{log_rs}
+	{log_lc}
+	{log_mau}
 />

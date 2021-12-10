@@ -10,11 +10,21 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import type { Group, Object3D } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
@@ -26,9 +36,10 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 	let controller: Group
 	$: controller = $svelthreeStores[sti].xr.controller
 
+	// TODO  Months later: What?! Remove?
 	/*
     $: if($svelthreeStores[sti].xr.controller) {
-        console.log("run 14!")
+        console.debug("run 14!")
         controller = $svelthreeStores[sti].xr.controller
     }
     */
@@ -71,10 +82,10 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : SvelthreeInteractionXR")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 
 		return () => {
-			console.info("SVELTHREE > onDestroy : SvelthreeInteractionXR")
+			if (verbose && log_lc) console.info(...c_lc_int(c_name, "onDestroy"))
 			obj.userData.interact = false
 
 			if (controller) {
@@ -83,6 +94,14 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 				controller.removeEventListener("selectend", tryDispatch)
 			}
 		}
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 
 	// TODO  Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
@@ -154,14 +173,14 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 	// --- Internal Actions ---
 
 	function onSelectAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectAction!", { e }))
 		typeof parent.onSelect === "function"
 			? parent.onSelect(e)
 			: console.error("SVELTHREE > SvelthreeInteractionXR : provided 'onSelect' object is not a valid function!")
 	}
 
 	function onSelectStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectStartAction!", { e }))
 		typeof parent.onSelectStart === "function"
 			? parent.onSelectStart(e)
 			: console.error(
@@ -170,7 +189,7 @@ This is a **svelthree** _SvelthreeInteractionAR_ Component.
 	}
 
 	function onSelectEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionXR :internal onSelectEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onSelectEndAction!", { e }))
 		typeof parent.onSelectEnd === "function"
 			? parent.onSelectEnd(e)
 			: console.error(

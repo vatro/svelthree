@@ -18,13 +18,25 @@ This is a **svelthree** _SessionAR_ Component.
       TODO  contribute to three.js (change ARButton so it uses the 'dom-overlay' feature)
     */
 
-	import { createEventDispatcher, onMount } from "svelte"
+	import { createEventDispatcher, onMount, beforeUpdate, afterUpdate } from "svelte"
 	import { Object3D, Quaternion, Vector3 } from "three"
 	import type { XRSession } from "three"
 	import { XRDefaults } from "../constants"
 	import { svelthreeStores } from "../stores"
 	import type { XrHitTestMode, XrOptionalFeatures, XrRequiredFeatures } from "../xr/types-svelthree"
 	import type { XRSessionMode } from "../xr/types-webxr"
+	import { get_current_component } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
 
 	let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
@@ -49,7 +61,7 @@ This is a **svelthree** _SessionAR_ Component.
 
 	function updateRequiredFeatures(): void {
 		$svelthreeStores[sti].xr.requiredFeatures = [...requiredFeatures]
-		//console.warn("SVELTHREE > SessionAR > updateRequiredFeatures:",$svelthreeStores[sti].xr.requiredFeatures)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "updateRequiredFeatures! -> $svelthreeStores[sti].xr.requiredFeatures: ", $svelthreeStores[sti].xr.requiredFeatures))
 	}
 
 	$: hitTestMode ? updateHitTestMode() : null
@@ -80,14 +92,14 @@ This is a **svelthree** _SessionAR_ Component.
 
 	function updateOptionalFeatures(): void {
 		$svelthreeStores[sti].xr.optionalFeatures = [...optionalFeatures]
-		//console.warn("SVELTHREE > SessionAR > updateOptionalFeatures:", $svelthreeStores[sti].xr.optionalFeatures)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "updateOptionalFeatures! -> $svelthreeStores[sti].xr.optionalFeatures: ", $svelthreeStores[sti].xr.optionalFeatures))
 	}
 
 	$: domOverlay ? updateDomOverlay() : null
 
 	function updateDomOverlay(): void {
 		$svelthreeStores[sti].xr.domOverlay = domOverlay
-		//console.warn("SVELTHREE > SessionAR > updateDomOverlay:", $svelthreeStores[sti].xr.domOverlay)
+		//if (verbose && log_rs) console.debug(...c_rs(c_name, "updateDomOverlay! -> $svelthreeStores[sti].xr.domOverlay: ", $svelthreeStores[sti].xr.domOverlay))
 	}
 
 	let currentSession: XRSession
@@ -179,7 +191,7 @@ This is a **svelthree** _SessionAR_ Component.
 	// ---- Virtual Hit Test ----
 
 	function performVirtualHitTest(): void {
-		console.warn("SessionAR performVirtualHitTest!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "performVirtualHitTest!"))
 
 		let currentScene = $svelthreeStores[sti].scenes[$svelthreeStores[sti].currentSceneIndex - 1].scene
 
@@ -359,11 +371,21 @@ This is a **svelthree** _SessionAR_ Component.
 		}
 	}
 
-	onMount(() => {
-		console.info("SVELTHREE > onMount : SessionAR")
-	})
-
 	export function sethitTestMode(mode: XrHitTestMode) {
 		hitTestMode = mode
 	}
+
+	// -------------- Lifecycle ----------------
+
+	onMount(() => {
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+	})
 </script>

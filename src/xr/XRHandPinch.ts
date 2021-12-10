@@ -7,6 +7,7 @@ import { Vector3, Object3D, Scene, Raycaster, Group } from "three"
 import { RaycasterRayHelper } from "./RaycasterRayHelper"
 import { XRHandTouchDefaults } from "./constants"
 import { XRControllerDefaults } from "./constants"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class XRHandPinch {
 	raycasterRay: RaycasterRayHelper
@@ -16,7 +17,7 @@ export default class XRHandPinch {
 	}
 
 	updatePinchRay(handSpace: Group, currentScene: Scene, raycaster: Raycaster) {
-		//console.log("updateForwardDistance!:", handSpace.userData.handedness)
+		//if (verbose_mode()) console.debug("updateForwardDistance!:", handSpace.userData.handedness)
 
 		// Proximal Phalanx (Index & Thumb) --> origin
 		let originXR1a_world: Vector3 = new Vector3().setFromMatrixPosition(handSpace.children[6].matrixWorld) // Index
@@ -225,6 +226,6 @@ export default class XRHandPinch {
 				break
 		}
 
-		//console.log("updateForwardDistance!", intersections.length, intersections)
+		//if (verbose_mode()) console.debug("updateForwardDistance!", intersections.length, intersections)
 	}
 }

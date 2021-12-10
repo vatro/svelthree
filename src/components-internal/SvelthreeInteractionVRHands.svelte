@@ -10,10 +10,20 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
  TODO  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
+	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import type { Group, Object3D, WebGLRenderer, WebXRManager } from "three"
 	import { svelthreeStores } from "../stores"
+	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
+	const c_name = get_comp_name_int(get_current_component())
+	const verbose: boolean = verbose_mode()
+
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_rs: boolean = false
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_mau: boolean = false
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
@@ -235,13 +245,21 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	onMount(() => {
-		console.info("SVELTHREE > onMount : SvelthreeInteractionVRHands")
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 
 		return () => {
-			console.info("SVELTHREE > onDestroy : SvelthreeInteractionVRHands")
+			if (verbose && log_lc) console.info(...c_lc_int(c_name, "onDestroy"))
 			obj.userData.interact = false
 			removeListeners()
 		}
+	})
+
+	beforeUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+	})
+
+	afterUpdate(() => {
+		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 
 	//  TODO  Event Type should be XRInputSourceEvent, but it isn't, because WebXRManager event propagation
@@ -295,7 +313,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	// --- Internal Actions ---
 
 	function onPinchStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchStartAction!", { e }))
 		typeof parent.onPinchStart === "function"
 			? parent.onPinchStart(e)
 			: console.error(
@@ -304,7 +322,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onPinchEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchEndAction!", { e }))
 		typeof parent.onPinchEnd === "function"
 			? parent.onPinchEnd(e)
 			: console.error(
@@ -313,7 +331,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onPinchRemoteStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchRemoteStartAction!", { e }))
 		typeof parent.onPinchRemoteStart === "function"
 			? parent.onPinchRemoteStart(e)
 			: console.error(
@@ -322,7 +340,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onPinchRemoteEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchRemoteEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchRemoteEndAction!", { e }))
 		typeof parent.onPinchRemoteEnd === "function"
 			? parent.onPinchRemoteEnd(e)
 			: console.error(
@@ -331,7 +349,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onPinchTouchStartAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchStartAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchTouchStartAction!", { e }))
 		typeof parent.onPinchTouchStart === "function"
 			? parent.onPinchTouchStart(e)
 			: console.error(
@@ -340,7 +358,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onPinchTouchEndAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onPinchTouchEndAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPinchTouchEndAction!", { e }))
 		typeof parent.onPinchTouchEnd === "function"
 			? parent.onPinchTouchEnd(e)
 			: console.error(
@@ -349,7 +367,7 @@ This is a **svelthree** _SvelthreeInteractionVRHands_ Component.
 	}
 
 	function onCustomTouchEventAction(e: CustomEvent): void {
-		console.info("SVELTHREE > SvelthreeInteractionVRHands :internal onCustomTouchEventAction!")
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onCustomTouchEventAction!", { e }))
 		typeof parent.onCustomTouchEvent === "function"
 			? parent.onCustomTouchEvent(e)
 			: console.error(

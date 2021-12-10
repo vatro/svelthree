@@ -5,6 +5,7 @@
 import type { OrthographicCamera, PerspectiveCamera, Scene } from "three"
 import { CameraHelper } from "three"
 import { CameraValues } from "../constants"
+import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class CameraUtils {
 	// #region --- Orthographic Camera
@@ -27,7 +28,7 @@ export default class CameraUtils {
 	 * Updates OrthographicCamera's `projectionMatrix` on canvas aspect change.
 	 */
 	public static updateOtrhoCam(cam: OrthographicCamera, frustumSize: number, canvasW: number, canvasH: number): void {
-		//console.info("SVELTHREE > CameraUtils : updateOtrhoCam!")
+		//if (verbose_mode()) console.debug("SVELTHREE > CameraUtils : updateOtrhoCam!")
 
 		// AUTO only
 		// no props, no params, cam has been created by using defaultParams
@@ -90,7 +91,7 @@ export default class CameraUtils {
 	/**
 	 * Creates a CameraHelper.
 	 */
-	public static createHelper(cam: OrthographicCamera | PerspectiveCamera, scene: Scene): void {
+	public static createHelper(cam: OrthographicCamera | PerspectiveCamera, scene: Scene): CameraHelper {
 		const camHelper = new CameraHelper(cam)
 
 		cam.userData.helper = camHelper
@@ -99,11 +100,7 @@ export default class CameraUtils {
 		scene.add(camHelper)
 		camHelper.visible = true
 
-		console.info("SVELTHREE > " + cam.type + " HELPER added!", {
-			camHelper: camHelper,
-			scene: scene,
-			total: scene.children.length
-		})
+		return camHelper
 	}
 
 	/**
