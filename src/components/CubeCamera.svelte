@@ -43,53 +43,7 @@ This is a **svelthree** _CubeCamera_ Component.
 	let cubeRenderTarget = new WebGLCubeRenderTarget(targetSize, targetProps)
 	let cubeCamera = new CubeCamera(near, far, cubeRenderTarget)
 
-	/*
-     not working as expected, currently just rebuilding everything on props change
-      TODO  Remove if not possible without rebuilding.
-    */
-
-	/*
-        let propsIterator: Propeller
-        let targetPropsIterator: Propeller
-        
-        propsIterator = new Propeller(cubeCamera)
-        targetPropsIterator = new Propeller(cubeRenderTarget)
-    
-        $: props
-            ? Object.keys(props).length > 0
-                ? propsIterator
-                    ? propsIterator.tryPropsUpdate(props)
-                    : null
-                : null
-            : null
-    */
-
-	/*
-     This is not working as expected, we have to rebuild WebGLCubeRenderTarget
-     in order to change settings on runtime / reactive
-      TODO  Really not possible without rebuilding? Am I missing something?
-      TODO  Remove if not possible without rebuilding.
-    */
-
-	/*
-        $: targetProps
-            ? Object.keys(targetProps).length > 0
-                ? targetPropsIterator
-                    ? (console.debug("REACTIVE!"),
-                    targetPropsIterator.tryPropsUpdate(targetProps),
-                    (parent.material["envMap"] = cubeCamera.renderTarget.texture),
-                    (parent.material["envMap"].needsUpdate = true),
-                    (parent.material["needsUpdate"] = true))
-                    : null
-                : null
-            : null
-    */
-
-	/*
-     simply rebuild CubeCamera & WebGLCubeRenderTarget
-     in order to change settings on runtime / reactive
-    */
-
+	// Simply rebuild CubeCamera & WebGLCubeRenderTarget in order to change settings on runtime / reactive.
 	$: props || targetProps || targetSize || near || far ? rebuild() : null
 
 	interface MaterialWithEnvMap extends Material {
