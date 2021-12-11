@@ -46,8 +46,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 		SvelthreeAnimationFunction
 	} from "../types-extra"
 	import { LightUtils } from "../utils"
-	import type { Empty } from "."
-	import type { Mesh } from "."
+	import type { Empty, Mesh } from "."
 	import { get_current_component } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
@@ -101,7 +100,7 @@ This is a **svelthree** _DirectionalLight_ Component.
 	// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
 	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-	export let target: Object3D | Empty | Mesh | boolean = undefined
+	export let target: Object3D | Empty | Mesh<any> | boolean = undefined
 
 	/**
 	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
