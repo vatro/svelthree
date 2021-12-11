@@ -12,7 +12,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 If you use this approach you'll see a warning in the console if you define left, right, top and bottom properties inside `props` attribute.
 - Use `params` attribute to initialize the camera and `props` attribute to mutate it's properties.
 - Use `props` attribute only: Camera will be initialized with default constructor values and `props` attribute will mutate it's properties.
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
 	export type OrthographicCameraProps = OnlyWritableNonFunctionPropsPlus<

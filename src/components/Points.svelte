@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!-- 
 @component
 This is a **svelthree** _Points_ Component.  
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
 	export type PointsInteractionHandler = (e?: CustomEvent) => void
@@ -725,7 +725,7 @@ This is a **svelthree** _Points_ Component.
 <!--
 @component
 This is a **svelthree** _Points_ Component.
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <!-- DEPRECATED  PERFORMANCE  SLOW : Lower performance over putting reactive statements directly inside the <script>-tag.
      IMPORTANT  using svelte child-components has significant performance impact, especially with a lot of objects + especially

@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!-- 
 @component
 This is a **svelthree** _LoadedGLTF_ Component.  
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script lang="ts">
 	import { createEventDispatcher } from "svelte"

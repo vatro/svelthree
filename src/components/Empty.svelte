@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!-- 
 @component
 This is a **svelthree** _Empty_ Component.  
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
 	export type EmptyProps = OnlyWritableNonFunctionPropsPlus<

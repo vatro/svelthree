@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!-- 
 @component
 This is an internal **svelthree** _Camera_ Component.  
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script lang="ts">
 	// #region --- Imports

@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!-- 
 @component
 This is a **svelthree** _SvelthreeInteraction_ Component.  
- TODO  Link to Docs.
+[ tbd ]  Link to Docs.
 -->
 <script lang="ts">
 	import { onMount, beforeUpdate, afterUpdate } from "svelte"
