@@ -2,8 +2,7 @@
  * @author Vatroslav Vrbanic @see https://github.com/vatro
  */
 
-import type { Group, Raycaster, Vector3 } from "three"
-import type { RaycasterIntersectObject } from "../types-extra"
+import type { Group, Raycaster, Vector3, Intersection } from "three"
 import { XRHandTouchDefaults } from "./constants"
 import type { XrTouchUpdateParams } from "./types-svelthree"
 import XRHandTouch from "./XRHandTouch"
@@ -24,7 +23,7 @@ export default class XRHandTouchRayExt extends XRHandTouch {
 		handSpace: Group,
 		joint: Group,
 		i: number,
-		intersectObj: RaycasterIntersectObject,
+		intersectObj: Intersection,
 		logMessage: String,
 		raycaster?: Raycaster,
 		origin?: Vector3
