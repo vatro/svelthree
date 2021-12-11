@@ -243,14 +243,9 @@ This is a **svelthree** _Canvas_ Component.
 
 		$svelthreeStores[sti].useBVH = useBVH
 
-		//if (!BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
 		if (!Object.keys(BufferGeometry.prototype).includes("computeBoundsTree")) {
 			// backup original raycast function
 			originalThreeRaycastFunction = Mesh.prototype.raycast
-
-			// TODO  this doesn't work, understand why and why you did it in the first place.
-			//Object.defineProperty(BufferGeometry.prototype, "computeBoundsTree", computeBoundsTree)
-			//Object.defineProperty(BufferGeometry.prototype, "disposeBoundsTree", disposeBoundsTree)
 
 			BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree
 			BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree
