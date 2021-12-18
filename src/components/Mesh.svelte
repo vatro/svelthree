@@ -242,7 +242,7 @@ This is a **svelthree** _Mesh_ Component.
 	export let mau: boolean = undefined
 
 	$: if (mesh) {
-		mesh.matrixAutoUpdate = mau ? true : false
+		mesh.matrixAutoUpdate = scene.matrixAutoUpdate ? true : false
 	}
 
 	/** `props` shorthand attribute. ☝️ Other shorthand attributes like `pos`, `rot`, `scale` etc. will override corresponding properties inside the `props` object, try to avoid this!*/
