@@ -97,9 +97,8 @@ This is a **svelthree** _Light_ Component.
 
 	export let mau: boolean = undefined
 
-	// we can do this, because 'userData.matrixAutoUpdate' can be 'undefined'
 	$: if (light) {
-		light.matrixAutoUpdate = mau ? true : false
+		light.matrixAutoUpdate = scene.matrixAutoUpdate ? true : false
 	}
 
 	// accept anything from the specific light component
