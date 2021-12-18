@@ -456,6 +456,14 @@ This is a **svelthree** _Mesh_ Component.
 						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
 					}
 
+					if (verbose && log_mau) {
+						console.debug(
+							...c_mau(c_name, "beforeUpdate : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
 
 					return () => {
 						if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
@@ -464,55 +472,63 @@ This is a **svelthree** _Mesh_ Component.
 			  }
 	)
 
-	let updateTime
-	let timeBefore
-	let timeAfter
-	let dirty = false
-
 	// TODO  CONFIRM: Reactive statements cause "beforeUpdate" but they don't end in "afterUpdate" (except the prop has been reassigned, then afterUpdate will be triggered)
 	// Nevertheless they are microtasks the scene waits for in order to trigger an "afterUpdate"
 	// Check once again and cinfirm bulletproof / write down!!!
 	// IMPORTANT  Months later: Yes, check the issue described above + also with with acc-mod!
 
 	beforeUpdate(async () => {
-		if (!dirty) {
-			timeBefore = performance.now()
-			dirty = true
-		}
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
-		//if(name) { console.warn(`Mesh before update! ${name}`) }
-		//await tick()
-		if (mesh.matrixWorldNeedsUpdate === false) {
-			mesh.matrixAutoUpdate = mau
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "beforeUpdate : mesh.", {
+					matrixAutoUpdate: mesh.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+				})
+			)
 		}
-
-		//meshDirty = false
-		//if(name) { console.warn(`Mesh before update! ${name} ----> >>> AFTER tick()!`) }
 	})
 
 	// PERFORMANCE  IMPORTANT  NOT BOTTLENECK --> commenting out doesn't significantly improve performance
 
 	afterUpdate(() => {
-		if (dirty) {
-			timeAfter = performance.now()
-			dirty = false
-			updateTime = timeAfter - timeBefore
-		}
 		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "afterUpdate : mesh.", {
+					matrixAutoUpdate: mesh.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+				})
+			)
+		}
 
-		//  BUG  IMPORTANT  this tick halts everything / causes crash!
-		//await tick()
-		//if(name) { console.warn(`Mesh after update! ${name}`) }
+		if (!mau && mesh?.parent?.constructor === Scene) {
+			/*
+				if top level object (scene is direct parent), update self and kick off update of all children, no need to
+				check for children, updateMatrixWorld() will do it!
+			/*
 
-		/*
-        if(meshDirty) {
-            meshDirty = false
-            if(name) { console.warn(`Mesh after update! ${name}`) }
-            if (mesh.matrixWorldNeedsUpdate === false) {
-                mesh.matrixAutoUpdate = mau
-            }
-        }
-        */
+			/*
+				if this.matrixWorldNeedsUpdate = false, matrixWorld will be skipped and the
+				function will move to checking all children (without forcing, because scene.autoUpdate = false),
+				IMPORTANT  remember -> Scene is also an Object3D!.
+				The first child object with .matrixWorldNeedsUpdate = true will kick off
+				FORCED update of it's children.
+					
+				see https://github.com/mrdoob/three.js/blob/a43d2386f58ed0929d894923291a0e86909108b3/src/core/Object3D.js#L573-L605
+			*/
+
+			/*
+				 IMPORTANT  THREE  updateMatrixWorld() sets .matrixWorldNeedsUpdate to `false`
+				 IMPORTANT  THREE  Object3D.updateMatrix() sets .matrixWorldNeedsUpdate to `true` but is MOSTLY being
+				executed only if matrixAutoUpdate = true, but sometimes it always gets executes,  TODO  nail it down,
+				search for 'updateMatrix()' in three source + WRITE IT DOWN!
+			*/
+
+			//	Update local and world matrix after all (prop) changes (microtasks) have been applied.
+			mesh.updateMatrix()
+			mesh.updateMatrixWorld()
+		}
 	})
 
 	function tryAddingMesh(): void {
