@@ -275,9 +275,9 @@ This is a **svelthree** _Light_ Component.
         ? console.warn(w_sh.rot)
         : null
         */
-	$: !matrix && !quat && light && rot ? setRot() : rot && light ? console.warn(w_sh.rot) : null
+	$: !matrix && !quat && light && rot ? setRotationFromValue() : rot && light ? console.warn(w_sh.rot) : null
 
-	function setRot() {
+	function setRotationFromValue() {
 		if (verbose && log_rs) console.debug(...c_rs_int(c_name, "rot", rot))
 		PropUtils.setRotationFromValue(light, rot)
 	}
