@@ -10,7 +10,6 @@ This is a **svelthree** _DirectionalLight_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
-	// TODO  this isn' right!
 	export type DirectionalLightProps = OnlyWritableNonFunctionPropsPlus<
 		Omit<DirectionalLight, PropBlackList>,
 		{
@@ -191,9 +190,6 @@ This is a **svelthree** _DirectionalLight_ Component.
 
 	afterUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
-		if (light.matrixWorldNeedsUpdate === false) {
-			light.matrixAutoUpdate = mau
-		}
 		if (verbose && log_mau) {
 			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
 		}
