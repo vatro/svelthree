@@ -54,13 +54,21 @@ This is a **svelthree** _Scene_ Component.
 	$: mau ? enableSceneAuto() : disableSceneAuto()
 
 	function enableSceneAuto() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "mau > enableSceneAuto!", { mau }))
 		scene.autoUpdate = true
 		scene.matrixAutoUpdate = true
+		if (verbose && log_mau) console.debug(...c_mau(c_name, "enableSceneAuto! scene.autoUpdate:", scene.autoUpdate))
+		if (verbose && log_mau)
+			console.debug(...c_mau(c_name, "enableSceneAuto! scene.matrixAutoUpdate:", scene.matrixAutoUpdate))
 	}
 
 	function disableSceneAuto() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "mau > disableSceneAuto!", { mau }))
 		scene.autoUpdate = false
 		scene.matrixAutoUpdate = false
+		if (verbose && log_mau) console.debug(...c_mau(c_name, "disableSceneAuto! scene.autoUpdate:", scene.autoUpdate))
+		if (verbose && log_mau)
+			console.debug(...c_mau(c_name, "disableSceneAuto! scene.matrixAutoUpdate:", scene.matrixAutoUpdate))
 	}
 
 	// TODO  WHY?  setting scene.autoUpdate to false literally everything, especially lookAt
@@ -77,7 +85,7 @@ This is a **svelthree** _Scene_ Component.
 		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "sti", sti))
 		if (verbose && log_mau) {
-			console.debug(...c_dev(c_name, "onMount -> scene.matrixAutoUpdate:", scene.matrixAutoUpdate))
+			console.debug(...c_mau(c_name, "onMount -> scene.matrixAutoUpdate:", scene.matrixAutoUpdate))
 		}
 
 		for (let p in props) {
