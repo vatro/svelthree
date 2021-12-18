@@ -77,9 +77,8 @@ This is a **svelthree** _Empty_ Component.
 		empty.userData.svelthreeComponent = self
 	}
 
-	// we can do this, because 'userData.matrixAutoUpdate' can be 'undefined'
 	$: if (empty) {
-		empty.matrixAutoUpdate = mau ? true : false
+		empty.matrixAutoUpdate = scene.matrixAutoUpdate ? true : false
 	}
 
 	// determining parent immediately
