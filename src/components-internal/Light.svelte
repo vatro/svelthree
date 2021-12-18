@@ -354,7 +354,12 @@ This is a **svelthree** _Light_ Component.
 			: () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 					if (verbose && log_mau) {
-						console.debug(...c_mau(c_name, "onMount : light.matrixAutoUpdate", light.matrixAutoUpdate))
+						console.debug(
+							...c_mau(c_name, "onMount : light.", {
+								matrixAutoUpdate: light.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+							})
+						)
 					}
 
 					return () => {
@@ -366,15 +371,26 @@ This is a **svelthree** _Light_ Component.
 
 	beforeUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "beforeUpdate : light.", {
+					matrixAutoUpdate: light.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+				})
+			)
+		}
 	})
 
 	afterUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
-		if (light.matrixWorldNeedsUpdate === false) {
-			light.matrixAutoUpdate = mau
-		}
+
 		if (verbose && log_mau) {
-			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
+			console.debug(
+				...c_mau(c_name, "afterUpdate : light.", {
+					matrixAutoUpdate: light.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+				})
+			)
 		}
 	})
 
