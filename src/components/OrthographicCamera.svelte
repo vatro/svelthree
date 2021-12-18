@@ -157,17 +157,31 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	let cam: OrthographicCamera
 
+	// IMPORTANT  This will NOT work here!
+	/*
+	$: {
+		if(cam) {
+			cam.matrixAutoUpdate = mau ? true : false
+		}
+	}
+	*/
+
 	$: {
 		if (!cam && params && params.length > 0) {
 			cam = new OrthographicCamera(...params)
-			cam.name = name
-			cam.userData.svelthreeComponent = self
-			debugger
 		} else if (!cam) {
 			cam = new OrthographicCamera(...defaultParams)
+		}
+	}
+
+	// IMPORTANT  This WILL work here!
+	// IMPORTANT  If the object hat been reactively created (inside reactive statement), any manipulation of it has to happen
+	// after the "creation"-reactive statement.
+	$: {
+		if (cam) {
 			cam.name = name
 			cam.userData.svelthreeComponent = self
-			debugger
+			cam.matrixAutoUpdate = scene.matrixAutoUpdate ? true : false
 		}
 	}
 
