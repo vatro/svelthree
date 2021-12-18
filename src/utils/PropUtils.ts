@@ -40,8 +40,6 @@ export default class PropUtils {
 	}
 
 	public static isArray3Nums(p: any): boolean {
-		// every() PERFORMANCE : 0,11 ms (at 6x CPU slowdown)
-		//return p?.constructor === Array && p.length === 3 && p.every((el) => !isNaN(el))
 		return p?.constructor === Array && p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
 	}
 
@@ -106,30 +104,11 @@ export default class PropUtils {
 	}
 
 	public static setRotationFromValue(obj: Object3D, val: any, complex?: ComplexValueType): void {
-		/*
-			console.warn(
-				"[ PropUtils ] -> setRotationFromValue! obj.matrixAutoUpdate before!",
-				obj.matrixAutoUpdate
-			)
-			*/
-		// console.warn("[ PropUtils ] -> setRotationFromValue!")
-		//PropUtils.inferMatrixAutoUpdate(obj, true)
-
 		switch (complex) {
 			case undefined:
 				if (Array.isArray(val)) {
-					/*  // IMPORTANT  no Speed up
-						obj.rotation.set(val[0], val[1], val[2])
-						obj.matrixAutoUpdate = true
-						obj.matrixWorldNeedsUpdate = true
-
-						return
-						*/
-
 					PropUtils.isArray3Nums(val)
-						? // IMPORTANT  no Speed up
-						  //? (obj.rotation.set(val[0], val[1], val[2]), obj.matrixAutoUpdate = true, obj.matrixWorldNeedsUpdate = true) //PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
-						  PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
+						? PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
 						: PropUtils.isEulerParamsArray(val)
 						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
 						: PropUtils.isQuaternionParamsArray(val)
@@ -180,80 +159,38 @@ export default class PropUtils {
 				)
 				break
 		}
-
-		// we got to update matrix if 'matrixAutoUpdate' is false
-		//if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-
-		/*
-			console.warn(
-				"[ PropUtils ] -> setRotationFromValue! obj.matrixAutoUpdate after!",
-				obj.matrixAutoUpdate
-			)
-			*/
 	}
 
 	public static setRotEuler(obj: Object3D, val: Euler): void {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotEuler : ", { obj, val })
-		//obj.setRotationFromEuler(val as Euler)
-		PropUtils.executeDecoratedMAU(obj, () => obj.setRotationFromEuler(val as Euler))
+		obj.setRotationFromEuler(val as Euler)
 	}
 
 	public static setRotEulerArray(obj: Object3D, val: Parameters<Euler["set"]>): void {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotEulerArray : ", { obj, val })
-		//obj.rotation.set(val[0], val[1], val[2], val[3])
-		PropUtils.executeDecoratedMAU(obj, () => obj.rotation.set(val[0], val[1], val[2], val[3]))
+		obj.rotation.set(val[0], val[1], val[2], val[3])
 	}
 
 	public static setRotVector3(obj: Object3D, val: Vector3): void {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotVector3 : ", { obj, val })
-		//obj.rotation.set(val.x, val.y, val.z)
-		PropUtils.executeDecoratedMAU(obj, () => obj.rotation.set(val.x, val.y, val.z))
+		obj.rotation.set(val.x, val.y, val.z)
 	}
 
 	public static setRotArray3(obj: Object3D, val: Parameters<Vector3["set"]>): void {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotQuaternion : ", { obj, val })
-		//obj.rotation.set(val[0], val[1], val[2])
-		//console.time("setRotArray3")
-
-		/* IMPORTANT  SLOW 
-		//PropUtils.executeDecoratedMAU(obj, () => obj.rotation.set(val[0], val[1], val[2]))
-
-		/* IMPORTANT  SLOW 
 		obj.rotation.set(val[0], val[1], val[2])
-		obj.matrixAutoUpdate = true
-		obj.matrixWorldNeedsUpdate = true
-		*/
-
-		/* IMPORTANT  SLOW */
-		obj.rotation.x = val[0]
-		obj.rotation.y = val[1]
-		obj.rotation.z = val[2]
-		obj.matrixAutoUpdate = true
-		obj.matrixWorldNeedsUpdate = true
-
-		//console.timeEnd("setRotArray3")
-	}
-
-	public static setRot(obj: Object3D, val: Euler | Parameters<Euler["set"]>): void {
-		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRot : ", { obj, val })
-
-		obj.rotation.set(val[0], val[1], val[2])
-		obj.matrixAutoUpdate = true
-		obj.matrixWorldNeedsUpdate = true
 	}
 
 	public static setRotQuaternion(obj: Object3D, val: Quaternion): void {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setRotQuaternion : ", { obj, val })
-		//obj.setRotationFromQuaternion(val)
-		PropUtils.executeDecoratedMAU(obj, () => obj.setRotationFromQuaternion(val))
+		obj.setRotationFromQuaternion(val)
 	}
 
 	public static setRotQuaternionArray(obj: Object3D, val: Parameters<Quaternion["set"]>): void {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setRotQuaternionArray : ", { obj, val })
 		}
-		//obj.quat.set(val[0], val[1], val[2], val[3])
-		PropUtils.executeDecoratedMAU(obj, () => obj.quaternion.set(val[0], val[1], val[2], val[3]))
+		obj.quaternion.set(val[0], val[1], val[2], val[3])
 	}
 
 	public static setPositionFromValue(
@@ -298,17 +235,14 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setPositionFromVector3 : ", { obj, val })
 		}
-		PropUtils.executeDecoratedMAU(obj, () => obj.position.copy(val))
+		obj.position.copy(val)
 	}
 
 	public static setPositionFromArray3(obj: Object3D, val: Parameters<Vector3["set"]>) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setPositionFromArray3 : ", { obj, val })
 		}
-		//console.time("setPositionFromArray3")
-		//if(obj.type?.includes("Camera")) { debugger }
-		PropUtils.executeDecoratedMAU(obj, () => obj.position.set(val[0], val[1], val[2]))
-		//console.timeEnd("setPositionFromArray3")
+		obj.position.set(val[0], val[1], val[2])
 	}
 
 	public static setScaleFromValue(
@@ -351,58 +285,16 @@ export default class PropUtils {
 
 	public static setScaleFromVector3(obj: Object3D, val: Vector3) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromArray3 : ", { obj, val })
-		PropUtils.executeDecoratedMAU(obj, () => obj.scale.copy(val as Vector3))
+		obj.scale.copy(val as Vector3)
 	}
 
 	public static setScaleFromArray3(obj: Object3D, val: Parameters<Vector3["set"]>) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromArray3 : ", { obj, val })
-		//console.time("setScaleFromArray3")
-		PropUtils.executeDecoratedMAU(obj, () => obj.scale.set(val[0], val[1], val[2]))
-		//console.timeEnd("setScaleFromArray3")
-	}
-
-	public static executeDecoratedMAU(obj: Object3D, fn: () => void) {
-		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> executeDecoratedMAU!")
-
-		/*
-		.matrixAutoUpdate : Boolean
-		When this is set, it calculates the matrix of position, (rotation or quaternion) and scale every frame
-		and also recalculates the matrixWorld property. Default is Object3D.DefaultMatrixAutoUpdate (true).
-		*/
-		//PropUtils.inferMatrixAutoUpdate(obj, true)
-		//if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> executeDecoratedMAU! AFTER INFER obj.matrixAutoUpdate:", obj.matrixAutoUpdate)
-
-		fn()
-
-		// we got to update matrix if 'matrixAutoUpdate' is false
-		if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-		/*
-		if (verbose_mode() && log_prop_utils(obj))
-			console.debug(
-				"[ PropUtils ] -> executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixAutoUpdate:",
-				obj.matrixAutoUpdate
-			)
-		if (verbose_mode() && log_prop_utils(obj))
-			console.debug(
-				"[ PropUtils ] -> executeDecoratedMAU! AFTER UPDATE CHECK : obj.matrixWorldNeedsUpdate:",
-				obj.matrixWorldNeedsUpdate
-			)
-			*/
-	}
-
-	public static updateMatrixAndWorldMatrix(obj: Object3D) {
-		//obj.updateMatrix()
-
-		// matrix will / should be updated on next scene graph update
-		obj.matrixAutoUpdate = true
-
-		// using `matrixWorldNeedsUpdate` as "needs matrix update" flag here.
-		// this will skip resetting or reset `matrixAutoUpdate` inside `afterUpdate`
-		// `matrixWorldNeedsUpdate` will be set to `true` anyway when auto-updating Matrix
-		obj.matrixWorldNeedsUpdate = true
+		obj.scale.set(val[0], val[1], val[2])
 	}
 
 	/* THREE  IMPORTANT 
+	// TODO  NAIL IT DOWN!
 	`lookAt` doesn't work with lights with `target` property (DirectionalLight & SpotLight).
 	Here we have to manipulate the position of the `target` + before we do that, make sure it's added
 	to the scene. So when manipulating these lights via `lookAt` attribute or `lookAt` in props-object:
@@ -417,7 +309,6 @@ export default class PropUtils {
 	*/
 	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLookAtFromValue!", { obj, val })
-		//if(obj.type.includes("Camera")) debugger
 
 		// IMPORTANT  update Matrix before setting `lookAt`--> lookAt has to be applied as last.
 		// this way we apply all other transforms before lookAt-update!
@@ -480,10 +371,8 @@ export default class PropUtils {
 			} else {
 				if (PropUtils.isArray3Nums(tVal)) {
 					obj.lookAt(tVal[0], tVal[1], tVal[2])
-					if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 				} else if (PropUtils.isVector3(tVal)) {
 					obj.lookAt(tVal as Vector3)
-					if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 				} else {
 					console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 						obj: obj,
@@ -498,60 +387,6 @@ export default class PropUtils {
 			})
 		}
 	}
-
-	/*
-	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLookAtFromValue : ", { obj, val })
-
-		PropUtils.inferMatrixAutoUpdate(obj, true)
-
-		if (PropUtils.isVector3(val)) {
-			if (obj["target"]?.parent !== null) {
-				;(obj["target"] as Object3D).position.copy(val as Vector3)
-
-				// we got to update matrix if 'matrixAutoUpdate' is false
-
-				// obj['target'].matrixAutoUpdate is 'true' by default!
-				// console.debug("[ PropUtils ] -> setLookAtFromValue : obj['target'].matrixAutoUpdate ", obj['target'].matrixAutoUpdate)
-
-				//if (obj["target"].matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj["target"])
-				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-			} else {
-				obj.lookAt(val as Vector3)
-
-				// we got to update matrix if 'matrixAutoUpdate' is false
-				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-			}
-		} else if (PropUtils.isArray3Nums(val)) {
-			// TODO
-			// DirectionalLight & SpotLight
-			if (obj.hasOwnProperty("target") && obj["target"].isObject3D) {
-				debugger
-				//obj.lookAt(val[0], val[1], val[2])
-				;(obj["target"] as Object3D).position.set(val[0], val[1], val[2])
-				obj.lookAt(val[0], val[1], val[2])
-
-				// lookAt function always updates matrix 'parents'?!
-				// .updateWorldMatrix ( updateParents : Boolean, updateChildren : Boolean )
-				// .updateWorldMatrix ( true, false )
-				// it also tries to update matrices of all parents (scene)
-
-				//if (obj["target"].matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj["target"])
-				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-			} else {
-				obj.lookAt(val[0], val[1], val[2])
-
-				// we got to update matrix if 'matrixAutoUpdate' is false
-				if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
-			}
-		} else {
-			console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
-				obj: obj,
-				value: val
-			})
-		}
-	}
-	*/
 
 	// we know that 'obj' has property 'key', see 'Propeller'
 	public static setColorFromValueKey(
@@ -658,42 +493,20 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val })
 		if (!val) {
 			console.warn(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
-			/*
-				console.error(`[ PropUtils ] -> setLightTarget : invalid '${key}' value!`, {
-					obj: obj,
-					value: val
-				})
-				*/
 		} else {
 			// TODO : Check why this being called twice on init! Not severe problem, but still to be checked.
 			//console.warn("SVELTHREE > Propeller > setLightTarget : " + this.objTypeStr + " : target in 'props' now defined!!")
 
 			if (val["isObject3D"]) {
 				obj["target"] = val
-				PropUtils.updateMatrixAndWorldMatrix(val as Object3D)
+				//PropUtils.updateMatrixAndWorldMatrix(val as Object3D)
 			} else if (val["isEmpty"]) {
 				let obj3d: Object3D = (val as Empty).getEmpty()
 				obj["target"] = obj3d
-				PropUtils.updateMatrixAndWorldMatrix(obj3d)
+				//PropUtils.updateMatrixAndWorldMatrix(obj3d)
 			} else {
 				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
 			}
-		}
-	}
-
-	public static inferMatrixAutoUpdate(obj: any, defaultValue?: boolean) {
-		/*
-		.matrixAutoUpdate : Boolean
-		When this is set, it calculates the matrix of position, (rotation or quaternion) and scale every frame
-		and also recalculates the matrixWorld property. Default is Object3D.DefaultMatrixAutoUpdate (true).
-		*/
-		switch (obj.userData.matrixAutoUpdate) {
-			case undefined:
-				obj.matrixAutoUpdate = defaultValue || true // 'true' is threejs default
-				break
-			default:
-				obj.matrixAutoUpdate = obj.userData.matrixAutoUpdate
-				break
 		}
 	}
 
@@ -703,14 +516,17 @@ export default class PropUtils {
 	 * Applying transformations via `position`, `rotation`, `scale` etc. will automatically set `matrixAutoUpdate` to `true` again.
 	 */
 	public static setMatrixFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
-		// console.warn("[ PropUtils ] -> obj.matrixAutoUpdate before!", obj.matrixAutoUpdate)
-		// console.warn("[ PropUtils ] -> setMatrixFromValue!", {obj:obj, val:val})
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug("[ PropUtils ] -> obj.matrixAutoUpdate before! : ", obj.matrixAutoUpdate)
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug("[ PropUtils ] -> setMatrixFromValue! : ", { obj, val })
 
 		if (PropUtils.isMatrix4(val)) {
 			// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
 			//mesh.applyMatrix4(matrix)
 
-			//console.warn("[ PropUtils ] -> setMatrixFromValue! is Matrix4 BEFORE", {obj:obj, val:val, m: obj.matrix})
+			if (verbose_mode() && log_prop_utils(obj))
+				console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 BEFORE : ", { obj, val, m: obj.matrix })
 
 			// save initial `matrixAutoUpdate` value
 			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
@@ -723,10 +539,11 @@ export default class PropUtils {
 			// reset inital `matrixAutoUpdate` value
 			obj.matrixAutoUpdate = initialMatrixAutoUpdate
 
-			// mark for matrixWorld update (as if we did updateMatrix())
+			// mark for matrixWorld update (as updateMatrix() normally would)
 			obj.matrixWorldNeedsUpdate = true
 
-			//console.warn("[ PropUtils ] -> setMatrixFromValue! is Matrix4 AFTER", {obj:obj, val:val, m: obj.matrix})
+			if (verbose_mode() && log_prop_utils(obj))
+				console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 AFTER : ", { obj, val, m: obj.matrix })
 		} else if (PropUtils.isMatrix4ParamsArray(val)) {
 			// save initial `matrixAutoUpdate` value
 			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
@@ -735,12 +552,12 @@ export default class PropUtils {
 			obj.matrixAutoUpdate = false
 
 			obj.matrix.set(...(val as Parameters<Matrix4["set"]>)).transpose()
-			// TODO  Nail updating matrix / matrixWorld
+			// TODO  Nail down updating matrix / matrixWorld
 
 			// reset inital `matrixAutoUpdate` value
 			obj.matrixAutoUpdate = initialMatrixAutoUpdate
 
-			// mark for matrixWorld update (as if we did updateMatrix())
+			// mark for matrixWorld update (as updateMatrix() normally would)
 			obj.matrixWorldNeedsUpdate = true
 		} else {
 			console.error(`[ PropUtils ] -> setMatrixFromValue : invalid 'matrix' value!`, {
@@ -749,17 +566,16 @@ export default class PropUtils {
 			})
 		}
 
-		PropUtils.inferMatrixAutoUpdate(obj, false)
-		//console.warn("[ PropUtils ] -> obj.matrixAutoUpdate after!", obj.matrixAutoUpdate)
-		//console.warn("[ PropUtils ] -> setMatrixFromValue! AFTER", { obj: obj, val: val, m: obj.matrix })
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug("[ PropUtils ] -> obj.matrixAutoUpdate after! : ", obj.matrixAutoUpdate)
+		if (verbose_mode() && log_prop_utils(obj))
+			console.debug("[ PropUtils ] -> setMatrixFromValue! AFTER : ", { obj, val, m: obj.matrix })
 	}
 
 	public static setQuaternionFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val, complex })
 		}
-
-		PropUtils.inferMatrixAutoUpdate(obj, true)
 
 		if (PropUtils.isQuaternion(val)) {
 			// see https://threejs.org/docs/#api/en/core/Object3D.setRotationFromQuaternion
@@ -771,7 +587,7 @@ export default class PropUtils {
 			obj.quaternion.copy(val as Quaternion)
 
 			// we got to update matrix if 'matrixAutoUpdate' is false
-			if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
+			//if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 		} else {
 			console.error(`[ PropUtils ] -> setQuaternionFromValue : invalid 'quat' value!`, {
 				obj: obj,
@@ -793,27 +609,17 @@ export default class PropUtils {
 			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj: obj, value: val, key: key })
 			throw new Error("SVELTHREE Exception! " + error)
 		}
-
-		//v2
-		// PERFORMANCE  removing try / catch : doesn't improve much / not at all at 5000
-		// obj[key] = val
 	}
 
 	public static getChangedKeys(newProps: { [key: string]: any }, prevProps: { [key: string]: any }): string[] {
-		/*
-		function safe_not_equal(a, b) {
-				return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
-		}
-		*/
-		// internal.safe_not_equal(value, new_value)
-		//.filter((key)) ... PERFORMANCE : 0,22ms (6x slowdown)
-		//return Object.keys(newProps).filter((key) => !is.equ(newProps[key], prevProps[key]))
 		return Object.keys(newProps).filter((key) => not_equal(newProps[key], prevProps[key]))
 	}
 
 	/**
 	 * Updates changes props, but only the ones not being handled by a specific Prop component ( PropUtils.isPropType(val) => false ).
 	 */
+	// TODO  CLEANUP !
+	// TODO  CHECK HOW THIS USED / NAIL TI DOWN!
 	public static updateProps(
 		keysToUpdate: string[],
 		newProps: { [key: string]: any },
@@ -840,31 +646,5 @@ export default class PropUtils {
 				*/
 			}
 		}
-	}
-}
-
-/**
- * Shamelessly copied from react-three-fiber 😬 thanks!✌️
- * @see https://github.com/pmndrs/react-three-fiber/blob/8eea1b53d02332e06b2cd53cefba1c3255eea800/src/renderer.tsx#L20-L40
- */
-export const is = {
-	obj: (a: any) => a === Object(a) && !is.arr(a),
-	fun: (a: any) => typeof a === "function",
-	str: (a: any) => typeof a === "string",
-	num: (a: any) => typeof a === "number",
-	und: (a: any) => a === void 0,
-	arr: (a: any) => Array.isArray(a),
-	equ(a: any, b: any) {
-		// Wrong type or one of the two undefined, doesn't match
-		if (typeof a !== typeof b || !!a !== !!b) return false
-		// Atomic, just compare a against b
-		if (is.str(a) || is.num(a) || is.obj(a)) return a === b
-		// Array, shallow compare first to see if it's a match
-		if (is.arr(a) && a == b) return true
-		// Last resort, go through keys
-		let i
-		for (i in a) if (!(i in b)) return false
-		for (i in b) if (a[i] !== b[i]) return false
-		return is.und(i) ? a === b : true
 	}
 }
