@@ -103,6 +103,7 @@ export type PropBlackList =
 	| "matrixWorldNeedsUpdate"
 	| "modelViewMatrix"
 	| "normalMatrix"
+	| "version"
 
 export type ComplexValueType =
 	| "Vector3"
