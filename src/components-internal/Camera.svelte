@@ -88,12 +88,6 @@ This is an internal **svelthree** _Camera_ Component.
 	// #region --- Optional Attributes
 
 	export let mau: boolean = undefined
-
-	// we can do this, because 'userData.matrixAutoUpdate' can be 'undefined'
-	$: if (cam) {
-		cam.matrixAutoUpdate = mau ? true : false
-	}
-
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	export let rot:
 		| Euler
