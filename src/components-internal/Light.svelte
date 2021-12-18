@@ -121,7 +121,7 @@ This is a **svelthree** _Light_ Component.
 
 	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
 
-	export let target: Object3D | Empty | Mesh | boolean = undefined
+	export let target: Object3D | Empty | Mesh<any> | boolean = undefined
 
 	/**
 	 * ☝️ If `matrix` attribute is provided, `pos`, `rot`, `scale` attributes as well as any provided transform props will be overridden!
@@ -156,14 +156,14 @@ This is a **svelthree** _Light_ Component.
 		}
 	}
 
-	function isEmpty(t: Object3D | Empty | Mesh | boolean): t is Empty {
+	function isEmpty(t: Object3D | Empty | Mesh<any> | boolean): t is Empty {
 		if (t.hasOwnProperty("getEmpty")) {
 			return true
 		}
 		return false
 	}
 
-	function isMesh(t: Object3D | Empty | Mesh | boolean): t is Mesh {
+	function isMesh(t: Object3D | Empty | Mesh<any> | boolean): t is Mesh<any> {
 		if (t.hasOwnProperty("getMesh")) {
 			return true
 		}
