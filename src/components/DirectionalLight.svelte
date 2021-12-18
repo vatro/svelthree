@@ -74,6 +74,12 @@ This is a **svelthree** _DirectionalLight_ Component.
 	light = new DirectionalLight()
 	light.userData.svelthreeComponent = self
 
+	$: {
+		if (light) {
+			light.matrixAutoUpdate = scene.matrixAutoUpdate ? true : false
+		}
+	}
+
 	// #endregion
 
 	// #region --- Optional Attributes
