@@ -198,8 +198,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	$: !currentCam && currentSceneId ? setCurrentCam() : null
 
 	function setCurrentCam() {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "setCurrentCam! ->", { currentSceneId }))
-
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "setCurrentCam! ->", { camToRenderId }))
 		currentCam = getCamToRender()
 		setCurrentCamActive()
 	}
