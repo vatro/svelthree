@@ -556,24 +556,28 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let xrHitTestAR: XRHitTestAR
 
+	$: cubeCamerasUsed = $svelthreeStores[sti].cubeCameras.length
+	$: orbitControlsUsed = $svelthreeStores[sti].orbitcontrols
+
+	// TODO  CHECK / IMPROVE!
 	async function renderStandard(): Promise<void> {
 		if (doAnimate) {
-			logOnce ? doLogOnce("renderStandard") : null
+			if (logOnce) doLogOnce("renderStandard")
 
-			isInteractive
-				? (raycaster.setFromCamera($svelthreeStores[sti].pointer.pos, currentCam),
-				  (toTest = currentScene.children.filter((child) => child.type === "Mesh")),
-				  ($svelthreeStores[sti].allIntersections = raycaster.intersectObjects(toTest, true)))
-				: null
+			if (isInteractive) {
+				raycaster.setFromCamera($svelthreeStores[sti].pointer.pos, currentCam)
+				toTest = currentScene.children.filter((child) => child.type === "Mesh")
+				$svelthreeStores[sti].allIntersections = raycaster.intersectObjects(toTest, true)
 
-			isInteractive ? checkCursor() : null
+				checkCursor()
+			}
 
 			// OrbitControls (NonXR)
 			// required if controls.enableDamping or controls.autoRotate are set to true
-			$svelthreeStores[sti].orbitcontrols ? $svelthreeStores[sti].orbitcontrols.update() : null
+			if (orbitControlsUsed) $svelthreeStores[sti].orbitcontrols.update()
 
 			// update cube cameras
-			if ($svelthreeStores[sti].cubeCameras.length > 0) {
+			if (cubeCamerasUsed) {
 				for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
 					let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
 					cubeCamComponent.doUpdate()
@@ -586,7 +590,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			// VERY IMPORTANT  THREE  SVELTE :
 			// inserting await tick() here enables cross-referencing:
-			//
 			await tick()
 
 			if (resizeRendererOnNextFrame) {
