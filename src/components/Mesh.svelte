@@ -456,7 +456,6 @@ This is a **svelthree** _Mesh_ Component.
 						if (verbose && log_lc) console.info(...c_lc(c_name, "onMount"))
 					}
 
-					//console.warn("SVELTHREE > onMount : Mesh : mesh.matrixAutoUpdate", mesh.matrixAutoUpdate)
 
 					return () => {
 						if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))

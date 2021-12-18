@@ -311,7 +311,12 @@ This is an internal **svelthree** _Camera_ Component.
 			: () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onMount"))
 					if (verbose && log_mau) {
-						console.debug(...c_mau(c_name, "onMount : cam.matrixAutoUpdate", cam.matrixAutoUpdate))
+						console.debug(
+							...c_mau(c_name, "onMount : cam.", {
+								matrixAutoUpdate: cam.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: cam.matrixWorldNeedsUpdate
+							})
+						)
 					}
 
 					return () => {
@@ -323,15 +328,25 @@ This is an internal **svelthree** _Camera_ Component.
 
 	beforeUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "beforeUpdate : cam.", {
+					matrixAutoUpdate: cam.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: cam.matrixWorldNeedsUpdate
+				})
+			)
+		}
 	})
 
 	afterUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "afterUpdate"))
-		if (cam.matrixWorldNeedsUpdate === false) {
-			cam.matrixAutoUpdate = mau
-		}
-		if (verbose && log_lc && (log_lc.all || log_lc.od)) {
-			console.debug(...c_mau(c_name, "afterUpdate : cam.matrixAutoUpdate", cam.matrixAutoUpdate))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "afterUpdate : cam.", {
+					matrixAutoUpdate: cam.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: cam.matrixWorldNeedsUpdate
+				})
+			)
 		}
 	})
 
