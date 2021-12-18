@@ -34,8 +34,8 @@ This is a **svelthree** _DirectionalLight_ Component.
 	// #region --- Imports
 
 	import { afterUpdate, beforeUpdate, onMount } from "svelte"
-	import type { Color, DirectionalLightShadow, Matrix4, Object3D, Scene, Vector3 } from "three"
-	import { DirectionalLight, DirectionalLightHelper } from "three"
+	import type { Color, DirectionalLightShadow, Matrix4, Object3D, Vector3 } from "three"
+	import { DirectionalLight, DirectionalLightHelper, Scene } from "three"
 	import { Light, SvelthreeLightWithShadow } from "../components-internal"
 	import type {
 		LightShadowCamProps,
@@ -184,6 +184,14 @@ This is a **svelthree** _DirectionalLight_ Component.
 
 	onMount(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "onMount : light.", {
+					matrixAutoUpdate: light.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+				})
+			)
+		}
 		return () => {
 			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
 			LightUtils.removeHelper(light, scene)
@@ -192,12 +200,54 @@ This is a **svelthree** _DirectionalLight_ Component.
 
 	beforeUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
+		if (verbose && log_mau) {
+			console.debug(
+				...c_mau(c_name, "beforeUpdate : light.", {
+					matrixAutoUpdate: light.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+				})
+			)
+		}
 	})
 
 	afterUpdate(() => {
 		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
+
 		if (verbose && log_mau) {
-			console.debug(...c_mau(c_name, "afterUpdate : light.matrixAutoUpdate", light.matrixAutoUpdate))
+			console.debug(
+				...c_mau(c_name, "afterUpdate : light.", {
+					matrixAutoUpdate: light.matrixAutoUpdate,
+					matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
+				})
+			)
+		}
+
+		if (!mau && light?.parent?.constructor === Scene) {
+			/*
+				if top level object (scene is direct parent), update self and kick off update of all children, no need to
+				check for children, updateMatrixWorld() will do it!
+			/*
+
+			/*
+				if this.matrixWorldNeedsUpdate = false, matrixWorld will be skipped and the
+				function will move to checking all children (without forcing, because scene.autoUpdate = false),
+				IMPORTANT  remember -> Scene is also an Object3D!.
+				The first child object with .matrixWorldNeedsUpdate = true will kick off
+				FORCED update of it's children.
+					
+				see https://github.com/mrdoob/three.js/blob/a43d2386f58ed0929d894923291a0e86909108b3/src/core/Object3D.js#L573-L605
+			*/
+
+			/*
+				 IMPORTANT  THREE  updateMatrixWorld() sets .matrixWorldNeedsUpdate to `false`
+				 IMPORTANT  THREE  Object3D.updateMatrix() sets .matrixWorldNeedsUpdate to `true` but is MOSTLY being
+				executed only if matrixAutoUpdate = true, but sometimes it always gets executes,  TODO  nail it down,
+				search for 'updateMatrix()' in three source + WRITE IT DOWN!
+			*/
+
+			//	Update local and world matrix after all (prop) changes (microtasks) have been applied.
+			light.updateMatrix()
+			light.updateMatrixWorld()
 		}
 	})
 
