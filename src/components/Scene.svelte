@@ -31,7 +31,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			quaternion?: Quaternion | Parameters<Quaternion["set"]>
 			matrix?: Matrix4 | Parameters<Matrix4["set"]>
 
-			background?: Color | Texture | number
+			background?: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3
 		}
 	>
 
@@ -397,7 +397,8 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	$: if (receiveShadow !== undefined && scene) scene.receiveShadow = receiveShadow
 
 	/** Scene `.background`. */
-	export let bg: Texture | Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
+	export let bg: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 =
+		undefined
 	$: if (bg) set_bg()
 
 	function set_bg(): void {

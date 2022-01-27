@@ -62,8 +62,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { BufferGeometry } from "three"
 
 	import { Points } from "three"
-	import type { OnlyWritableNonFunctionProps, RemoveFirst } from "../types-extra"
-	import type { Material, PointsMaterial } from "three"
+	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
+	import type { Material, PointsMaterial, Color } from "three"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -99,7 +99,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
 	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
 	type AnyMaterial = $$Generic<Material | Material[] | PointsMaterial>
-	type AnyMaterialProps = OnlyWritableNonFunctionProps<Omit<AnyMaterial, PropBlackList>>
+	type AnyMaterialProps = OnlyWritableNonFunctionPropsOverwritten<
+		Omit<AnyMaterial, PropBlackList>,
+		{ color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 }
+	>
 	export let material: AnyMaterial = undefined
 	export let geometry: BufferGeometry = undefined
 

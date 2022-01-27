@@ -405,6 +405,8 @@ export default class PropUtils {
 			? PropUtils.setColorFromNumber(obj, val, key)
 			: PropUtils.isColor(val)
 			? PropUtils.setColorFromColor(obj, val, key)
+			: PropUtils.isVector3(val)
+			? PropUtils.setColorFromVector3(obj, val, key)
 			: typeof val === "string"
 			? PropUtils.setColorFromString(obj, val, key)
 			: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
@@ -417,7 +419,7 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromArray : ", { obj, val, key })
 		}
-		obj[key].setRGB(val[0], val[1], val[2])
+		!obj[key] ? (obj[key] = new Color(val[0], val[1], val[2])) : obj[key].setRGB(val[0], val[1], val[2])
 	}
 
 	public static setColorFromNumber(obj: Object3D | Material, val: number, key: string) {
@@ -442,11 +444,19 @@ export default class PropUtils {
 		} 
 	}
 
+	public static setColorFromVector3(obj: Object3D | Material, val: Vector3, key: string) {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setColorFromVector3 : ", { obj, val, key })
+		}
+		
+		!obj[key] ? (obj[key] = new Color(val.x, val.y, val.z)) : obj[key].setRGB(val.x, val.y, val.z)
+	}
+
 	public static setColorFromString(obj: Object3D | Material, val: string, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromString : ", { obj, val, key })
 		}
-		obj[key].set(val)
+		!obj[key] ? (obj[key] = new Color(val)) : obj[key].set(val)
 	}
 
 	// Light specific

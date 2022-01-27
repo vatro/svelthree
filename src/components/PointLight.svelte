@@ -293,7 +293,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setMatrixFromValue(light, matrix)
 	}
 
-	export let color: Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
+	export let color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 = undefined
 	$: if (color) set_color()
 	function set_color(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "color", color))
