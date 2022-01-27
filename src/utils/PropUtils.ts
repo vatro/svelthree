@@ -110,24 +110,24 @@ export default class PropUtils {
 					PropUtils.isArray3Nums(val)
 						? PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
 						: PropUtils.isEulerParamsArray(val)
-						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
-						: PropUtils.isQuaternionParamsArray(val)
-						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
-						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
-								obj: obj,
-								value: val
-						  })
+							? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
+							: PropUtils.isQuaternionParamsArray(val)
+								? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
+								: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
+									obj: obj,
+									value: val
+								})
 				} else {
 					PropUtils.isEuler(val)
 						? PropUtils.setRotEuler(obj, val)
 						: PropUtils.isVector3(val)
-						? PropUtils.setRotVector3(obj, val)
-						: PropUtils.isQuaternion(val)
-						? PropUtils.setRotQuaternion(obj, val)
-						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
-								obj: obj,
-								value: val
-						  })
+							? PropUtils.setRotVector3(obj, val)
+							: PropUtils.isQuaternion(val)
+								? PropUtils.setRotQuaternion(obj, val)
+								: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
+									obj: obj,
+									value: val
+								})
 				}
 				break
 			case "Euler":
@@ -206,11 +206,11 @@ export default class PropUtils {
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
-					? PropUtils.setPositionFromVector3(obj, val as Vector3)
-					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
+						? PropUtils.setPositionFromVector3(obj, val as Vector3)
+						: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
 							value: val
-					  })
+						})
 				break
 			case "Array3Nums":
 				PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
@@ -258,11 +258,11 @@ export default class PropUtils {
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: PropUtils.isVector3(val)
-					? PropUtils.setScaleFromVector3(obj, val as Vector3)
-					: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
+						? PropUtils.setScaleFromVector3(obj, val as Vector3)
+						: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
 							obj: obj,
 							value: val
-					  })
+						})
 				break
 			case "Array3Nums":
 				PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
@@ -402,17 +402,17 @@ export default class PropUtils {
 		PropUtils.isArray3Nums(val)
 			? PropUtils.setColorFromArray(obj, val, key)
 			: !isNaN(val)
-			? PropUtils.setColorFromNumber(obj, val, key)
-			: PropUtils.isColor(val)
-			? PropUtils.setColorFromColor(obj, val, key)
-			: PropUtils.isVector3(val)
-			? PropUtils.setColorFromVector3(obj, val, key)
-			: typeof val === "string"
-			? PropUtils.setColorFromString(obj, val, key)
-			: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
-					obj: obj,
-					value: val
-			  })
+				? PropUtils.setColorFromNumber(obj, val, key)
+				: PropUtils.isColor(val)
+					? PropUtils.setColorFromColor(obj, val, key)
+					: PropUtils.isVector3(val)
+						? PropUtils.setColorFromVector3(obj, val, key)
+						: typeof val === "string"
+							? PropUtils.setColorFromString(obj, val, key)
+							: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
+								obj: obj,
+								value: val
+							})
 	}
 
 	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {
@@ -433,7 +433,6 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromColor : ", { obj, val, key })
 		}
-		
 		if (!obj[key]) {
 			// only copy the received Color in order to prevent circular binding to the prop
 			obj[key] = new Color()
@@ -441,14 +440,13 @@ export default class PropUtils {
 		} else {
 			// only copy the received Color in order to prevent circular binding to the prop
 			obj[key].copy(val)
-		} 
+		}
 	}
 
 	public static setColorFromVector3(obj: Object3D | Material, val: Vector3, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromVector3 : ", { obj, val, key })
 		}
-		
 		!obj[key] ? (obj[key] = new Color(val.x, val.y, val.z)) : obj[key].setRGB(val.x, val.y, val.z)
 	}
 
