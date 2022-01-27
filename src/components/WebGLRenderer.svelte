@@ -150,7 +150,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		for (let i = 0; i < outputs.length; i++) {
 			// if it's a canvas component, also get / set sti from it
 			const output: WebGLRendererOutput = outputs[i]
-			debugger
 
 			if (output.canvas instanceof HTMLCanvasElement) {
 				outputs_queue.push({
