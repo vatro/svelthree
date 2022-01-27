@@ -138,15 +138,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	/** Set to `true` for correct **floor reflections** (_default: `false`_). */
 	export let is_floor: boolean = false
 
-	/** TEMPORARY PROP: Added for dev / testing purposes. */
-	export let quickndirty_rt_props: any = undefined
-	$: if (quickndirty_rt_props && camera_updated) {
-		//console.log("heeey quickndirty_rt_props!")
-
-		renderTarget = new WebGLCubeRenderTarget(renderTargetParams[0], quickndirty_rt_props)
-		camera = new CubeCamera(params[0], params[1], renderTarget)
-	}
-
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 
