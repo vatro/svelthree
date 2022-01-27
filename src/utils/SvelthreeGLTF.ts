@@ -48,7 +48,7 @@ export default class SvelthreeGLTF {
     }
 
     async build_tree(scene: Object3D): Promise<void> {
-        console.log("SvelthreeGLTF parsing started!")
+        //console.log("SvelthreeGLTF parsing started!")
 
         const fns: (() => Promise<void>)[] = []
 
@@ -80,7 +80,7 @@ export default class SvelthreeGLTF {
             await fn()
         }
 
-        console.log("SvelthreeGLTF parsing FINISHED!")
+        //console.log("SvelthreeGLTF parsing FINISHED!")
     }
 
     async get_parent_component(parent_uuid: string): Promise<AnySvelthreeComponent> {
@@ -92,7 +92,7 @@ export default class SvelthreeGLTF {
     }
 
     public async apply(dom_target: HTMLElement, root_component: AnySvelthreeComponent): Promise<void> {
-        console.log("SvelthreeGLTF apply started!")
+        //console.log("SvelthreeGLTF apply started!")
 
         const fns: (() => Promise<void>)[] = []
 
@@ -126,15 +126,6 @@ export default class SvelthreeGLTF {
         }
 
         for (const [uuid, item] of this.tree.entries()) {
-            /*
-            for (const [uuid, item] of this.tree.entries()) {
-                console.log("---------------------------------------------")
-                console.log("type:", item.obj_type)
-                console.log(".matrix", item.obj.matrix.elements.toString())
-                console.log(".matrixWorld", item.obj.matrixWorld.elements.toString())
-            }
-            */
-
             fns.push(create_component(item, dom_target, root_component))
         }
 
@@ -163,6 +154,6 @@ export default class SvelthreeGLTF {
         }
 
 
-        console.log("SvelthreeGLTF apply FINISHED!")
+        //console.log("SvelthreeGLTF apply FINISHED!")
     }
 }

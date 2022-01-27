@@ -186,7 +186,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	async function process_afterLoaded(fn_index: number) {
 		dispatch("afterLoaded_start")
-		console.log("processAfterLoaded started!")
+		//console.log("processAfterLoaded started!")
 
 		if (afterLoaded?.length) {
 			for (const fn of afterLoaded) {
@@ -195,7 +195,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 		}
 
-		console.log("processAfterLoaded finished!")
+		//console.log("processAfterLoaded finished!")
 		dispatch("afterLoaded_finished")
 	}
 

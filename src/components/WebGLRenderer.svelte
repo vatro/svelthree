@@ -93,7 +93,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// wait for
 	function process_canvas_inputs() {
-		console.log("process_canvas_inputs!")
+		//console.log("process_canvas_inputs!")
 		for (let i = 0; i < inputs.length; i++) {
 			// if it's a canvas component, also get / set sti from it
 			const input: WebGLRendererInput = inputs[i]
@@ -143,7 +143,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let outputs_queue: WebGLRendererOutputsQueueItem[] = []
 
 	async function process_canvas_outputs() {
-		console.log("process_canvas_outputs!")
+		//console.log("process_canvas_outputs!")
 
 		await tick()
 

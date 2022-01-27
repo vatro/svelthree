@@ -141,7 +141,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	/** TEMPORARY PROP: Added for dev / testing purposes. */
 	export let quickndirty_rt_props: any = undefined
 	$: if (quickndirty_rt_props && camera_updated) {
-		console.log("heeey quickndirty_rt_props!")
+		//console.log("heeey quickndirty_rt_props!")
 
 		renderTarget = new WebGLCubeRenderTarget(renderTargetParams[0], quickndirty_rt_props)
 		camera = new CubeCamera(params[0], params[1], renderTarget)
@@ -459,7 +459,7 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 	$: if (renderTargetOptions && camera_updated) recreate_render_target()
 
 	function recreate_render_target() {
-		console.log("recreate_render_target!")
+		//console.log("recreate_render_target!")
 		if (verbose && log_rs)
 			console.debug(...c_rs(c_name, "renderTargetOptions (recreating 'renderTarget')", renderTargetOptions))
 		// without camera recreation!

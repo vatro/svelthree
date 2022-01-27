@@ -12,7 +12,7 @@ export default class GLTF_afterLoaded {
     // TODO  RECONSIDER  static remove_all_textures ?
 
     public static remove_all_lights: (dummy: any, ...args: any[]) => Promise<void> = async (content: GLTF) => {
-        console.log("remove_all_lights!")
+        //console.log("remove_all_lights!")
         if (content) {
             if (content.scenes?.length > 1) {
                 for (let i = 0; i < content.scenes.length; i++) {
@@ -27,7 +27,7 @@ export default class GLTF_afterLoaded {
     }
 
     public static remove_all_cameras: (content: any, ...args: any[]) => Promise<void> = async (content: GLTF) => {
-        console.log("remove_all_cameras!")
+        //console.log("remove_all_cameras!")
         if (content) {
             if (content.scenes?.length > 1) {
                 for (let i = 0; i < content.scenes.length; i++) {
@@ -42,7 +42,7 @@ export default class GLTF_afterLoaded {
     }
 
     private static async remove_all(scene: Group, typ: string): Promise<void> {
-        console.log("remove_all started!")
+        //console.log("remove_all started!")
 
         if (scene) {
             const fns: (() => Promise<void>)[] = []
@@ -80,12 +80,12 @@ export default class GLTF_afterLoaded {
             console.error("SVELTHREE > GLTF_afterLoaded > async 'remove_all(scene, ...)' -> 'scene' not available!", { scene })
         }
 
-        console.log("remove_all FINISHED!")
-        if (scene) { console.log(scene) }
+        //console.log("remove_all FINISHED!")
+        //if (scene) { console.log(scene) }
     }
 
     private static async apply_to_materials(scene: Group, props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }): Promise<void> {
-        console.log("apply_to_materials started!")
+        //console.log("apply_to_materials started!")
 
         if (scene) {
             const fns: (() => Promise<void>)[] = []
@@ -124,13 +124,13 @@ export default class GLTF_afterLoaded {
             console.error("SVELTHREE > GLTF_afterLoaded > async 'get_all_scene_lights(scene, ...)' -> 'scene' not available!", { scene })
         }
 
-        console.log("apply_to_materials FINISHED!")
-        if (scene) { console.log(scene) }
+        //console.log("apply_to_materials FINISHED!")
+        //if (scene) { console.log(scene) }
 
     }
 
     private static async apply_to_meshes(scene: Group, props: { [P in keyof MeshProps]: MeshProps[P] }): Promise<void> {
-        console.log("apply_to_meshes started!")
+        //console.log("apply_to_meshes started!")
 
         if (scene) {
             const fns: (() => Promise<void>)[] = []
@@ -169,12 +169,12 @@ export default class GLTF_afterLoaded {
             console.error("SVELTHREE > GLTF_afterLoaded > async 'apply_to_meshes(scene, ...)' -> 'scene' not available!", { scene })
         }
 
-        console.log("apply_to_meshes FINISHED!")
-        if (scene) { console.log(scene) }
+        //console.log("apply_to_meshes FINISHED!")
+        //if (scene) { console.log(scene) }
     }
 
     private static async apply_to_lights(scene: Group, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }): Promise<void> {
-        console.log("apply_to_lights started!")
+        //console.log("apply_to_lights started!")
 
         if (scene) {
             const fns: (() => Promise<void>)[] = []
@@ -213,8 +213,8 @@ export default class GLTF_afterLoaded {
             console.error("SVELTHREE > GLTF_afterLoaded > async 'apply_to_lights(scene, ...)' -> 'scene' not available!", { scene })
         }
 
-        console.log("apply_to_lights FINISHED!")
-        if (scene) { console.log(scene) }
+        //console.log("apply_to_lights FINISHED!")
+        //if (scene) { console.log(scene) }
     }
 
 

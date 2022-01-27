@@ -78,7 +78,7 @@ export default class GLTF_utils {
     /** [ _**internal utility**_ ] Get all references of a specific type from a scene. */
     static async get_all(scene: Group, found: (Mesh | Light | Camera)[], check: string): Promise<void> {
 
-        console.log(`get_all_of_type - ${check} - started!`)
+        //console.log(`get_all_of_type - ${check} - started!`)
 
         if (scene) {
             const fns: (() => Promise<void>)[] = []
@@ -108,6 +108,6 @@ export default class GLTF_utils {
             console.error("SVELTHREE > GLTF_utils > async 'get_all(scene, ...)' -> 'scene' not available!", { scene })
         }
 
-        console.log(`get_all_of_type - ${check} - finished!`)
+        //console.log(`get_all_of_type - ${check} - finished!`)
     }
 }

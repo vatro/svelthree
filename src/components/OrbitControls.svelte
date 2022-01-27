@@ -70,7 +70,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
 	function create_orbitcontrols(): void {
-		console.log("create_orbitcontrols!")
+		//console.log("create_orbitcontrols!")
 		const oc_cam: PerspectiveCamera | OrthographicCamera = get_oc_cam()
 		const oc_dom: HTMLElement = get_oc_dom()
 

@@ -281,7 +281,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.addEventListener("pointerleave", onPointerLeave_notInteractive, false)
 		c.removeEventListener("pointerenter", onPointerEnter_notInteractive)
 
-		console.log("onPointerEnter_notInteractive!")
+		//console.log("onPointerEnter_notInteractive!")
 
 		$svelthreeStores[sti].orbitcontrols.length > 0 ? set_cursor_style("all-scroll") : set_cursor_style("default")
 	}
