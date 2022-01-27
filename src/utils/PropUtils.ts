@@ -3,7 +3,7 @@
  */
 
 import { not_equal } from "svelte/internal"
-import type { Light, Material, Object3D } from "three"
+import type { Light, Material, Object3D, Scene } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types-extra"
 import type { default as Empty } from "./components/Empty.svelte"
@@ -317,6 +317,7 @@ export default class PropUtils {
 		let tVal: any
 
 		if (val) {
+			// TODO  TOFIX  this seems to be broken?! (Spotlight)
 			// can use Object3D as `lookAt` value
 
 			tVal =
@@ -390,7 +391,7 @@ export default class PropUtils {
 
 	// we know that 'obj' has property 'key', see 'Propeller'
 	public static setColorFromValueKey(
-		obj: Object3D | Material | Light,
+		obj: Object3D | Material | Light | Scene,
 		val: any,
 		key: string,
 		complex?: ComplexValueType
@@ -423,15 +424,22 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromNumber : ", { obj, val, key })
 		}
-		obj[key].set(val)
+		!obj[key] ? (obj[key] = new Color(val)) : obj[key].set(val)
 	}
 
 	public static setColorFromColor(obj: Object3D | Material, val: Color, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromColor : ", { obj, val, key })
 		}
-		// only copy the received Color in order to prevent circular binding to the prop
-		obj[key].copy(val)
+		
+		if (!obj[key]) {
+			// only copy the received Color in order to prevent circular binding to the prop
+			obj[key] = new Color()
+			obj[key].copy(val)
+		} else {
+			// only copy the received Color in order to prevent circular binding to the prop
+			obj[key].copy(val)
+		} 
 	}
 
 	public static setColorFromString(obj: Object3D | Material, val: string, key: string) {

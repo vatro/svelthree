@@ -48,12 +48,23 @@ export type OnlyWritableNonFunctionProps<T> = Partial<Pick<T, OnlyWritableNonFun
 export type OnlyWritableNonFunctionPropsPlus<T, U> = Partial<Pick<T, OnlyWritableNonFunctionKeys<T>> & U>
 export type OnlyWritableNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<OnlyWritableNonFunctionProps<T>, U>>
 
+export type RemoveFirst<T extends unknown[]> = T extends [infer H, ...infer R] ? R : T
+export type RemoveLast<T extends unknown[]> = T extends [...infer H, infer R] ? H : T
+
 // Animation
 
 export interface SvelthreeAnimationFunctionReturn {
+	/** Usually used to define the intial state of the animation and start the animation (_set inital prop values and call a function which starts the animation_). */
 	onStart: () => void
+	/** Usually used to destroy (_stop / kill / nullify_) any processes which would otherwise remain in memory. */
 	onDestroy: () => void
+	/** (optional) What should happen with the animation if the parent scene is not the active (_rendered_) scene during the animation?
+	 * _Usually used for pausing the animation in a multiple top-level Scenes scenario._
+	 */
 	onSceneDeactivated?: () => void
+	/** (optional) What should happen with the animation if the parent scene is active (_rendered_) again (_reactivated_) during the animation?
+	 * _Usually used for continuing the animation in a multiple top-level Scenes scenario._
+	 */
 	onSceneReactivated?: () => void
 	[anything: string]: any
 }
@@ -61,7 +72,7 @@ export interface SvelthreeAnimationFunctionReturn {
 /**
  * Animation function (closure) which is being processed internally by the component.
  * ```
- * (dummyParam: any, ...args: any[]) => {
+ * (obj: any, ...args: any[]) => {
  *      onStart: () => void
  *      onDestroy: () => void
  *      onSceneDeactivated?: () => void
@@ -69,15 +80,15 @@ export interface SvelthreeAnimationFunctionReturn {
  *      [anything: string]: any
  * }
  * ```
- * - ☝️ `dummyParam` is basically just a named / declared argument (no initial value).
- * - ☝️ `dummyParam` will be internally replaced by the **real** THREE.Object3D reference (the reference to the object the animation has been applied to).
+ * - ☝️ `obj` is basically just a named / declared argument (no initial value).
+ * - ☝️ `obj` will be internally replaced by the **real** THREE.Object3D reference (the reference to the object the animation has been applied to).
  *
  * Simple example:
  * ```
- * const ani = (dummyParam) => {
+ * const ani = (obj) => {
  *      return {
  *          onStart: () => {
- *              dummyParam.position.y = 1
+ *              obj.position.y = 1
  *          }
  *      }
  * }
@@ -85,12 +96,12 @@ export interface SvelthreeAnimationFunctionReturn {
  *
  */
 export interface SvelthreeAnimationFunction {
-	(dummyParam: any, ...args: any[]): SvelthreeAnimationFunctionReturn
+	(obj: any, ...args: any[]): SvelthreeAnimationFunctionReturn
 }
 
 export type LightWithShadow = THREE.DirectionalLight | THREE.SpotLight | THREE.PointLight
-export type LightShadowProps<T> = OnlyWritableNonFunctionProps<T>
-export type LightShadowCamProps<T> = OnlyWritableNonFunctionProps<T>
+export type LightShadowProps<T> = OnlyWritableNonFunctionProps<Omit<T, PropBlackList>>
+export type LightShadowCamProps<T> = OnlyWritableNonFunctionProps<Omit<T, PropBlackList>>
 
 export type PropBlackList =
 	| "id"
@@ -115,3 +126,108 @@ export type ComplexValueType =
 	| "Matrix4"
 	| "Matrix4ParamsArray"
 	| "Color"
+
+import type {
+	Mesh,
+	Empty,
+	PointLight,
+	SpotLight,
+	OrthographicCamera,
+	Scene,
+	DirectionalLight
+} from "./components"
+export type Targetable =
+	| Mesh<any>
+	| Empty
+	| THREE.Object3D
+	| PointLight
+	| SpotLight
+	| OrthographicCamera
+	| Scene
+	| DirectionalLight
+export type CubeCameraBoundable = Mesh<any> | Empty | THREE.Object3D
+
+import type {
+	MeshToonMaterialParameters,
+	MeshBasicMaterialParameters,
+	MeshDepthMaterialParameters,
+	MaterialParameters,
+	MeshPhongMaterialParameters,
+	MeshMatcapMaterialParameters,
+	MeshNormalMaterialParameters,
+	MeshLambertMaterialParameters,
+	MeshStandardMaterialParameters,
+	MeshDistanceMaterialParameters,
+	MeshPhysicalMaterialParameters
+} from "three"
+
+/* TODO  DELETE  we don't need this
+type AllMeshMaterialParameters =
+	& MeshToonMaterialParameters
+	& MeshBasicMaterialParameters
+	& MeshDepthMaterialParameters
+	& MaterialParameters
+	& MeshPhongMaterialParameters
+	& MeshMatcapMaterialParameters
+	& MeshNormalMaterialParameters
+	& MeshLambertMaterialParameters
+	& MeshStandardMaterialParameters
+	& MeshDistanceMaterialParameters
+	& MeshPhysicalMaterialParameters
+
+export type AnyMeshMaterialParameters = OnlyWritableNonFunctionProps<Omit<AllMeshMaterialParameters, PropBlackList>>
+*/
+
+import type {
+	MeshToonMaterial,
+	MeshBasicMaterial,
+	MeshDepthMaterial,
+	Material,
+	MeshPhongMaterial,
+	MeshMatcapMaterial,
+	MeshNormalMaterial,
+	MeshLambertMaterial,
+	MeshStandardMaterial,
+	MeshDistanceMaterial,
+	MeshPhysicalMaterial
+} from "three"
+
+type AllMeshMaterials = MeshToonMaterial &
+	MeshBasicMaterial &
+	MeshDepthMaterial &
+	Material &
+	MeshPhongMaterial &
+	MeshMatcapMaterial &
+	MeshNormalMaterial &
+	MeshLambertMaterial &
+	MeshStandardMaterial &
+	MeshDistanceMaterial &
+	MeshPhysicalMaterial
+
+export type AnyMeshMaterialProps = OnlyWritableNonFunctionProps<Omit<AllMeshMaterials, PropBlackList>>
+
+type AllLights = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
+
+export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
+
+import type * as SvelthreeComponent from "./components"
+
+type AnySvelthreeComponentName = keyof typeof SvelthreeComponent
+export type AnySvelthreeComponent = typeof SvelthreeComponent[AnySvelthreeComponentName]
+
+export interface PointerState {
+	pos: THREE.Vector2
+	event: PointerEvent
+	isOverCanvas: boolean
+	unprojected: THREE.Vector3
+}
+
+export interface StoreCanvas {
+	dom: HTMLCanvasElement
+	svelthreeComponent: any
+	dim: { 
+		w: number
+		h: number
+	}
+	interactive: boolean
+}

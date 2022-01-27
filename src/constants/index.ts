@@ -1,7 +1,2 @@
 export { default as ExposedPropKeys } from "./ExposedPropKeys"
 export { default as CameraValues } from "./CameraValues"
-export { default as XRControllerDefaults } from "./XRControllerDefaults"
-export { default as XRDefaults } from "./XRDefaults"
-export { default as XRHandJointIndices } from "./XRHandJointIndices"
-export { default as XRHandRayConfigs } from "./XRHandRayConfigs"
-export { default as XRHandTouchDefaults } from "./XRHandTouchDefaults"

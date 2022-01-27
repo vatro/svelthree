@@ -9,7 +9,7 @@ export default class SvelthreeAnimationManager {
 	obj: Object3D
 	scene: Scene
 
-	constructor(animation: SvelthreeAnimationProp | any, aniauto: boolean, obj: Object3D, scene: Scene) {
+	constructor(animation: SvelthreeAnimationProp | any, aniauto: boolean, obj: Object3D, scene: Scene | null) {
 		this.animation = animation
 		this.aniauto = aniauto
 		this.obj = obj
@@ -58,12 +58,23 @@ export default class SvelthreeAnimationManager {
 	initiateAnimation(): void {
 		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
 		//if animation is a function it has not been initiated / started yet (otherwise object)
-		!this.scene.userData.isActive
-			? console.warn(
+
+		if (this.scene) {
+			if (!this.scene.userData.isActive) {
+				console.warn(
 					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
-			  )
-			: null
+				)
+			}
+		} else if (this.scene === null && (this.obj as Scene).isScene) {
+			if (!(this.obj as Scene).userData.isActive) {
+				console.warn(
+					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive NESTED Scene!"
+				)
+			}
+		}
+
 		this.animation = this.animation.initiate(this.obj, ...arguments)
+
 		if (verbose_mode())
 			console.debug(
 				"SVELTHREE > SvelthreeAnimationManager > initiateAnimation : after initialization: this.animation:",

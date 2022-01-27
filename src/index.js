@@ -15,10 +15,7 @@ export { default as Scene } from "./components/Scene.svelte"
 export { default as LoadedGLTF } from "./components/LoadedGLTF.svelte"
 export { default as WebGLRenderer } from "./components/WebGLRenderer.svelte"
 export { default as OrbitControls } from "./components/OrbitControls.svelte"
-export { default as SessionAR } from "./components/SessionAR.svelte"
-export { default as SessionVR } from "./components/SessionVR.svelte"
 export { default as CubeCamera } from "./components/CubeCamera.svelte"
-export { XRHandJointIndices } from "./constants"
 export { svelthreeStores } from "./stores"
 
 // export all THREE modules

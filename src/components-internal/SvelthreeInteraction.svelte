@@ -10,12 +10,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate, getContext } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
 	import { svelthreeStores } from "../stores"
-	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { PointerState } from "../types-extra"
+	import type { Writable } from "svelte/store"
 
 	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
@@ -27,35 +29,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
-	export let sti: number
+	export let sti: number = getContext("store_index")
 	export let obj: Object3D
 	//export let recursive: boolean
 
 	let raycaster: Raycaster
 	$: raycaster = $svelthreeStores[sti].raycaster
 
-	// TODO  Months later: What?! Remove?
-	/*
-    $: if($svelthreeStores[sti].raycaster) {
-        console.debug("run 12!")
-        raycaster = $svelthreeStores[sti].raycaster
-    }
-    */
-
 	export let dispatch: (type: string, detail?: any) => void
+
+	const pointer: PointerState = getContext("pointer")
+	const all_intersections: { result: any[] } = getContext("all_intersections")
+	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 
 	// Canvas-DOM-Element listens to 'pointermove' the whole time in order to trigger over/out enter/leave events
 
 	let c: HTMLElement
-	$: c = $svelthreeStores[sti].canvas.dom
-
-	// TODO  Months later: What?! Remove?
-	/*
-    $: if($svelthreeStores[sti].canvas.dom) {
-        console.debug("run 13!")
-        c = $svelthreeStores[sti].canvas.dom
-    }
-    */
+	//$: c = $svelthreeStores[sti].canvas.dom
+	$: c = $canvas_dom.element
 
 	$: if (c) {
 		if (interactionEnabled && obj && !obj.userData.interact) {
@@ -72,8 +63,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	$: if (interactionEnabled) {
 		if (obj && raycaster) {
-			if ($svelthreeStores[sti].pointer.event !== lastPointerMoveEvent) {
-				lastPointerMoveEvent = $svelthreeStores[sti].pointer.event
+			//if ($svelthreeStores[sti].pointer.event !== lastPointerMoveEvent) {
+			//lastPointerMoveEvent = $svelthreeStores[sti].pointer.event
+			if (pointer.event !== lastPointerMoveEvent) {
+				lastPointerMoveEvent = pointer.event
 				checkOverOut(lastPointerMoveEvent)
 				tryDispatch(lastPointerMoveEvent)
 			}
@@ -264,7 +257,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			? dispatch(e.type, {
 					event: e,
 					target: obj,
-					unprojected: $svelthreeStores[sti].pointer.unprojected
+					//unprojected: $svelthreeStores[sti].pointer.unprojected
+					unprojected: pointer.unprojected
 			  })
 			: null
 
@@ -274,7 +268,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 						detail: {
 							event: e,
 							target: obj,
-							unprojected: $svelthreeStores[sti].pointer.unprojected
+							//unprojected: $svelthreeStores[sti].pointer.unprojected
+							unprojected: pointer.unprojected
 						}
 					})
 			  )
@@ -339,22 +334,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// @see https://threejs.org/docs/#api/en/core/Raycaster
 
 	function intersects(): boolean {
-		if ($svelthreeStores[sti].allIntersections) {
-			if (
-				$svelthreeStores[sti].allIntersections.length > 0 &&
-				$svelthreeStores[sti].allIntersections[0].object === obj
-			) {
+		if (all_intersections) {
+			if (all_intersections.result.length && all_intersections.result[0].object === obj) {
 				let intersects = raycaster.intersectObject(obj)
 
 				raycasterData = {
 					intersections: intersects, // [] all intersections
 					ray: raycaster.ray, // Ray( origin : Vector3, direction : Vector3 )
 					camera: raycaster.camera,
-					unprojectedPoint: new Vector3(
-						$svelthreeStores[sti].pointer.pos.x,
-						$svelthreeStores[sti].pointer.pos.y,
-						0
-					).unproject(raycaster.camera)
+					unprojectedPoint: new Vector3(pointer.pos.x, pointer.pos.y, 0).unproject(raycaster.camera)
 				}
 
 				return true

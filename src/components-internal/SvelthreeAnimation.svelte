@@ -10,11 +10,11 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import { onMount, beforeUpdate, afterUpdate } from "svelte"
+	import { onMount, beforeUpdate, afterUpdate, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import type { Object3D, Scene } from "three"
 	import { SvelthreeAnimationManager, SvelthreeAnimationProp } from "../ani"
-	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import { c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
 	const c_name = get_comp_name_int(get_current_component())
@@ -29,7 +29,7 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 	export let animation: any = undefined
 	export let aniauto: boolean = undefined
 	export let obj: Object3D = undefined
-	export let scene: Scene
+	export let scene: Scene = getContext("scene")
 
 	let aniManager: SvelthreeAnimationManager
 	$: animation && animationEnabled ? createAnimationManager() : null

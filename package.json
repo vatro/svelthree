@@ -6,6 +6,7 @@
   "types": "src/index.d.ts",
   "module": "dist/svelthree.es.js",
   "main": "dist/svelthree.umd.js",
+  "type": "module",
   "scripts": {
     "build": "vite build",
     "svelte-check": "svelte-check",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@types/three": "^0.134.0",
+    "fs-extra": "^10.0.0",
     "prettier": "^2.5.0",
     "prettier-plugin-svelte": "^2.5.0",
     "svelte": "^3.44.2",

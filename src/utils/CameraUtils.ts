@@ -87,41 +87,4 @@ export default class CameraUtils {
 	}
 
 	// #endregion
-
-	/**
-	 * Creates a CameraHelper.
-	 */
-	public static createHelper(cam: OrthographicCamera | PerspectiveCamera, scene: Scene): CameraHelper {
-		const camHelper = new CameraHelper(cam)
-
-		cam.userData.helper = camHelper
-		CameraUtils.updateHelper(cam)
-
-		scene.add(camHelper)
-		camHelper.visible = true
-
-		return camHelper
-	}
-
-	/**
-	 * Syncs Camera and CameraHelper.
-	 */
-	public static updateHelper(cam: OrthographicCamera | PerspectiveCamera): void {
-		if (cam.userData.helper) {
-			// updates appearance / elements
-			cam.userData.helper.update()
-
-			// updates matrix (position, rotation, scale)
-			// this approach is bulletproof for all scene / matrix update modes.
-			cam.userData.helper.matrix.copy(cam.matrix)
-			cam.userData.helper.matrixWorld.copy(cam.matrixWorld)
-		}
-	}
-
-	public static removeHelper(cam: OrthographicCamera | PerspectiveCamera, scene: Scene): void {
-		if (cam.userData.helper) {
-			scene.remove(cam.userData.helper)
-			cam.userData.helper = null
-		}
-	}
 }

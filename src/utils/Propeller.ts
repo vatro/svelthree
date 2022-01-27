@@ -48,6 +48,9 @@ export default class Propeller {
 				case "groundColor":
 					PropUtils.setColorFromValueKey(obj, value, key, complex)
 					break
+				case "background":
+					PropUtils.setColorFromValueKey(obj, value, key, complex)
+					break
 
 				default:
 					PropUtils.applyValueToProp(obj, value, key)

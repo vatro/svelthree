@@ -160,8 +160,8 @@ export default class LightUtils {
 
 			// updates matrix (position, rotation, scale)
 			// this approach is bulletproof for all scene / matrix update modes.
-			light.userData.helper.matrix.copy(light.matrix)
-			light.userData.helper.matrixWorld.copy(light.matrixWorld)
+			//light.userData.helper.matrix.copy(light.matrix)
+			//light.userData.helper.matrixWorld.copy(light.matrixWorld)
 		}
 	}
 
