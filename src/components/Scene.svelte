@@ -16,7 +16,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * component_ref.props = my_init_props
 	 * ```
 	 * */
-	export type SceneProps = OnlyWritableNonFunctionPropsPlus<
+	export type SceneProps = OnlyWritableNonFunctionPropsOverwritten<
 		Omit<Scene, PropBlackList>,
 		{
 			position?: Vector3 | Parameters<Vector3["set"]>
@@ -30,6 +30,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				| Parameters<Vector3["set"]>
 			quaternion?: Quaternion | Parameters<Quaternion["set"]>
 			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+
+			background?: Color | Texture | number
 		}
 	>
 
@@ -42,7 +44,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
 	import { svelthreeStores } from "../stores"
@@ -60,7 +61,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { Scene } from "three"
 	import type { FogBase, Color, Mapping, Texture } from "three"
 	import { EquirectangularReflectionMapping, TextureLoader } from "three"
-	import type { RemoveFirst } from "../types-extra"
+	import type { RemoveFirst, OnlyWritableNonFunctionPropsOverwritten, PropBlackList } from "../types-extra"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
