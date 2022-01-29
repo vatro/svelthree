@@ -41,7 +41,6 @@ This is a **svelthree** _Canvas_ Component.
 	import { self as _self } from "svelte/internal"
 	import { BufferGeometry, Mesh, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from "three"
 	import type { OrthographicCamera, PerspectiveCamera } from "three"
-	import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh"
 	import { svelthreeStores } from "../stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 	import type { PointerState, StoreCanvas } from "../types-extra"
@@ -165,41 +164,6 @@ This is a **svelthree** _Canvas_ Component.
 		result: []
 	}
 	setContext("all_intersections", all_intersections)
-
-
-	// --- BVH
-
-	let originalThreeRaycastFunction: (raycaster: Raycaster, intersects: THREE.Intersection[]) => void
-	export let useBVH: boolean = undefined
-
-	$: if (useBVH) {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "Using BVH", { useBVH }))
-
-		$svelthreeStores[sti].useBVH = useBVH
-
-		if (!Object.keys(BufferGeometry.prototype).includes("computeBoundsTree")) {
-			// backup original raycast function
-			originalThreeRaycastFunction = Mesh.prototype.raycast
-
-			BufferGeometry.prototype["computeBoundsTree"] = computeBoundsTree
-			BufferGeometry.prototype["disposeBoundsTree"] = disposeBoundsTree
-
-			Mesh.prototype.raycast = acceleratedRaycast
-
-			//if (verbose && log_rs) console.debug(...c_rs(c_name, "if useBVH -> if Object.keys(BufferGeometry.prototype) ->", Object.keys(BufferGeometry.prototype)))
-		}
-	} else {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "Not using BVH", { useBVH }))
-		$svelthreeStores[sti].useBVH = useBVH
-
-		if (BufferGeometry.prototype.hasOwnProperty("computeBoundsTree")) {
-			BufferGeometry.prototype["computeBoundsTree"] = undefined
-			BufferGeometry.prototype["disposeBoundsTree"] = undefined
-
-			// restore original raycast function
-			Mesh.prototype.raycast = originalThreeRaycastFunction
-		}
-	}
 
 	// --- interactivity
 
