@@ -1,5 +1,5 @@
 node_modules
 dist
 generator
-components-check
+src/components-check
 generate_svelthree_components.js
