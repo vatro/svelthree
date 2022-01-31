@@ -1,5 +1,3 @@
-import type { default as Canvas } from "../components/Canvas.svelte";
-import type { SvelteComponent } from "svelte";
 import type { BufferGeometry, Material, Matrix4, Object3D } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
@@ -19,8 +17,6 @@ interface ITreeMember {
         geometry: BufferGeometry
         material: Material | Material[]
     },
-    //matrixWorld?: Matrix4,
-    //svelthree_comp_class?: AnySvelthreeComponent
     svelthree_comp?: any
 }
 
@@ -41,14 +37,6 @@ export default class SvelthreeGLTF {
         }
 
         return this.tree
-    }
-
-    get_comp_class(obj: Object3D): AnySvelthreeComponent {
-        switch (obj.type) {
-            case "Object3D":
-            case "Group": return SvelthreeComponent.Empty
-            default: return SvelthreeComponent[obj.type]
-        }
     }
 
     async build_tree(scene: Object3D): Promise<void> {
