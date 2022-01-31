@@ -1,9 +1,13 @@
 import type { default as Canvas } from "../components/Canvas.svelte";
 import type { SvelteComponent } from "svelte";
-import type { BufferGeometry, Material, Matrix4, Mesh, Object3D } from "three";
+import type { BufferGeometry, Material, Matrix4, Object3D } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
-import * as SvelthreeComponent from "../components"
-import type { AnySvelthreeComponent } from "../types-extra"
+
+// import currently supported components only
+import { Mesh } from "../components"
+import { Empty } from "../components"
+
+import type { SvelthreeGLTFSupportedComponents } from "../types-extra"
 
 
 interface ITreeMember {
@@ -59,7 +63,7 @@ export default class SvelthreeGLTF {
                 parent_uuid: parent ? parent.uuid : null,
                 name: obj.name ? obj.name : null,
                 obj_type: obj.type,
-                mesh: obj.type === "Mesh" ? { geometry: (obj as Mesh).geometry, material: (obj as Mesh).material } : null,
+                mesh: obj.type === "Mesh" ? { geometry: (obj as THREE.Mesh).geometry, material: (obj as THREE.Mesh).material } : null,
                 svelthree_comp: null
             })
         }
@@ -83,20 +87,20 @@ export default class SvelthreeGLTF {
         //console.log("SvelthreeGLTF parsing FINISHED!")
     }
 
-    async get_parent_component(parent_uuid: string): Promise<AnySvelthreeComponent> {
+    async get_parent_component(parent_uuid: string): Promise<SvelthreeGLTFSupportedComponents> {
         return this.tree.get(parent_uuid).svelthree_comp
     }
 
-    async get_parent_context(parent_component: AnySvelthreeComponent): Promise<Map<any, any>> {
+    async get_parent_context(parent_component: SvelthreeGLTFSupportedComponents): Promise<Map<any, any>> {
         return parent_component["$$"].context
     }
 
-    public async apply(dom_target: HTMLElement, root_component: AnySvelthreeComponent): Promise<void> {
+    public async apply(dom_target: HTMLElement, root_component: SvelthreeGLTFSupportedComponents): Promise<void> {
         //console.log("SvelthreeGLTF apply started!")
 
         const fns: (() => Promise<void>)[] = []
 
-        const create_component = (item: ITreeMember, dom_target: HTMLElement, root_component: AnySvelthreeComponent) => async (): Promise<void> => {
+        const create_component = (item: ITreeMember, dom_target: HTMLElement, root_component: SvelthreeGLTFSupportedComponents) => async (): Promise<void> => {
 
             let context: Map<any, any> = null
             if (item.parent_uuid) {
@@ -108,19 +112,14 @@ export default class SvelthreeGLTF {
 
             switch (item.obj_type) {
                 case "Mesh":
-                    item.svelthree_comp = new SvelthreeComponent.Mesh({ target: dom_target, props: { geometry: item.mesh.geometry, material: item.mesh.material, name: item.name }, context })
+                    item.svelthree_comp = new Mesh({ target: dom_target, props: { geometry: item.mesh.geometry, material: item.mesh.material, name: item.name }, context })
                     break
                 case "Object3D":
                 case "Group":
-                    item.svelthree_comp = new SvelthreeComponent.Empty({ target: dom_target, props: { name: item.name }, context })
+                    item.svelthree_comp = new Empty({ target: dom_target, props: { name: item.name }, context })
                     break
                 default:
-                    try {
-                        item.svelthree_comp = new SvelthreeComponent[item.obj_type]({ target: dom_target, props: { name: item.name }, context })
-                    } catch (e) {
-                        console.error(e)
-                        console.log(item)
-                    }
+                    console.error(`SVELTHREE > utils > SvelthreeGLTF : sorry, converting ${item.obj.type} to a svlethree component is not supported (yet?).`, { item })
                     break
             }
         }

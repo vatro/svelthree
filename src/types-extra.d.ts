@@ -210,10 +210,10 @@ type AllLights = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
-import type * as SvelthreeComponent from "./components"
+export type SvelthreeGLTFSupportedComponents = Mesh<any> & Empty
 
-type AnySvelthreeComponentName = keyof typeof SvelthreeComponent
-export type AnySvelthreeComponent = typeof SvelthreeComponent[AnySvelthreeComponentName]
+//type AnySvelthreeComponentName = keyof typeof SvelthreeComponent
+//export type AnySvelthreeComponent = typeof SvelthreeComponent[AnySvelthreeComponentName]
 
 export interface PointerState {
 	pos: THREE.Vector2
