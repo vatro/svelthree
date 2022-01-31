@@ -401,7 +401,7 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 	}
 
 	function set_visibility(obj: typeof hide | typeof bind_pos, val: boolean) {
-		if (obj.hasOwnProperty("is_svelthree_component")) {
+		if (obj["is_svelthree_component"]) {
 			let o: MeshSvelthreeComponent<any> | EmptySvelthreeComponent = obj as
 				| MeshSvelthreeComponent<any>
 				| EmptySvelthreeComponent
