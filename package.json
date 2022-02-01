@@ -1,13 +1,12 @@
 {
   "name": "svelthree",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Svelte powered three.js development",
   "svelte": "./src/index.js",
   "main": "./src/index.js",
   "type": "module",
   "files": ["src"],
   "scripts": {
-    "init": "npm install --production=false",
     "svelte-check": "svelte-check",
     "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
     "pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
@@ -15,14 +14,11 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
-    "@types/three": "0.135.0",
     "fs-extra": "^10.0.0",
     "prettier": "^2.5.0",
     "prettier-plugin-svelte": "^2.5.0",
-    "svelte": "3.44.2 - 3.46.3",
     "svelte-check": "^2.2.10",
     "svelte-preprocess": "^4.9.8",
-    "three": "0.135.0",
     "typescript": "^4.5.2",
     "vite": "^2.6.14"
   },
