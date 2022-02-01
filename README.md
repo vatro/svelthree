@@ -54,7 +54,8 @@
 
 #### Usage Example
 
-🥳  no more `let:sti`, `{sti}` ,`let:scene`, `{scene}`, `let:parent` or `{parent}` ! + more cool improvements and new features! 🚀
+🥳  no more `let:sti`, `{sti}` ,`let:scene`, `{scene}`, `let:parent` or `{parent}`!
++ more cool improvements and new features! 🚀
 
 ```svelte
 <!-- HelloCube.svelte -->
