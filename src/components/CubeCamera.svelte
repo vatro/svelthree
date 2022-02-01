@@ -114,11 +114,11 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	 * add the `CubeCamera` component as a child to either a `Mesh` or an `Empty` component,
 	 * in this case `CubeCamera`'s position will be bound to it's parent / object (three) instance. */
 	export let bind_pos: MeshSvelthreeComponent<any> | EmptySvelthreeComponent | Object3D = undefined
-	$: if (bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
+	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Adjust `CubeCamera`'s position by setting an offset relative to the pivot of the object specified by `bind_pos`. */
 	export let bind_pos_offset: Vector3 = undefined
-	$: if (bind_pos && bind_pos_offset && !dynamic) update_cubecam()
+	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Specify which objects / components should be hidden on `CubeCamera` update.
 	 * Default: `CubeCamera`'s parent component's object (three) instance will be hidden.
@@ -459,6 +459,7 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 		renderTarget = new WebGLCubeRenderTarget(renderTargetParams[0], renderTargetOptions)
 		camera.renderTarget = renderTarget
 
+		update_cubecam()
 		update_texture_bindings()
 	}
 

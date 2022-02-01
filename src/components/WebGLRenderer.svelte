@@ -735,9 +735,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 							let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
 							if (cubeCamComponent.dynamic) {
 								cubeCamComponent.update_cubecam()
-							} else if (!cubeCamComponent.camera_updated) {
-								cubeCamComponent.update_cubecam()
-								cubeCamComponent.camera_updated = true
 							}
 						}
 					}
@@ -748,9 +745,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 						let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
 						if (cubeCamComponent.dynamic) {
 							cubeCamComponent.update_cubecam()
-						} else if (!cubeCamComponent.camera_updated) {
-							cubeCamComponent.update_cubecam()
-							cubeCamComponent.camera_updated = true
 						}
 					}
 				}
