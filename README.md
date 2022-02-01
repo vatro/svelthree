@@ -55,7 +55,8 @@
 #### Usage Example
 
 🥳  no more `let:sti`, `{sti}` ,`let:scene`, `{scene}`, `let:parent` or `{parent}`!
-+ more cool improvements and new features! 🚀
+
+➕ more cool improvements and new features! 🚀
 
 ```svelte
 <!-- HelloCube.svelte -->
@@ -83,14 +84,15 @@
 <Canvas w={500} h={500}>
 
   <Scene
-  	id="scene1"
-  	bg={0xf0f9ff}
-  	props={{ fog }}
-	env_tex={{ url: '...' }} >
+    id="scene1"
+    bg={0xf0f9ff}
+    props={{ fog }}
+    env_tex={{ url: '...' }}
+    >
 
     <PerspectiveCamera id="cam1" pos={[0, 0, 3]} lookAt={[0, 0, 0]} />
     <AmbientLight intensity={1.25} />
-    <DirectionalLight pos={[3, 3, 3]} shadowMapSize={512*4}/>
+    <DirectionalLight pos={[3, 3, 3]} shadowMapSize={512*4} />
 
     <Mesh
       geometry
@@ -100,8 +102,8 @@
       rot={[0.5, 0.6, 0]}
       scale={[1, 1, 1]}
       receiveShadow
-	  castShadow
-	  />
+      castShadow
+      />
 
   </Scene>
 
