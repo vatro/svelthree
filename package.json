@@ -1,34 +1,34 @@
 {
   "name": "svelthree",
-  "version": "0.119.1",
+  "version": "1.0.0-alpha.1",
   "description": "Svelte powered three.js development",
-  "svelte": "src/svelthree.js",
-  "types": "src/svelthree.d.ts",
-  "module": "dist/svelthree.mjs",
-  "main": "dist/svelthree.js",
+  "svelte": "./src/index.js",
+  "main": "./src/index.js",
+  "type": "module",
+  "files": ["src"],
   "scripts": {
-    "build": "rollup -c",
-    "prepublishOnly": "npm run build",
     "svelte-check": "svelte-check",
-    "local-tsc": "tsc",
+    "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
+    "pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
-    "@rollup/plugin-typescript": "^5.0.2",
-    "prettier": "^2.0.5",
-    "rollup": "^2.23.0",
-    "rollup-plugin-svelte": "^5.2.3",
-    "rollup-plugin-terser": "^6.1.0",
-    "svelte": "^3.24.0",
-    "svelte-check": "^1.0.5",
-    "svelte-preprocess": "^4.0.9",
-    "tslib": "^2.0.0",
-    "typescript": "^3.9.7"
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
+    "fs-extra": "^10.0.0",
+    "prettier": "^2.5.0",
+    "prettier-plugin-svelte": "^2.5.0",
+    "svelte-check": "^2.2.10",
+    "svelte-preprocess": "^4.9.8",
+    "typescript": "^4.5.2",
+    "vite": "^2.6.14"
   },
   "dependencies": {
-    "svelthree-three": "git+https://github.com/vatro/svelthree-three.git#119-1"
+    "three": "0.135.0",
+    "@types/three": "0.135.0",
+    "svelte": "3.44.2 - 3.46.3"
+  },
+  "peerDependencies": {
+    "svelte-accmod-patch": "^1.0.0"
   },
   "author": "Vatroslav Vrbanic",
   "repository": {
@@ -45,6 +45,7 @@
     "svelte.js",
     "three",
     "three.js",
-    "svelthree"
+    "svelthree",
+    "svelte-accmod"
   ]
 }

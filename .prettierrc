@@ -2,12 +2,13 @@
     "trailingComma": "none",
     "tabWidth": 4,
     "semi": false,
+    "endOfLine": "crlf",
     "singleQuote": false,
-    "jsxBracketSameLine": true,
-    "printWidth": 80,
+    "printWidth": 120,
+    
 
-    "svelteSortOrder" : "scripts-styles-markup",
+    "svelteSortOrder" : "options-scripts-styles-markup",
     "svelteStrictMode": false,
-    "svelteBracketNewLine": false,
+    "svelteBracketNewLine": true,
     "svelteAllowShorthand": true
 }

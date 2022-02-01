@@ -1,596 +1,692 @@
-<script lang="typescript">
-    /**
-     * @author Vatroslav Vrbanic @see https://github.com/vatro
-     */
-
-    import { onMount } from "svelte"
-    import { get_current_component } from "svelte/internal"
-    import {
-        Mesh,
-        Object3D,
-        Scene,
-        Material,
-        BufferGeometry,
-        Geometry
-    } from "svelthree-three"
-    import { svelthreeStores } from "../stores.js"
-    import { UniversalPropIterator } from "../utils/UniversalPropIterator.svelte"
-    import { Object3DUtils } from "../utils/Object3DUtils.svelte"
-
-    import SvelthreeAnimation from "./SvelthreeAnimation.svelte"
-
-    import type {
-        PropPos,
-        PropRot,
-        PropScale,
-        PropMatrix4
-    } from "../utils/SvelthreeTypes"
-    import {
-        isValidArray3Prop,
-        isValidMatrix4
-    } from "../utils/PropUtils.svelte"
-    import SvelthreeInteraction from "./SvelthreeInteraction.svelte"
-    import SvelthreeInteractionAR from "./SvelthreeInteractionAR.svelte"
-    import SvelthreeInteractionVR from "./SvelthreeInteractionVR.svelte"
-    import { createEventDispatcher } from "svelte"
-
-    let ani: any
-    let self = get_current_component()
-    let dispatch = createEventDispatcher()
-
-    // construction
-
-    export let name: string = undefined
-    export let arReticle: boolean = false
-    export let arReticleAuto: boolean = false
-
-    export let parent: Object3D = undefined
-    export let parentForSlot: Object3D = undefined
-    export let parentForUs: Object3D = undefined
-    export let scene: Scene
-
-    export let aniauto: boolean = undefined
-    export let interact: boolean = undefined
-    //export let recursive: boolean = undefined
-
-    let sti: number
-
-    if (scene) {
-        if (scene.type === "Scene") {
-            setSTI()
-        } else {
-            console.warn(
-                "SVELTHREE > Mesh : You have to provide a valid 'scene' prop of type 'Scene'!",
-                { scene: scene }
-            )
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    } else {
-        console.warn("SVELTHREE > Mesh : You have to provide a {scene} prop!", {
-            scene: scene
-        })
-        throw new Error("SVELTHREE Exception (see warning above)")
-    }
-
-    let interactive: boolean = undefined
-    $: interactive = $svelthreeStores[sti].canvas.interactive
-
-    let generate = false
-    export let mesh: Mesh = undefined
-
-    let object3DUtils: Object3DUtils
-    let meshPropIterator: UniversalPropIterator
-    let matPropIterator: UniversalPropIterator
-
-    export let material: Material | Material[] = undefined
-    export let geometry: Geometry | BufferGeometry = undefined
-
-    mesh ? ((generate = false), onMeshProvided()) : (generate = true)
-
-    function onMeshProvided(): void {
-        // check if mesh is really a Mesh then do the rest
-        if (mesh.type === "Mesh") {
-            mesh.geometry ? (geometry = mesh.geometry) : null
-            mesh.material
-                ? (material = mesh.material)
-                : console.warn(
-                      "SVELTHREE > Mesh : Mesh provided, but has no material!",
-                      { mesh: mesh }
-                  )
-            console.info("SVELTHREE > Mesh : Saved geometry:", {
-                geometry: geometry
-            })
-            console.info("SVELTHREE > Mesh : Saved material:", {
-                material: material
-            })
-            ;(mesh.userData.initScale = mesh.scale.x),
-                (object3DUtils = new Object3DUtils(mesh))
-            meshPropIterator = new UniversalPropIterator(mesh)
-            material
-                ? (matPropIterator = new UniversalPropIterator(material))
-                : null
-        }
-    }
-
-    /**
-     * Determining parent immediately if mesh is available on initialization (generate false)
-     */
-    if (!generate) {
-        if (!parent) {
-            parentForSlot = mesh
-        } else {
-            if (parent !== mesh) {
-                parentForUs = parent
-                parentForSlot = mesh
-            }
-        }
-    }
-
-    /**
-     * Determining if mesh has to be generated first, was not available on initialization (generate true)
-     */
-    // triggered as soon as mesh is generated
-    $: mesh ? checkParentSlot() : null
-
-    function checkParentSlot() {
-        if (generate) {
-            if (mesh && !parent) {
-                //parent was not provided, means we are the root parent
-                parentForSlot = mesh
-            } else {
-                if (!mesh) {
-                    console.error(
-                        "SVELTHREE > Mesh : 'parent' check : no mesh provided yet!"
-                    )
-                } else if (parent) {
-                    //parent is already there, either it has been provided or set on mesh generation to the mesh itself
-                    //means this parent was provided and we are child
-                    if (parent !== mesh) {
-                        //set self as parent for next slot
-                        parentForUs = parent
-                        parentForSlot = mesh
-                    } else {
-                        /* nothing */
-                    }
-                }
-            }
-        }
-    }
-
-    // reactive creating / recreating mesh
-    $: geometry && generate
-        ? (console.info("SVELTHREE > Mesh : Geometry provided!"),
-          tryGeometryUpdate())
-        : null
-
-    $: material && generate
-        ? (console.info("SVELTHREE > Mesh : Material provided!"),
-          (matPropIterator = new UniversalPropIterator(material)),
-          tryMaterialUpdate())
-        : null
-
-    // change geometry and material on provided mesh
-
-    //we know mesh has geometry if geometry is available and !generate, it was referenced onMeshProvided()
-    $: geometry && !generate
-        ? geometry !== mesh.geometry
-            ? tryGeometryUpdate()
-            : null
-        : null
-
-    //we know mesh has material if material is available and !generate, it was referenced onMeshProvided()
-    $: material && !generate
-        ? material !== mesh.material
-            ? tryMaterialUpdate()
-            : null
-        : null
-
-    $: geometry && material && !mesh && generate
-        ? ((mesh = new Mesh(geometry, material)),
-          (mesh.name = name),
-          (mesh.userData.initScale = mesh.scale.x),
-          console.info("SVELTHREE > Mesh : " + geometry.type + " created!", {
-              mesh: mesh
-          }),
-          console.info(
-              "SVELTHREE > Mesh : saved 'geometry' (generated):",
-              geometry
-          ),
-          console.info(
-              "SVELTHREE > Mesh : saved 'material' (generated):",
-              material
-          ),
-          (object3DUtils = new Object3DUtils(mesh)),
-          (meshPropIterator = new UniversalPropIterator(mesh)))
-        : null
-
-    // This statement is being triggered on creation / recreation
-    $: mesh
-        ? tryAddingMesh()
-        : console.error("SVELTHREE > Mesh : mesh was not created!")
-
-    export let userData: { [key: string]: any } = undefined
-
-    $: userData ? tryApplyUserData() : null
-
-    function tryApplyUserData(): void {
-        if (mesh) {
-            mesh.userData = { ...mesh.userData, ...userData }
-        }
-    }
-
-    // props
-    // shorthand props can be set directly as props
-
-    /**
-     *  TOFIX : if even possible / needed: Don't like any, but what type to add if 'animation' (mutable) can be function or object?!
-     * @see https://stackoverflow.com/questions/50371351/typescript-check-if-objects-property-is-a-function-with-given-signature
-     * "It doesn't look like typeof type guards exist for function types"
-     * @see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-3.html#improved-behavior-for-calling-union-types
-     * @see https://stackoverflow.com/questions/14638990/are-strongly-typed-functions-as-parameters-possible-in-typescript
-     * @see https://stackoverflow.com/questions/55385690/passing-function-as-parameter-in-typescript-expected-0-arguments-but-got-1-ts
-     * @see https://basarat.gitbook.io/typescript/type-system/callable
-     * Svelte's 'onMount' has also (fn: any) as argument!
-     *  TODO  create own 'InternalAnimation' Type / Interface
-     */
-
-    export let animation: (
-        obj: any,
-        ...args: any[]
-    ) => {
-        onStart: () => void
-        onDestroy: () => void
-        onSceneDeactivated?: () => void
-        onSceneReactivated?: () => void
-    } = undefined
-
-    export let mat: { [key: string]: any } = undefined
-    export let pos: PropPos = undefined
-    export let rot: PropRot = undefined
-    export let scale: PropScale = undefined
-    export let castShadow: boolean = undefined
-    export let receiveShadow: boolean = undefined
-
-    // TODO  Implement
-    export let matrix: PropMatrix4 = undefined
-
-    //props object can be filled with anything, ideally available THREE props of course.
-    export let props: { [key: string]: any } = undefined
-
-    //reactive updating props
-    $: !matrix
-        ? pos
-            ? isValidArray3Prop(pos)
-                ? object3DUtils.tryPosUpdate(pos)
-                : null
-            : null
-        : null
-    $: !matrix
-        ? rot
-            ? isValidArray3Prop(rot)
-                ? object3DUtils.tryRotUpdate(rot)
-                : null
-            : null
-        : null
-    $: !matrix
-        ? scale
-            ? isValidArray3Prop(scale)
-                ? (object3DUtils.tryScaleUpdate(scale),
-                  (mesh.userData.initScale = mesh.scale.x))
-                : null
-            : null
-        : null
-    $: isValidMatrix4(matrix)
-        ? (console.warn(
-              "SVELTHREE > Mesh : Matrix provided, will ignore 'pos', 'rot' or 'scale' props if any provided!"
-          ),
-          tryMatrixUpdate())
-        : null
-
-    $: castShadow ? tryCastShadowUpdate() : null
-    $: receiveShadow ? tryReceiveShadowUpdate() : null
-
-    $: props
-        ? Object.keys(props).length > 0
-            ? meshPropIterator
-                ? meshPropIterator.tryPropsUpdate(props)
-                : null
-            : null
-        : null
-
-    $: mat
-        ? Object.keys(mat).length > 0
-            ? matPropIterator
-                ? (console.info(
-                      "SVELTHREE > Mesh : matPropIterator is true: ",
-                      mat
-                  ),
-                  matPropIterator.tryPropsUpdate(mat))
-                : null
-            : null
-        : null
-
-    // reactive animation handling (has to be enabled as last, so that initial animation state overrides props)
-
-    let currentSceneActive = false
-    $: $svelthreeStores[sti].scenes[scene.userData.indexInScenes] !== undefined
-        ? (currentSceneActive =
-              $svelthreeStores[sti].scenes[scene.userData.indexInScenes]
-                  .isActive)
-        : null
-
-    let animationEnabled = false
-    $: animation ? (animationEnabled = true) : null
-
-    let interactionEnabled: boolean = undefined
-    $: interactive && interact
-        ? (interactionEnabled = true)
-        : (interactionEnabled = false)
-
-    // -----------------------------------
-
-    export let fnOnMount: any = undefined
-
-    onMount(
-        fnOnMount
-            ? () => fnOnMount(self)
-            : () => {
-                  if (parent) {
-                      console.info(
-                          "SVELTHREE > onMount : Mesh, parent: ",
-                          parent
-                      )
-                  } else {
-                      console.info("SVELTHREE > onMount : Mesh")
-                  }
-
-                  return () => {
-                      console.info("SVELTHREE > onDestroy : Mesh")
-                      removeMeshFromParent()
-                  }
-              }
-    )
-
-    function setSTI() {
-        if (scene.userData.sti >= 0) {
-            sti = scene.userData.sti
-        } else {
-            console.warn(
-                "SVELTHREE > Mesh : Failed to set 'sti' from 'scene.userData.sti', 'sti' has to be >= 0!",
-                {
-                    scene: scene,
-                    userData: scene.userData,
-                    sti: scene.userData.sti
-                }
-            )
-            throw new Error("SVELTHREE Exception (see warning above)")
-        }
-    }
-
-    function tryAddingMesh(): void {
-        if (!parentForUs) {
-            if (mesh.parent !== scene) {
-                scene.add(mesh)
-                console.info(
-                    "SVELTHREE > Mesh : " +
-                        geometry.type +
-                        " was added to scene!",
-                    {
-                        mesh: mesh,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
-
-                if (arReticle || arReticleAuto) {
-                    $svelthreeStores[sti].xr.reticle = mesh
-                }
-            }
-        } else {
-            if (mesh.parent !== parentForUs) {
-                parentForUs.add(mesh)
-                console.info(
-                    "SVELTHREE > Mesh : " +
-                        geometry.type +
-                        " was added to parent!",
-                    {
-                        mesh: mesh,
-                        parent: parentForUs,
-                        scene: scene,
-                        total: scene.children.length
-                    }
-                )
-                if (arReticle || arReticleAuto) {
-                    $svelthreeStores[sti].xr.reticle = mesh
-                }
-            }
-        }
-    }
-
-    function tryMaterialUpdate(): void {
-        mesh
-            ? ((mesh.material = material),
-              console.info("SVELTHREE > Mesh : Material updated!"),
-              matPropIterator ? matPropIterator.tryPropsUpdate(mat) : null)
-            : null
-    }
-
-    function tryGeometryUpdate(): void {
-        mesh
-            ? ((mesh.geometry = geometry),
-              console.info("SVELTHREE > Mesh : Geometry updated!"))
-            : null
-    }
-
-    function tryCastShadowUpdate(): void {
-        mesh ? (mesh.castShadow = castShadow) : null
-    }
-
-    function tryReceiveShadowUpdate(): void {
-        mesh ? (mesh.receiveShadow = receiveShadow) : null
-    }
-
-    // TODO  implement updating Matrix
-    function tryMatrixUpdate(): void {
-        console.error(
-            "SVELTHREE > Mesh : updating Matrix is not yet implemented!"
-        )
-    }
-
-    // --- AR Reticle basic auto display and positioning -------
-
-    $: if (arReticle || arReticleAuto) {
-        if ($svelthreeStores[sti].xr.hitTestResults) {
-            handleHitTestResults()
-        }
-    }
-
-    function handleHitTestResults() {
-        if ($svelthreeStores[sti].xr.hitTestResults.length > 0) {
-            let hit = $svelthreeStores[sti].xr.hitTestResults[0]
-            let referenceSpace = $svelthreeStores[
-                sti
-            ].renderer.xr.getReferenceSpace()
-
-            //console.log({ hit: hit, referenceSpace: referenceSpace })
-
-            if ($svelthreeStores[sti].xr.reticle) {
-                if (arReticleAuto) {
-                    showReticle()
-                    poseReticle(hit, referenceSpace)
-                }
-
-                dispatch("hit", {
-                    reticle: mesh,
-                    hitPose: hit.getPose(referenceSpace).transform.matrix
-                })
-            }
-        } else {
-            if ($svelthreeStores[sti].xr.reticle) {
-                if (arReticleAuto) {
-                    if ($svelthreeStores[sti].xr.reticle.visible) {
-                        hideReticle()
-                    }
-                }
-
-                dispatch("nohit", {
-                    reticle: mesh
-                })
-            }
-        }
-    }
-
-    function showReticle(): void {
-        mesh.visible = true
-    }
-
-    function hideReticle(): void {
-        mesh.visible = false
-    }
-
-    function poseReticle(
-        hit: any = undefined,
-        referenceSpace: any = undefined
-    ): void {
-        //console.info("poseReticle!", $svelthreeStores[sti].xr.reticle)
-        mesh.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
-    }
-
-    // --- Public methods ---
-
-    export function removeMeshFromParent(): void {
-        mesh.parent.remove(mesh)
-    }
-
-    export function getMesh(): Mesh {
-        return mesh
-    }
-
-    export function getName(): string {
-        return name
-    }
-
-    export function getScene(): Scene {
-        return scene
-    }
-
-    // --- Animation related public methods ---
-
-    export function getAnimation(): any {
-        return ani.getAnimation()
-    }
-
-    export function startAni(): void {
-        ani.startAni()
-    }
-
-    // ------- Interaction --------------
-
-    export let onClick: (e?: CustomEvent) => void = undefined
-    export let onPointerUp: (e?: CustomEvent) => void = undefined
-    export let onPointerDown: (e?: CustomEvent) => void = undefined
-    export let onPointerOver: (e?: CustomEvent) => void = undefined
-    export let onPointerOut: (e?: CustomEvent) => void = undefined
-    export let onPointerEnter: (e?: CustomEvent) => void = undefined
-    export let onPointerLeave: (e?: CustomEvent) => void = undefined
-    export let onPointerMove: (e?: CustomEvent) => void = undefined
-
-    //XR
-
-    let currentSessionMode: string = undefined
-    $: $svelthreeStores[sti].xr.sessionMode
-        ? (currentSessionMode = $svelthreeStores[sti].xr.sessionMode)
-        : null
-
-    export let onSelect: (e?: CustomEvent) => void = undefined
-    export let onSelectStart: (e?: CustomEvent) => void = undefined
-    export let onSelectEnd: (e?: CustomEvent) => void = undefined
-    export let onSqueeze: (e?: CustomEvent) => void = undefined
-    export let onSqueezeStart: (e?: CustomEvent) => void = undefined
-    export let onSqueezeEnd: (e?: CustomEvent) => void = undefined
+<!--
+`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
+svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
+-->
+<svelte:options accessors />
+
+<!--
+@component
+**svelthree** _Mesh_ Component.
+[ tbd ]  Link to Docs.
+-->
+<script context="module" lang="ts">
+	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
+	 * ```
+	 * const my_init_props: MeshProps = {...}
+	 * component_ref.props = my_init_props
+	 * ```
+	 * */
+	export type MeshProps = OnlyWritableNonFunctionPropsPlus<
+		Omit<Mesh, PropBlackList>,
+		{
+			position?: Vector3 | Parameters<Vector3["set"]>
+			scale?: Vector3 | Parameters<Vector3["set"]>
+			rotation?:
+				| Euler
+				| Parameters<Euler["set"]>
+				| Quaternion
+				| Parameters<Quaternion["set"]>
+				| Vector3
+				| Parameters<Vector3["set"]>
+			quaternion?: Quaternion | Parameters<Quaternion["set"]>
+			matrix?: Matrix4 | Parameters<Matrix4["set"]>
+		}
+	>
+
+	export type MeshInteractionHandler = (e?: CustomEvent) => void
 </script>
 
-<svelte:options accessors={true} />
-<!-- cool!: we can override parent passed on init by setting parent here to something else! -->
+<script lang="ts">
+	import type { Scene } from "three"
 
-<slot {scene} parent={parentForSlot} />
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
+	import { get_current_component } from "svelte/internal"
+	import { self as _self } from "svelte/internal"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
+	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
+	import { svelthreeStores } from "../stores"
+	import { PropUtils, SvelthreeProps } from "../utils"
+
+	import { SvelthreeAnimation } from "../components-internal"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+
+	import { SvelthreeInteraction } from "../components-internal"
+	import { createEventDispatcher } from "svelte"
+	import type { Writable } from "svelte/store"
+
+	import { BoxHelper } from "three"
+
+	import type { BufferGeometry } from "three"
+
+	import { Mesh } from "three"
+	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
+	import type { Material, Color } from "three"
+
+	const self = get_current_component()
+	const c_name = get_comp_name(self)
+
+	const verbose: boolean = verbose_mode()
+
+	export let log_all: boolean = false
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_rs: boolean = log_all
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_mau: boolean = log_all
+
+	const dispatch = createEventDispatcher()
+
+	let scene: Scene = getContext("scene")
+	const sti: number = getContext("store_index")
+
+	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
+	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.
+	 * It's being set to `false` on initialization if an (_already created_) threejs object instance was provided,
+	 * otherwise it's set to `true`, means a new threejs object instance will be created. */
+	let create = false
+
+	/** The (three) instance that was shared to this component as it's 'parent'. */
+	let our_parent: Object3D = undefined
+
+	/** Returns the `mesh` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Mesh` instances. */
+	export let mesh: Mesh = undefined
+	let mesh_uuid: string = undefined
+
+	// Generic Material type and props
+	// COOL!  This is possible now! see https://github.com/sveltejs/language-tools/issues/442#issuecomment-977803507
+	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
+	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
+	type AnyMaterial = $$Generic<Material | Material[]>
+	type AnyMaterialProps = OnlyWritableNonFunctionPropsOverwritten<
+		Omit<AnyMaterial, PropBlackList>,
+		{ color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 }
+	>
+	export let material: AnyMaterial = undefined
+	export let geometry: BufferGeometry = undefined
+
+	export const is_svelthree_component: boolean = true
+	export const is_svelthree_mesh: boolean = true
+
+	if (mesh) {
+		create = false
+		on_instance_provided()
+	} else {
+		create = true
+	}
+
+	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	function on_instance_provided(): void {
+		// check if type of provided instance is correct and then do something with it...
+		if (mesh.type === "Mesh") {
+			if (mesh.geometry) {
+				geometry = mesh.geometry
+				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved geometry:", { geometry }))
+			} else {
+				// this will most probably never happen ( TODO  when would it?)
+				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no geometry!")
+			}
+
+			if (mesh.material) {
+				material = mesh.material as AnyMaterial
+				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved material:", { material }))
+			} else {
+				// this will most probably never happen ( TODO  when would it?)
+				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no material!")
+			}
+
+			mesh.userData.initScale = mesh.scale.x
+			mesh.userData.svelthreeComponent = self
+		} else {
+			throw new Error(
+				`SVELTHREE > Mesh Error: provided 'mesh' instance has wrong type '${mesh.type}', should be 'Mesh'!`
+			)
+		}
+	}
+
+	// Determining 'parent' on initialization if 'mesh' instance was provided ('create' is false).
+	if (!create) {
+		// get the instance that was shared to us as our 'parent'.
+		our_parent = getContext("parent") || scene
+
+		// share created object (three) instance to all children (slots) as 'parent'.
+		setContext("parent", mesh)
+	}
+
+	// reactive creating / recreating mesh
+
+	$: if (geometry && create) on_geometry_provided()
+	$: if (material && create) on_material_provided()
+
+	function on_geometry_provided() {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
+		try_geometry_update()
+	}
+
+	function on_material_provided() {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
+		try_material_update()
+	}
+
+	// change geometry and material on provided mesh
+
+	// we know mesh has geometry if geometry is available and !create, it was referenced on_instance_provided()
+	$: if (geometry && !create) {
+		if (geometry !== mesh.geometry) try_geometry_update()
+	}
+
+	// we know mesh has material if material is available and !create, it was referenced on_instance_provided()
+	$: if (material && !create) {
+		if (material !== mesh.material) try_material_update()
+	}
+
+	function try_geometry_update(): void {
+		if (mesh) {
+			mesh.geometry = geometry as BufferGeometry
+
+			// update BoxHelper if any
+			if (mesh.userData.box) mesh.userData.box.update()
+
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
+		}
+	}
+
+	function try_material_update(): void {
+		if (mesh) {
+			mesh.material = material
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
+			force_material_update()
+		}
+	}
+
+	function force_material_update(): void {
+		// recreate 'sMat' in case sMat was created with / is bound to 'mesh.material'
+		sMat = new SvelthreeProps(material)
+		if (sMat && mat) sMat.update(mat)
+	}
+
+	// creation using provided geometry & material or constructor 'params' shorthand
+
+	/** Initializes `Mesh` with provided constructor parameters.*/
+	export let params: ConstructorParameters<typeof Mesh> = undefined
+
+	$: if (!mesh && create) {
+		if (geometry && material) {
+			if (params?.length)
+				console.error(
+					`SVELTHREE Error > ${c_name} : You've set 'geometry', 'material' & 'params' -> specified 'params' will be ignored! Please use either 'geometry' & 'material' or 'params' for initialization.`
+				)
+
+			// letting threejs throw errors if anything's wrong with 'geometry' or 'material'
+			mesh = new Mesh(geometry, material)
+
+			mesh_uuid = mesh.uuid
+
+			mesh.userData.initScale = mesh.scale.x
+			mesh.userData.svelthreeComponent = self
+
+			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (created):", geometry))
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'material' (created):", material))
+		} else {
+			// create 'mesh' via params (can be an empty []) or if no 'params' set (undefined) via new Mesh()
+
+			// create with params -> since 'geometry' & 'material' are optional, params can also be empty []!
+			if (params) {
+				// disallow 'params' with 'geometry' or 'material'
+				if (geometry)
+					throw new Error(
+						`SVELTHREE Error > ${c_name} : You've set 'geometry' & 'params' -> specified 'geometry' will be ignored! Please use either 'geometry' & 'material' or 'params' for initialization.`
+					)
+				if (material)
+					throw new Error(
+						`SVELTHREE Error > ${c_name} : You've set 'material' & 'params' -> specified 'material' will be ignored! Please use either 'geometry' & 'material' or 'params' for initialization.`
+					)
+
+				if (params.length) {
+					// letting threejs throw errors if anything's wrong with provided 'params'
+					mesh = new Mesh(...params)
+				} else {
+					// will create a blank 'BufferGeometry' and a blank Material
+					mesh = new Mesh()
+				}
+			} else {
+				// no 'geometry', no 'material' and no 'params'
+				// will create a blank 'BufferGeometry' or a blank Material or both.
+				mesh = new Mesh(geometry, material)
+			}
+
+			mesh_uuid = mesh.uuid
+
+			mesh.userData.initScale = mesh.scale.x
+			mesh.userData.svelthreeComponent = self
+
+			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
+		}
+	}
+
+	// Determining 'parent' if 'mesh' instance has to be created first / was not provided on initialization ('create' is true).
+	$: if (mesh && create && !our_parent) set_parent()
+
+	function set_parent() {
+		// get the instance that was shared to us as our 'parent'.
+		our_parent = getContext("parent") || scene
+
+		// share created object (three) instance to all children (slots) as 'parent'.
+		setContext("parent", mesh)
+	}
+
+	// this statement is being triggered on creation / recreation
+	$: if (mesh && ((mesh_uuid && mesh_uuid !== mesh.uuid) || (mesh.parent !== our_parent && mesh !== our_parent)))
+		add_instance_to()
+
+	function add_instance_to(): void {
+		//let replacing = false
+
+		// if 'mesh' was already created or set via 'mesh' attribute before
+		if (mesh_uuid && mesh.uuid !== mesh_uuid) {
+			// remove old instance and update references where needed
+
+			const old_instance: Object3D = scene.getObjectByProperty("uuid", mesh_uuid)
+
+			// update 'index_in_x'
+
+			if (old_instance.userData.helper?.parent) {
+				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
+				old_instance.userData.helper = null
+			}
+
+			if (old_instance.userData.box?.parent) {
+				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
+				old_instance.userData.box = null
+			}
+
+			if (old_instance.parent) old_instance.parent.remove(old_instance)
+
+			// recreate 'SvelthreeProps'
+			// - all initially set props will be applied to the new instance.
+			// - 'props' attribute can be used directly after mesh reassignment.
+			sProps = new SvelthreeProps(mesh)
+
+			// helpers will be recreated automatically
+			// (see corresponding reactive statement -> !mesh.userData.helper)
+		}
+
+		// add `mesh` to `our_parent`
+		if (our_parent) {
+			// TODO  UNDERSTAND completely why we need the `mesh !== our_parent` check (was added as quick-fix)
+			// TODO  Update - we changed the approach, still needed?
+			if (mesh.parent !== our_parent && mesh !== our_parent) {
+				our_parent.add(mesh)
+				mesh_uuid = mesh.uuid
+
+				if (verbose && log_dev) {
+					console.debug(
+						...c_dev(c_name, `${geometry.type} was added to ${our_parent.type}!`, {
+							mesh,
+							scene,
+							total: scene.children.length
+						})
+					)
+				}
+			} else {
+				// TODO / TOFIX  why is this happening if `!replacing`?
+				//if (!replacing) console.warn(`mesh was already added to the ${get_comp_name(our_parent)}`, {mesh, our_parent, scene})
+			}
+		} else {
+			console.error("No 'our_parent' (or 'scene')! Nothing to add 'mesh' to!", { mesh, our_parent, scene })
+		}
+	}
+
+	/** Override object's `.matrixAutoUpdate` set (*on initialzation*) by scene's `.matrixAutoUpdate` (*default is `true`*). Also: `mau` can be changed on-the-fly.*/
+	export let mau: boolean = undefined
+	$: if (mesh) mesh.matrixAutoUpdate = scene.matrixAutoUpdate
+	$: if (mesh && mau !== undefined) mesh.matrixAutoUpdate = mau
+
+	export let name: string = undefined
+	$: if (mesh && name) mesh.name = name
+
+	let sMat: SvelthreeProps
+
+	$: if (!sMat) {
+		if (mesh.material) {
+			sMat = new SvelthreeProps(mesh.material)
+		}
+	}
+
+	// Generic Material props
+	// COOL!  This works now! 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
+	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
+	/** **shorthand** attribute for setting properties of a `Material` using key-value pairs in an `Object`. */
+	export let mat: { [P in keyof AnyMaterialProps]: AnyMaterialProps[P] } = undefined
+	$: if (mat && sMat) sMat.update(mat)
+
+	/** ☝️ `matrix` **shorthand** attribute overrides ( *are ignored* ) `pos`, `rot`, `quat`, `scale` and `lookAt` 'shorthand' attributes! */
+	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
+
+	const w_sh = PropUtils.getShortHandAttrWarnings(`SVELTHREE > ${c_name} >`)
+
+	let sProps: SvelthreeProps
+
+	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
+	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	export let props: { [P in keyof MeshProps]: MeshProps[P] } = undefined
+
+	$: if (!sProps && mesh && props) sProps = new SvelthreeProps(mesh)
+	$: if (props && sProps) update_props()
+	function update_props() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
+		sProps.update(props)
+	}
+
+	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
+
+	/** **shorthand** attribute for setting the `position` property. */
+	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
+	$: !matrix && mesh && pos ? set_pos() : pos && mesh ? console.warn(w_sh.pos) : null
+	function set_pos() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", pos))
+		PropUtils.setPositionFromValue(mesh, pos)
+	}
+
+	/** **shorthand** attribute for setting the `rotation` property. */
+	export let rot:
+		| Euler
+		| Parameters<Euler["set"]>
+		| Quaternion
+		| Parameters<Quaternion["set"]>
+		| Vector3
+		| Parameters<Vector3["set"]> = undefined
+	$: !matrix && !quat && mesh && rot ? set_rot() : rot && mesh ? console.warn(w_sh.rot) : null
+	function set_rot() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "rot", rot))
+		PropUtils.setRotationFromValue(mesh, rot)
+	}
+
+	/** **shorthand** attribute for setting the `quaternion` property. */
+	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
+	$: !matrix && mesh && quat ? set_quat() : quat && mesh ? console.warn(w_sh.quat) : null
+	function set_quat() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "quat", quat))
+		PropUtils.setQuaternionFromValue(mesh, quat)
+	}
+
+	export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
+	$: !matrix && mesh && scale ? set_scale() : scale && mesh ? console.warn(w_sh.scale) : null
+	function set_scale() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
+		PropUtils.setScaleFromValue(mesh, scale)
+	}
+
+	/** */
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
+	$: !matrix && mesh && lookAt ? set_lookat() : lookAt && mesh ? console.warn(w_sh.lookAt) : null
+	function set_lookat() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
+		PropUtils.setLookAtFromValue(mesh, lookAt)
+	}
+
+	// IMPORTANT  `matrix` 'shorthand' attribute will override all other transforms ('shorthand' attributes)!
+	$: if (matrix && mesh) set_matrix()
+	function set_matrix(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "matrix", matrix))
+		PropUtils.setMatrixFromValue(mesh, matrix)
+	}
+
+	export let castShadow: boolean = undefined
+	$: if (castShadow !== undefined && mesh) mesh.castShadow = castShadow
+
+	export let receiveShadow: boolean = undefined
+	$: if (receiveShadow !== undefined && mesh) mesh.receiveShadow = receiveShadow
+
+	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
+	export let boxParams: RemoveFirst<BoxHelperParams> = undefined
+	/** Creates and adds a `BoxHelper`. */
+	export let box: boolean = undefined
+
+	$: if (box && mesh && !mesh.userData.box) add_box_helper()
+	$: if (!box && mesh.userData.box) remove_box_helper()
+
+	function add_box_helper() {
+		if (boxParams) {
+			mesh.userData.box = new BoxHelper(mesh, ...boxParams)
+		} else {
+			mesh.userData.box = new BoxHelper(mesh)
+		}
+
+		scene.add(mesh.userData.box)
+	}
+
+	function remove_box_helper() {
+		if (mesh.userData.box?.parent) {
+			mesh.userData.box.parent.remove(mesh.userData.box)
+			mesh.userData.box = null
+		}
+	}
+
+	export let interact: boolean = undefined
+
+	let interactive: boolean = undefined
+	const canvas_interactivity: Writable<{ enabled: boolean }> = getContext("canvas_interactivity")
+
+	$: interactive = $canvas_interactivity.enabled
+
+	let interactionEnabled: boolean = undefined
+	$: interactionEnabled = interactive && interact
+
+	export let onClick: MeshInteractionHandler = undefined
+
+	export let onPointerUp: MeshInteractionHandler = undefined
+
+	export let onPointerDown: MeshInteractionHandler = undefined
+
+	export let onPointerOver: MeshInteractionHandler = undefined
+
+	export let onPointerOut: MeshInteractionHandler = undefined
+
+	export let onPointerEnter: MeshInteractionHandler = undefined
+
+	export let onPointerLeave: MeshInteractionHandler = undefined
+
+	export let onPointerMove: MeshInteractionHandler = undefined
+
+	let ani: any
+
+	let currentSceneActive = false
+	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
+
+	export let animation: SvelthreeAnimationFunction = undefined
+
+	export let aniauto: boolean = undefined
+
+	let animationEnabled: boolean = false
+	$: if (animation) animationEnabled = true
+
+	/** Removes the (three) instance of the object created by the component from it's parent. */
+	export const remove_instance_from_parent = (): void => {
+		if (mesh.parent) mesh.parent.remove(mesh)
+	}
+	/**
+	 * Same as `remove_instance_from_parent()` just shorter syntax.
+	 * Removes the (three) instance of the object created by the component from it's parent.
+	 */
+	export const remove = remove_instance_from_parent
+
+	/** Returns the (three) instance of the object created by the component. */
+	export const get_instance = (): Mesh => mesh
+
+	/** Returns the `animation` object. */
+	export const get_animation = (): any => ani.getAnimation()
+	/** Same as `get_animation()` just shorter syntax. Returns the `animation` object. */
+	export const get_ani = get_animation
+
+	/** Starts the `animation` object. */
+	export const start_animation = (): void => ani.startAni()
+	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
+	export const start_ani = start_animation
+
+	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
+	 * _default verbosity will be gone!_ */
+	export let onMount_replace: (args?: any) => any = undefined
+
+	onMount(
+		onMount_replace
+			? async () => onMount_replace(_self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
+						console.info(...c_lc(c_name, "onMount"))
+					}
+
+					if (verbose && log_mau) {
+						console.debug(
+							...c_mau(c_name, "onMount : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
+			  }
+	)
+
+	/** **Inject** functionality **before** component's existing `onDestroy` logic.
+	 * _default verbosity not affected._ */
+	export let onDestroy_inject_before: (args?: any) => any = undefined
+
+	/** **Inject** functionality **after** component's existing `onDestroy` logic.
+	 * _default verbosity not affected._ */
+	export let onDestroy_inject_after: (args?: any) => any = undefined
+
+	/** **Completely replace** `onDestroy` -> any `onDestroy_inject_before` & `onDestroy_inject_after` will be ignored.
+	 * _default verbosity will be gone!_ */
+	export let onDestroy_replace: (args?: any) => any = undefined
+
+	onDestroy(
+		onDestroy_replace
+			? async () => onDestroy_replace(_self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
+						console.info(...c_lc(c_name, "onDestroy"))
+					}
+
+					if (verbose && log_mau) {
+						console.debug(
+							...c_mau(c_name, "onDestroy : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
+
+					if (onDestroy_inject_before) onDestroy_inject_before()
+
+					remove_box_helper()
+
+					if (onDestroy_inject_after) onDestroy_inject_after()
+			  }
+	)
+
+	/** **Completely replace** `beforeUpdate` -> any `beforeUpdate_inject_before` & `beforeUpdate_inject_after` will be ignored.
+	 * _default verbosity will be gone!_ */
+	export let beforeUpdate_replace: (args?: any) => any = undefined
+
+	beforeUpdate(
+		beforeUpdate_replace
+			? async () => beforeUpdate_replace(_self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
+						console.info(...c_lc(c_name, "beforeUpdate"))
+					}
+
+					if (verbose && log_mau) {
+						console.debug(
+							...c_mau(c_name, "beforeUpdate : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
+			  }
+	)
+
+	/** **Inject** functionality **before** component's existing `afterUpdate` logic.
+	 * _default verbosity not affected._ */
+	export let afterUpdate_inject_before: (args?: any) => any = undefined
+
+	/** **Inject** functionality **after** component's existing `afterUpdate` logic.
+	 * _default verbosity not affected._ */
+	export let afterUpdate_inject_after: (args?: any) => any = undefined
+
+	/** **Completely replace** `afterUpdate` -> any `afterUpdate_inject_before` & `afterUpdate_inject_after` will be ignored.
+	 * _default verbosity will be gone!_ */
+	export let afterUpdate_replace: (args?: any) => any = undefined
+
+	afterUpdate(
+		afterUpdate_replace
+			? async () => afterUpdate_replace(_self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
+						console.info(...c_lc(c_name, "afterUpdate"))
+					}
+
+					if (verbose && log_mau) {
+						console.debug(
+							...c_mau(c_name, "afterUpdate : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
+
+					if (afterUpdate_inject_before) afterUpdate_inject_before()
+
+					// Update local matrix after all (props) changes (async microtasks) have been applied.
+					if (!mesh.matrixAutoUpdate) mesh.updateMatrix()
+
+					if (verbose && !mesh.matrixAutoUpdate && log_mau) {
+						console.debug(
+							...c_mau(c_name, "afterUpdate : mesh.", {
+								matrixAutoUpdate: mesh.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: mesh.matrixWorldNeedsUpdate
+							})
+						)
+					}
+
+					if (box && mesh.userData.box) mesh.userData.box.update()
+
+					if (afterUpdate_inject_after) afterUpdate_inject_after()
+			  }
+	)
+</script>
+
+<!-- using context -->
+<slot />
+
+<!-- TODO  get rid of the SvelthreeAnimation component / create a ts class -->
 {#if animation}
-    <SvelthreeAnimation
-        bind:this={ani}
-        bind:currentSceneActive
-        {animationEnabled}
-        {animation}
-        {aniauto}
-        obj={mesh}
-        {scene} />
+	<SvelthreeAnimation
+		bind:this={ani}
+		bind:currentSceneActive
+		obj={mesh}
+		{animationEnabled}
+		{animation}
+		{aniauto}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
+	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-    <SvelthreeInteraction
-        {sti}
-        {dispatch}
-        obj={mesh}
-        parent={self}
-        {interactionEnabled} />
-{/if}
-
-{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === true}
-    {#if currentSessionMode === 'immersive-ar'}
-        <SvelthreeInteractionAR
-            {sti}
-            {dispatch}
-            obj={mesh}
-            parent={self}
-            {interactionEnabled} />
-    {/if}
-
-    {#if currentSessionMode === 'immersive-vr'}
-        <SvelthreeInteractionVR
-            {sti}
-            {dispatch}
-            obj={mesh}
-            parent={self}
-            {interactionEnabled} />
-    {/if}
+	<SvelthreeInteraction
+		{dispatch}
+		obj={mesh}
+		parent={self}
+		{interactionEnabled}
+		{log_dev}
+		{log_rs}
+		{log_lc}
+		{log_mau}
+	/>
 {/if}
