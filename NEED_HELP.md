@@ -8,7 +8,7 @@ removed from: `src/types-extra.ts`
 ```javascript
 /**
  * Replaced all type aliases with union type signatures in order to have more
- * informative hint on hover over JSX attributes. Otherwise only the name if the type
+ * informative hint on hover over JSX attributes. Otherwise only the name of the type
  * alias would show up, with no further information on which types are included.
  *
  * TODO  would like to avoid using long union types, but I couldn't yet figure out
@@ -20,51 +20,4 @@ removed from: `src/types-extra.ts`
 // export type PropScale = THREE.Vector3 | Array3
 // export type PropLookAt = THREE.Vector3 | Array3
 // export type PropMatrix4 = THREE.Matrix4
-```
-
-
-
-removed from: `src/components/CubeCamera.svelte`
-```javascript
-/*
-     not working as expected, currently just rebuilding everything on props change
-      TODO  Remove if not possible without rebuilding.
-    */
-
-	/*
-        let propsIterator: Propeller
-        let targetPropsIterator: Propeller
-        
-        propsIterator = new Propeller(cubeCamera)
-        targetPropsIterator = new Propeller(cubeRenderTarget)
-    
-        $: props
-            ? Object.keys(props).length > 0
-                ? propsIterator
-                    ? propsIterator.tryPropsUpdate(props)
-                    : null
-                : null
-            : null
-    */
-
-	/*
-     This is not working as expected, we have to rebuild WebGLCubeRenderTarget
-     in order to change settings on runtime / reactive
-      TODO  Really not possible without rebuilding? Am I missing something?
-      TODO  Remove if not possible without rebuilding.
-    */
-
-	/*
-        $: targetProps
-            ? Object.keys(targetProps).length > 0
-                ? targetPropsIterator
-                    ? (console.debug("REACTIVE!"),
-                    targetPropsIterator.tryPropsUpdate(targetProps),
-                    (parent.material["envMap"] = cubeCamera.renderTarget.texture),
-                    (parent.material["envMap"].needsUpdate = true),
-                    (parent.material["needsUpdate"] = true))
-                    : null
-                : null
-            : null
-    */
 ```
