@@ -2,8 +2,8 @@ import type { BufferGeometry, Material, Matrix4, Object3D } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 // import currently supported components only
-import { default as MeshComponent } from "../components/Mesh.svelte"
-import { default as EmptyComponent } from "../components/Empty.svelte"
+import { Mesh } from "../components"
+import { Empty } from "../components"
 
 import type { SvelthreeGLTFSupportedComponents } from "../types-extra"
 
@@ -100,11 +100,11 @@ export default class SvelthreeGLTF {
 
             switch (item.obj_type) {
                 case "Mesh":
-                    item.svelthree_comp = new MeshComponent({ target: dom_target, props: { geometry: item.mesh.geometry, material: item.mesh.material, name: item.name }, context })
+                    item.svelthree_comp = new Mesh({ target: dom_target, props: { geometry: item.mesh.geometry, material: item.mesh.material, name: item.name }, context })
                     break
                 case "Object3D":
                 case "Group":
-                    item.svelthree_comp = new EmptyComponent({ target: dom_target, props: { name: item.name }, context })
+                    item.svelthree_comp = new Empty({ target: dom_target, props: { name: item.name }, context })
                     break
                 default:
                     console.error(`SVELTHREE > utils > SvelthreeGLTF : sorry, converting ${item.obj.type} to a svlethree component is not supported (yet?).`, { item })
