@@ -515,7 +515,7 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	let ani: any
 
 	let currentSceneActive = false
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene.userData.index_in_scenes]?.isActive
 
 	export let animation: SvelthreeAnimationFunction = undefined
 
@@ -699,7 +699,7 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	/>
 {/if}
 
-{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
+{#if $svelthreeStores[sti]?.renderer?.xr.enabled === false}
 	<SvelthreeInteraction
 		{dispatch}
 		obj={scene}

@@ -478,7 +478,7 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 	let ani: any
 
 	let currentSceneActive = false
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene.userData.index_in_scenes]?.isActive
 
 	export let animation: SvelthreeAnimationFunction = undefined
 
