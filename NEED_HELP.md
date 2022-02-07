@@ -1,8 +1,4 @@
-## Comments removed from code 
-
-...but still open (general programming issues), any help is welcome!
-
-
+## JSX attributes intellisense with TS Union Types (VSCode)
 
 removed from: `src/types-extra.ts`
 ```javascript
@@ -21,3 +17,4 @@ removed from: `src/types-extra.ts`
 // export type PropLookAt = THREE.Vector3 | Array3
 // export type PropMatrix4 = THREE.Matrix4
 ```
+
