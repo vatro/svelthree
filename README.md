@@ -10,7 +10,7 @@
 
 
 
-#### Install
+### Install
 
 ​	In your **Svelte** 3.44.2 - 3.46.3 project (also **SvelteKit**):
 
@@ -35,26 +35,26 @@
 
 
 
-#### Quickstart
+### Quickstart
 - ***todo**: create new svelthree-app-**rollup** template (publish after svelthree 1.0.0-next.1 release)*
 - ***todo**: create new svelthree-app-**vite** template (publish after svelthree 1.0.0-next.1 release)*
 - ***todo**: create new svelthree-app-**sveltekit** template (publish after svelthree 1.0.0-next.1 release)*
 
 
 
-#### General Usage
+### General Usage
 
 - ***todo**: new Vercel hosted SvelteKit website with some cool examples*
 
 
 
-#### REPL Usage
+### REPL Usage
 
 ***todo (?)**: with the new Vercel hosted SvelteKit website ->  implement REPL (not quite not sure about this though... probably just for people to play around, without login / saving?)*
 
 
 
-#### Usage Example
+### Usage Example
 
 ```svelte
 <!-- HelloCube.svelte -->
