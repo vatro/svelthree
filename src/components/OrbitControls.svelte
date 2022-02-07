@@ -26,7 +26,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 	import type { Writable } from "svelte/store"
 
-	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 	import { CameraHelper } from "three"
 	import type { Vector3, PerspectiveCamera, OrthographicCamera } from "three"
 	import type { default as PerspCamSvelthreeComponent } from "./PerspectiveCamera.svelte"

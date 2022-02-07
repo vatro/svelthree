@@ -59,9 +59,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { BoxHelper } from "three"
 
-	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
-	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
+	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
+	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
+	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { AnimationClip, Group, Camera, Mesh, Light } from "three"
 	import { Object3D, LoadingManager } from "three"
 	import type { RemoveFirst } from "../types-extra"
