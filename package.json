@@ -1,11 +1,30 @@
 {
   "name": "svelthree",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-next.0.4",
   "description": "Svelte powered three.js development",
-  "svelte": "./src/index.js",
-  "main": "./src/index.js",
+  "module": "index.js",
+  "main": "index",
   "type": "module",
-  "files": ["src"],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./index.js"
+    },
+    "./utils": {
+      "types": "./utils/index.d.ts",
+      "import": "./utils/index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "utils",
+    "src",
+    "NEED_HELP.md",
+    "THREE_COMPATIBILITY.md",
+    "CHANGELOG.md",
+    "README.md"
+  ],
   "scripts": {
     "svelte-check": "svelte-check",
     "prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
@@ -13,22 +32,22 @@
     "test": "echo 'No test specified' && exit 1"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.37",
     "fs-extra": "^10.0.0",
-    "prettier": "^2.5.0",
-    "prettier-plugin-svelte": "^2.5.0",
-    "svelte-check": "^2.2.10",
-    "svelte-preprocess": "^4.9.8",
-    "typescript": "^4.5.2",
-    "vite": "^2.6.14"
-  },
-  "dependencies": {
-    "three": "0.135.0",
-    "@types/three": "0.135.0",
-    "svelte": "3.44.2 - 3.46.3"
+    "prettier": "^2.5.1",
+    "prettier-plugin-svelte": "^2.6.0",
+    "svelte-check": "^2.4.3",
+    "svelte-preprocess": "^4.10.2",
+    "typescript": "^4.5.5",
+    "vite": "^2.7.13"
   },
   "peerDependencies": {
-    "svelte-accmod-patch": "^1.0.0"
+    "svelte": "3.44.2 - 3.46.3",
+    "svelte-accmod-patch": "^1.0.0",
+    "three": "0.125.x - 0.137.x"
+  },
+  "optionalDependencies": {
+    "@types/three": "0.125.x - 0.137.x"
   },
   "author": "Vatroslav Vrbanic",
   "repository": {

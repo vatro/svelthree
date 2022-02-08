@@ -1,0 +1,6 @@
+{
+  "main": "./index",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "type": "module"
+}
