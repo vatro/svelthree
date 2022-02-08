@@ -12,7 +12,7 @@
 
 ### Install
 
-​	In your **Svelte** 3.44.2 - 3.46.3 project (also **SvelteKit**):
+​	In your **Svelte** 3.44.2 - 3.46.4 project (also **SvelteKit**):
 
 - intall **three.js** along with **three.js types** (*if available*):
 
