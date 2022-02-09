@@ -15,9 +15,9 @@ function verbose_mode(): boolean {
 		return false
 	} else {
 		throw new Error(
-			`SVELTHREE > SvelthreeLogger > verboseMode : 'VITE_SVELTHREE_VERBOSE' (environment variable) has an invalid value: '${
+			`SVELTHREE > SvelthreeLogger > verboseMode : 'SVELTHREE_VERBOSE' (environment variable) has an invalid value: '${
 				import.meta.env.VITE_SVELTHREE_VERBOSE
-			}', allowed values are '1' or '0'! Please check your Vite configuration / .env files.`
+			}', allowed values are '1' or '0'! Please check your environment configuration / .env files.`
 		)
 	}
 }
