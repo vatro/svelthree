@@ -9,9 +9,9 @@ export type LogDEV = { all?: boolean; prop_utils?: boolean }
 //export type LogDEV = { all?: boolean; flow?: boolean; prop_utils?: boolean; wip?: boolean }
 
 function verbose_mode(): boolean {
-	if (import.meta.env.VITE_SVELTHREE_VERBOSE === "1") {
+	if (import.meta.env.VITE_SVELTHREE_VERBOSE == "1") {
 		return true
-	} else if (!import.meta.env.VITE_SVELTHREE_VERBOSE || import.meta.env.VITE_SVELTHREE_VERBOSE === "0") {
+	} else if (!import.meta.env.VITE_SVELTHREE_VERBOSE || import.meta.env.VITE_SVELTHREE_VERBOSE == "0") {
 		return false
 	} else {
 		throw new Error(
