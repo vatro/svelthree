@@ -19,8 +19,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
-	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
+	import type { LogLC } from "../utils/SvelthreeLogger"
 
 	import { svelthreeStores } from "../stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -40,10 +40,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	const verbose: boolean = verbose_mode()
 
 	export let log_all: boolean = false
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
-	export let log_mau: boolean = log_all
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
