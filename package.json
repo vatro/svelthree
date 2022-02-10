@@ -1,6 +1,6 @@
 {
   "name": "svelthree",
-  "version": "1.0.0-next.0.25",
+  "version": "1.0.0-next.0.26",
   "description": "Svelte powered three.js development",
   "module": "index.js",
   "main": "index",
