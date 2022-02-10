@@ -497,20 +497,28 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	$: interactionEnabled = interactive && interact
 
 	export let onClick: SceneInteractionHandler = undefined
+	onClick // prevent 'unused-export-let' warning
 
 	export let onPointerUp: SceneInteractionHandler = undefined
+	onPointerUp // prevent 'unused-export-let' warning
 
 	export let onPointerDown: SceneInteractionHandler = undefined
+	onPointerDown // prevent 'unused-export-let' warning
 
 	export let onPointerOver: SceneInteractionHandler = undefined
+	onPointerOver // prevent 'unused-export-let' warning
 
 	export let onPointerOut: SceneInteractionHandler = undefined
+	onPointerOut // prevent 'unused-export-let' warning
 
 	export let onPointerEnter: SceneInteractionHandler = undefined
+	onPointerEnter // prevent 'unused-export-let' warning
 
 	export let onPointerLeave: SceneInteractionHandler = undefined
+	onPointerLeave // prevent 'unused-export-let' warning
 
 	export let onPointerMove: SceneInteractionHandler = undefined
+	onPointerMove // prevent 'unused-export-let' warning
 
 	let ani: any
 

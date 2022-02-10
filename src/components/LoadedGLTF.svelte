@@ -330,20 +330,28 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: interactionEnabled = interactive && interact
 
 	export let onClick: GLTFContainerInteractionHandler = undefined
+	onClick // prevent 'unused-export-let' warning
 
 	export let onPointerUp: GLTFContainerInteractionHandler = undefined
+	onPointerUp // prevent 'unused-export-let' warning
 
 	export let onPointerDown: GLTFContainerInteractionHandler = undefined
+	onPointerDown // prevent 'unused-export-let' warning
 
 	export let onPointerOver: GLTFContainerInteractionHandler = undefined
+	onPointerOver // prevent 'unused-export-let' warning
 
 	export let onPointerOut: GLTFContainerInteractionHandler = undefined
+	onPointerOut // prevent 'unused-export-let' warning
 
 	export let onPointerEnter: GLTFContainerInteractionHandler = undefined
+	onPointerEnter // prevent 'unused-export-let' warning
 
 	export let onPointerLeave: GLTFContainerInteractionHandler = undefined
+	onPointerLeave // prevent 'unused-export-let' warning
 
 	export let onPointerMove: GLTFContainerInteractionHandler = undefined
+	onPointerMove // prevent 'unused-export-let' warning
 
 	let ani: any
 
