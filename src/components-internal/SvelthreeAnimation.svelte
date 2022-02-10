@@ -15,15 +15,15 @@ This is a **svelthree** _SvelthreeAnimation_ Component.
 	import type { Object3D, Scene } from "three"
 	import { SvelthreeAnimationManager, SvelthreeAnimationProp } from "../ani"
 	import { c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { LogLC } from "../utils/SvelthreeLogger"
 
 	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
 
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
-	export let log_rs: boolean = false
+	//export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	//export let log_rs: boolean = false
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
-	export let log_mau: boolean = false
+	//export let log_mau: boolean = false
 
 	export let animationEnabled: boolean = undefined
 	export let animation: any = undefined
