@@ -16,14 +16,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC } from "../utils/SvelthreeLogger"
 
 	import { svelthreeStores } from "../stores"
-	import { PropUtils, SvelthreeProps } from "../utils"
+	import { SvelthreeProps } from "../utils"
 	import type { Writable } from "svelte/store"
 
 	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
