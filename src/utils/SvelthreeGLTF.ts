@@ -5,7 +5,7 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { Mesh } from "../components"
 import { Empty } from "../components"
 
-import type { SvelthreeGLTFSupportedComponents } from "../types-extra"
+import type { GLTFSupportedSvelthreeComponents } from "../types-extra"
 
 
 interface ITreeMember {
@@ -75,20 +75,20 @@ export default class SvelthreeGLTF {
         //console.log("SvelthreeGLTF parsing FINISHED!")
     }
 
-    async get_parent_component(parent_uuid: string): Promise<SvelthreeGLTFSupportedComponents> {
+    async get_parent_component(parent_uuid: string): Promise<GLTFSupportedSvelthreeComponents> {
         return this.tree.get(parent_uuid).svelthree_comp
     }
 
-    async get_parent_context(parent_component: SvelthreeGLTFSupportedComponents): Promise<Map<any, any>> {
+    async get_parent_context(parent_component: GLTFSupportedSvelthreeComponents): Promise<Map<any, any>> {
         return parent_component["$$"].context
     }
 
-    public async apply(dom_target: HTMLElement, root_component: SvelthreeGLTFSupportedComponents): Promise<void> {
+    public async apply(dom_target: HTMLElement, root_component: GLTFSupportedSvelthreeComponents): Promise<void> {
         //console.log("SvelthreeGLTF apply started!")
 
         const fns: (() => Promise<void>)[] = []
 
-        const create_component = (item: ITreeMember, dom_target: HTMLElement, root_component: SvelthreeGLTFSupportedComponents) => async (): Promise<void> => {
+        const create_component = (item: ITreeMember, dom_target: HTMLElement, root_component: GLTFSupportedSvelthreeComponents) => async (): Promise<void> => {
 
             let context: Map<any, any> = null
             if (item.parent_uuid) {

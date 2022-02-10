@@ -1,5 +1,5 @@
 import type { Object3D } from "three"
-import type { AnySvelthreeComponent } from "../types-extra"
+import type { RaycastableSvelthreeComponents } from "../types-extra"
 
 class RaycastArray_Base extends Array {
 
@@ -7,8 +7,8 @@ class RaycastArray_Base extends Array {
       super(...args)
    }
 
-   push(...to_check_intersection: (Object3D | AnySvelthreeComponent)[]): number {
-      super.push(...arguments)
+   push(...to_check_intersection: (Object3D | RaycastableSvelthreeComponents)[]): number {
+      super.push(...to_check_intersection)
       this.process_to_check_intersection()
       return this.length
    }
@@ -24,8 +24,10 @@ class RaycastArray_Base extends Array {
 
 
 class RaycastArray extends RaycastArray_Base {
-   constructor(...to_check_intersection: (Object3D | AnySvelthreeComponent)[]) {
+   public to_check_intersection: (Object3D | RaycastableSvelthreeComponents)[]
+   constructor(...to_check_intersection: (Object3D | RaycastableSvelthreeComponents)[]) {
       super()
+      this.to_check_intersection = to_check_intersection
    }
 }
 
