@@ -23,9 +23,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
-	export let log_rs: boolean = false
+	//export let log_rs: boolean = false
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
-	export let log_mau: boolean = false
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
