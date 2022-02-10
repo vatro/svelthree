@@ -9,32 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _Mesh_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: MeshProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type MeshProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Mesh, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
-	export type MeshInteractionHandler = (e?: CustomEvent) => void
-</script>
 
 <script lang="ts">
 	import type { Scene } from "three"
@@ -52,6 +26,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { SvelthreeAnimation } from "../components-internal"
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+	import type { MeshProps } from "../types-comp-props"
+	import type { MeshInteractionHandler } from "../types-comp-props"
 
 	import { SvelthreeInteraction } from "../components-internal"
 	import { createEventDispatcher } from "svelte"
