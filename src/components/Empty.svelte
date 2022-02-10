@@ -491,9 +491,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}

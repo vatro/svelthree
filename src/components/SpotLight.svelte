@@ -605,9 +605,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	{shadowProps}
 	{shadowCameraProps}
 	{log_dev}
-	{log_rs}
-	{log_lc}
-	{log_mau}
 />
 
 <!-- TODO  get rid of the SvelthreeAnimation component / create a ts class -->
@@ -619,9 +616,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}

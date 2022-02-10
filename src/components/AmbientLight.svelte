@@ -403,9 +403,6 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}

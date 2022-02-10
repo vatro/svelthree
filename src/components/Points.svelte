@@ -658,22 +658,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction
-		{dispatch}
-		obj={points}
-		parent={self}
-		{interactionEnabled}
-		{log_dev}
-		{log_rs}
-		{log_lc}
-		{log_mau}
-	/>
+	<SvelthreeInteraction {dispatch} obj={points} parent={self} {interactionEnabled} {log_dev} {log_lc} />
 {/if}

@@ -692,22 +692,10 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction
-		{dispatch}
-		obj={scene}
-		parent={self}
-		{interactionEnabled}
-		{log_dev}
-		{log_rs}
-		{log_lc}
-		{log_mau}
-	/>
+	<SvelthreeInteraction {dispatch} obj={scene} parent={self} {interactionEnabled} {log_dev} {log_lc} />
 {/if}

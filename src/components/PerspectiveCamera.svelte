@@ -656,9 +656,6 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}

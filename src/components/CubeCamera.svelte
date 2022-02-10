@@ -756,9 +756,6 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 		{animationEnabled}
 		{animation}
 		{aniauto}
-		{log_dev}
-		{log_rs}
 		{log_lc}
-		{log_mau}
 	/>
 {/if}
