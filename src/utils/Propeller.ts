@@ -6,7 +6,6 @@ import type { WebGLCubeRenderTarget } from "three"
 import PropUtils from "./PropUtils"
 import { has_prop } from "svelte/internal"
 import type { ComplexValueType } from "../types-extra"
-import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class Propeller {
 	public static getObjectType(obj: any): string {
@@ -42,7 +41,7 @@ export default class Propeller {
 					PropUtils.setQuaternionFromValue(obj, value, complex)
 					break
 				case "matrix":
-					PropUtils.setMatrixFromValue(obj, value, complex)
+					PropUtils.setMatrixFromValue(obj, value)
 					break
 
 				case "groundColor":

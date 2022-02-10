@@ -531,7 +531,7 @@ export default class PropUtils {
 	 * IMPORTANT  Setting "manually" updating the `matrix` property will automatically set `matrixAutoUpdate` to `false`.
 	 * Applying transformations via `position`, `rotation`, `scale` etc. will automatically set `matrixAutoUpdate` to `true` again.
 	 */
-	public static setMatrixFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
+	public static setMatrixFromValue(obj: Object3D, val: any) {
 		if (verbose_mode() && log_prop_utils(obj))
 			console.debug("[ PropUtils ] -> obj.matrixAutoUpdate before! : ", obj.matrixAutoUpdate)
 		if (verbose_mode() && log_prop_utils(obj))
