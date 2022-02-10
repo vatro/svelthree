@@ -13,16 +13,13 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 
 	import type { LightWithShadow } from "../types-extra"
 	import { PropUtils, SvelthreeProps } from "../utils"
-	import { c_rs_int, c_dev, c_lc_int, c_mau, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import { verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import type { LogDEV } from "../utils/SvelthreeLogger"
 
 	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
-	export let log_rs: boolean = false
-	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
-	export let log_mau: boolean = false
 
 	export let light: LightWithShadow
 
