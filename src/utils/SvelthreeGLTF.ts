@@ -112,7 +112,8 @@ export default class SvelthreeGLTF {
             }
         }
 
-        for (const [uuid, item] of this.tree.entries()) {
+        // const [uuid, item] -> uuid not needed -> [,item]
+        for (const [, item] of this.tree.entries()) {
             fns.push(create_component(item, dom_target, root_component))
         }
 
@@ -121,7 +122,8 @@ export default class SvelthreeGLTF {
         }
 
         //postprocess matrix etc.
-        for (const [uuid, item] of this.tree.entries()) {
+        // const [uuid, item] -> uuid not needed -> [,item]
+        for (const [,item] of this.tree.entries()) {
 
             const instance = item.svelthree_comp.get_instance()
             instance.matrixAutoUpdate = false
