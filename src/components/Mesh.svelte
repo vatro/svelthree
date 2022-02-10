@@ -9,7 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _Mesh_ Component.
 [ tbd ]  Link to Docs.
 -->
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -26,8 +25,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { SvelthreeAnimation } from "../components-internal"
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
-	import type { MeshProps } from "../types-comp-props"
-	import type { MeshInteractionHandler } from "../types-comp-props"
 
 	import { SvelthreeInteraction } from "../components-internal"
 	import { createEventDispatcher } from "svelte"
@@ -39,6 +36,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { Mesh } from "three"
 	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
+	import type { MeshProps } from "../types-comp-props"
+	import type { MeshInteractionHandler } from "../types-comp-props"
 	import type { Material, Color } from "three"
 
 	const self = get_current_component()
