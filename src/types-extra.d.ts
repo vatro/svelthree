@@ -229,3 +229,30 @@ export interface StoreCanvas {
 	}
 	interactive: boolean
 }
+
+// $svelthreeStores body
+
+import type { SvelthreeStoreArray } from "./utils/SvelthreeStoreArray"
+import type { WebGLRenderer as WebGLRendererComponent } from "./components"
+
+export type StoreBody = {
+	id: number
+	canvas: StoreCanvas
+	scenes: SvelthreeStoreArray
+
+	// IMPORTANT !
+	/** `currentSceneIndex` will always be `+1` real index, because index `0` means `false`,
+	 * so the change from `undefined` to `0` will not be triggered.
+	 */
+	currentSceneIndex: number
+
+	cameras: SvelthreeStoreArray
+	cubeCameras: SvelthreeStoreArray
+	activeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera
+	activeScene: THREE.Scene
+	renderer: THREE.WebGLRenderer
+	rendererComponent: WebGLRendererComponent
+	raycaster: THREE.Raycaster
+	orbitcontrols: SvelthreeStoreArray
+	useBVH: boolean
+}

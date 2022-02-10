@@ -9,30 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 This is a **svelthree** _Canvas_ Component.  
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	export type StoreBody = {
-		id: number
-		canvas: StoreCanvas
-		scenes: SvelthreeStoreArray
-
-		// IMPORTANT !
-		/** `currentSceneIndex` will always be `+1` real index, because index `0` means `false`,
-		 * so the change from `undefined` to `0` will not be triggered.
-		 */
-		currentSceneIndex: number
-
-		cameras: SvelthreeStoreArray
-		cubeCameras: SvelthreeStoreArray
-		activeCamera: PerspectiveCamera | OrthographicCamera
-		activeScene: Scene
-		renderer: WebGLRenderer
-		rendererComponent: SvelteComponentDev
-		raycaster: Raycaster
-		orbitcontrols: SvelthreeStoreArray
-		useBVH: boolean
-	}
-</script>
-
 <script lang="ts">
 	// #region --- Imports
 
@@ -43,7 +19,7 @@ This is a **svelthree** _Canvas_ Component.
 	import type { OrthographicCamera, PerspectiveCamera } from "three"
 	import { svelthreeStores } from "../stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
-	import type { PointerState, StoreCanvas } from "../types-extra"
+	import type { PointerState, StoreBody } from "../types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import { RaycastArray } from "../utils/RaycastArray"
