@@ -13,10 +13,9 @@ This is a **svelthree** _Canvas_ Component.
 	// #region --- Imports
 
 	import { afterUpdate, beforeUpdate, onMount, setContext } from "svelte"
-	import { get_current_component, SvelteComponentDev } from "svelte/internal"
+	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
-	import { BufferGeometry, Mesh, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from "three"
-	import type { OrthographicCamera, PerspectiveCamera } from "three"
+	import { Raycaster, Vector2, Vector3 } from "three"
 	import { svelthreeStores } from "../stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 	import type { PointerState, StoreBody } from "../types-extra"
