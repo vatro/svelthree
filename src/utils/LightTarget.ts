@@ -1,7 +1,5 @@
 import type { Targetable } from "../types-extra"
 import type { Light, Object3D, Scene } from "three"
-import type { Empty } from "../components"
-import type { Mesh } from "../components"
 import { LightUtils } from "../utils"
 
 export default class LightTarget {
@@ -11,7 +9,6 @@ export default class LightTarget {
 
     constructor(
         public change: boolean,
-        //private target: Object3D | Empty | Mesh<any> | boolean,
 		private target: Targetable | boolean,
         private scene: Scene,
         private light: Light,
@@ -21,24 +18,6 @@ export default class LightTarget {
 
     public on_light_target_change() {
         this.change = false
-
-		/*
-        if (this.light.hasOwnProperty("target")) {
-            if (this.target["empty"]) {
-				// light_comp_ref.target = empty_comp_ref -> use an 'Empty' component as target (already added to the scene)
-                this.light["target"] = this.target["empty"]
-            } else if (this.target["mesh"]) {
-				// light_comp_ref.target = mesh_comp_ref -> use a 'Mesh' component as target (already added to the scene)
-                this.light["target"] = this.target["mesh"]
-            } else if ((this.target as Object3D).isObject3D) {
-				// light_comp_ref.target = obj3d_ref -> use own 'Object3D' as target (already added to the scene)
-                this.light["target"] = this.target
-            } else if (typeof this.target === "boolean") {
-				// light_comp_ref.target = true -> use the built-in 'Object3D' as target (add it to the scene)
-                this.scene.add(this.light["target"])
-            }
-        }
-		*/
 
 		if (this.light.hasOwnProperty("target")) {
 			// remove current target from parent if it's a built-in target
