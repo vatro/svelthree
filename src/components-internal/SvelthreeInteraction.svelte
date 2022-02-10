@@ -30,7 +30,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let parent: SvelteComponentDev
 	export let sti: number = getContext("store_index")
 	export let obj: Object3D
-	//export let recursive: boolean
 
 	let raycaster: Raycaster
 	$: raycaster = $svelthreeStores[sti].raycaster
@@ -44,7 +43,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// Canvas-DOM-Element listens to 'pointermove' the whole time in order to trigger over/out enter/leave events
 
 	let c: HTMLElement
-	//$: c = $svelthreeStores[sti].canvas.dom
 	$: c = $canvas_dom.element
 
 	$: if (c) {
@@ -62,8 +60,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	$: if (interactionEnabled) {
 		if (obj && raycaster) {
-			//if ($svelthreeStores[sti].pointer.event !== lastPointerMoveEvent) {
-			//lastPointerMoveEvent = $svelthreeStores[sti].pointer.event
 			if (pointer.event !== lastPointerMoveEvent) {
 				lastPointerMoveEvent = pointer.event
 				checkOverOut(lastPointerMoveEvent)
