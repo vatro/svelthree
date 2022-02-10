@@ -7,7 +7,7 @@ class SvelthreeStoreArray_Base extends Array {
     }
  
     push(...items: any[]): number {
-       super.push(...arguments)
+       super.push(...items)
        this.set_index_prop()
        return this.length
     }
