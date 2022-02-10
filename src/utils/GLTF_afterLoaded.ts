@@ -1,6 +1,6 @@
 import type { Object3D, Group } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
-import type { MeshProps } from "../components/Mesh.svelte"
+import type { MeshProps } from "../types-comp-props"
 import type { AnyMeshMaterialProps, AnyLightProps } from "../types-extra"
 
 export default class GLTF_afterLoaded {
