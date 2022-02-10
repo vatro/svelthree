@@ -32,7 +32,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
-	export let log_mau: boolean = log_all
 
 	let inside: boolean = undefined
 
