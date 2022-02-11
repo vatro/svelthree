@@ -63,6 +63,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { EquirectangularReflectionMapping, TextureLoader } from "three"
 	import type { RemoveFirst, OnlyWritableNonFunctionPropsOverwritten, PropBlackList } from "../types-extra"
 
+	/**
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
+
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 
@@ -419,12 +428,14 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	function set_bg_tex(): Texture {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "bg_tex", bg_tex))
 
-		const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
-			if (bg_tex.mapping) tex.mapping = bg_tex.mapping
-			scene.background = tex
-		})
+		if (browser) {
+			const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
+				if (bg_tex.mapping) tex.mapping = bg_tex.mapping
+				scene.background = tex
+			})
 
-		return env_texture_loader
+			return env_texture_loader
+		}
 	}
 
 	/** Scene `.fog`. */
@@ -453,12 +464,14 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	function set_env_tex(): Texture {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "env_tex", env_tex))
 
-		const env_texture_loader = new TextureLoader().load(env_tex.url, (tex) => {
-			tex.mapping = env_tex.mapping | EquirectangularReflectionMapping
-			scene.environment = tex
-		})
+		if (browser) {
+			const env_texture_loader = new TextureLoader().load(env_tex.url, (tex) => {
+				tex.mapping = env_tex.mapping | EquirectangularReflectionMapping
+				scene.environment = tex
+			})
 
-		return env_texture_loader
+			return env_texture_loader
+		}
 	}
 
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>

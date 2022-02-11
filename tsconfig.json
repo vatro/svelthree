@@ -27,7 +27,10 @@
      * of JS in `.svelte` files.
      */
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "paths": {
+			"$app/env": ["src/$app/env"]
+		}
   },
   /**
    * Use global.d.ts instead of compilerOptions.types
