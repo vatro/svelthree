@@ -67,6 +67,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { RemoveFirst } from "../types-extra"
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils"
 
+	/**
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
+
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 
@@ -159,10 +168,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// TODO  Do we want this to be reactive, so we can change the GLTF file on-the-fly?
-	$: if (url) {
-		doLoad()
-	} else {
-		console.warn("SVELTHREE > LoadedGLTF : You have to provide an 'url' attribute to load some GLTF file!", { url })
+	$: if (browser) {
+		if (url) {
+			doLoad()
+		} else {
+			console.warn("SVELTHREE > LoadedGLTF : You have to provide an 'url' attribute to load some GLTF file!", {
+				url
+			})
+		}
 	}
 
 	function onProgress(xhr: ProgressEvent): void {
