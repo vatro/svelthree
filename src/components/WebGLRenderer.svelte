@@ -329,43 +329,43 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		activate_currentCam()
 	}
 
-	// inside only
-	$: if (!inputs && renderer && sceneToRenderId !== currentSceneId) {
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
+	$: if (!inputs && renderer && sceneToRenderId !== currentSceneId && currentScene) {
 		if (verbose && log_rs) {
 			console.debug(
 				...c_rs(
 					c_name,
-					"[TODO ???] -> sceneToRenderId !== currentSceneId :",
+					"sceneToRenderId !== currentSceneId :",
 					sceneToRenderId !== currentSceneId
 				)
 			)
 		}
+
+		updateCurrentScene()
 	}
 
-	// won't trigger change if 'currentScene' is not being set, this happens first time onMount()
-
-	// inside only
-	$: if (!inputs && currentScene) {
+	function updateCurrentScene(): void {
 		deactivate_currentScene()
 		currentScene = get_sceneToRender()
 		activate_currentScene()
-	} else {
-		//console.warn("SVELTHREE > WebGLRenderer : handle scene switch triggered, currentScene was NOT CHANGED:", {currentScene: currentScene})
 	}
 
-	// inside only
-	$: if (!inputs && renderer && camToRenderId !== currentCamId) {
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
+	$: if (!inputs && renderer && camToRenderId !== currentCamId && currentCam) {
 		if (verbose && log_rs) {
 			console.debug(
-				...c_rs(c_name, "[TODO ???] -> camToRenderId !== currentCamId :", camToRenderId !== currentCamId)
+				...c_rs(c_name, "camToRenderId !== currentCamId :", camToRenderId !== currentCamId)
 			)
 		}
-		// won't trigger change if 'currentCam' is not being set, this happens first time onMount()
-		if (currentCam) {
-			currentCam ? (set_currentCamInactive(), (currentCam = get_camToRender()), activate_currentCam()) : null
-		} else {
-			//console.warn("SVELTHREE > WebGLRenderer : handle scene switch triggered, currentCam was NOT CHANGED:", {currentCam: currentCam})
-		}
+
+		updateCurrentCam()
+	}
+
+
+	function updateCurrentCam(): void {
+		set_currentCamInactive()
+		currentCam = get_camToRender()
+		activate_currentCam()
 	}
 
 	let resizeRendererOnNextFrame = false
