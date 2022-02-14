@@ -13,19 +13,20 @@ export default class SvelthreeAnimationProp {
 
 		try {
 			initiatedFn = this.fn(obj, args)
+			console.log("initiatedFn:", initiatedFn)
 
 			if (!initiatedFn.hasOwnProperty("onStart")) {
-				console.warn("SVELTHREE > Provided animation is missing 'onStart' function!", {
+				console.error("SVELTHREE > Provided animation is missing 'onStart' function!", {
 					animation: initiatedFn
 				})
-				throw new Error("SVELTHREE Exception (see warning above)")
+				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
 
 			if (!initiatedFn.hasOwnProperty("onDestroy")) {
-				console.warn("SVELTHREE > Provided animation has no 'onDestroy' function!", {
+				console.error("SVELTHREE > Provided animation has no 'onDestroy' function!", {
 					animation: initiatedFn
 				})
-				throw new Error("SVELTHREE Exception (see warning above)")
+				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
 		} catch (error) {
 			throw new Error("SVELTHREE Exception, " + error)

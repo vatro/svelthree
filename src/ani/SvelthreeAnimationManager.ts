@@ -2,7 +2,6 @@ import type { Object3D, Scene } from "three"
 import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
 import { verbose_mode } from "../utils/SvelthreeLogger"
 
-// TODO  TOFIX  This seems to be a MESS, DEBUG! (switching Scenes)
 export default class SvelthreeAnimationManager {
 	animation: SvelthreeAnimationProp | any
 	aniauto: boolean
@@ -41,23 +40,23 @@ export default class SvelthreeAnimationManager {
 		}
 	}
 
-	//active / reactivated
+	// active / reactivated
 	handleSceneActive() {
 		if (verbose_mode()) {
 			console.debug("SVELTHREE > SvelthreeAnimationManager > handleSceneActive!")
 		}
-		//check if animation has been initiated, if so try to execute 'onSceneReactivated'...
+		// check if animation has been initiated, if so try to execute 'onSceneReactivated'...
 		if (this.animationInitiated() === true) {
 			this.tryOnSceneReactivated()
 		} else {
-			//... otherwise initate / start it (aniauto is true)
+			// ... otherwise initate / start it (aniauto is true)
 			this.initiateAnimation()
 		}
 	}
 
 	initiateAnimation(): void {
 		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
-		//if animation is a function it has not been initiated / started yet (otherwise object)
+		// if animation is a function it has not been initiated / started yet (otherwise object)
 
 		if (this.scene) {
 			if (!this.scene.userData.isActive) {
@@ -91,16 +90,15 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneReactivated
 			? this.animation.onSceneReactivated()
 			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
-			  )
+				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
+			)
 	}
 
-	//inactive / deactivated
+	// inactive / deactivated
 	handleSceneInActive() {
-		//check if animation has been initiated
-		//if it has been initated, try to execute 'onSceneDeactivated'
+		// check if animation has been initiated
+		// if it has been initated, try to execute 'onSceneDeactivated'
 		if (this.animationInitiated() === true) {
-			// TODO  TOFIX  funktioniert nicht! onSceneDeactivated is not being called!
 			this.tryOnSceneDeactivated()
 		}
 	}
@@ -109,11 +107,9 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneDeactivated
 			? this.animation.onSceneDeactivated()
 			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
-			  )
+				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
+			)
 	}
-
-	// --------- user initiated actions ---------
 
 	startAni(): void {
 		if (this.animationInitiated() === false) {
@@ -127,27 +123,6 @@ export default class SvelthreeAnimationManager {
 	}
 
 	destroyAnimation(): void {
-		//console.warn("SVELTHREE > SvelthreeAnimationManager > destroyAnimation")
-
-		/** TODO  BUG  WHY?  When testing in a demo, this runs just fine / as intended, however
-		 * when testing via REPL (running sapper svelthree-website on localhost:3000) an exception is being thrown
-		 * "SVELTHREE Exception, TypeError: this.animation.onDestroy is not a function"
-		 * If we check 'this.animation' in a demo, it contains 'onDestroy' etc, with REPL 'AnimationProp' empty
-		 *
-		 * check aniauto change in a demo...
-		 */
-		/*
-			try {
-				console.warn("SVELTHREE > SvelthreeAnimationManager > trying this.animation.onDestroy() : this.animation", this.animation)
-				this.animation.onDestroy()
-			} catch (error) {
-				throw new Error("SVELTHREE Exception, " + error)
-			}
-			*/
-
-		// WORKAROUND:
-		// Don't try / check, just check if this.animation has 'onDestroy', if not just throw a warning, not exception.
-
 		if (this.animation.hasOwnProperty("onDestroy")) {
 			this.animation.onDestroy()
 		} else {

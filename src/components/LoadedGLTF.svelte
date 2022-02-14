@@ -50,7 +50,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { svelthreeStores } from "../stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
-	import { SvelthreeAnimation } from "../components-internal"
+	import { SvelthreeAnimation } from "../ani"
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { SvelthreeInteraction } from "../components-internal"
@@ -366,17 +366,21 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let onPointerMove: GLTFContainerInteractionHandler = undefined
 	onPointerMove // prevent 'unused-export-let' warning
 
-	let ani: any
-
-	let currentSceneActive = false
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
-
+	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
-
-	export let aniauto: boolean = undefined
 
 	let animationEnabled: boolean = false
 	$: if (animation) animationEnabled = true
+
+	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */
+	export let aniauto: boolean = undefined
+
+	let ani: SvelthreeAnimation
+	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, container, animation, aniauto)
+
+	let currentSceneActive = undefined
+	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
+	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance of the object created by the component from it's parent. */
 	export const remove_instance_from_parent = (): void => {
@@ -466,6 +470,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (onDestroy_inject_before) onDestroy_inject_before()
 
 					remove_box_helper()
+					if (ani) ani.destroyAnimation()
 
 					if (onDestroy_inject_after) onDestroy_inject_after()
 			  }
@@ -543,19 +548,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			  }
 	)
 </script>
-
-<!-- TODO  get rid of the SvelthreeAnimation component / create a ts class -->
-{#if animation}
-	<SvelthreeAnimation
-		bind:this={ani}
-		bind:currentSceneActive
-		obj={container}
-		{animationEnabled}
-		{animation}
-		{aniauto}
-		{log_lc}
-	/>
-{/if}
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
 	<SvelthreeInteraction {dispatch} obj={container} parent={self} {interactionEnabled} {log_dev} {log_lc} />
