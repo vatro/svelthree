@@ -36,9 +36,9 @@
 
 
 ### Quickstart
-- ***todo**: create new svelthree-app-**rollup** template (publish after svelthree 1.0.0-next.1 release)*
-- ***todo**: create new svelthree-app-**vite** template (publish after svelthree 1.0.0-next.1 release)*
-- ***todo**: create new svelthree-app-**sveltekit** template (publish after svelthree 1.0.0-next.1 release)*
+- ***todo**: create new svelthree-app-**rollup** template -> CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
+- ***todo**: create new svelthree-app-**vite** template -> CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
+- ***todo**: create new svelthree-app-**sveltekit** template -> SSR + CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
 
 
 
