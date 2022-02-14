@@ -113,7 +113,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 		// get and activate specified cams and scenes
 		for (let j = 0; j < inputs_queue.length; j++) {
-			
 			const queued: WebGLRendererInputsQueueItem = inputs_queue[j]
 			queued.scene = get_sceneToRender_2(queued.sti, queued.scene_id)
 			queued.cam = get_camToRender_2(queued.sti, queued.cam_id)
@@ -166,13 +165,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		const fullHeight: number = get_outputs_full_height()
 
 		for (let j = 0; j < outputs_queue.length; j++) {
-			
 			const output: WebGLRendererOutputsQueueItem = outputs_queue[j]
 
-			const x:number = output.dom_element.offsetLeft
-			const y:number = output.dom_element.offsetTop
-			const w:number = output.dom_element.clientWidth
-			const h:number = output.dom_element.clientHeight
+			const x: number = output.dom_element.offsetLeft
+			const y: number = output.dom_element.offsetTop
+			const w: number = output.dom_element.clientWidth
+			const h: number = output.dom_element.clientHeight
 
 			output.viewOffset = [fullWidth, fullHeight, x, y, w, h]
 		}
@@ -181,20 +179,42 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function get_outputs_full_width(): number {
-		const sorted_left: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort((a, b) => a.dom_element.offsetLeft - b.dom_element.offsetLeft)
-		const sorted_right: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort((a, b) => (a.dom_element.offsetLeft + a.dom_element.clientWidth) - (b.dom_element.offsetLeft + b.dom_element.clientWidth))
+		const sorted_left: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort(
+			(a, b) => a.dom_element.offsetLeft - b.dom_element.offsetLeft
+		)
+		const sorted_right: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort(
+			(a, b) =>
+				a.dom_element.offsetLeft +
+				a.dom_element.clientWidth -
+				(b.dom_element.offsetLeft + b.dom_element.clientWidth)
+		)
 
-		return ((sorted_right[sorted_right.length - 1].dom_element.offsetLeft + sorted_right[sorted_right.length - 1].dom_element.clientWidth) - sorted_left[0].dom_element.offsetLeft)
+		return (
+			sorted_right[sorted_right.length - 1].dom_element.offsetLeft +
+			sorted_right[sorted_right.length - 1].dom_element.clientWidth -
+			sorted_left[0].dom_element.offsetLeft
+		)
 	}
 
 	function get_outputs_full_height(): number {
-		const sorted_top: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort((a, b) => a.dom_element.offsetTop - b.dom_element.offsetTop)
-		const sorted_bottom: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort((a, b) => (a.dom_element.offsetTop + a.dom_element.clientHeight) - (b.dom_element.offsetTop + b.dom_element.clientHeight))
+		const sorted_top: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort(
+			(a, b) => a.dom_element.offsetTop - b.dom_element.offsetTop
+		)
+		const sorted_bottom: WebGLRendererOutputsQueueItem[] = [...outputs_queue].sort(
+			(a, b) =>
+				a.dom_element.offsetTop +
+				a.dom_element.clientHeight -
+				(b.dom_element.offsetTop + b.dom_element.clientHeight)
+		)
 
-		return ((sorted_bottom[sorted_bottom.length - 1].dom_element.offsetTop + sorted_bottom[sorted_bottom.length - 1].dom_element.clientHeight) - sorted_top[0].dom_element.offsetTop)
+		return (
+			sorted_bottom[sorted_bottom.length - 1].dom_element.offsetTop +
+			sorted_bottom[sorted_bottom.length - 1].dom_element.clientHeight -
+			sorted_top[0].dom_element.offsetTop
+		)
 	}
 
-	$: if (inputs?.length && inputs_processed && (!outputs || outputs?.length && outputs_processed)) create_renderer()
+	$: if (inputs?.length && inputs_processed && (!outputs || (outputs?.length && outputs_processed))) create_renderer()
 
 	export let config: { [key: string]: any } = undefined
 
@@ -332,13 +352,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!inputs && renderer && sceneToRenderId !== currentSceneId && currentScene) {
 		if (verbose && log_rs) {
-			console.debug(
-				...c_rs(
-					c_name,
-					"sceneToRenderId !== currentSceneId :",
-					sceneToRenderId !== currentSceneId
-				)
-			)
+			console.debug(...c_rs(c_name, "sceneToRenderId !== currentSceneId :", sceneToRenderId !== currentSceneId))
 		}
 
 		updateCurrentScene()
@@ -353,14 +367,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!inputs && renderer && camToRenderId !== currentCamId && currentCam) {
 		if (verbose && log_rs) {
-			console.debug(
-				...c_rs(c_name, "camToRenderId !== currentCamId :", camToRenderId !== currentCamId)
-			)
+			console.debug(...c_rs(c_name, "camToRenderId !== currentCamId :", camToRenderId !== currentCamId))
 		}
 
 		updateCurrentCam()
 	}
-
 
 	function updateCurrentCam(): void {
 		set_currentCamInactive()
@@ -669,7 +680,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		if (renderer.xr.enabled === false) {
 			renderStandard()
 		} else {
-			throw new Error ("SVELTHREE > You're using the non-XR svelthree version!")
+			throw new Error("SVELTHREE > You're using the non-XR svelthree version!")
 		}
 	}
 
@@ -759,11 +770,17 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					}
 
 					if (outputs_queue?.length) {
-
 						for (let j = 0; j < outputs_queue.length; j++) {
 							const out = outputs_queue[j]
-							
-							inp.cam.setViewOffset(out.viewOffset[0], out.viewOffset[1], out.viewOffset[2], out.viewOffset[3], out.viewOffset[4], out.viewOffset[5])
+
+							inp.cam.setViewOffset(
+								out.viewOffset[0],
+								out.viewOffset[1],
+								out.viewOffset[2],
+								out.viewOffset[3],
+								out.viewOffset[4],
+								out.viewOffset[5]
+							)
 							renderer.setSize(out.viewOffset[4], out.viewOffset[5])
 							renderer.render(inp.scene, inp.cam)
 
@@ -771,7 +788,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 							context.drawImage(renderer.domElement, 0, 0)
 							inp.cam.clearViewOffset()
 						}
-						
 					} else {
 						renderer.render(inp.scene, inp.cam)
 						const context = inp.dom_element.getContext("2d")
