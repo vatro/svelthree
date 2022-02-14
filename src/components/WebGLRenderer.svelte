@@ -200,7 +200,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let renderer: WebGLRenderer
 
-	// only inside
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!renderer && canvas_dom_element && sti >= 0) create_renderer()
 
 	function create_renderer(): void {
@@ -306,7 +306,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let currentScene: Scene = undefined
 	let currentSceneId = ""
 
-	// inside only
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!inputs && renderer && !currentScene && sceneToRenderId) set_currentScene()
 
 	function set_currentScene() {
@@ -320,7 +320,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let currentCam: PerspectiveCamera | OrthographicCamera = undefined
 	let currentCamId = ""
 
-	// inside only
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!inputs && renderer && !currentCam && currentSceneId) set_currentCam()
 
 	function set_currentCam() {
@@ -372,7 +372,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	const canvas_dim: Writable<{ w: number; h: number }> = getContext("canvas_dim")
 
-	// only inside
+	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 	$: if (!inputs && renderer && ($canvas_dim?.w || $canvas_dim?.h)) {
 		if (verbose && log_rs) {
 			console.debug(
@@ -677,13 +677,13 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// TODO  CHECK / IMPROVE!
 	async function renderStandard(): Promise<void> {
-		// inside only
+		// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 		if (!inputs && currentCam.userData.renderer_currentcam_needsupdate) {
 			currentCam.userData.renderer_currentcam_needsupdate = false
 			set_currentCam()
 		}
 
-		// inside only
+		// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 		if (!inputs && currentCam.userData.renderer_currentscene_needsupdate) {
 			currentCam.userData.renderer_currentscene_needsupdate = false
 			set_currentScene()
@@ -750,7 +750,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			}
 
 			if (inputs_queue.length) {
-				// only outside
+				// outside only -> if the 'WebGLRenderer' component is placed outside of a 'Canvas' component
 				for (let i = 0; i < inputs_queue.length; i++) {
 					const inp = inputs_queue[i]
 					// inside should be false if inputs_queue.length
@@ -779,7 +779,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					}
 				}
 			} else {
-				// only inside
+				// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 				if (resizeRendererOnNextFrame) {
 					renderer.setSize($canvas_dim.w, $canvas_dim.h, true)
 					resizeRendererOnNextFrame = false
