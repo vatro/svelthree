@@ -824,6 +824,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		return currentCam
 	}
 
+	/** Get the total number of currently rendered frames. */
+	export function getCurrentFrame(): number {
+		return frames.total
+	}
+
 	// TODO  different?
 
 	export function setRender(parameters = { sceneId: "", camId: "" }): void {
