@@ -13,6 +13,7 @@ class RaycastArray_Base extends Array {
       return this.length
    }
 
+   // replace component references with three.js object instances created by the component 
    process_to_check_intersection() {
       for (let i = 0; i < this.length; i++) {
          if (this[i]["is_svelthree_component"]) {
