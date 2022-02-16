@@ -284,6 +284,8 @@ This is a **svelthree** _Canvas_ Component.
 
 	/** An array which accepts **svelthree components** or any Object3D to be checked for **intersection** with the ray -> see [`Raycaster`](https://threejs.org/docs/#api/en/core/Raycaster). */
 	export let raycast: RaycastArray = new RaycastArray()
+	// IMPORTANT  not reactive!
+	setContext("raycast", raycast)
 
 	function update_all_intersections_and_cursor(): void {
 		if (interactive && pointer_state.isOverCanvas) {
