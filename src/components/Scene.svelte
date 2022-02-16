@@ -53,6 +53,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { SvelthreeInteraction } from "../components-internal"
+	import type { RaycastArray } from "../utils/RaycastArray"
 	import { createEventDispatcher } from "svelte"
 	import type { Writable } from "svelte/store"
 
@@ -508,6 +509,23 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 
 	let interactionEnabled: boolean = undefined
 	$: interactionEnabled = interactive && interact
+
+	//  IMPORTANT  not reactive
+	const raycast: RaycastArray = getContext("raycast")
+
+	// reactively enable raycasting to the created three.js instance
+	$: if (interactionEnabled && raycast) {
+		if (!raycast.includes(scene)) {
+			raycast.push(scene)
+		}
+	}
+
+	// reactively disable raycasting to the created three.js instance
+	$: if (!interactionEnabled && raycast) {
+		if (raycast.includes(scene)) {
+			raycast.splice(raycast.indexOf(scene), 1)
+		}
+	}
 
 	export let onClick: SceneInteractionHandler = undefined
 	onClick // prevent 'unused-export-let' warning
