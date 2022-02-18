@@ -256,3 +256,5 @@ export type StoreBody = {
 	orbitcontrols: SvelthreeStoreArray
 	useBVH: boolean
 }
+
+export type WebGLRendererMode = "always" | "once" | "auto"

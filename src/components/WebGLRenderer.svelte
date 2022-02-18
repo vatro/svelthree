@@ -23,6 +23,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
+	import type { WebGLRendererMode } from "../types-extra"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -400,6 +401,13 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// TODO  auto-animate! (render only if something changed!)
 
+	/** Choose one of the `WebGLRenderer` modes:
+	 * - (default) `"always"` -> render on every AnimationFrame (_use requestAnimationFrame for continuously animated scenes_)
+	 * - `"once"` -> render only once (_static scenes_)
+	 * - (todo/wip) `"auto"` -> render only if something in the scene has changed (_the most performant mode for animated scenes_).
+	*/
+	export let mode: WebGLRendererMode = "always"
+
 	// both inside and outside
 	$: if (renderer && (canvas_dom_element || inputs_queue.length)) {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "renderer created -> start_renderer ...", { renderer }))
@@ -695,8 +703,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			set_currentScene()
 		}
 
-			if (logOnce) doLogOnce("renderStandard")
 		if (enabled) {
+			if (logOnce) doLogOnce(mode)
 
 			dispatch("before_render", { frame: frames.total })
 			dispatch("before_render_int", { frame: frames.total })
@@ -807,8 +815,25 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			frames.total++
 			dispatch("after_render", { frame: frames.total })
 
-			rAF.id = requestAnimationFrame(animate)
+			switch (mode) {
+				case "always": 
+					rAF.id = requestAnimationFrame(render_standard)
+				break;
+				case "once": /* nothing */ break;
+				case "auto": /* TODO  not implemented yet */ check_render_auto()
+				break;
+				default:
+					console.error(`SVELTHREE -> WebGLRenderer : No \`mode:"${mode}"\` defined, using \`mode:"always"\` as fallback!`)
+					rAF.id = requestAnimationFrame(render_standard)
+				break; 
+			}
 		}
+	}
+
+	/* TODO  not implemented yet */
+	function check_render_auto(): void {
+		// if something changed
+		rAF.id = requestAnimationFrame(render_standard)
 	}
 
 	function doLogOnce(renderMode: string): void {
