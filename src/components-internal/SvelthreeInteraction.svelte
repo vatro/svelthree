@@ -46,29 +46,44 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	$: c = $canvas_dom.element
 
 	$: if (c) {
-		if (interactionEnabled && obj && !obj.userData.interact) {
+		if (raycaster && interactionEnabled && obj && !obj.userData.interact) {
 			addListeners()
 			obj.userData.interact = true
-		} else if (!interactionEnabled && obj && obj.userData.interact) {
-			removeListeners()
-			obj.userData.interact = false
+
+			if ($svelthreeStores[sti].rendererComponent?.mode === "always") add_interaction_2_listener()
 		}
 	}
 
-	// Use single pointermove from canvas via store
 	let lastPointerMoveEvent: PointerEvent
 
-	$: if (interactionEnabled) {
-		if (obj && raycaster) {
-			if (pointer.event !== lastPointerMoveEvent) {
-				lastPointerMoveEvent = pointer.event
-				checkOverOut(lastPointerMoveEvent)
-				tryDispatch(lastPointerMoveEvent)
-			}
+	// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
+	$: if (
+		$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
+		$svelthreeStores[sti].rendererComponent?.mode === "once"
+	) {
+		if (pointer.event && pointer.event !== lastPointerMoveEvent) {
+			lastPointerMoveEvent = pointer.event
+			checkPointer(lastPointerMoveEvent)
 		}
-	} else if (obj && obj.userData.interact) {
-		obj.userData.interact = false
+	}
+
+	let remove_interaction_2_listener: () => void
+
+	// animated scenes -> check intersections / fire events on every rendered frame, even if pointer is not moving
+	function add_interaction_2_listener(): void {
+		remove_interaction_2_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_2", () =>
+			pointer.event ? checkPointer(pointer.event) : null
+		)
+	}
+
+	function checkPointer(e: PointerEvent): void {
+		checkOverOut(e)
+		tryDispatch(e)
+	}
+
+	$: if (!interactionEnabled && obj && obj.userData.interact) {
 		removeListeners()
+		obj.userData.interact = false
 	}
 
 	function addListeners() {
@@ -104,6 +119,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			obj.userData.interact = false
 
 			if (c) {
+				if (remove_interaction_2_listener) {
+					remove_interaction_2_listener()
+					remove_interaction_2_listener = null
+				}
 				c.removeEventListener("pointermove", checkOverOut)
 				c.removeEventListener("click", tryDispatch)
 				c.removeEventListener("pointerup", tryDispatch)
