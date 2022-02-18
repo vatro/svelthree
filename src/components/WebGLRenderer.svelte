@@ -706,6 +706,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			// inserting await tick() here enables cross-referencing:
 			await tick()
 
+			dispatch("interaction_1")
+			dispatch("interaction_2")
+
 			// update OrbitControls (NonXR)
 			// required if `enableDamping` or `autoRotate` are set to `true`
 			if (inputs_queue.length) {
