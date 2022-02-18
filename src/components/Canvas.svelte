@@ -18,7 +18,7 @@ This is a **svelthree** _Canvas_ Component.
 	import { Raycaster, Vector2, Vector3 } from "three"
 	import { svelthreeStores } from "../stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
-	import type { PointerState, StoreBody } from "../types-extra"
+	import type { PointerState, StoreBody, WebGLRendererMode } from "../types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import { RaycastArray } from "../utils/RaycastArray"
@@ -151,6 +151,9 @@ This is a **svelthree** _Canvas_ Component.
 	// reactive create raycaster
 	$: interactive && !raycaster && c && $svelthreeStores[sti].renderer ? createRaycaster() : null
 
+	let render_mode: WebGLRendererMode
+	$: render_mode = $svelthreeStores[sti].rendererComponent?.mode
+
 	function createRaycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > interactive", interactive))
 
@@ -192,11 +195,39 @@ This is a **svelthree** _Canvas_ Component.
 		}
 	}
 
+	let remove_interaction_1_listener: () => void
+
+	function add_interaction_1_listener(): void {
+		remove_interaction_1_listener = $svelthreeStores[sti].rendererComponent.$on(
+			"interaction_1",
+			update_all_intersections_and_cursor
+		)
+	}
+
+	function add_pointermove_listeners(): void {
+		if (render_mode === "always") {
+			c.addEventListener("pointermove", updatePointer, false)
+			add_interaction_1_listener()
+		} else {
+			c.addEventListener("pointermove", updatePointer, false)
+		}
+	}
+
+	function remove_pointermove_listeners(): void {
+		if (render_mode === "always") {
+			c.removeEventListener("pointermove", updatePointer)
+			remove_interaction_1_listener()
+			remove_interaction_1_listener = null
+		} else {
+			c.removeEventListener("pointermove", updatePointer)
+		}
+	}
+
 	// start updating mouse position (if not xr)
 	function startUpdatingPointer(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > startUpdatingPointer!"))
 
-		c.addEventListener("pointermove", updatePointer, false)
+		add_pointermove_listeners()
 		c.addEventListener("pointerenter", onPointerEnter, false)
 		c.addEventListener("pointerleave", onPointerLeave, false)
 
@@ -208,7 +239,7 @@ This is a **svelthree** _Canvas_ Component.
 		pointer_state.isOverCanvas = true
 
 		c.addEventListener("pointerleave", onPointerLeave, false)
-		c.addEventListener("pointermove", updatePointer, false)
+		add_pointermove_listeners()
 		c.removeEventListener("pointerenter", updatePointer)
 
 		//console.log("onPointerEnter!")
@@ -238,7 +269,7 @@ This is a **svelthree** _Canvas_ Component.
 	function onPointerLeave(): void {
 		pointer_state.isOverCanvas = false
 
-		c.removeEventListener("pointermove", updatePointer)
+		remove_pointermove_listeners()
 		c.removeEventListener("pointerleave", onPointerLeave)
 		c.addEventListener("pointerenter", onPointerEnter, false)
 
@@ -249,7 +280,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	function removeAllPointerListeners(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "removeAllPointerListeners!"))
-		c.removeEventListener("pointermove", updatePointer)
+		remove_pointermove_listeners()
 		c.removeEventListener("pointerenter", onPointerEnter)
 		c.removeEventListener("pointerleave", onPointerLeave)
 		c.removeEventListener("pointerenter", onPointerEnter_notInteractive)
@@ -279,7 +310,9 @@ This is a **svelthree** _Canvas_ Component.
         */
 		pointer_state.event = e
 
-		update_all_intersections_and_cursor()
+		if (render_mode !== "always") {
+			update_all_intersections_and_cursor()
+		}
 	}
 
 	/** An array which accepts **svelthree components** or any Object3D to be checked for **intersection** with the ray -> see [`Raycaster`](https://threejs.org/docs/#api/en/core/Raycaster). */
