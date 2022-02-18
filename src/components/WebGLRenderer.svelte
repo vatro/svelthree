@@ -667,7 +667,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	const rAF = { id: undefined }
 	const frames = { total: 0 }
 
-	let doAnimate = false
+	export let enabled: boolean = true
 
 	function start_renderer(): void {
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "start_renderer!"))
@@ -695,8 +695,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			set_currentScene()
 		}
 
-		if (doAnimate) {
 			if (logOnce) doLogOnce("renderStandard")
+		if (enabled) {
 
 			dispatch("before_render", { frame: frames.total })
 			dispatch("before_render_int", { frame: frames.total })
@@ -821,7 +821,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function stopAnimating(): void {
-		doAnimate = false
+		enabled = false
 		cancelAnimationFrame(rAF.id)
 	}
 
