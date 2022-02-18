@@ -315,7 +315,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					parent.onPointerOut ? onPointerOutAction(event) : null
 					break
 				case "pointerenter":
-					parent.onPointerOut ? onPointerEnterAction(event) : null
+					parent.onPointerEnter ? onPointerEnterAction(event) : null
 					break
 				case "pointerleave":
 					parent.onPointerLeave ? onPointerLeaveAction(event) : null
