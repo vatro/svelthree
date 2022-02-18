@@ -402,8 +402,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// both inside and outside
 	$: if (renderer && (canvas_dom_element || inputs_queue.length)) {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "renderer created -> start_animating ...", { renderer }))
-		start_animating()
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "renderer created -> start_renderer ...", { renderer }))
+		start_renderer()
 	}
 
 	function activate_currentCam(): void {
@@ -669,16 +669,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let doAnimate = false
 
-	function start_animating(): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "start_animating!"))
-		doAnimate = true
-		animate()
-	}
+	function start_renderer(): void {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "start_renderer!"))
 
-	function animate(): void {
-		//if (verbose && log_dev) console.debug(...c_dev(c_name, "animate!"))
 		if (renderer.xr.enabled === false) {
-			renderStandard()
+			render_standard()
 		} else {
 			throw new Error("SVELTHREE > You're using the non-XR svelthree version!")
 		}
@@ -687,7 +682,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let logOnce = true
 
 	// TODO  CHECK / IMPROVE!
-	async function renderStandard(): Promise<void> {
+	async function render_standard(): Promise<void> {
 		// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
 		if (!inputs && currentCam.userData.renderer_currentcam_needsupdate) {
 			currentCam.userData.renderer_currentcam_needsupdate = false
@@ -816,8 +811,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	function doLogOnce(renderMode: string): void {
 		logOnce = false
 		if (verbose && log_dev)
-			console.debug(
-				...c_dev(c_name, `animate > doLogOnce! -> animate : ${renderMode}`, {
+			console.warn(
+				...c_dev(c_name, `"SVELTHREE -> WebGLRenderer -> render_standard, mode:": ${renderMode}`, {
 					currentScene,
 					currentCam,
 					canvas_dom_element
