@@ -356,7 +356,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// reactively disable raycasting to the created three.js instance
 	$: if (!interactionEnabled && raycast) {
 		if (raycast.includes(container)) {
-			raycast.splice(raycast.indexOf(container), 1)
+			raycast.splice(container.userData.index_in_raycast, 1)
 		}
 	}
 

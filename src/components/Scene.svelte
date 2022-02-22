@@ -523,7 +523,7 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	// reactively disable raycasting to the created three.js instance
 	$: if (!interactionEnabled && raycast) {
 		if (raycast.includes(scene)) {
-			raycast.splice(raycast.indexOf(scene), 1)
+			raycast.splice(scene.userData.index_in_raycast, 1)
 		}
 	}
 
