@@ -412,6 +412,13 @@ This is a **svelthree** _Canvas_ Component.
 		return [...raycast]
 	}
 
+	/** Get all interactive **svelthree components** from all Scenes inside the Canvas. */
+	export function get_interactive_components_all(): Object3D[] {
+		return raycast.map((item: Object3D) => {
+			return item.userData.svelthreeComponent
+		})
+	}
+
 	function set_cursor_style(css_value: string): void {
 		// doesn't update the component on cursor change (as opposed to c.style)
 		self.$$.root.style.cursor = css_value
