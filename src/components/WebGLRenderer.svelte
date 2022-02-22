@@ -859,6 +859,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// public methods
 
+	/** Render manually. Suitable for `WebGLRenderer` component modes `mode="once"` and `mode="change"`. */
+	export function update(): void {
+		start_renderer()
+	}
+
 	export function getRenderer(): WebGLRenderer {
 		return renderer
 	}
