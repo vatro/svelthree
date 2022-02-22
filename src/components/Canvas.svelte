@@ -440,6 +440,7 @@ This is a **svelthree** _Canvas_ Component.
 
 		return () => {
 			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
+			remove_interaction_0_listener()
 			removeAllPointerListeners()
 			// if canvas is being removed set the the whole store to 'null'
 			// this way we don't have to handle anything, other store 'sti' will remain valid
