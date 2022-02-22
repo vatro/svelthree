@@ -40,8 +40,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const all_intersections: { result: any[] } = getContext("all_intersections")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 
-	// Canvas-DOM-Element listens to 'pointermove' the whole time in order to trigger over/out enter/leave events
-
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
@@ -51,19 +49,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			obj.userData.interact = true
 
 			if ($svelthreeStores[sti].rendererComponent?.mode === "always") add_interaction_2_listener()
-		}
-	}
 
-	let lastPointerMoveEvent: PointerEvent
-
-	// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
-	$: if (
-		$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
-		$svelthreeStores[sti].rendererComponent?.mode === "once"
-	) {
-		if (pointer.event && pointer.event !== lastPointerMoveEvent) {
-			lastPointerMoveEvent = pointer.event
-			checkPointer(lastPointerMoveEvent)
+			// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
+			if (
+				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
+				$svelthreeStores[sti].rendererComponent?.mode === "once"
+			) {
+				c.addEventListener("pointermove", checkOverOut)
+			}
 		}
 	}
 
