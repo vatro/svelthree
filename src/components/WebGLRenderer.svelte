@@ -714,7 +714,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			// inserting await tick() here enables cross-referencing:
 			await tick()
 
+			// update raycaster intersections and pointer appearance
 			dispatch("interaction_1")
+			// fire any interactive events 
 			dispatch("interaction_2")
 
 			// update OrbitControls (NonXR)
