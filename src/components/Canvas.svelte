@@ -16,6 +16,7 @@ This is a **svelthree** _Canvas_ Component.
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { Raycaster, Vector2, Vector3 } from "three"
+	import type { Object3D, Scene } from "three"
 	import { svelthreeStores } from "../stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 	import type { PointerState, StoreBody, WebGLRendererMode } from "../types-extra"
@@ -164,6 +165,7 @@ This is a **svelthree** _Canvas_ Component.
 
 		if ($svelthreeStores[sti].renderer.xr.enabled === false) {
 			startUpdatingPointer()
+			add_interaction_0_listener()
 		}
 
 		if (verbose && log_dev) {
@@ -188,6 +190,7 @@ This is a **svelthree** _Canvas_ Component.
 		// start updating mouse position (if not xr)
 		if ($svelthreeStores[sti].renderer.xr.enabled === false) {
 			removeAllPointerListeners()
+			remove_interaction_0_listener()
 		}
 
 		if (verbose && log_rs) {
@@ -320,10 +323,67 @@ This is a **svelthree** _Canvas_ Component.
 	// IMPORTANT  not reactive!
 	setContext("raycast", raycast)
 
+	let filtered_raycast: {
+		dirty: boolean
+		objects: Object3D[]
+	} = {
+		dirty: false,
+		objects: []
+	}
+
+	$: if ($svelthreeStores[sti].activeScene) filtered_raycast.dirty = true
+
+	let remove_interaction_0_listener: () => void
+
+	function add_interaction_0_listener(): void {
+		remove_interaction_0_listener = $svelthreeStores[sti].rendererComponent.$on(
+			"interaction_0",
+			check_filter_raycast
+		)
+	}
+
+	function check_filter_raycast(): void {
+		//console.log("---> check_filter_raycast!")
+		if (raycast.dirty || filtered_raycast.dirty) {
+			raycast.dirty = false
+			filterRaycast()
+		}
+	}
+
+	function filterRaycast(): void {
+		//console.log("---> filterRaycast!")
+		filtered_raycast.objects = []
+
+		for (let i = 0; i < raycast.length; i++) {
+			is_inside_active_scene(raycast[i])
+		}
+
+		filtered_raycast.dirty = false
+	}
+
+	function is_inside_active_scene(obj: Object3D): void {
+		let active_scene: Scene = $svelthreeStores[sti].activeScene
+
+		function check_parent(obj: Object3D) {
+			if (obj.parent && obj.parent === active_scene) {
+				//console.log("true!", obj)
+				filtered_raycast.objects.push(obj)
+				return true
+			} else if (obj.parent.parent) {
+				check_parent(obj.parent)
+			} else {
+				//console.log("false!", obj)
+				return false
+			}
+		}
+
+		check_parent(obj)
+	}
+
 	function update_all_intersections_and_cursor(): void {
 		if (interactive && pointer_state.isOverCanvas) {
 			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
-			all_intersections.result = raycaster.intersectObjects(raycast, true)
+			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, true)
 
 			if (all_intersections.result.length && all_intersections.result[0].object.userData.interact) {
 				set_cursor_style("pointer")
