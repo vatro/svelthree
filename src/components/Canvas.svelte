@@ -395,6 +395,11 @@ This is a **svelthree** _Canvas_ Component.
 		}
 	}
 
+	/** Get all interactive **three.js object instances** from the currently active (_rendered_) Scene. */
+	export function get_interactive(): Object3D[] {
+		return filtered_raycast.objects
+	}
+
 	function set_cursor_style(css_value: string): void {
 		// doesn't update the component on cursor change (as opposed to c.style)
 		self.$$.root.style.cursor = css_value
