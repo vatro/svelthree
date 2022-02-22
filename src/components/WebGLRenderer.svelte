@@ -714,6 +714,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			// inserting await tick() here enables cross-referencing:
 			await tick()
 
+			// filter interactive objects in currently active (rendered) scene
+			dispatch("interaction_0")
 			// update raycaster intersections and pointer appearance
 			dispatch("interaction_1")
 			// fire any interactive events 
