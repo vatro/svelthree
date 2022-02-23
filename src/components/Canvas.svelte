@@ -122,12 +122,15 @@ This is a **svelthree** _Canvas_ Component.
 		$canvas_dim.h = h
 	}
 
+	// IMPORTANT  reactive!
+	const pointer_over_canvas: Writable<{ status: boolean }> = writable({ status: false })
+	setContext("pointer_over_canvas", pointer_over_canvas)
+
 	// pointer
 	// IMPORTANT  not reactive!
 	const pointer_state: PointerState = {
 		pos: new Vector2(-1, -1),
 		event: undefined,
-		isOverCanvas: false,
 		unprojected: new Vector3()
 	}
 
@@ -139,6 +142,11 @@ This is a **svelthree** _Canvas_ Component.
 		result: []
 	}
 	setContext("all_intersections", all_intersections)
+
+	// clear intersections if pointer is out of canvas
+	$: if ($pointer_over_canvas.status === false) {
+		all_intersections.result = []
+	}
 
 	// --- interactivity
 
@@ -239,7 +247,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function onPointerEnter(): void {
-		pointer_state.isOverCanvas = true
+		$pointer_over_canvas.status = true
 
 		c.addEventListener("pointerleave", onPointerLeave, false)
 		add_pointermove_listeners()
@@ -249,7 +257,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function onPointerEnter_notInteractive(): void {
-		pointer_state.isOverCanvas = true
+		$pointer_over_canvas.status = true
 		c.addEventListener("pointerleave", onPointerLeave_notInteractive, false)
 		c.removeEventListener("pointerenter", onPointerEnter_notInteractive)
 
@@ -259,7 +267,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function onPointerLeave_notInteractive(): void {
-		pointer_state.isOverCanvas = false
+		$pointer_over_canvas.status = false
 
 		c.addEventListener("pointerenter", onPointerEnter_notInteractive, false)
 		c.removeEventListener("pointerleave", onPointerLeave_notInteractive)
@@ -270,7 +278,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function onPointerLeave(): void {
-		pointer_state.isOverCanvas = false
+		$pointer_over_canvas.status = false
 
 		remove_pointermove_listeners()
 		c.removeEventListener("pointerleave", onPointerLeave)
@@ -381,7 +389,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function update_all_intersections_and_cursor(): void {
-		if (interactive && pointer_state.isOverCanvas) {
+		if (interactive && $pointer_over_canvas.status === true) {
 			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
 			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, true)
 
