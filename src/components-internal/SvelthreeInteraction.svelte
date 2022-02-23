@@ -55,7 +55,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
 				$svelthreeStores[sti].rendererComponent?.mode === "once"
 			) {
-				c.addEventListener("pointermove", checkOverOut)
+				c.addEventListener("pointermove", checkOverOut, false)
 			}
 		}
 	}
