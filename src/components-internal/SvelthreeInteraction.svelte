@@ -39,6 +39,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const pointer: PointerState = getContext("pointer")
 	const all_intersections: { result: any[] } = getContext("all_intersections")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
+	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
 
 	let c: HTMLElement
 	$: c = $canvas_dom.element
@@ -57,6 +58,22 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			) {
 				c.addEventListener("pointermove", checkOverOut, false)
 			}
+		}
+	}
+
+	let out_of_canvas_triggered: boolean = false
+
+	$: if (obj.userData.interact && $pointer_over_canvas.status === false) {
+		if (!out_of_canvas_triggered) {
+			out_of_canvas_triggered = true
+			// detect if pointer is out of canvas and fire pointer out/leave events if needed.
+			checkOverOut(pointer.event)
+		}
+	}
+
+	$: if (obj.userData.interact && $pointer_over_canvas.status === true) {
+		if (out_of_canvas_triggered) {
+			out_of_canvas_triggered = false
 		}
 	}
 
