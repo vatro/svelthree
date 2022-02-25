@@ -1,4 +1,5 @@
-import type { BufferGeometry, Material, Matrix4, Object3D } from "three";
+import type { BufferGeometry, Material, Object3D } from "three";
+import { Euler, Vector3 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 // import currently supported components only
@@ -125,21 +126,13 @@ export default class SvelthreeGLTF {
         // const [uuid, item] -> uuid not needed -> [,item]
         for (const [,item] of this.tree.entries()) {
 
-            const instance = item.svelthree_comp.get_instance()
-            instance.matrixAutoUpdate = false
+            const comp = item.svelthree_comp
 
-            // don't clone, just copy (is faster)
-            instance.matrix.copy(item.obj.matrix as Matrix4)
-            instance.matrixWorld.copy(item.obj.matrixWorld as Matrix4)
-            instance.position.copy(item.obj.position)
-            instance.rotation.copy(item.obj.rotation)
-            instance.scale.copy(item.obj.scale)
-
-            instance.matrixWorldNeedsUpdate = false
-            instance.matrixAutoUpdate = item.svelthree_comp.mau
-
-            instance.castShadow = item.obj.castShadow
-            instance.receiveShadow = item.obj.receiveShadow
+            comp.scale = new Vector3().copy(item.obj.scale)
+            comp.pos = new Vector3().copy(item.obj.position)
+            comp.rot = new Euler().copy(item.obj.rotation)
+            comp.castShadow = item.obj.castShadow
+            comp.receiveShadow = item.obj.receiveShadow
         }
 
 
