@@ -720,6 +720,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			dispatch("interaction_1")
 			// fire any interactive events 
 			dispatch("interaction_2")
+			// will currently update box-helpers only
+			dispatch("update_helpers")
 
 			// update OrbitControls (NonXR)
 			// required if `enableDamping` or `autoRotate` are set to `true`
