@@ -57,6 +57,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import { CubeCamera, WebGLCubeRenderTarget } from "three"
 	// custom CubeCameraHelper
 	import { CubeCameraHelper } from "../utils"
+	import { get_root_scene } from "../utils/SceneUtils"
 	import { Vector3 } from "three"
 	import type { CubeTexture, WebGLRenderer, WebGLRenderTargetOptions, Camera, Mesh } from "three"
 	import type {
@@ -98,25 +99,10 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 	let camera_updated: boolean = false
 
+	/** `CubeCamera` instances are always added to the `root_scene`
+	 * no matter which component the `CubeCamera` component was added to. */
 	let root_scene: Scene | null = undefined
-
-	// keep in mind we can have scenes inside scenes!
-	// root scene must not be the currently active scene!
-	function get_root_scene(): Scene | null {
-		let context_scene: Scene = getContext("scene")
-		if (context_scene.parent === null) {
-			return context_scene
-		} else {
-			let n = undefined
-			let o: any = context_scene
-			while (n !== null) {
-				n = o.parent
-			}
-			return o
-		}
-
-		return null
-	}
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
 
 	/** Bind `CubeCamera`'s position to the specified component / object (three) instance
 	 * ☝️ The `pos` shorthand attribute will override `bind_pos`! _Alternatively (standard)_:
@@ -203,10 +189,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		// get the instance that was shared to us as our 'parent'.
 		our_parent = getContext("parent") || scene
 
-		// `CubeCamera` instances are always added to the `root_scene`
-		// no matter which component the `CubeCamera` component was added to.
-		root_scene = get_root_scene()
-
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 	}
@@ -264,10 +246,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent'.
 		our_parent = getContext("parent") || scene
-
-		// `CubeCamera` instances are always added to the `root_scene`
-		// no matter which component the `CubeCamera` component was added to.
-		root_scene = get_root_scene()
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
