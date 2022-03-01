@@ -54,6 +54,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { BoxHelper } from "three"
+	import { once_on_render_event } from "../utils/RendererUtils.svelte"
+	import { get_root_scene } from "../utils/SceneUtils"
+	import type { WebGLRenderer } from "../components"
 
 	import { Object3D } from "three"
 	import type { RemoveFirst } from "../types-extra"
@@ -286,10 +289,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setMatrixFromValue(empty, matrix)
 	}
 
+	/** The root scene -> `scene.parent = null`. */
+	let root_scene: Scene | null = undefined
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> = undefined
 	/** Creates and adds a `BoxHelper`. */
 	export let box: boolean = undefined
+
+	/** Removes `WebGLRenderer` `"update_helpers"` event listener. */
+	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && empty && !empty.userData.box) add_box_helper()
 	$: if (!box && empty.userData.box) remove_box_helper()
@@ -301,10 +311,43 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			empty.userData.box = new BoxHelper(empty)
 		}
 
-		scene.add(empty.userData.box)
+		empty.userData.box.visible = false
 	}
 
-	function remove_box_helper() {
+	// update and show box on next frame
+	$: if (box && empty && empty.userData.box && $svelthreeStores[sti].rendererComponent) {
+		once_on_render_event($svelthreeStores[sti].rendererComponent, "before_render", apply_box, 1)
+	}
+
+	function apply_box(): void {
+		if (!empty.userData.box.parent) {
+			// add all boxes to the root scene!
+			if (root_scene) {
+				root_scene.add(empty.userData.box)
+			} else {
+				console.error(`SVELTHREE > ${c_name} > Cannot add box to 'root_scene'!`, root_scene)
+			}
+		}
+
+		// update box and make it visible
+		empty.userData.box.update()
+		empty.userData.box.visible = true
+
+		// start updating
+		if (!remove_update_box_on_render_event) {
+			remove_update_box_on_render_event = $svelthreeStores[sti].rendererComponent.$on(
+				"update_helpers",
+				update_box
+			)
+		}
+	}
+
+	function update_box(): void {
+		empty.userData.box.update()
+	}
+
+	function remove_box_helper(): void {
+		if (remove_update_box_on_render_event) remove_update_box_on_render_event()
 		if (empty.userData.box?.parent) {
 			empty.userData.box.parent.remove(empty.userData.box)
 			empty.userData.box = null
@@ -476,8 +519,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							})
 						)
 					}
-
-					if (box && empty.userData.box) empty.userData.box.update()
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }

@@ -59,6 +59,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Writable } from "svelte/store"
 
 	import { BoxHelper } from "three"
+	import { once_on_render_event } from "../utils/RendererUtils.svelte"
+	import { get_root_scene } from "../utils/SceneUtils"
+	import type { WebGLRenderer } from "../components"
 
 	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
@@ -308,10 +311,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let receiveShadow: boolean = undefined
 	$: if (receiveShadow !== undefined && content) GLTF_afterLoaded.for_all_meshes({ receiveShadow })(content)
 
+	/** The root scene -> `scene.parent = null`. */
+	let root_scene: Scene | null = undefined
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> = undefined
 	/** Creates and adds a `BoxHelper`. */
 	export let box: boolean = undefined
+
+	/** Removes `WebGLRenderer` `"update_helpers"` event listener. */
+	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && container && !container.userData.box) add_box_helper()
 	$: if (!box && container.userData.box) remove_box_helper()
@@ -323,10 +333,43 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			container.userData.box = new BoxHelper(container)
 		}
 
-		scene.add(container.userData.box)
+		container.userData.box.visible = false
 	}
 
-	function remove_box_helper() {
+	// update and show box on next frame
+	$: if (box && container && container.userData.box && $svelthreeStores[sti].rendererComponent) {
+		once_on_render_event($svelthreeStores[sti].rendererComponent, "before_render", apply_box, 1)
+	}
+
+	function apply_box(): void {
+		if (!container.userData.box.parent) {
+			// add all boxes to the root scene!
+			if (root_scene) {
+				root_scene.add(container.userData.box)
+			} else {
+				console.error(`SVELTHREE > ${c_name} > Cannot add box to 'root_scene'!`, root_scene)
+			}
+		}
+
+		// update box and make it visible
+		container.userData.box.update()
+		container.userData.box.visible = true
+
+		// start updating
+		if (!remove_update_box_on_render_event) {
+			remove_update_box_on_render_event = $svelthreeStores[sti].rendererComponent.$on(
+				"update_helpers",
+				update_box
+			)
+		}
+	}
+
+	function update_box(): void {
+		container.userData.box.update()
+	}
+
+	function remove_box_helper(): void {
+		if (remove_update_box_on_render_event) remove_update_box_on_render_event()
 		if (container.userData.box?.parent) {
 			container.userData.box.parent.remove(container.userData.box)
 			container.userData.box = null
@@ -559,8 +602,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							})
 						)
 					}
-
-					if (box && container.userData.box) container.userData.box.update()
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }
