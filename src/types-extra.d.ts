@@ -216,7 +216,6 @@ export type RaycastableSvelthreeComponents = Mesh<any> & Empty
 export interface PointerState {
 	pos: THREE.Vector2
 	event: PointerEvent
-	isOverCanvas: boolean
 	unprojected: THREE.Vector3
 }
 
