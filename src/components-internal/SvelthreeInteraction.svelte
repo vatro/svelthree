@@ -371,11 +371,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function intersects(): boolean {
 		if (all_intersections) {
 			if (all_intersections.result.length && all_intersections.result[0].object === obj) {
-				let intersects = raycaster.intersectObject(obj)
-
+			
 				raycasterData = {
-					intersections: intersects, // [] all intersections
-					ray: raycaster.ray, // Ray( origin : Vector3, direction : Vector3 )
+					intersections: all_intersections.result[0],
+					ray: raycaster.ray,
 					camera: raycaster.camera,
 					unprojectedPoint: new Vector3(pointer.pos.x, pointer.pos.y, 0).unproject(raycaster.camera)
 				}
