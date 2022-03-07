@@ -364,35 +364,30 @@ This is a **svelthree** _Canvas_ Component.
 		filtered_raycast.objects = []
 
 		for (let i = 0; i < raycast.length; i++) {
-			is_inside_active_scene(raycast[i])
+			const obj: Object3D = raycast[i]
+			if (obj.userData.root_scene) {
+				if (obj.userData.root_scene === $svelthreeStores[sti].activeScene) {
+					filtered_raycast.objects.push(obj)
+				} else {
+					/* nothing, object will not be raycasted */
+				}
+			} else {
+				console.error(`SVELTHREE > Canvas > filterRaycast > no 'obj.userData.root_scene'!`, { obj } )
+			}
 		}
 
 		filtered_raycast.dirty = false
 	}
 
-	function is_inside_active_scene(obj: Object3D): void {
-		let active_scene: Scene = $svelthreeStores[sti].activeScene
-
-		function check_parent(obj: Object3D) {
-			if (obj.parent && obj.parent === active_scene) {
-				//console.log("true!", obj)
-				filtered_raycast.objects.push(obj)
-				return true
-			} else if (obj.parent.parent) {
-				check_parent(obj.parent)
-			} else {
-				//console.log("false!", obj)
-				return false
-			}
-		}
-
-		check_parent(obj)
-	}
+	/** If `true` (_default_), the interaction (_pointer intersections_) [`Raycaster`](https://threejs.org/docs/index.html?q=raycaster#api/en/core/Raycaster)
+	 * will also check all descendants of interactive objects.
+	 * If set to `false` it will only check intersection with interactive objects. */
+	export let recursive: boolean = true
 
 	function update_all_intersections_and_cursor(): void {
 		if (interactive && $pointer_over_canvas.status === true) {
 			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
-			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, true)
+			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, recursive)
 
 			if (all_intersections.result.length && all_intersections.result[0].object.userData.interact) {
 				set_cursor_style("pointer")
