@@ -298,6 +298,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.removeEventListener("pointerleave", onPointerLeave_notInteractive)
 	}
 
+	/** Triggered on `pointermove` only, saves pointer position etc. */
 	function updatePointer(e: PointerEvent): void {
 		// type 'ClientRect' is deprecated, see : https://issueexplorer.com/issue/tinymce/tinymce/7140, using 'DOMRect' instead.
 		let rect: DOMRect = c.getBoundingClientRect()
