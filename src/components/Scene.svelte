@@ -486,11 +486,9 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 		if (root_scene === scene) {
 			// we are the root scene
 			root_scene = null
+		} else {
+			scene.userData.root_scene = root_scene
 		}
-	}
-
-	$: if (scene && root_scene) {
-		scene.userData.root_scene = root_scene
 	}
 
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
