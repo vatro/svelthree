@@ -575,29 +575,58 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 		}
 	}
 
-	export let onClick: SceneInteractionHandler = undefined
-	onClick // prevent 'unused-export-let' warning
+	/** for `SvelthreeInteraction` component's reactive listener management only */
+	let callbacks = {}
 
-	export let onPointerUp: SceneInteractionHandler = undefined
-	onPointerUp // prevent 'unused-export-let' warning
+	/** **svelthree** replacement for [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * but it doesn't return a function for removal of the listener (_like Svelte native does_), instead use `.remove(type, callback)` syntax.
+	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
+	export function on(type: any, callback: any): void {
+		self.$on(type, callback)
+		callbacks = callbacks
+	}
 
-	export let onPointerDown: SceneInteractionHandler = undefined
-	onPointerDown // prevent 'unused-export-let' warning
+	/** **svelthree** replacement for the _event listener removal function_ returned by [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
+	export function onx(type: any, callback: any): void {
+		const cbacks = self.$$.callbacks[type]
+		const index = cbacks.indexOf(callback)
+		if (index !== -1) cbacks.splice(index, 1)
+		callbacks = callbacks
+	}
 
-	export let onPointerOver: SceneInteractionHandler = undefined
-	onPointerOver // prevent 'unused-export-let' warning
+	export let on_click: SceneInteractionHandler = undefined
+	$: if (on_click !== undefined) callbacks = callbacks
 
-	export let onPointerOut: SceneInteractionHandler = undefined
-	onPointerOut // prevent 'unused-export-let' warning
+	export let on_pointerup: SceneInteractionHandler = undefined
+	$: if (on_pointerup !== undefined) callbacks = callbacks
 
-	export let onPointerEnter: SceneInteractionHandler = undefined
-	onPointerEnter // prevent 'unused-export-let' warning
+	export let on_pointerdown: SceneInteractionHandler = undefined
+	$: if (on_pointerdown !== undefined) callbacks = callbacks
 
-	export let onPointerLeave: SceneInteractionHandler = undefined
-	onPointerLeave // prevent 'unused-export-let' warning
+	export let on_pointerover: SceneInteractionHandler = undefined
+	$: if (on_pointerover !== undefined) callbacks = callbacks
 
-	export let onPointerMove: SceneInteractionHandler = undefined
-	onPointerMove // prevent 'unused-export-let' warning
+	export let on_pointerout: SceneInteractionHandler = undefined
+	$: if (on_pointerout !== undefined) callbacks = callbacks
+
+	export let on_pointerenter: SceneInteractionHandler = undefined
+	$: if (on_pointerenter !== undefined) callbacks = callbacks
+
+	export let on_pointerleave: SceneInteractionHandler = undefined
+	$: if (on_pointerleave !== undefined) callbacks = callbacks
+
+	export let on_pointermove: SceneInteractionHandler = undefined
+	$: if (on_pointermove !== undefined) callbacks = callbacks
+
+	export let on_pointercapture: SceneInteractionHandler = undefined
+	$: if (on_pointercapture !== undefined) callbacks = callbacks
+
+	export let on_lostpointercapture: SceneInteractionHandler = undefined
+	$: if (on_lostpointercapture !== undefined) callbacks = callbacks
+
+	export let on_pointercancel: SceneInteractionHandler = undefined
+	$: if (on_pointercancel !== undefined) callbacks = callbacks
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
@@ -774,5 +803,5 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 <slot />
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction {dispatch} obj={scene} parent={self} {interactionEnabled} {log_dev} {log_lc} />
+	<SvelthreeInteraction {dispatch} {callbacks} obj={scene} parent={self} {interactionEnabled} {log_dev} {log_lc} />
 {/if}

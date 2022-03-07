@@ -515,29 +515,58 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	export let onClick: MeshInteractionHandler = undefined
-	onClick // prevent 'unused-export-let' warning
+	/** for `SvelthreeInteraction` component's reactive listener management only */
+	let callbacks = {}
 
-	export let onPointerUp: MeshInteractionHandler = undefined
-	onPointerUp // prevent 'unused-export-let' warning
+	/** **svelthree** replacement for [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * but it doesn't return a function for removal of the listener (_like Svelte native does_), instead use `.remove(type, callback)` syntax.
+	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
+	export function on(type: any, callback: any): void {
+		self.$on(type, callback)
+		callbacks = callbacks
+	}
 
-	export let onPointerDown: MeshInteractionHandler = undefined
-	onPointerDown // prevent 'unused-export-let' warning
+	/** **svelthree** replacement for the _event listener removal function_ returned by [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
+	export function onx(type: any, callback: any): void {
+		const cbacks = self.$$.callbacks[type]
+		const index = cbacks.indexOf(callback)
+		if (index !== -1) cbacks.splice(index, 1)
+		callbacks = callbacks
+	}
 
-	export let onPointerOver: MeshInteractionHandler = undefined
-	onPointerOver // prevent 'unused-export-let' warning
+	export let on_click: MeshInteractionHandler = undefined
+	$: if (on_click !== undefined) callbacks = callbacks
 
-	export let onPointerOut: MeshInteractionHandler = undefined
-	onPointerOut // prevent 'unused-export-let' warning
+	export let on_pointerup: MeshInteractionHandler = undefined
+	$: if (on_pointerup !== undefined) callbacks = callbacks
 
-	export let onPointerEnter: MeshInteractionHandler = undefined
-	onPointerEnter // prevent 'unused-export-let' warning
+	export let on_pointerdown: MeshInteractionHandler = undefined
+	$: if (on_pointerdown !== undefined) callbacks = callbacks
 
-	export let onPointerLeave: MeshInteractionHandler = undefined
-	onPointerLeave // prevent 'unused-export-let' warning
+	export let on_pointerover: MeshInteractionHandler = undefined
+	$: if (on_pointerover !== undefined) callbacks = callbacks
 
-	export let onPointerMove: MeshInteractionHandler = undefined
-	onPointerMove // prevent 'unused-export-let' warning
+	export let on_pointerout: MeshInteractionHandler = undefined
+	$: if (on_pointerout !== undefined) callbacks = callbacks
+
+	export let on_pointerenter: MeshInteractionHandler = undefined
+	$: if (on_pointerenter !== undefined) callbacks = callbacks
+
+	export let on_pointerleave: MeshInteractionHandler = undefined
+	$: if (on_pointerleave !== undefined) callbacks = callbacks
+
+	export let on_pointermove: MeshInteractionHandler = undefined
+	$: if (on_pointermove !== undefined) callbacks = callbacks
+
+	export let on_pointercapture: MeshInteractionHandler = undefined
+	$: if (on_pointercapture !== undefined) callbacks = callbacks
+
+	export let on_lostpointercapture: MeshInteractionHandler = undefined
+	$: if (on_lostpointercapture !== undefined) callbacks = callbacks
+
+	export let on_pointercancel: MeshInteractionHandler = undefined
+	$: if (on_pointercancel !== undefined) callbacks = callbacks
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
@@ -714,5 +743,5 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <slot />
 
 {#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction {dispatch} obj={mesh} parent={self} {interactionEnabled} {log_dev} {log_lc} />
+	<SvelthreeInteraction {dispatch} {callbacks} obj={mesh} parent={self} {interactionEnabled} {log_dev} {log_lc} />
 {/if}

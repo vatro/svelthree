@@ -41,23 +41,25 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
 
+	const pointer_events_queue = []
+
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
-	$: if (c) {
-		if (raycaster && interactionEnabled && obj && !obj.userData.interact) {
-			addListeners()
-			obj.userData.interact = true
+	let pointer_listeners: boolean = false
 
-			if ($svelthreeStores[sti].rendererComponent?.mode === "always") add_interaction_2_listener()
+	$: if (c && raycaster && interactionEnabled && obj && !obj.userData.interact) {
+		obj.userData.interact = true
+		pointer_listeners = true
 
-			// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
-			if (
-				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
-				$svelthreeStores[sti].rendererComponent?.mode === "once"
-			) {
-				c.addEventListener("pointermove", checkOverOut, false)
-			}
+		if ($svelthreeStores[sti].rendererComponent?.mode === "always") add_interaction_2_listener()
+
+		// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
+		if (
+			$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
+			$svelthreeStores[sti].rendererComponent?.mode === "once"
+		) {
+			c.addEventListener("pointermove", check_overout, false)
 		}
 	}
 
@@ -67,7 +69,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (!out_of_canvas_triggered) {
 			out_of_canvas_triggered = true
 			// detect if pointer is out of canvas and fire pointer out/leave events if needed.
-			checkOverOut(pointer.event)
+			check_overout(pointer.event)
 		}
 	}
 
@@ -86,38 +88,138 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		)
 	}
 
+	// e will always be `pointermove` event!
 	function checkPointer(e: PointerEvent): void {
-		checkOverOut(e)
-		tryDispatch(e)
+		check_overout(e)
+		try_dispatch(e)
+
+		for (let i = 0; i < pointer_events_queue.length; i++) {
+			pointer_events_queue[i]()
+		}
+
+		pointer_events_queue.length = 0
 	}
 
-	$: if (!interactionEnabled && obj && obj.userData.interact) {
-		removeListeners()
+	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
+	function has_on_directive(on_directive: string): boolean {
+		const has_directive_key: boolean = Object.keys(parent.$$.callbacks).includes(on_directive)
+		const directive_callbacks: any[] | null = has_directive_key ? parent.$$.callbacks[on_directive] : null
+
+		if (directive_callbacks?.length) {
+			for (let i = 0; i < directive_callbacks.length; i++) {
+				if (directive_callbacks[i]) {
+					return true
+				}
+			}
+			return false
+		} else {
+			return false
+		}
+	}
+
+	function has_prop_action(prop_action: string): boolean {
+		return !!parent[prop_action]
+	}
+
+	function using_pointer_event(event_name: string): boolean {
+		return has_on_directive(event_name) || parent[`on_${event_name}`]
+	}
+
+	function not_using_pointer_event(event_name: string): boolean {
+		return !has_on_directive(event_name) && !parent[`on_${event_name}`]
+	}
+
+	function add_listener(event_name: string, capture: boolean = false): void {
+		//console.log(`SVELTHREE > ${c_name} > add '${event_name}' listener!`)
+		c.addEventListener(event_name, try_dispatch, capture)
+	}
+
+	function remove_listener(event_name: string): void {
+		//console.log(`SVELTHREE > ${c_name} > remove '${event_name}' listener!`)
+		c.removeEventListener(event_name, try_dispatch)
+	}
+
+	const pointer_events = [
+		"click",
+		"pointerup",
+		"pointerdown",
+		"gotpointercapture",
+		"lostpointercapture",
+		"pointercancel"
+	]
+
+	/** for `SvelthreeInteraction` component's reactive listener management only */
+	export let callbacks = undefined
+
+	// reactive listener management checks
+	$: r_add = interactionEnabled && pointer_listeners
+	$: r_remove = !interactionEnabled && pointer_listeners
+
+	// Reactively add / remove pointer listeners, works with e.g. (syntax):
+
+	// programmatically:
+	//   - add/re-add: `comp.on("click", onClick)`
+	//   - disable/remove: `comp.onx("click", onClick)`
+
+	// dom directive:
+	//   - add: `<Mesh on:click={onClick} />
+	//   - disable/remove: `comp.onx("click", turn_wheel)` or not adding to dom in the first place
+
+	// interaction prop (internal action):
+	//   - add/re-add: `<Mesh on_click={onClick} /> or `comp.on_click = {onClick}`
+	//   - disable/remove: `comp.on_click = null` or not adding to dom in the first place
+
+	$: if (r_add || callbacks) {
+		if (using_pointer_event("click")) add_listener("click")
+		if (using_pointer_event("pointerup")) add_listener("pointerup")
+		if (using_pointer_event("pointerdown")) add_listener("pointerdown")
+		if (using_pointer_event("gotpointercapture")) add_listener("gotpointercapture")
+		if (using_pointer_event("lostpointercapture")) add_listener("lostpointercapture")
+		if (using_pointer_event("pointercancel")) add_listener("pointercancel")
+
+		if (not_using_pointer_event("click")) remove_listener("click")
+		if (not_using_pointer_event("pointerup")) remove_listener("pointerup")
+		if (not_using_pointer_event("pointerdown")) remove_listener("pointerdown")
+		if (not_using_pointer_event("gotpointercapture")) remove_listener("gotpointercapture")
+		if (not_using_pointer_event("lostpointercapture")) remove_listener("lostpointercapture")
+		if (not_using_pointer_event("pointercancel")) remove_listener("pointercancel")
+	}
+
+	$: if (r_remove) remove_all_listeners()
+
+	function remove_all_pointer_listeners(): void {
+		for (let i = 0; i < pointer_events.length; i++) {
+			remove_listener(pointer_events[i])
+		}
+	}
+
+	function remove_all_listeners(): void {
+		if (remove_interaction_2_listener) {
+			remove_interaction_2_listener()
+			remove_interaction_2_listener = null
+		}
+		remove_all_pointer_listeners()
+		pointer_listeners = false
+		pointer_events_queue.length = 0
+	}
+
+	// disable interaction (reactive)
+	$: if (c && raycaster && !interactionEnabled && obj && obj.userData.interact) {
+		remove_all_listeners()
 		obj.userData.interact = false
 	}
 
-	function addListeners() {
-		c.addEventListener("click", tryDispatch, false)
-		c.addEventListener("pointerup", tryDispatch, false)
-		c.addEventListener("pointerdown", tryDispatch, false)
-	}
-
-	function removeListeners() {
-		c.removeEventListener("click", tryDispatch)
-		c.removeEventListener("pointerup", tryDispatch)
-		c.removeEventListener("pointerdown", tryDispatch)
-	}
-
-	let checks = {
-		click: { check: dispatchOnIntersect },
-		pointerup: { check: dispatchOnIntersect },
-		pointerdown: { check: dispatchOnIntersect },
-		pointermove: { check: dispatchAlways }
-	}
-
-	function tryDispatch(e: MouseEvent | PointerEvent): void {
-		if (checks.hasOwnProperty(e.type)) {
-			checks[e.type].check(e)
+	function try_dispatch(e: PointerEvent): void {
+		// queue only 'dispatch_on_intersect' events
+		switch (e.type) {
+			case "click":
+			case "pointerup":
+			case "pointerdown":
+				pointer_events_queue.push(() => dispatch_on_intersect(e))
+				break
+			default:
+				dispatch_always(e)
+				break
 		}
 	}
 
@@ -127,18 +229,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		return () => {
 			if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onDestroy"))
 			obj.userData.interact = false
-
-			if (c) {
-				if (remove_interaction_2_listener) {
-					remove_interaction_2_listener()
-					remove_interaction_2_listener = null
-				}
-				c.removeEventListener("pointermove", checkOverOut)
-				c.removeEventListener("click", tryDispatch)
-				c.removeEventListener("pointerup", tryDispatch)
-				c.removeEventListener("pointerdown", tryDispatch)
-				c.removeEventListener("pointermove", tryDispatch)
-			}
+			if (c) remove_all_listeners()
 		}
 	})
 
@@ -155,113 +246,57 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let raycasterData: {}
 
-	function getPointerData(e: PointerEvent | MouseEvent) {
-		let pointerData = {
-			// PointerEventInit props, see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent
-
-			pointerId: 1976 + e["pointerId"],
-			width: e["width"],
-			height: e["height"],
-			pressure: e["pressure"],
-			tangentialPressure: e["tangentialPressure"],
-			tiltX: e["tangentialPressure"],
-			tiltY: e["tiltY"],
-			twist: e["twist"],
-			pointerType: e["pointerType"],
-			isPrimary: e["isPrimary"],
-
-			// without PointerEvent methods
-
-			// MouseEvent props, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
-			altKey: e.altKey,
-			button: e.button,
-			buttons: e.buttons,
-			clientX: e.clientX,
-			clientY: e.clientY,
-			ctrlKey: e.ctrlKey,
-			metaKey: e.metaKey,
-			movementX: e.movementX,
-			movementY: e.movementY,
-			offsetX: e.offsetX,
-			offsetY: e.offsetY,
-			pageX: e.pageX,
-			pageY: e.pageY,
-			//region: e.region, // doesn't exist on Mouse or PointerEvent, deprecated?
-			relatedTarget: e.relatedTarget,
-			screenX: e.screenX,
-			screenY: e.screenY,
-			shiftKey: e.shiftKey,
-			//which // not standardized
-			//mozPressure // deprecated
-			//mozInputSource // not standardized
-			//webkitForce // not standardized
-			x: e.x, // = clientX
-			y: e.y // = clientY
-
-			// without MouseEvent methods
-		}
-
-		return pointerData
-	}
-
-	/*
-     The checkOverOut could maybe also be further optimized to bypass raycaster check one level higher?
-     Although we already get very decent performance with high number of interactive objects, the problem is
-     this check happens on every pointermove event in every interactive object. Not sure if some distance calculation
-     based on for example the bounding box of the mesh would be more performant than simply checking "allIntersections" in
-     store like we do at the moment. hmm...
-    */
-	function checkOverOut(e: PointerEvent) {
+	function check_overout(e: PointerEvent) {
 		if (intersects()) {
-			if (!isOverDispatched) {
-				let pointerData = getPointerData(e)
+			const pointerData = { ...e }
 
-				mDispatch(
+			if (!isOverDispatched) {
+				m_dispatch(
 					"pointerenter",
 					{
 						type: "pointerenter",
 						target: obj,
-						pointerData: pointerData,
-						raycasterData: raycasterData
+						pointerData,
+						raycasterData
 					},
-					!!parent.onPointerEnter
+					!!parent.on_pointerenter
 				)
-				mDispatch(
+				m_dispatch(
 					"pointerover",
 					{
 						type: "pointerover",
 						target: obj,
-						pointerData: pointerData,
-						raycasterData: raycasterData
+						pointerData,
+						raycasterData
 					},
-					!!parent.onPointerOver
+					!!parent.on_pointerover
 				)
 				isOverDispatched = true
 				isOutDispatched = false
 			}
 		} else {
 			if (!isOutDispatched) {
-				let pointerData = getPointerData(e)
+				const pointerData = { ...e }
 
-				mDispatch(
+				m_dispatch(
 					"pointerout",
 					{
 						type: "pointerout",
 						target: obj,
-						pointerData: pointerData,
-						raycasterData: raycasterData
+						pointerData,
+						raycasterData
 					},
-					!!parent.onPointerOut
+					!!parent.on_pointerout
 				)
-				mDispatch(
+				m_dispatch(
 					"pointerleave",
 					{
 						type: "pointerleave",
 						target: obj,
-						pointerData: pointerData,
-						raycasterData: raycasterData
+						pointerData,
+						raycasterData
 					},
-					!!parent.onPointerLeave
+					!!parent.on_pointerleave
 				)
 				isOutDispatched = true
 				isOverDispatched = false
@@ -270,88 +305,52 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/*
-     Proccess 'pointermove'-event only if parent component has been rendered with an on:click handler
+     Proccess 'pointermove'-event only if parent component has been rendered with an on:pointermove handler
      or if an internal 'onPointerMove'-handler was provided.
      @see https://discord.com/channels/457912077277855764/457912077277855766/728789428729938021
      @see https://svelte.dev/repl/b7d49058463c48cbb1b35cbbe19c184d?version=3.24.0
     */
 
-	function dispatchAlways(e: PointerEvent) {
-		Object.keys(parent.$$.callbacks).includes("pointermove")
-			? dispatch(e.type, {
-					event: e,
-					target: obj,
-					//unprojected: $svelthreeStores[sti].pointer.unprojected
-					unprojected: pointer.unprojected
-			  })
-			: null
+	function dispatch_always(e: PointerEvent) {
+		const action_name: string = `on_${e.type}`
 
-		parent.onPointerMove
-			? onPointerMoveAction(
-					new CustomEvent(e.type, {
-						detail: {
-							event: e,
-							target: obj,
-							//unprojected: $svelthreeStores[sti].pointer.unprojected
-							unprojected: pointer.unprojected
-						}
-					})
-			  )
-			: null
-	}
-
-	function dispatchOnIntersect(e: MouseEvent | PointerEvent) {
-		if (intersects()) {
-			e.type === "click" ? doDispatch(e, !!parent.onClick) : null
-			e.type === "pointerup" ? doDispatch(e, !!parent.onPointerUp) : null
-			e.type === "pointerdown" ? doDispatch(e, !!parent.onPointerDown) : null
+		if (has_on_directive(e.type)) dispatch(e.type, { event: e, target: obj, unprojected: pointer.unprojected })
+		if (has_prop_action(action_name)) {
+			parent[action_name](
+				new CustomEvent(e.type, {
+					detail: {
+						event: e,
+						target: obj,
+						unprojected: pointer.unprojected
+					}
+				})
+			)
 		}
 	}
 
-	function doDispatch(e: MouseEvent | PointerEvent, fireInternal: boolean): void {
-		let pointerData = getPointerData(e)
-		mDispatch(
-			e.type,
-			{
-				type: e.type,
-				target: obj,
-				pointerData: pointerData,
-				raycasterData: raycasterData
-			},
-			fireInternal
-		)
+	function dispatch_on_intersect(e: PointerEvent) {
+		if (intersects()) {
+			e.type === "click" ? do_dispatch(e, !!parent.on_click) : null
+			e.type === "pointerup" ? do_dispatch(e, !!parent.on_pointerup) : null
+			e.type === "pointerdown" ? do_dispatch(e, !!parent.on_pointerdown) : null
+		}
 	}
 
-	function mDispatch(message: string, details: { [key: string]: any }, fireInternal: boolean): void {
-		dispatch(message, details)
+	function do_dispatch(e: PointerEvent, fire_prop_action: boolean): void {
+		const pointerData = { ...e }
+		const message: string = e.type
+		const details = { type: e.type, target: obj, pointerData, raycasterData }
 
-		if (fireInternal) {
+		m_dispatch(message, details, fire_prop_action)
+	}
+
+	function m_dispatch(message: string, details: { [key: string]: any }, fire_prop_action: boolean): void {
+		if (has_on_directive(message)) dispatch(message, details)
+
+		if (fire_prop_action) {
 			let event = new CustomEvent(message, { detail: details })
-			switch (message) {
-				case "click":
-					parent.onClick ? onClickAction(event) : null
-					break
-				case "pointerup":
-					parent.onPointerUp ? onPointerUpAction(event) : null
-					break
-				case "pointerdown":
-					parent.onPointerDown ? onPointerDownAction(event) : null
-					break
-				case "pointerover":
-					parent.onPointerOver ? onPointerOverAction(event) : null
-					break
-				case "pointerout":
-					parent.onPointerOut ? onPointerOutAction(event) : null
-					break
-				case "pointerenter":
-					parent.onPointerEnter ? onPointerEnterAction(event) : null
-					break
-				case "pointerleave":
-					parent.onPointerLeave ? onPointerLeaveAction(event) : null
-					break
-				case "pointermove": // see dispatchAlways(e: PointerEvent)
-					break
-			}
+			const action_name: string = `on_${message}`
+			on_action(event, action_name)
 		}
 	}
 
@@ -380,59 +379,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// --- Internal Actions ---
 
-	function onClickAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onClickAction!", { e }))
-		typeof parent.onClick === "function"
-			? parent.onClick(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onClick' object is not a valid function!")
-	}
-
-	function onPointerUpAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerUpAction!", { e }))
-		typeof parent.onPointerUp === "function"
-			? parent.onPointerUp(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerUp' object is not a function!")
-	}
-
-	function onPointerDownAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerDownAction!", { e }))
-		typeof parent.onPointerDown === "function"
-			? parent.onPointerDown(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerDown' object is not a function!")
-	}
-
-	function onPointerOverAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerOverAction!", { e }))
-		typeof parent.onPointerOver === "function"
-			? parent.onPointerOver(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOver' object is not a function!")
-	}
-
-	function onPointerOutAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerOutAction!", { e }))
-		typeof parent.onPointerOut === "function"
-			? parent.onPointerOut(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerOut' object is not a function!")
-	}
-
-	function onPointerEnterAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerEnterAction!", { e }))
-		typeof parent.onPointerEnter === "function"
-			? parent.onPointerEnter(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerEnter' object is not a function!")
-	}
-
-	function onPointerLeaveAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerLeaveAction!", { e }))
-		typeof parent.onPointerLeave === "function"
-			? parent.onPointerLeave(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerLeave' object is not a function!")
-	}
-
-	function onPointerMoveAction(e: CustomEvent): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "(internal) onPointerMoveAction!", { e }))
-		typeof parent.onPointerMove === "function"
-			? parent.onPointerMove(e)
-			: console.error("SVELTHREE > SvelthreeInteraction : provided 'onPointerMove' object is not a function!")
+	function on_action(e: CustomEvent, action_name: string) {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, `(internal) ${action_name}!`, { e }))
+		typeof parent[action_name] === "function"
+			? parent[action_name](e)
+			: console.error(
+					`SVELTHREE > SvelthreeInteraction : provided '${action_name}' object is not a valid function!`
+			  )
 	}
 </script>
