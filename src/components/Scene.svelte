@@ -489,6 +489,10 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 		}
 	}
 
+	$: if (scene && root_scene) {
+		scene.userData.root_scene = root_scene
+	}
+
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> = undefined
 	/** Creates and adds a `BoxHelper`. */

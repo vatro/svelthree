@@ -315,6 +315,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let root_scene: Scene | null = undefined
 	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
 
+	$: if (container && root_scene) {
+		container.userData.root_scene = root_scene
+	}
+
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> = undefined
 	/** Creates and adds a `BoxHelper`. */
