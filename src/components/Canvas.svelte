@@ -251,7 +251,7 @@ This is a **svelthree** _Canvas_ Component.
 
 		c.addEventListener("pointerleave", onPointerLeave, false)
 		add_pointermove_listeners()
-		c.removeEventListener("pointerenter", updatePointer)
+		c.removeEventListener("pointerenter", onPointerEnter)
 
 		//console.log("onPointerEnter!")
 	}
