@@ -423,6 +423,11 @@ This is a **svelthree** _Canvas_ Component.
 		})
 	}
 
+	/** Get all interactive **three.js object instances** intersected by the ray (pointer). */
+	export function get_interactive_intersections_all(): any[] {
+		return all_intersections.result
+	}
+
 	function set_cursor_style(css_value: string): void {
 		// doesn't update the component on cursor change (as opposed to c.style)
 		self.$$.root.style.cursor = css_value
