@@ -138,11 +138,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		"click",
 		"pointerup",
 		"pointerdown",
-		"pointerover",
-		"pointerout",
-		"pointerenter",
-		"pointerleave",
-		"pointermove",
 		"gotpointercapture",
 		"lostpointercapture",
 		"pointercancel"
@@ -175,11 +170,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (using_pointer_event("click")) add_listener("click")
 		if (using_pointer_event("pointerup")) add_listener("pointerup")
 		if (using_pointer_event("pointerdown")) add_listener("pointerdown")
-		if (using_pointer_event("pointerover")) add_listener("pointerover")
-		if (using_pointer_event("pointerout")) add_listener("pointerout")
-		if (using_pointer_event("pointerenter")) add_listener("pointerenter")
-		if (using_pointer_event("pointerleave")) add_listener("pointerleave")
-		if (using_pointer_event("pointermove")) add_listener("pointermove")
 		if (using_pointer_event("gotpointercapture")) add_listener("gotpointercapture")
 		if (using_pointer_event("lostpointercapture")) add_listener("lostpointercapture")
 		if (using_pointer_event("pointercancel")) add_listener("pointercancel")
@@ -187,11 +177,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (not_using_pointer_event("click")) remove_listener("click")
 		if (not_using_pointer_event("pointerup")) remove_listener("pointerup")
 		if (not_using_pointer_event("pointerdown")) remove_listener("pointerdown")
-		if (not_using_pointer_event("pointerover")) remove_listener("pointerover")
-		if (not_using_pointer_event("pointerout")) remove_listener("pointerout")
-		if (not_using_pointer_event("pointerenter")) remove_listener("pointerenter")
-		if (not_using_pointer_event("pointerleave")) remove_listener("pointerleave")
-		if (not_using_pointer_event("pointermove")) remove_listener("pointermove")
+		if (not_using_pointer_event("pointerover")) listeners_counter--
+		if (not_using_pointer_event("pointerout")) listeners_counter--
+		if (not_using_pointer_event("pointerenter")) listeners_counter--
+		if (not_using_pointer_event("pointerleave")) listeners_counter--
+		if (not_using_pointer_event("pointermove")) listeners_counter--
 		if (not_using_pointer_event("gotpointercapture")) remove_listener("gotpointercapture")
 		if (not_using_pointer_event("lostpointercapture")) remove_listener("lostpointercapture")
 		if (not_using_pointer_event("pointercancel")) remove_listener("pointercancel")
