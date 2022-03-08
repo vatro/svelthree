@@ -244,14 +244,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let isOverDispatched = false
 	let isOutDispatched = true
 
-	
 	interface RaycasterData {
 		/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
-		intersections: { [P in keyof THREE.Intersection]: THREE.Intersection[P] },
+		intersections: { [P in keyof THREE.Intersection]: THREE.Intersection[P] }
 		/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
-		ray: THREE.Ray,
+		ray: THREE.Ray
 		/** The `Camera` used for raycasting. */
-		camera: THREE.Camera,
+		camera: THREE.Camera
 		/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
 		unprojectedPoint: THREE.Vector3
 	}
@@ -371,7 +370,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function intersects(): boolean {
 		if (all_intersections) {
 			if (all_intersections.result.length && all_intersections.result[0].object === obj) {
-			
 				raycasterData = {
 					intersections: all_intersections.result[0],
 					ray: raycaster.ray,
