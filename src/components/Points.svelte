@@ -500,7 +500,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
+	/** Make component's three.js object interactive -> enable raycasting, `on:<event_name>` directives and `on_<event_name>` internal actions. */
 	export let interact: boolean = undefined
+
+	/** Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
+	 * This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
+	 *
+	 * Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.
+	 * In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
+	 * the object will automatically become an _interaction occluder / blocker_.
+	 */
+	export let block: boolean = false
 
 	let interactive: boolean = undefined
 	const canvas_interactivity: Writable<{ enabled: boolean }> = getContext("canvas_interactivity")
@@ -514,16 +524,30 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	const raycast: RaycastArray = getContext("raycast")
 
 	// reactively enable raycasting to the created three.js instance
-	$: if (interactionEnabled && raycast) {
+	$: if (interactionEnabled && raycast && !block) {
 		if (!raycast.includes(points)) {
+			points.userData.block = false
 			raycast.push(points)
+		} else {
+			points.userData.block = false
+		}
+	}
+
+	// reactively enable raycasting to the created three.js instance if it's an 'interaction occluder / blocker'
+	$: if (!interactionEnabled && raycast && block) {
+		if (!raycast.includes(points)) {
+			points.userData.block = true
+			raycast.push(points)
+		} else {
+			points.userData.block = true
 		}
 	}
 
 	// reactively disable raycasting to the created three.js instance
-	$: if (!interactionEnabled && raycast) {
+	$: if (!interactionEnabled && raycast && !block) {
 		if (raycast.includes(points)) {
 			raycast.splice(points.userData.index_in_raycast, 1)
+			points.userData.block = false
 		}
 	}
 

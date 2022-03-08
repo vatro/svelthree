@@ -51,16 +51,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	$: if (c && raycaster && interactionEnabled && obj && !obj.userData.interact) {
 		obj.userData.interact = true
 		pointer_listeners = true
-
-		if ($svelthreeStores[sti].rendererComponent?.mode === "always") add_interaction_2_listener()
-
-		// 'auto' & 'once' render modes -> check intersections / fire events only if pointer is moving
-		if (
-			$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
-			$svelthreeStores[sti].rendererComponent?.mode === "once"
-		) {
-			c.addEventListener("pointermove", check_overout, false)
-		}
 	}
 
 	let out_of_canvas_triggered: boolean = false
@@ -69,7 +59,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (!out_of_canvas_triggered) {
 			out_of_canvas_triggered = true
 			// detect if pointer is out of canvas and fire pointer out/leave events if needed.
-			check_overout(pointer.event)
+			if (!obj.userData.block) {
+				check_overout(pointer.event)
+			}
 		}
 	}
 
@@ -129,6 +121,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		return !has_on_directive(event_name) && !parent[`on_${event_name}`]
 	}
 
+	let listeners_counter = 0
+
 	function add_listener(event_name: string, capture: boolean = false): void {
 		//console.log(`SVELTHREE > ${c_name} > add '${event_name}' listener!`)
 		c.addEventListener(event_name, try_dispatch, capture)
@@ -137,6 +131,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function remove_listener(event_name: string): void {
 		//console.log(`SVELTHREE > ${c_name} > remove '${event_name}' listener!`)
 		c.removeEventListener(event_name, try_dispatch)
+		listeners_counter--
 	}
 
 	const pointer_events = [
@@ -174,7 +169,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	//   - add/re-add: `<Mesh on_click={onClick} /> or `comp.on_click = {onClick}`
 	//   - disable/remove: `comp.on_click = null` or not adding to dom in the first place
 
-	$: if (r_add || callbacks) {
+	$: if (r_add || (callbacks && interactionEnabled)) {
+		listeners_counter = 0
+
 		if (using_pointer_event("click")) add_listener("click")
 		if (using_pointer_event("pointerup")) add_listener("pointerup")
 		if (using_pointer_event("pointerdown")) add_listener("pointerdown")
@@ -198,6 +195,34 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (not_using_pointer_event("gotpointercapture")) remove_listener("gotpointercapture")
 		if (not_using_pointer_event("lostpointercapture")) remove_listener("lostpointercapture")
 		if (not_using_pointer_event("pointercancel")) remove_listener("pointercancel")
+
+		// interact is true, but there are listeners added, cursor should not chang on mouseover, but object should be raycasted.
+		obj.userData.block = listeners_counter === -11
+
+		if (obj.userData.block) {
+			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && remove_interaction_2_listener) {
+				remove_interaction_2_listener()
+				remove_interaction_2_listener = null
+			}
+
+			if (
+				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
+				$svelthreeStores[sti].rendererComponent?.mode === "once"
+			) {
+				c.removeEventListener("pointermove", check_overout)
+			}
+		} else {
+			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
+				add_interaction_2_listener()
+			}
+
+			if (
+				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
+				$svelthreeStores[sti].rendererComponent?.mode === "once"
+			) {
+				c.addEventListener("pointermove", check_overout, false)
+			}
+		}
 	}
 
 	$: if (r_remove) remove_all_listeners()
@@ -213,9 +238,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			remove_interaction_2_listener()
 			remove_interaction_2_listener = null
 		}
+		c.removeEventListener("pointermove", check_overout)
+
 		remove_all_pointer_listeners()
 		pointer_listeners = false
 		pointer_events_queue.length = 0
+		obj.userData.block = true
 	}
 
 	// disable interaction (reactive)

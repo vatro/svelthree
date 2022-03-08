@@ -389,7 +389,11 @@ This is a **svelthree** _Canvas_ Component.
 			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
 			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, recursive)
 
-			if (all_intersections.result.length && all_intersections.result[0].object.userData.interact) {
+			if (
+				all_intersections.result.length &&
+				all_intersections.result[0].object.userData.interact &&
+				!all_intersections.result[0].object.userData.block
+			) {
 				set_cursor_style("pointer")
 			} else {
 				$svelthreeStores[sti].orbitcontrols.length > 0
