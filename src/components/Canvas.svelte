@@ -443,7 +443,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	function set_cursor_style(css_value: string): void {
 		// doesn't update the component on cursor change (as opposed to c.style)
-		self.$$.root.style.cursor = css_value
+		if (self.$$.root.style.cursor !== css_value) self.$$.root.style.cursor = css_value
 	}
 
 	// --- public methods
