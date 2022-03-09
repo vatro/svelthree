@@ -53,6 +53,9 @@ This is a **svelthree** _Canvas_ Component.
 	let clazz: string = undefined
 	export { clazz as class }
 
+	/** If `true` (_default_) the cursor will change automatically (_e.g. over/out canvas DOM element, **interactive** objects or when using the `OrbitControls` component_). */
+	export let change_cursor: boolean = true
+
 	export let interactive: boolean = undefined
 	const canvas_interactivity: Writable<{ enabled: boolean }> = writable({ enabled: interactive })
 	setContext("canvas_interactivity", canvas_interactivity)
@@ -263,7 +266,11 @@ This is a **svelthree** _Canvas_ Component.
 
 		//console.log("onPointerEnter_notInteractive!")
 
-		$svelthreeStores[sti].orbitcontrols.length > 0 ? set_cursor_style("all-scroll") : set_cursor_style("default")
+		if (change_cursor) {
+			$svelthreeStores[sti].orbitcontrols.length > 0
+				? set_cursor_style("all-scroll")
+				: set_cursor_style("default")
+		}
 	}
 
 	function onPointerLeave_notInteractive(): void {
@@ -272,7 +279,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.addEventListener("pointerenter", onPointerEnter_notInteractive, false)
 		c.removeEventListener("pointerleave", onPointerLeave_notInteractive)
 
-		set_cursor_style("default")
+		if (change_cursor) set_cursor_style("default")
 
 		//console.log("onPointerLeave_notInteractive!")
 	}
@@ -284,7 +291,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.removeEventListener("pointerleave", onPointerLeave)
 		c.addEventListener("pointerenter", onPointerEnter, false)
 
-		set_cursor_style("default")
+		if (change_cursor) set_cursor_style("default")
 
 		//console.log("onPointerLeave!")
 	}
@@ -389,16 +396,18 @@ This is a **svelthree** _Canvas_ Component.
 			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
 			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, recursive)
 
-			if (
-				all_intersections.result.length &&
-				all_intersections.result[0].object.userData.interact &&
-				!all_intersections.result[0].object.userData.block
-			) {
-				set_cursor_style("pointer")
-			} else {
-				$svelthreeStores[sti].orbitcontrols.length > 0
-					? set_cursor_style("all-scroll")
-					: set_cursor_style("default")
+			if (change_cursor) {
+				if (
+					all_intersections.result.length &&
+					all_intersections.result[0].object.userData.interact &&
+					!all_intersections.result[0].object.userData.block
+				) {
+					set_cursor_style("pointer")
+				} else {
+					$svelthreeStores[sti].orbitcontrols.length > 0
+						? set_cursor_style("all-scroll")
+						: set_cursor_style("default")
+				}
 			}
 		}
 	}
