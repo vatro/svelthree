@@ -379,7 +379,7 @@ This is a **svelthree** _Canvas_ Component.
 					/* nothing, object will not be raycasted */
 				}
 			} else {
-				console.error(`SVELTHREE > Canvas > filterRaycast > no 'obj.userData.root_scene'!`, { obj } )
+				console.error(`SVELTHREE > Canvas > filterRaycast > no 'obj.userData.root_scene'!`, { obj })
 			}
 		}
 
