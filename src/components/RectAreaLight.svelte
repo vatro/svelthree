@@ -45,7 +45,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"

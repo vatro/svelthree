@@ -16,7 +16,6 @@ export { default as LoadedGLTF } from "./components/LoadedGLTF.svelte"
 export { default as WebGLRenderer } from "./components/WebGLRenderer.svelte"
 export { default as OrbitControls } from "./components/OrbitControls.svelte"
 export { default as CubeCamera } from "./components/CubeCamera.svelte"
-export { svelthreeStores } from "./stores"
 
 // export all THREE modules
 export * from "three"

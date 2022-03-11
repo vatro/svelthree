@@ -17,7 +17,7 @@ This is a **svelthree** _Canvas_ Component.
 	import { self as _self } from "svelte/internal"
 	import { Raycaster, Vector2, Vector3 } from "three"
 	import type { Object3D, Scene } from "three"
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 	import type { PointerState, StoreBody, WebGLRendererMode } from "../types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"

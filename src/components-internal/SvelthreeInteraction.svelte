@@ -13,7 +13,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { onMount, beforeUpdate, afterUpdate, getContext } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { PointerState } from "../types-extra"

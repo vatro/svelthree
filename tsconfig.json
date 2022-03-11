@@ -29,7 +29,8 @@
     "allowJs": true,
     "checkJs": true,
     "paths": {
-			"$app/env": ["src/$app/env"]
+      "$app/env": ["src/$app/env"],
+      "svelthree/stores": ["./stores"]
 		}
   },
   /**

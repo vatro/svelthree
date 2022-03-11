@@ -48,7 +48,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 	import type { Euler, Matrix4, Object3D, Quaternion } from "three"
 
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"

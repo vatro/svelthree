@@ -14,11 +14,17 @@
     "./utils": {
       "types": "./utils/index.d.ts",
       "import": "./utils/index.js"
+    },
+    "./stores": {
+      "types": "./stores.d.ts",
+      "import": "./stores.js"
     }
   },
   "files": [
     "index.js",
     "index.d.ts",
+    "stores.js",
+    "stores.d.ts",
     "utils",
     "src",
     "NEED_HELP.md",

@@ -22,7 +22,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC } from "../utils/SvelthreeLogger"
 
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeProps } from "../utils"
 	import type { Writable } from "svelte/store"
 

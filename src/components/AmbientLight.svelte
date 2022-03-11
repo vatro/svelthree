@@ -25,7 +25,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
