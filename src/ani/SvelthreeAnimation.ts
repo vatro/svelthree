@@ -4,7 +4,6 @@ import SvelthreeAnimationManager from "./SvelthreeAnimationManager"
 import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
 
 export default class SvelthreeAnimation {
-
 	animationEnabled: boolean
 	animation: any
 	aniauto: boolean

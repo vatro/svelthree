@@ -46,7 +46,6 @@ export default class SvelthreeProps {
 	}
 
 	public update(props: { [key: string]: any }) {
-		
 		if (this.propsPrev) {
 			// new props object
 			if (this.propsPrev !== props) {

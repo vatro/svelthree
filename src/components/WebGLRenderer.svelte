@@ -405,7 +405,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * - (default) `"always"` -> render on every AnimationFrame (_use requestAnimationFrame for continuously animated scenes_)
 	 * - `"once"` -> render only once (_static scenes_)
 	 * - (todo/wip) `"auto"` -> render only if something in the scene has changed (_the most performant mode for animated scenes_).
-	*/
+	 */
 	export let mode: WebGLRendererMode = "always"
 
 	// both inside and outside
@@ -718,7 +718,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			dispatch("interaction_0")
 			// update raycaster intersections and pointer appearance
 			dispatch("interaction_1")
-			// fire any interactive events 
+			// fire any interactive events
 			dispatch("interaction_2")
 			// will currently update box-helpers only
 			dispatch("update_helpers")
@@ -822,16 +822,20 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			dispatch("after_render", { frame: frames.total })
 
 			switch (mode) {
-				case "always": 
+				case "always":
 					rAF.id = requestAnimationFrame(render_standard)
-				break;
-				case "once": /* nothing */ break;
-				case "auto": /* TODO  not implemented yet */ check_render_auto()
-				break;
+					break
+				case "once":
+					/* nothing */ break
+				case "auto":
+					/* TODO  not implemented yet */ check_render_auto()
+					break
 				default:
-					console.error(`SVELTHREE -> WebGLRenderer : No \`mode:"${mode}"\` defined, using \`mode:"always"\` as fallback!`)
+					console.error(
+						`SVELTHREE -> WebGLRenderer : No \`mode:"${mode}"\` defined, using \`mode:"always"\` as fallback!`
+					)
 					rAF.id = requestAnimationFrame(render_standard)
-				break; 
+					break
 			}
 		}
 	}

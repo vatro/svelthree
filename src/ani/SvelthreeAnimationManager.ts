@@ -90,8 +90,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneReactivated
 			? this.animation.onSceneReactivated()
 			: console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
-			)
+					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
+			  )
 	}
 
 	// inactive / deactivated
@@ -107,8 +107,8 @@ export default class SvelthreeAnimationManager {
 		this.animation.onSceneDeactivated
 			? this.animation.onSceneDeactivated()
 			: console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
-			)
+					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
+			  )
 	}
 
 	startAni(): void {

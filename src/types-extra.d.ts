@@ -9,7 +9,9 @@ export type Array4 = [number, number, number, string]
 export type Params<T> = T extends new (...params: any) => any ? ConstructorParameters<T> : T
 
 // see https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir
-export type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B
+export type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+	? A
+	: B
 
 export type WritableKeys<T> = {
 	[P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
@@ -127,15 +129,7 @@ export type ComplexValueType =
 	| "Matrix4ParamsArray"
 	| "Color"
 
-import type {
-	Mesh,
-	Empty,
-	PointLight,
-	SpotLight,
-	OrthographicCamera,
-	Scene,
-	DirectionalLight
-} from "./components"
+import type { Mesh, Empty, PointLight, SpotLight, OrthographicCamera, Scene, DirectionalLight } from "./components"
 export type Targetable =
 	| Mesh<any>
 	| Empty
@@ -206,7 +200,12 @@ type AllMeshMaterials = MeshToonMaterial &
 
 export type AnyMeshMaterialProps = OnlyWritableNonFunctionProps<Omit<AllMeshMaterials, PropBlackList>>
 
-type AllLights = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
+type AllLights = THREE.SpotLight &
+	THREE.PointLight &
+	THREE.AmbientLight &
+	THREE.RectAreaLight &
+	THREE.HemisphereLight &
+	THREE.DirectionalLight
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
@@ -222,7 +221,7 @@ export interface PointerState {
 export interface StoreCanvas {
 	dom: HTMLCanvasElement
 	svelthreeComponent: any
-	dim: { 
+	dim: {
 		w: number
 		h: number
 	}
