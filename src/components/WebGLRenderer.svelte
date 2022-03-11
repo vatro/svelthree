@@ -16,7 +16,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer } from "three"
 	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-	import { svelthreeStores } from "../stores"
+	import { svelthreeStores } from "svelthree/stores"
 	import { Propeller, PropUtils } from "../utils"
 
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
