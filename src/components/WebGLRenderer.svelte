@@ -403,8 +403,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	/** Choose one of the `WebGLRenderer` modes:
 	 * - (default) `"always"` -> render on every AnimationFrame (_use requestAnimationFrame for continuously animated scenes_)
-	 * - `"once"` -> render only once (_static scenes_)
-	 * - (todo/wip) `"auto"` -> render only if something in the scene has changed (_the most performant mode for animated scenes_).
+	 * - (todo/wip) `"auto"` -> render only if something in the scene has changed (_the most performant mode overall_).
 	 */
 	export let mode: WebGLRendererMode = "always"
 
@@ -825,8 +824,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				case "always":
 					rAF.id = requestAnimationFrame(render_standard)
 					break
-				case "once":
-					/* nothing */ break
 				case "auto":
 					/* TODO  not implemented yet */ check_render_auto()
 					break
@@ -865,7 +862,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// public methods
 
-	/** Render manually. Suitable for `WebGLRenderer` component modes `mode="once"` and `mode="auto"` (_forced render_). */
+	/** Render manually (_forced render_). */
 	export function update(): void {
 		start_renderer()
 	}

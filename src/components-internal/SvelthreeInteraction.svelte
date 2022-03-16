@@ -195,10 +195,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				remove_interaction_2_listener = null
 			}
 
-			if (
-				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
-				$svelthreeStores[sti].rendererComponent?.mode === "once"
-			) {
+			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 				c.removeEventListener("pointermove", check_overout)
 			}
 		} else {
@@ -206,10 +203,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				add_interaction_2_listener()
 			}
 
-			if (
-				$svelthreeStores[sti].rendererComponent?.mode === "auto" ||
-				$svelthreeStores[sti].rendererComponent?.mode === "once"
-			) {
+			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 				c.addEventListener("pointermove", check_overout, false)
 			}
 		}
