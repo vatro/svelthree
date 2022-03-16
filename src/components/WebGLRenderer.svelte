@@ -716,9 +716,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			// filter interactive objects in currently active (rendered) scene
 			dispatch("interaction_0")
-			// update raycaster intersections and pointer appearance
+			// update raycaster intersections and cursor appearance (_if `canvas_comp.change_cursor = true`_)
 			dispatch("interaction_1")
-			// fire any interactive events
+			// fire any interactivity events
 			dispatch("interaction_2")
 			// will currently update box-helpers only
 			dispatch("update_helpers")
@@ -865,7 +865,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// public methods
 
-	/** Render manually. Suitable for `WebGLRenderer` component modes `mode="once"` and `mode="change"`. */
+	/** Render manually. Suitable for `WebGLRenderer` component modes `mode="once"` and `mode="auto"` (_forced render_). */
 	export function update(): void {
 		start_renderer()
 	}
