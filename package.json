@@ -1,6 +1,6 @@
 {
 	"name": "svelthree",
-	"version": "1.0.0-next.0.60",
+	"version": "1.0.0-next.0.61",
 	"description": "Svelte powered three.js development",
 	"module": "index.js",
 	"main": "index",
@@ -35,6 +35,7 @@
 	"scripts": {
 		"svelte-check": "svelte-check",
 		"prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
+		"reinstall-packages": "rimraf node_modules && rimraf package-lock.json && npm i",
 		"pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
 		"test": "echo 'No test specified' && exit 1"
 	},
@@ -51,10 +52,10 @@
 	"peerDependencies": {
 		"svelte": "3.44.2 - 3.46.4",
 		"svelte-accmod-patch": "^1.0.0",
-		"three": "0.125.x - 0.137.x"
+		"three": "0.125.x - 0.138.x"
 	},
 	"optionalDependencies": {
-		"@types/three": "0.125.x - 0.137.x"
+		"@types/three": "0.125.x - 0.138.x"
 	},
 	"author": "Vatroslav Vrbanic",
 	"repository": {
