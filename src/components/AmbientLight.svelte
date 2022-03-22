@@ -33,6 +33,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	import { AmbientLight } from "three"
 	import type { Color, Vector3, Object3D } from "three"
+	import { get_root_scene } from "../utils/SceneUtils"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -241,6 +242,14 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
+	/** The root scene -> `scene.parent = null`. */
+	let root_scene: Scene | null = undefined
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+
+	$: if (light && root_scene) {
+		light.userData.root_scene = root_scene
+	}
+
 	/** Removes the (three) instance of the object created by the component from it's parent. */
 	export const remove_instance_from_parent = (): void => {
 		if (light.parent) light.parent.remove(light)
@@ -389,6 +398,11 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 								matrixWorldNeedsUpdate: light.matrixWorldNeedsUpdate
 							})
 						)
+					}
+
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						root_scene.userData.dirty = true
+						$svelthreeStores[sti].rendererComponent.schedule_render()
 					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()

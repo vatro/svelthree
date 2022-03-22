@@ -61,6 +61,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		undefined
 	export let dom_el: HTMLElement | CanvasSvelthreeComponent = undefined
 
+	/** mode `"auto"`: schedule render loop rAF id */
+	let raf_id = 0
+
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
 	$: if (!orbitcontrols && $canvas_dom?.element && $svelthreeStores[sti].activeCamera) create_orbitcontrols()
@@ -87,6 +90,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					{ orbitcontrols }
 				)
 			}
+
+			// mode 'auto'
+			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+				if (auto === true) {
+					// schedule render every animation frame
+					raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+				} else {
+					// schedule render on `"change"` event
+					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
+				}
+			}
 		} catch (error) {
 			console.error(
 				`SVELTHREE > ${c_name} > Oops, something went wrong while trying to create and add OrbitControls!`,
@@ -95,6 +109,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				{ scene, sti }
 			)
 		}
+	}
+
+	// schedule render
+	function on_orbitcontrols_change(e: any): void {
+		orbitcontrols.object.userData.root_scene.userData.dirty = true
+		$svelthreeStores[sti].rendererComponent.schedule_render()
+
+		// schedule next render (loop) if function was not called by an event
+		if (e === null) raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 	}
 
 	function get_oc_cam(): PerspectiveCamera | OrthographicCamera {
@@ -167,7 +190,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		orbitcontrols.enableRotate = !!rotate
 	}
 
-	/** Set to `true` to automatically rotate around the target.
+	/** Set to `true` to automatically rotate around the target. Default is `false`.
+	 * - With `WebGLRenderer` component's `mode` set to `"auto"`:
+	 *     - `true`: will schedule a render on every AF.
+	 *     - `false`: will schedule a render on `OrbitControls`'s event `"change"`.
+	 *
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.autoRotate) */
 	export let auto: boolean = false
 	$: if (orbitcontrols && (auto === true || !auto)) set_auto()
@@ -175,6 +202,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_auto(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "auto", auto))
 		orbitcontrols.autoRotate = !!auto
+
+		if (!orbitcontrols.autoRotate) {
+			if (raf_id) {
+				cancelAnimationFrame(raf_id)
+				raf_id = 0
+				orbitcontrols.addEventListener("change", on_orbitcontrols_change)
+			}
+		} else {
+			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+				orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
+				if (raf_id === 0) raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+			}
+		}
 	}
 
 	/** How fast to rotate around the target if `autorot` is `true`. Default is `2.0`, which equates to 30 seconds per orbit at 60fps.
@@ -255,6 +295,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					}
 
 					if (onDestroy_inject_before) onDestroy_inject_before()
+
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						if (raf_id) cancelAnimationFrame(raf_id)
+						orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
+					}
 
 					if (onDestroy_inject_after) onDestroy_inject_after()
 			  }

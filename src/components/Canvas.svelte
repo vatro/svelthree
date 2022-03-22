@@ -219,22 +219,14 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function add_pointermove_listeners(): void {
-		if (render_mode === "always") {
-			c.addEventListener("pointermove", updatePointer, false)
-			add_interaction_1_listener()
-		} else {
-			c.addEventListener("pointermove", updatePointer, false)
-		}
+		c.addEventListener("pointermove", updatePointer, false)
+		add_interaction_1_listener()
 	}
 
 	function remove_pointermove_listeners(): void {
-		if (render_mode === "always") {
-			c.removeEventListener("pointermove", updatePointer)
-			remove_interaction_1_listener()
-			remove_interaction_1_listener = null
-		} else {
-			c.removeEventListener("pointermove", updatePointer)
-		}
+		c.removeEventListener("pointermove", updatePointer)
+		remove_interaction_1_listener()
+		remove_interaction_1_listener = null
 	}
 
 	// start updating mouse position (if not xr)
@@ -329,9 +321,7 @@ This is a **svelthree** _Canvas_ Component.
         */
 		pointer_state.event = e
 
-		if (render_mode !== "always") {
-			update_all_intersections_and_cursor()
-		}
+		update_all_intersections_and_cursor()
 	}
 
 	/** An array which accepts **svelthree components** or any Object3D to be checked for **intersection** with the ray -> see [`Raycaster`](https://threejs.org/docs/#api/en/core/Raycaster). */

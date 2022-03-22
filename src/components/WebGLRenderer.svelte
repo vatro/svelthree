@@ -817,15 +817,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				context.drawImage(renderer.domElement, 0, 0)
 			}
 
-			frames.total++
-			dispatch("after_render", { frame: frames.total })
-
 			switch (mode) {
 				case "always":
 					rAF.id = requestAnimationFrame(render_standard)
 					break
 				case "auto":
-					/* TODO  not implemented yet */ check_render_auto()
+					render_scheduled.status = false
 					break
 				default:
 					console.error(
@@ -834,13 +831,22 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					rAF.id = requestAnimationFrame(render_standard)
 					break
 			}
+
+			frames.total++
+			dispatch("after_render", { frame: frames.total })
 		}
 	}
 
-	/* TODO  not implemented yet */
-	function check_render_auto(): void {
-		// if something changed
-		rAF.id = requestAnimationFrame(render_standard)
+	export const render_scheduled: { status: boolean } = { status: false }
+
+	export function schedule_render(): void {
+		if (render_scheduled.status === false) {
+			if (currentScene && currentScene.userData.dirty) {
+				currentScene.userData.dirty = false
+				rAF.id = requestAnimationFrame(render_standard)
+				render_scheduled.status = true
+			}
+		}
 	}
 
 	function doLogOnce(renderMode: string): void {

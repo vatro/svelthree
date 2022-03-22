@@ -53,6 +53,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Writable } from "svelte/store"
 
 	import { PerspectiveCamera, CameraHelper } from "three"
+	import { get_root_scene } from "../utils/SceneUtils"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -491,6 +492,14 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
+	/** The root scene -> `scene.parent = null`. */
+	let root_scene: Scene | null = undefined
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+
+	$: if (camera && root_scene) {
+		camera.userData.root_scene = root_scene
+	}
+
 	/** Removes the (three) instance of the object created by the component from it's parent. */
 	export const remove_instance_from_parent = (): void => {
 		if (camera.parent) camera.parent.remove(camera)
@@ -643,6 +652,11 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 					}
 
 					if (helper && camera.userData.helper) camera.userData.helper.update()
+
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						root_scene.userData.dirty = true
+						$svelthreeStores[sti].rendererComponent.schedule_render()
+					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }

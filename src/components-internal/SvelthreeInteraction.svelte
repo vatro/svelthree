@@ -85,8 +85,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		check_overout(e)
 		try_dispatch(e)
 
-		for (let i = 0; i < pointer_events_queue.length; i++) {
-			pointer_events_queue[i]()
+		// with mode "auto":
+		// - there should be nothing inside 'pointer_events_queue'
+		//   because all pointer events are being dispatched immediatelly! (not bound to render interactivity  events / not raf aligned)
+		// - we need the 'checkPointer' function only for the over/out related events if the pointer is not moving!
+		if (pointer_events_queue.length) {
+			for (let i = 0; i < pointer_events_queue.length; i++) {
+				pointer_events_queue[i]()
+			}
 		}
 
 		pointer_events_queue.length = 0
@@ -189,22 +195,26 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		// interact is true, but there are listeners added, cursor should not chang on mouseover, but object should be raycasted.
 		obj.userData.block = listeners_counter === -11
 
-		if (obj.userData.block) {
-			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && remove_interaction_2_listener) {
+		if (!obj.userData.block) {
+			if (!remove_interaction_2_listener) {
+				// IMPORTANT  needed to dispatch over/out related events if the pointer is not moving and the object enters it!
+				// mode "always": scenes are rendered on every animation frame, means over/out checks will also run on every animation frame, "pointermove" -> check_overout handler not needed!
+				// mode "auto": scenes must not be rendered, "pointermove" -> check_overout handler needed!
+				add_interaction_2_listener()
+			}
+
+			// IMPORTANT  mode "auto": we need this because we want to check over/out not bound to render interactivity events (not raf aligned)!
+			// - the scene must not be rendered in order to dispatch over/out related events
+			if ($svelthreeStores[sti].rendererComponent?.mode === "auto")
+				c.addEventListener("pointermove", check_overout)
+		} else {
+			if (remove_interaction_2_listener) {
 				remove_interaction_2_listener()
 				remove_interaction_2_listener = null
 			}
 
 			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 				c.removeEventListener("pointermove", check_overout)
-			}
-		} else {
-			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
-				add_interaction_2_listener()
-			}
-
-			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
-				c.addEventListener("pointermove", check_overout, false)
 			}
 		}
 	}
@@ -237,12 +247,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function try_dispatch(e: PointerEvent): void {
-		// queue only 'dispatch_on_intersect' events
 		switch (e.type) {
 			case "click":
 			case "pointerup":
 			case "pointerdown":
-				pointer_events_queue.push(() => dispatch_on_intersect(e))
+				// 'dispatch_on_intersect' events
+				if ($svelthreeStores[sti].rendererComponent?.mode === "always") {
+					// queue event
+					// dispatch event / call handler on next render (raf aligned)
+					pointer_events_queue.push(() => dispatch_on_intersect(e))
+				} else if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+					// dispatch event / call handler immediatelly (not raf aligned) any changes will schedule a new render!
+					dispatch_on_intersect(e)
+				}
 				break
 			default:
 				dispatch_always(e)

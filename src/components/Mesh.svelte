@@ -758,6 +758,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						)
 					}
 
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						root_scene.userData.dirty = true
+						$svelthreeStores[sti].rendererComponent.schedule_render()
+					}
+
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }
 	)

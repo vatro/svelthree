@@ -731,6 +731,11 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 						)
 					}
 
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						root_scene.userData.dirty = true
+						$svelthreeStores[sti].rendererComponent.schedule_render()
+					}
+
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }
 	)

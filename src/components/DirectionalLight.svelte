@@ -59,6 +59,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { DirectionalLightShadow } from "three"
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types-extra"
+	import { get_root_scene } from "../utils/SceneUtils"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -396,6 +397,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
+	/** The root scene -> `scene.parent = null`. */
+	let root_scene: Scene | null = undefined
+	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+
+	$: if (light && root_scene) {
+		light.userData.root_scene = root_scene
+	}
+
 	export const get_helper = (): DirectionalLightHelper => light.userData.helper as DirectionalLightHelper
 
 	/** Removes the (three) instance of the object created by the component from it's parent. */
@@ -550,6 +559,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					}
 
 					if (helper && light.userData.helper) light.userData.helper.update()
+
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						root_scene.userData.dirty = true
+						$svelthreeStores[sti].rendererComponent.schedule_render()
+					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }

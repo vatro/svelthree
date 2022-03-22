@@ -818,6 +818,16 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 						)
 					}
 
+					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						if (root_scene) {
+							root_scene.userData.dirty = true
+						} else {
+							// we are the root scene
+							scene.userData.dirty = true
+						}
+						$svelthreeStores[sti].rendererComponent.schedule_render()
+					}
+
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
 			  }
 	)
