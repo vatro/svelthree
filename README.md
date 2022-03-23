@@ -4,6 +4,45 @@
 
 #### Svelte powered three.js development
 
+---
+
+#### How to try latest svelthree NOW ?
+
+- **clone the svelthree repo**
+
+  e.g. using [degit](https://github.com/Rich-Harris/degit): `npx degit vatro/svelthree `
+
+- **create a svelthree-tarball and save it somewhere** *(see [npm pack](https://docs.npmjs.com/cli/v7/commands/npm-pack))*
+
+  e.g. run `npm pack --pack-destination ../some_directory/` 
+
+- **install the created svelthree-tarball**
+
+  e.g. in your existing Svelte-project add `"svelthree"` to `"devDependencies"` inside `package.json` file:
+
+  ```
+  "devDependencies": {
+      ...
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.61.tgz",
+      ...
+  }
+  ```
+
+  ... and **run** `npm i`  (*this will actually install svelthree*)
+
+  
+
+- **patch original (*installed*) Svelte to [svelte-accmod](https://github.com/vatro/svelte-accmod)**
+
+      run: `npx svelte-accmod-patch`
+  
+- Depending on your Svelte / SvelteKit project, you'll probably need to make some configuration changes (*svelthree-starters coming soon!*), but you're basically **ready to rumble!** 🚀
+
+
+---
+
+
+
 ## 1.0.0-next.x DRAFT
 
 [Svelte](https://svelte.dev/) components library for declarative construction of reactive and reusable [three.js](https://threejs.org/) scene graphs using a modified version of Svelte *[svelte-accmod](https://github.com/vatro/svelte-accmod)* under the hood. 👨🏻‍💻 Please keep in mind that updates may come frequently and include breaking changes.
