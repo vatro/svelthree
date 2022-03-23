@@ -34,7 +34,7 @@
 
 - **patch original (*installed*) Svelte to [svelte-accmod](https://github.com/vatro/svelte-accmod)**
 
-      run: `npx svelte-accmod-patch`
+  run: `npx svelte-accmod-patch`
   
 - Depending on your Svelte / SvelteKit project, you'll probably need to make some configuration changes (*svelthree-starters coming soon!*), but you're basically **ready to rumble!** 🚀
 
