@@ -837,7 +837,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
-	export const render_scheduled: { status: boolean } = { status: false }
+	const render_scheduled: { status: boolean } = { status: false }
 
 	export function schedule_render(): void {
 		if (render_scheduled.status === false) {
