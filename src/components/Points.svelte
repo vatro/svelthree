@@ -604,6 +604,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let on_pointercancel: PointsInteractionHandler = undefined
 	$: if (on_pointercancel !== undefined) callbacks = callbacks
 
+	export let on_keydown: PointsInteractionHandler = undefined
+	$: if (on_keydown !== undefined) callbacks = callbacks
+
+	export let on_keypress: PointsInteractionHandler = undefined
+	$: if (on_keypress !== undefined) callbacks = callbacks
+
+	export let on_keyup: PointsInteractionHandler = undefined
+	$: if (on_keyup !== undefined) callbacks = callbacks
+
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 

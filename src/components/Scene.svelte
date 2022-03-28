@@ -655,6 +655,15 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	export let on_pointercancel: SceneInteractionHandler = undefined
 	$: if (on_pointercancel !== undefined) callbacks = callbacks
 
+	export let on_keydown: SceneInteractionHandler = undefined
+	$: if (on_keydown !== undefined) callbacks = callbacks
+
+	export let on_keypress: SceneInteractionHandler = undefined
+	$: if (on_keypress !== undefined) callbacks = callbacks
+
+	export let on_keyup: SceneInteractionHandler = undefined
+	$: if (on_keyup !== undefined) callbacks = callbacks
+
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 
