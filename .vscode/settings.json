@@ -1,4 +1,306 @@
 {
-    "typescript.tsdk": "./node_modules/typescript/lib",
-    "standard.enable": false
+	"typescript.tsdk": "./node_modules/typescript/lib",
+	// language preferences
+	"javascript.preferences.importModuleSpecifier": "relative",
+	// formatters
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	// --- svelte compiler warnings ---
+	"svelte.plugin.svelte.compilerWarnings": {
+		//"unused-export-let": "ignore"
+	},
+	"todohighlight.keywords": [
+		{
+			"text": " TODO ",
+			"color": "black",
+			"fontWeight": "bold",
+			"border": "2px solid #F6E05E",
+			"backgroundColor": "#F6E05E",
+			"overviewRulerColor": "#F6E05E"
+		},
+		{
+			"text": " TOFIX ",
+			"color": "white",
+			"fontWeight": "bold",
+			"border": "2px solid #E53E3E",
+			"backgroundColor": "#E53E3E",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " BUG ",
+			"color": "white",
+			"fontWeight": "bold",
+			"border": "2px solid #E53E3E",
+			"backgroundColor": "#E53E3E",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " DUCKTAPE ",
+			"border": "2px solid #F6E05E",
+			"fontWeight": "bold",
+			"color": "#F6E05E",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " DELETE ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " BAD ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " COOL! ",
+			"border": "2px solid #34D399",
+			"fontWeight": "bold",
+			"color": "#34D399",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " GOOD ",
+			"border": "2px solid #34D399",
+			"fontWeight": "bold",
+			"color": "#34D399",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " BEST ",
+			"border": "2px solid #34D399",
+			"fontWeight": "bold",
+			"color": "black",
+			"backgroundColor": "#34D399",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " SVELTE ",
+			"border": "2px solid #ff3e00",
+			"fontWeight": "bold",
+			"color": "#ffffff",
+			"backgroundColor": "#ff3e00",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " SVELTEKIT ",
+			"border": "2px solid #ff3e00",
+			"fontWeight": "bold",
+			"color": "#ffffff",
+			"backgroundColor": "#ff3e00",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " SSR ",
+			"border": "2px solid #ff3e00",
+			"fontWeight": "bold",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " THREE ",
+			"border": "2px solid #000000",
+			"fontWeight": "bold",
+			"color": "#000000",
+			"backgroundColor": "#ffffff",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " EXCLUDED ",
+			"border": "2px solid #9CA3AF",
+			"fontWeight": "bold",
+			"color": "#9CA3AF",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " CUSTOM ",
+			"border": "2px solid #ff3e00",
+			"fontWeight": "bold",
+			"color": "#ffffff",
+			"backgroundColor": "#000000",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " IMPORTANT ",
+			"border": "2px solid #F6E05E",
+			"fontWeight": "bold",
+			"color": "#F6E05E",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " VERY IMPORTANT ",
+			"border": "2px solid #FCD34D",
+			"fontWeight": "bold",
+			"color": "#FCD34D",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " AS EXPECTED ",
+			"border": "2px solid #00ff00",
+			"fontWeight": "bold",
+			"color": "#00ff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " REACTIVE STATEMENT ",
+			"border": "2px solid #00ff00",
+			"fontWeight": "bold",
+			"color": "#00ff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " ALL BEFORE / AFTER ",
+			"border": "2px solid #00ff00",
+			"fontWeight": "bold",
+			"color": "#00ff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " PARENT BEFORE / AFTER ",
+			"border": "2px solid #00ff00",
+			"fontWeight": "bold",
+			"color": "#00ff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " MAIN BEFORE / AFTER ",
+			"border": "2px solid #00ff00",
+			"fontWeight": "bold",
+			"color": "#00ff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " X REACTIVE STATEMENT ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " X CHILD BEFORE / AFTER ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " UNEXPECTED ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " ACCESSORS BUG ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+
+		{
+			"text": " FAST ",
+			"border": "2px solid #84CC16",
+			"fontWeight": "bold",
+			"color": "#84CC16",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " FASTER ",
+			"border": "2px solid #BEF264",
+			"fontWeight": "bold",
+			"color": "#BEF264",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " SLOW ",
+			"border": "2px solid #EF4444",
+			"fontWeight": "bold",
+			"color": "#EF4444",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " PERFORMANCE ",
+			"border": "2px solid #D946EF",
+			"fontWeight": "bold",
+			"color": "#D946EF",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " RECONSIDER ",
+			"border": "2px solid #F59E0B",
+			"color": "#F59E0B",
+			"fontWeight": "bold",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " WHY? ",
+			"color": "#D69E2E",
+			"border": "2px solid #D69E2E",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " ANSWER ",
+			"border": "2px solid #2F855A",
+			"color": "#2F855A",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " INCONSISTENCY ",
+			"border": "2px solid #975A16",
+			"color": "#1A202C",
+			"fontWeight": "bold",
+			"backgroundColor": "#975A16",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " DEPRECATED ",
+			"border": "2px solid #9CA3AF",
+			"fontWeight": "bold",
+			"color": "#9CA3AF",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		}
+	]
 }
