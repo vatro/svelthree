@@ -68,6 +68,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { RemoveFirst, OnlyWritableNonFunctionPropsOverwritten, PropBlackList } from "../types-extra"
 
 	/**
+	 *  SVELTEKIT  SSR
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
 	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
 	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
@@ -432,6 +433,7 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	function set_bg_tex(): Texture {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "bg_tex", bg_tex))
 
+		//  SVELTEKIT  SSR
 		if (browser) {
 			const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
 				if (bg_tex.mapping) tex.mapping = bg_tex.mapping
@@ -468,6 +470,7 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 	function set_env_tex(): Texture {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "env_tex", env_tex))
 
+		//  SVELTEKIT  SSR
 		if (browser) {
 			const env_texture_loader = new TextureLoader().load(env_tex.url, (tex) => {
 				tex.mapping = env_tex.mapping | EquirectangularReflectionMapping
