@@ -18,6 +18,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { PointerState } from "../types-extra"
 	import type { Writable } from "svelte/store"
+	/**
+	 * SVELTEKIT  SSR
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
 
 	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
@@ -42,15 +51,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
 
 	const pointer_events_queue = []
+	const keyboard_events_queue = []
 
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
-	let pointer_listeners: boolean = false
+	let listeners: boolean = false
 
 	$: if (c && raycaster && interactionEnabled && obj && !obj.userData.interact) {
 		obj.userData.interact = true
-		pointer_listeners = true
+		listeners = true
 	}
 
 	let out_of_canvas_triggered: boolean = false
@@ -60,7 +70,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			out_of_canvas_triggered = true
 			// detect if pointer is out of canvas and fire pointer out/leave events if needed.
 			if (!obj.userData.block) {
-				check_overout(pointer.event)
+				check_pointer_overout(pointer.event)
 			}
 		}
 	}
@@ -75,20 +85,21 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// animated scenes -> check intersections / fire events on every rendered frame, even if pointer is not moving
 	function add_interaction_2_listener(): void {
-		remove_interaction_2_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_2", () =>
-			pointer.event ? checkPointer(pointer.event) : null
-		)
+		remove_interaction_2_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_2", () => {
+			pointer.event ? check_pointer(pointer.event) : null
+			check_keyboard()
+		})
 	}
 
 	// e will always be `pointermove` event!
-	function checkPointer(e: PointerEvent): void {
-		check_overout(e)
-		try_dispatch(e)
+	function check_pointer(e: PointerEvent): void {
+		check_pointer_overout(e)
+		dispatch_pointer_event(e)
 
 		// with mode "auto":
 		// - there should be nothing inside 'pointer_events_queue'
-		//   because all pointer events are being dispatched immediatelly! (not bound to render interactivity  events / not raf aligned)
-		// - we need the 'checkPointer' function only for the over/out related events if the pointer is not moving!
+		//   because all pointer events are being dispatched immediatelly! (not bound to render interactivity events / not raf aligned)
+		// - we need the 'check_pointer' function only for the over/out related events if the pointer is not moving!
 		if (pointer_events_queue.length) {
 			for (let i = 0; i < pointer_events_queue.length; i++) {
 				pointer_events_queue[i]()
@@ -96,6 +107,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		pointer_events_queue.length = 0
+	}
+
+	function check_keyboard(): void {
+		if (keyboard_events_queue.length) {
+			for (let i = 0; i < keyboard_events_queue.length; i++) {
+				keyboard_events_queue[i]()
+			}
+		}
+
+		keyboard_events_queue.length = 0
 	}
 
 	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
@@ -119,26 +140,39 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		return !!parent[prop_action]
 	}
 
-	function using_pointer_event(event_name: string): boolean {
+	function using_event(event_name: string): boolean {
 		return has_on_directive(event_name) || parent[`on_${event_name}`]
 	}
 
-	function not_using_pointer_event(event_name: string): boolean {
+	function not_using_event(event_name: string): boolean {
 		return !has_on_directive(event_name) && !parent[`on_${event_name}`]
 	}
 
 	let listeners_counter = 0
 
-	function add_listener(event_name: string, capture: boolean = false): void {
-		//console.log(`SVELTHREE > ${c_name} > add '${event_name}' listener!`)
-		c.addEventListener(event_name, try_dispatch, capture)
+	function add_pointer_listener(event_name: string, capture: boolean = false): void {
+		//console.log(`SVELTHREE > ${c_name} > add pointer '${event_name}' listener!`)
+		c.addEventListener(event_name, dispatch_pointer_event, capture)
 	}
 
-	function remove_listener(event_name: string): void {
-		//console.log(`SVELTHREE > ${c_name} > remove '${event_name}' listener!`)
-		c.removeEventListener(event_name, try_dispatch)
+	function remove_pointer_listener(event_name: string): void {
+		//console.log(`SVELTHREE > ${c_name} > remove pointer '${event_name}' listener!`)
+		c.removeEventListener(event_name, dispatch_pointer_event)
 		listeners_counter--
 	}
+
+	function add_keyboard_listener(event_name: string, element, capture: boolean = false): void {
+		//console.log(`SVELTHREE > ${c_name} > add keyboard '${event_name}' listener!`)
+		window.addEventListener(event_name, dispatch_keyboard_event, capture)
+	}
+
+	function remove_keyboard_listener(event_name: string): void {
+		//console.log(`SVELTHREE > ${c_name} > remove keyboard '${event_name}' listener!`)
+		window.removeEventListener(event_name, dispatch_keyboard_event)
+		listeners_counter--
+	}
+
+	const keyboard_events = ["keydown", "keypress", "keyup"]
 
 	const pointer_events = [
 		"click",
@@ -153,8 +187,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let callbacks = undefined
 
 	// reactive listener management checks
-	$: r_add = interactionEnabled && pointer_listeners
-	$: r_remove = !interactionEnabled && pointer_listeners
+	$: r_add = interactionEnabled && listeners
+	$: r_remove = !interactionEnabled && listeners
 
 	// Reactively add / remove pointer listeners, works with e.g. (syntax):
 
@@ -170,43 +204,51 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	//   - add/re-add: `<Mesh on_click={onClick} /> or `comp.on_click = {onClick}`
 	//   - disable/remove: `comp.on_click = null` or not adding to dom in the first place
 
+	// COOL!  Multiple `on:` directives WILL be triggered as expected.
+
 	$: if (r_add || (callbacks && interactionEnabled)) {
 		listeners_counter = 0
 
-		if (using_pointer_event("click")) add_listener("click")
-		if (using_pointer_event("pointerup")) add_listener("pointerup")
-		if (using_pointer_event("pointerdown")) add_listener("pointerdown")
-		if (using_pointer_event("gotpointercapture")) add_listener("gotpointercapture")
-		if (using_pointer_event("lostpointercapture")) add_listener("lostpointercapture")
-		if (using_pointer_event("pointercancel")) add_listener("pointercancel")
+		if (using_event("click")) add_pointer_listener("click")
+		if (using_event("pointerup")) add_pointer_listener("pointerup")
+		if (using_event("pointerdown")) add_pointer_listener("pointerdown")
+		if (using_event("gotpointercapture")) add_pointer_listener("gotpointercapture")
+		if (using_event("lostpointercapture")) add_pointer_listener("lostpointercapture")
+		if (using_event("pointercancel")) add_pointer_listener("pointercancel")
+		if (using_event("keydown")) add_keyboard_listener("keydown")
+		if (using_event("keypress")) add_keyboard_listener("keypress")
+		if (using_event("keyup")) add_keyboard_listener("keyup")
 
-		if (not_using_pointer_event("click")) remove_listener("click")
-		if (not_using_pointer_event("pointerup")) remove_listener("pointerup")
-		if (not_using_pointer_event("pointerdown")) remove_listener("pointerdown")
-		if (not_using_pointer_event("pointerover")) listeners_counter--
-		if (not_using_pointer_event("pointerout")) listeners_counter--
-		if (not_using_pointer_event("pointerenter")) listeners_counter--
-		if (not_using_pointer_event("pointerleave")) listeners_counter--
-		if (not_using_pointer_event("pointermove")) listeners_counter--
-		if (not_using_pointer_event("gotpointercapture")) remove_listener("gotpointercapture")
-		if (not_using_pointer_event("lostpointercapture")) remove_listener("lostpointercapture")
-		if (not_using_pointer_event("pointercancel")) remove_listener("pointercancel")
+		if (not_using_event("click")) remove_pointer_listener("click")
+		if (not_using_event("pointerup")) remove_pointer_listener("pointerup")
+		if (not_using_event("pointerdown")) remove_pointer_listener("pointerdown")
+		if (not_using_event("pointerover")) listeners_counter--
+		if (not_using_event("pointerout")) listeners_counter--
+		if (not_using_event("pointerenter")) listeners_counter--
+		if (not_using_event("pointerleave")) listeners_counter--
+		if (not_using_event("pointermove")) listeners_counter--
+		if (not_using_event("gotpointercapture")) remove_pointer_listener("gotpointercapture")
+		if (not_using_event("lostpointercapture")) remove_pointer_listener("lostpointercapture")
+		if (not_using_event("pointercancel")) remove_pointer_listener("pointercancel")
+		if (not_using_event("keydown")) remove_keyboard_listener("keydown")
+		if (not_using_event("keypress")) remove_keyboard_listener("keypress")
+		if (not_using_event("keyup")) remove_keyboard_listener("keyup")
 
-		// interact is true, but there are listeners added, cursor should not chang on mouseover, but object should be raycasted.
-		obj.userData.block = listeners_counter === -11
+		// interact is true, but there are no listeners added, cursor should not change on mouseover, but the object should be raycasted / block the raycaster ray.
+		obj.userData.block = listeners_counter === -14
 
 		if (!obj.userData.block) {
 			if (!remove_interaction_2_listener) {
 				// IMPORTANT  needed to dispatch over/out related events if the pointer is not moving and the object enters it!
-				// mode "always": scenes are rendered on every animation frame, means over/out checks will also run on every animation frame, "pointermove" -> check_overout handler not needed!
-				// mode "auto": scenes must not be rendered, "pointermove" -> check_overout handler needed!
+				// mode "always": scenes are rendered on every animation frame, means over/out checks will also run on every animation frame, "pointermove" -> check_pointer_overout handler not needed!
+				// mode "auto": scenes must not be rendered, "pointermove" -> check_pointer_overout handler needed!
 				add_interaction_2_listener()
 			}
 
 			// IMPORTANT  mode "auto": we need this because we want to check over/out not bound to render interactivity events (not raf aligned)!
 			// - the scene must not be rendered in order to dispatch over/out related events
 			if ($svelthreeStores[sti].rendererComponent?.mode === "auto")
-				c.addEventListener("pointermove", check_overout)
+				c.addEventListener("pointermove", check_pointer_overout)
 		} else {
 			if (remove_interaction_2_listener) {
 				remove_interaction_2_listener()
@@ -214,7 +256,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 
 			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
-				c.removeEventListener("pointermove", check_overout)
+				c.removeEventListener("pointermove", check_pointer_overout)
 			}
 		}
 	}
@@ -223,7 +265,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function remove_all_pointer_listeners(): void {
 		for (let i = 0; i < pointer_events.length; i++) {
-			remove_listener(pointer_events[i])
+			remove_pointer_listener(pointer_events[i])
+		}
+	}
+
+	function remove_all_keyboard_listeners(): void {
+		for (let i = 0; i < keyboard_events.length; i++) {
+			remove_keyboard_listener(keyboard_events[i])
 		}
 	}
 
@@ -232,12 +280,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			remove_interaction_2_listener()
 			remove_interaction_2_listener = null
 		}
-		c.removeEventListener("pointermove", check_overout)
+		c.removeEventListener("pointermove", check_pointer_overout)
+		listeners = false
 
 		remove_all_pointer_listeners()
-		pointer_listeners = false
 		pointer_events_queue.length = 0
 		obj.userData.block = true
+
+		// SVELTEKIT  SSR  keyboard event listeners are being added to `window`.
+		if (browser) {
+			remove_all_keyboard_listeners()
+			keyboard_events_queue.length = 0
+		}
 	}
 
 	// disable interaction (reactive)
@@ -246,7 +300,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		obj.userData.interact = false
 	}
 
-	function try_dispatch(e: PointerEvent): void {
+	function dispatch_pointer_event(e: PointerEvent): void {
 		switch (e.type) {
 			case "click":
 			case "pointerup":
@@ -255,15 +309,42 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if ($svelthreeStores[sti].rendererComponent?.mode === "always") {
 					// queue event
 					// dispatch event / call handler on next render (raf aligned)
+					// IMPORTANT  with mode `always` all (scheduled) events will be canceled / propagation will be stopped
+					e.preventDefault()
+					e.stopPropagation()
 					pointer_events_queue.push(() => dispatch_on_intersect(e))
 				} else if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 					// dispatch event / call handler immediatelly (not raf aligned) any changes will schedule a new render!
+					// IMPORTANT  with mode `auto` events will NOT be canceled / propagation will NOT be stopped (NOT scheduled),
+					// this also means, that `preventDefault` etc. can / have to be called from inside the handler.
 					dispatch_on_intersect(e)
 				}
 				break
 			default:
-				dispatch_always(e)
+				// IMPORTANT  `pointermove, `gotpointercapture`, `lostpointercapture` & `pointercancel` events
+				// will NOT be canceled / propagation will NOT be stopped (NOT scheduled), this also means that
+				// `preventDefault` etc. can / have to be called from inside the handler.
+				// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
+				dispatch_always_pointer(e)
 				break
+		}
+	}
+
+	function dispatch_keyboard_event(e: KeyboardEvent): void {
+		if ($svelthreeStores[sti].rendererComponent?.mode === "always") {
+			// queue event
+			// dispatch event / call handler on next render (raf aligned)
+			// IMPORTANT  with mode `always` all events will be canceled / propagation will be stopped (scheduled)
+			e.preventDefault()
+			e.stopPropagation()
+			keyboard_events_queue.push(() => {
+				dispatch_always_keyboard(e)
+			})
+		} else if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+			// dispatch event / call handler immediatelly (not raf aligned) any changes will schedule a new render!
+			// IMPORTANT  with mode `auto` events (NOT scheduled) will NOT be canceled / propagation will NOT be stopped,
+			// this also means, that `preventDefault` etc. can / have to be called from inside the handler.
+			dispatch_always_keyboard(e)
 		}
 	}
 
@@ -301,7 +382,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let raycasterData: RaycasterData
 
-	function check_overout(e: PointerEvent) {
+	function check_pointer_overout(e: PointerEvent) {
 		if (intersects()) {
 			const pointerData = { ...e }
 
@@ -359,14 +440,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	/*
-     Proccess 'pointermove'-event only if parent component has been rendered with an on:pointermove handler
-     or if an internal 'onPointerMove'-handler was provided.
-     @see https://discord.com/channels/457912077277855764/457912077277855766/728789428729938021
-     @see https://svelte.dev/repl/b7d49058463c48cbb1b35cbbe19c184d?version=3.24.0
-    */
-
-	function dispatch_always(e: PointerEvent) {
+	function dispatch_always_pointer(e: PointerEvent) {
 		const action_name: string = `on_${e.type}`
 
 		if (has_on_directive(e.type)) dispatch(e.type, { event: e, target: obj, unprojected: pointer.unprojected })
@@ -377,6 +451,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 						event: e,
 						target: obj,
 						unprojected: pointer.unprojected
+					}
+				})
+			)
+		}
+	}
+
+	function dispatch_always_keyboard(e: KeyboardEvent) {
+		const action_name: string = `on_${e.type}`
+
+		if (has_on_directive(e.type)) dispatch(e.type, { code: e.code, event: e, target: obj })
+		if (has_prop_action(action_name)) {
+			parent[action_name](
+				new CustomEvent(e.type, {
+					detail: {
+						code: e.code,
+						event: e,
+						target: obj
 					}
 				})
 			)
@@ -408,8 +499,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			on_action(event, action_name)
 		}
 	}
-
-	// @see https://threejs.org/docs/#api/en/core/Raycaster
 
 	function intersects(): boolean {
 		if (all_intersections) {
