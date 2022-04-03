@@ -161,7 +161,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listeners_counter--
 	}
 
-	function add_keyboard_listener(event_name: string, element, capture: boolean = false): void {
+	function add_keyboard_listener(event_name: string, capture: boolean = false): void {
 		//console.log(`SVELTHREE > ${c_name} > add keyboard '${event_name}' listener!`)
 		window.addEventListener(event_name, dispatch_keyboard_event, capture)
 	}
