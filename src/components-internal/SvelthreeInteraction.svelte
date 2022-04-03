@@ -384,15 +384,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function check_pointer_overout(e: PointerEvent) {
 		if (intersects()) {
-			const pointerData = { ...e }
-
 			if (!isOverDispatched) {
 				m_dispatch(
 					"pointerenter",
 					{
 						type: "pointerenter",
 						target: obj,
-						pointerData,
+						event: e,
 						raycasterData
 					},
 					!!parent.on_pointerenter
@@ -402,7 +400,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					{
 						type: "pointerover",
 						target: obj,
-						pointerData,
+						event: e,
 						raycasterData
 					},
 					!!parent.on_pointerover
@@ -412,14 +410,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			if (!isOutDispatched) {
-				const pointerData = { ...e }
-
 				m_dispatch(
 					"pointerout",
 					{
 						type: "pointerout",
 						target: obj,
-						pointerData,
+						event: e,
 						raycasterData
 					},
 					!!parent.on_pointerout
@@ -429,7 +425,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					{
 						type: "pointerleave",
 						target: obj,
-						pointerData,
+						event: e,
 						raycasterData
 					},
 					!!parent.on_pointerleave
@@ -483,9 +479,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function do_dispatch(e: PointerEvent, fire_prop_action: boolean): void {
-		const pointerData = { ...e }
 		const message: string = e.type
-		const details = { type: e.type, target: obj, pointerData, raycasterData }
+		const details = { type: e.type, target: obj, event: e, raycasterData }
 
 		m_dispatch(message, details, fire_prop_action)
 	}
