@@ -1,6 +1,6 @@
 {
 	"name": "svelthree",
-	"version": "1.0.0-next.0.64",
+	"version": "1.0.0-next.0.66",
 	"description": "Svelte powered three.js development",
 	"module": "index.js",
 	"main": "index",
@@ -40,22 +40,22 @@
 		"test": "echo 'No test specified' && exit 1"
 	},
 	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.37",
-		"fs-extra": "^10.0.0",
-		"prettier": "^2.5.1",
+		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.40",
+		"fs-extra": "^10.0.1",
+		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.6.0",
-		"svelte-check": "^2.4.3",
-		"svelte-preprocess": "^4.10.2",
-		"typescript": "^4.5.5",
-		"vite": "^2.7.13"
+		"svelte-check": "^2.4.6",
+		"svelte-preprocess": "^4.10.5",
+		"typescript": "^4.6.3",
+		"vite": "^2.9.1"
 	},
 	"peerDependencies": {
-		"svelte": "3.44.2 - 3.46.4",
+		"svelte": "3.44.2 - 3.46.6",
 		"svelte-accmod-patch": "^1.0.0",
-		"three": "0.125.x - 0.138.x"
+		"three": "0.125.x - 0.139.x"
 	},
 	"optionalDependencies": {
-		"@types/three": "0.125.x - 0.138.x"
+		"@types/three": "0.125.x - 0.139.x"
 	},
 	"author": "Vatroslav Vrbanic",
 	"repository": {
