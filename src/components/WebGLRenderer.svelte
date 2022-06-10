@@ -10,8 +10,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import { afterUpdate, beforeUpdate, createEventDispatcher, onMount, tick, getContext } from "svelte"
-	import { get_current_component, SvelteComponentDev } from "svelte/internal"
+	import { afterUpdate, beforeUpdate, onDestroy, createEventDispatcher, onMount, tick, getContext } from "svelte"
+	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer } from "three"
 	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera } from "three"
@@ -23,6 +23,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
+	import type { default as CubeCamera } from "./CubeCamera.svelte"
 	import type { WebGLRendererMode } from "../types-extra"
 
 	const self = get_current_component()
@@ -34,26 +35,23 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
+	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
+
+	/**
+	 * svelthreeStore index (`sti`) spread via context.  \
+	 * _will be `undefined` if the `WebGlRenderer` is placed **outside** of a `Canvas` component._
+	 */
+	const sti: number = getContext("store_index")
+
+	/**
+	 * Position of the `WebGLRenderer` component in the markup.
+	 * - `true`: the `WebGLRenderer` component is placed **inside** of a `Canvas` component (_**can** access `store_index` via **context**_)
+	 * - `false`: the `WebGLRenderer` component is placed **outside** of a `Canvas` component (_**cannot** access `store_index` via **context**_)
+	 *
+	 * TODO : describe handling differencies in detail ...
+	 */
 	let inside: boolean = undefined
-
-	let dispatch: (type: string, detail?: any) => void = createEventDispatcher()
-
-	export function getDispatcher(): any {
-		return dispatch
-	}
-
-	/** using context ... TODO  CHECK: We want to keep the ability to pass 'sti' to a WebGLRenderer component in order to be able to render some other Canvas with the (different sti). */
-	let sti: number = undefined
-	// will be 'undefined' if the 'WebGlRenderer' component is out of scene graph
-	let store_index: number = getContext("store_index")
-
-	// we're INSIDE scene graph (got context -> store_index)
-	$: if (store_index !== undefined) {
-		sti = store_index
-		inside = true
-	} else {
-		inside = false
-	}
+	$: inside = !!sti
 
 	interface WebGLRendererInput {
 		canvas: Canvas
@@ -61,8 +59,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		cam_id: string
 	}
 
-	// will be 'undefined' if the 'WebGlRenderer' component is out of scene graph
-	/** Canvas component or a Canvas Dom element where the scene / camera setup should be rendered */
+	/**
+	 * An array of configuration objects specifying `Canvas` components incl. `Scene` and `Camera` components' `id`s that should be rendered.
+	 */
 	export let inputs: WebGLRendererInput[] = undefined
 	let inputs_processed: boolean = false
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
@@ -91,8 +90,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	$: if (inputs?.length && inputs[0].canvas) first_inputs_canvas = inputs[0].canvas
 	$: if (inside === false && first_inputs_canvas) process_canvas_inputs()
 
-	// wait for
-	function process_canvas_inputs() {
+	function process_canvas_inputs(): void {
 		//console.log("process_canvas_inputs!")
 		for (let i = 0; i < inputs.length; i++) {
 			// if it's a canvas component, also get / set sti from it
@@ -115,10 +113,10 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		// get and activate specified cams and scenes
 		for (let j = 0; j < inputs_queue.length; j++) {
 			const queued: WebGLRendererInputsQueueItem = inputs_queue[j]
-			queued.scene = get_sceneToRender_2(queued.sti, queued.scene_id)
-			queued.cam = get_camToRender_2(queued.sti, queued.cam_id)
-			activate_currentCam_2(queued.cam, queued.sti)
-			activate_currentScene_2(queued.scene, queued.sti)
+			queued.scene = get_scene_to_render(queued.sti, queued.scene_id)
+			queued.cam = get_cam_to_render(queued.sti, queued.cam_id)
+			activate_cam(queued.cam, queued.sti)
+			activate_scene(queued.scene, queued.sti)
 		}
 
 		inputs_processed = true
@@ -133,6 +131,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		viewOffset?: number[]
 	}
 
+	/** An array of `Canvas` components or `<canvas>` DOM elements to rendered to. */
 	export let outputs: WebGLRendererOutput[] = undefined
 	let outputs_processed: boolean = false
 	let first_outputs_canvas: HTMLCanvasElement | HTMLElement = undefined
@@ -141,7 +140,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let outputs_queue: WebGLRendererOutputsQueueItem[] = []
 
-	async function process_canvas_outputs() {
+	async function process_canvas_outputs(): Promise<void> {
 		//console.log("process_canvas_outputs!")
 
 		await tick()
@@ -161,9 +160,15 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			}
 		}
 
-		// calculate camera view offset, see: https://threejs.org/docs/#api/en/cameras/PerspectiveCamera.setViewOffset
-		const fullWidth: number = get_outputs_full_width()
-		const fullHeight: number = get_outputs_full_height()
+		outputs_processed = await calculate_output_viewOffset()
+	}
+
+	/**
+	 * Calculate camera's `viewOffset`, see [PerspectiveCamera.setViewOffset](https://threejs.org/docs/#api/en/cameras/PerspectiveCamera.setViewOffset).
+	 */
+	async function calculate_output_viewOffset(): Promise<boolean> {
+		const full_width: number = get_outputs_full_width()
+		const full_height: number = get_outputs_full_height()
 
 		for (let j = 0; j < outputs_queue.length; j++) {
 			const output: WebGLRendererOutputsQueueItem = outputs_queue[j]
@@ -173,10 +178,10 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			const w: number = output.dom_element.clientWidth
 			const h: number = output.dom_element.clientHeight
 
-			output.viewOffset = [fullWidth, fullHeight, x, y, w, h]
+			output.viewOffset = [full_width, full_height, x, y, w, h]
 		}
 
-		outputs_processed = true
+		return true
 	}
 
 	function get_outputs_full_width(): number {
@@ -221,7 +226,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	let renderer: WebGLRenderer
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
 	$: if (!renderer && canvas_dom_element && sti >= 0) create_renderer()
 
 	function create_renderer(): void {
@@ -249,37 +254,37 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
-	export let enableShadowMap = false
+	export let enable_shadowmap = false
 	$: if (renderer) set_ShadowMap_status()
 
-	function set_ShadowMap_status() {
-		renderer.shadowMap.enabled = enableShadowMap ? true : false
+	function set_ShadowMap_status(): void {
+		renderer.shadowMap.enabled = !!enable_shadowmap
 
 		if (verbose && log_rs) {
 			console.debug(
 				...c_rs(c_name, "set_ShadowMap_status! ->", {
-					enableShadowMap,
+					enable_shadowmap,
 					"renderer.shadowMap.enabled": renderer.shadowMap.enabled
 				})
 			)
 		}
 	}
 
-	/*
-     @see https://threejs.org/docs/#api/en/constants/Renderer
-     @see https://threejs.org/docs/#api/en/lights/shadows/LightShadow
-     @see https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow
+	/**
+     see [WebGLRenderer Constants](https://threejs.org/docs/#api/en/constants/Renderer)  \
+     see [LightShadow](https://threejs.org/docs/#api/en/lights/shadows/LightShadow)  \
+     see [DirectionalLightShadow](https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow)
      
-     THREE.BasicShadowMap
-     THREE.PCFShadowMap
-     THREE.PCFSoftShadowMap
-     THREE.VSMShadowMap
-    */
-	export let shadowMapType: ShadowMapType = PCFSoftShadowMap
-	$: if (renderer && renderer.shadowMap.enabled && shadowMapType) set_ShadowMap_type()
+     - BasicShadowMap
+     - PCFShadowMap
+     - PCFSoftShadowMap
+     - VSMShadowMap
+  */
+	export let shadowmap_type: ShadowMapType = PCFSoftShadowMap
+	$: if (renderer && renderer.shadowMap.enabled && shadowmap_type) set_ShadowMap_type()
 
-	function set_ShadowMap_type() {
-		renderer.shadowMap.type = shadowMapType
+	function set_ShadowMap_type(): void {
+		renderer.shadowMap.type = shadowmap_type
 
 		if (verbose && log_rs) {
 			console.debug(
@@ -291,23 +296,24 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
+	// TODO  check / refactor -> looks outdated
 	// props object can be filled with anything, ideally available THREE props of course.
 	export let props: { [key: string]: any } = undefined
-	let propsPrev: typeof props = undefined
+	let props_prev: typeof props = undefined
 	$: if (renderer && props) update_props()
 
-	function update_props() {
+	function update_props(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "update_props! ->", { props }))
 
-		// TODO  refactor
-		if (propsPrev === undefined) {
-			const allKeys = Object.keys(props)
-			PropUtils.updateProps(allKeys, props, Propeller.update, renderer)
-			propsPrev = { ...props }
+		// TODO  check / refactor -> looks outdated
+		if (props_prev === undefined) {
+			const all_keys = Object.keys(props)
+			PropUtils.updateProps(all_keys, props, Propeller.update, renderer)
+			props_prev = { ...props }
 		} else {
-			const keysOfChangedProps = PropUtils.getChangedKeys(props, propsPrev)
-			PropUtils.updateProps(keysOfChangedProps, props, Propeller.update, renderer)
-			propsPrev = { ...props }
+			const keys_of_changed_props = PropUtils.getChangedKeys(props, props_prev)
+			PropUtils.updateProps(keys_of_changed_props, props, Propeller.update, renderer)
+			props_prev = { ...props }
 		}
 	}
 
@@ -315,76 +321,80 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	$: if (renderer) set_xr()
 
-	function set_xr() {
-		renderer.xr.enabled = xr ? true : false
+	function set_xr(): void {
+		renderer.xr.enabled = !!xr
 		if (verbose && log_rs) {
 			console.debug(...c_rs(c_name, "set_xr! ->", { xr, "renderer.xr.enabled": renderer.xr.enabled }))
 		}
 	}
 
-	let sceneToRenderId: string = undefined
-	export { sceneToRenderId as sceneId }
-	let currentScene: Scene = undefined
-	let currentSceneId = ""
+	/** `WebGLRenderer` component's prop `sceneId` -> `id` of a `Scene` component to render. */
+	let scene_to_render_id: string = undefined
+	export { scene_to_render_id as sceneId }
+	let current_scene: Scene = undefined
+	let current_scene_id = ""
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-	$: if (!inputs && renderer && !currentScene && sceneToRenderId) set_currentScene()
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+	$: if (!inputs && renderer && !current_scene && scene_to_render_id) set_current_scene()
 
-	function set_currentScene() {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_currentScene! ->", { sceneToRenderId }))
-		currentScene = get_sceneToRender()
-		activate_currentScene()
+	function set_current_scene(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_scene! ->", { scene_to_render_id }))
+		current_scene = get_scene_to_render(sti, scene_to_render_id)
+		activate_scene(current_scene, sti)
 	}
 
-	let camToRenderId: string = undefined
-	export { camToRenderId as camId }
-	let currentCam: PerspectiveCamera | OrthographicCamera = undefined
-	let currentCamId = ""
+	/** `WebGLRenderer` component's prop `camId` -> `id` of a camera component to render. */
+	let cam_to_render_id: string = undefined
+	export { cam_to_render_id as camId }
+	let current_cam: PerspectiveCamera | OrthographicCamera = undefined
+	let current_cam_id = ""
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-	$: if (!inputs && renderer && !currentCam && currentSceneId) set_currentCam()
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+	$: if (!inputs && renderer && !current_cam && current_scene_id) set_current_cam()
 
-	function set_currentCam() {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_currentCam! ->", { camToRenderId }))
-		currentCam = get_camToRender()
-		activate_currentCam()
+	function set_current_cam(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_cam! ->", { cam_to_render_id }))
+		current_cam = get_cam_to_render(sti, cam_to_render_id)
+		activate_cam(current_cam, sti)
 	}
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-	$: if (!inputs && renderer && sceneToRenderId !== currentSceneId && currentScene) {
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+	$: if (!inputs && renderer && scene_to_render_id !== current_scene_id && current_scene) {
 		if (verbose && log_rs) {
-			console.debug(...c_rs(c_name, "sceneToRenderId !== currentSceneId :", sceneToRenderId !== currentSceneId))
+			console.debug(
+				...c_rs(c_name, "scene_to_render_id !== current_scene_id :", scene_to_render_id !== current_scene_id)
+			)
 		}
 
-		updateCurrentScene()
+		update_current_scene()
 	}
 
-	function updateCurrentScene(): void {
-		deactivate_currentScene()
-		currentScene = get_sceneToRender()
-		activate_currentScene()
+	function update_current_scene(): void {
+		deactivate_scene(current_scene, sti)
+		current_scene = get_scene_to_render(sti, scene_to_render_id)
+		activate_scene(current_scene, sti)
 	}
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-	$: if (!inputs && renderer && camToRenderId !== currentCamId && currentCam) {
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+	$: if (!inputs && renderer && cam_to_render_id !== current_cam_id && current_cam) {
 		if (verbose && log_rs) {
-			console.debug(...c_rs(c_name, "camToRenderId !== currentCamId :", camToRenderId !== currentCamId))
+			console.debug(...c_rs(c_name, "cam_to_render_id !== current_cam_id :", cam_to_render_id !== current_cam_id))
 		}
 
-		updateCurrentCam()
+		update_current_cam()
 	}
 
-	function updateCurrentCam(): void {
-		set_currentCamInactive()
-		currentCam = get_camToRender()
-		activate_currentCam()
+	function update_current_cam(): void {
+		deactivate_cam(current_cam, sti)
+		current_cam = get_cam_to_render(sti, cam_to_render_id)
+		activate_cam(current_cam, sti)
 	}
 
-	let resizeRendererOnNextFrame = false
+	let resize_renderer_on_next_frame = false
 
 	const canvas_dim: Writable<{ w: number; h: number }> = getContext("canvas_dim")
 
-	// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
+	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
 	$: if (!inputs && renderer && ($canvas_dim?.w || $canvas_dim?.h)) {
 		if (verbose && log_rs) {
 			console.debug(
@@ -396,16 +406,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 
 		// resize renderer on canvas_dom_element.dim change
-		resizeRendererOnNextFrame = true
+		resize_renderer_on_next_frame = true
 	}
 
-	// TODO  auto-animate! (render only if something changed!)
-
 	/** Choose one of the `WebGLRenderer` modes:
-	 * - (default) `"always"` -> render on every AnimationFrame (_use requestAnimationFrame for continuously animated scenes_)
-	 * - (todo/wip) `"auto"` -> render only if something in the scene has changed (_the most performant mode overall_).
+	 * - `"auto"` (default) -> render only if something in the active scene has changed ( _the most performant mode overall_ ).
+	 * - `"always"` -> render on every AnimationFrame ( _classic requestAnimationFrame loop_ )
 	 */
-	export let mode: WebGLRendererMode = "always"
+	export let mode: WebGLRendererMode = "auto"
 
 	// both inside and outside
 	$: if (renderer && (canvas_dom_element || inputs_queue.length)) {
@@ -413,264 +421,109 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		start_renderer()
 	}
 
-	function activate_currentCam(): void {
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "activate_currentCam! (before) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
+	// --- Camera activation / deactivation ---
 
-		currentCam.userData.isActive = true
-		$svelthreeStores[sti].cameras[currentCam.userData.index_in_cameras].isActive = true
-		$svelthreeStores[sti].activeCamera = currentCam
-
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "activate_currentCam! (done) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
+	function activate_cam(camera: PerspectiveCamera | OrthographicCamera, store_index: number) {
+		camera.userData.isActive = true
+		$svelthreeStores[store_index].cameras[camera.userData.index_in_cameras].isActive = true
+		$svelthreeStores[store_index].activeCamera = camera
 	}
 
-	function activate_currentCam_2(currentCam: PerspectiveCamera | OrthographicCamera, sti: number): void {
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "activate_currentCam! (before) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
-
-		currentCam.userData.isActive = true
-		$svelthreeStores[sti].cameras[currentCam.userData.index_in_cameras].isActive = true
-		$svelthreeStores[sti].activeCamera = currentCam
-
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "activate_currentCam! (done) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
+	function deactivate_cam(camera: PerspectiveCamera | OrthographicCamera, store_index: number): void {
+		camera.userData.isActive = false
+		$svelthreeStores[store_index].cameras[camera.userData.index_in_cameras].isActive = false
 	}
 
-	function set_currentCamInactive(): void {
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "set_currentCamInactive! (before) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
+	function get_scene_to_render(store_index: number, scene_id: string): Scene {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_scene_to_render!"))
 
-		currentCam.userData.isActive = false
-		$svelthreeStores[sti].cameras[currentCam.userData.index_in_cameras].isActive = false
-
-		if (verbose && log_dev) {
-			console.debug(
-				...c_dev(c_name, "activate_currentCam! (done) ->", {
-					currentCam: currentCam.type,
-					uuid: currentCam.uuid,
-					isActive: currentCam.userData.isActive
-				})
-			)
-		}
-	}
-
-	function get_sceneToRender(): Scene {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_sceneToRender!"))
-		if ($svelthreeStores[sti].scenes.length > 0) {
-			if (sceneToRenderId === undefined) {
+		if ($svelthreeStores[store_index].scenes.length > 0) {
+			if (scene_id === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
-					sceneId: sceneToRenderId
+					sceneId: scene_id
 				})
 				throw new Error("SVELTHREE Exception (see warning above)")
 			} else {
-				for (let i = 0; i < $svelthreeStores[sti].scenes.length; i++) {
-					let item = $svelthreeStores[sti].scenes[i]
+				for (let i = 0; i < $svelthreeStores[store_index].scenes.length; i++) {
+					let item = $svelthreeStores[store_index].scenes[i]
 
-					if (item.id === sceneToRenderId) {
-						currentSceneId = sceneToRenderId
+					if (item.id === scene_id) {
+						current_scene_id = scene_id
 						return item.scene
 					}
 				}
 
-				console.warn("SVELTHREE > WebGLRenderer : Scene with id '" + sceneToRenderId + "' not found!", {
-					scenes: $svelthreeStores[sti].scenes
+				console.warn("SVELTHREE > WebGLRenderer : Scene with id '" + scene_id + "' not found!", {
+					scenes: $svelthreeStores[store_index].scenes
 				})
 				throw new Error("SVELTHREE Exception (see warning above)")
 			}
 		} else {
-			console.warn("SVELTHREE > WebGLRenderer : get_sceneToRender: No Scenes available!", {
-				scenes: $svelthreeStores[sti].scenes
+			console.warn("SVELTHREE > WebGLRenderer : get_scene_to_render: No Scenes available!", {
+				scenes: $svelthreeStores[store_index].scenes
 			})
 			throw new Error("SVELTHREE Exception (see warning above)")
 		}
 	}
 
-	function get_sceneToRender_2(sti: number, sceneToRenderId: string): Scene {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_sceneToRender_2!"))
-		if ($svelthreeStores[sti].scenes.length > 0) {
-			if (sceneToRenderId === undefined) {
-				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
-					sceneId: sceneToRenderId
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			} else {
-				for (let i = 0; i < $svelthreeStores[sti].scenes.length; i++) {
-					let item = $svelthreeStores[sti].scenes[i]
-
-					if (item.id === sceneToRenderId) {
-						currentSceneId = sceneToRenderId
-						return item.scene
-					}
-				}
-
-				console.warn("SVELTHREE > WebGLRenderer : Scene with id '" + sceneToRenderId + "' not found!", {
-					scenes: $svelthreeStores[sti].scenes
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			}
-		} else {
-			console.warn("SVELTHREE > WebGLRenderer : get_sceneToRender: No Scenes available!", {
-				scenes: $svelthreeStores[sti].scenes
-			})
-			throw new Error("SVELTHREE Exception (see warning above)")
-		}
-	}
-
-	function get_camToRender(): PerspectiveCamera | OrthographicCamera {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_camToRender!"))
-		if ($svelthreeStores[sti].cameras.length > 0) {
-			if (camToRenderId === undefined) {
+	function get_cam_to_render(store_index: number, cam_id: string): PerspectiveCamera | OrthographicCamera {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render_2!"))
+		if ($svelthreeStores[store_index].cameras.length > 0) {
+			if (cam_id === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
-					camId: camToRenderId
+					camId: cam_id
 				})
 				throw new Error("SVELTHREE Exception (see warning above)")
 			} else {
-				for (let i = 0; i < $svelthreeStores[sti].cameras.length; i++) {
-					let item = $svelthreeStores[sti].cameras[i]
-					if (item.id === camToRenderId) {
-						currentCamId = camToRenderId
+				for (let i = 0; i < $svelthreeStores[store_index].cameras.length; i++) {
+					let item = $svelthreeStores[store_index].cameras[i]
+					if (item.id === cam_id) {
+						current_cam_id = cam_id
 						return item.camera
 					}
 				}
 
-				console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + camToRenderId + "' not found!", {
-					cameras: $svelthreeStores[sti].cameras
+				console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + cam_id + "' not found!", {
+					cameras: $svelthreeStores[store_index].cameras
 				})
 				throw new Error("SVELTHREE Exception (see warning above)")
 			}
 		} else {
 			console.warn(
-				"SVELTHREE > WebGLRenderer : get_camToRender: No Cameras available! $svelthreeStores[sti].cameras:",
-				{ cameras: $svelthreeStores[sti].cameras }
+				"SVELTHREE > WebGLRenderer : get_cam_to_render: No Cameras available! $svelthreeStores[store_index].cameras:",
+				{ cameras: $svelthreeStores[store_index].cameras }
 			)
 			throw new Error("SVELTHREE Exception (see warning above)")
 		}
 	}
 
-	function get_camToRender_2(sti: number, camToRenderId: string): PerspectiveCamera | OrthographicCamera {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_camToRender_2!"))
-		if ($svelthreeStores[sti].cameras.length > 0) {
-			if (camToRenderId === undefined) {
-				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
-					camId: camToRenderId
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			} else {
-				for (let i = 0; i < $svelthreeStores[sti].cameras.length; i++) {
-					let item = $svelthreeStores[sti].cameras[i]
-					if (item.id === camToRenderId) {
-						currentCamId = camToRenderId
-						return item.camera
-					}
-				}
-
-				console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + camToRenderId + "' not found!", {
-					cameras: $svelthreeStores[sti].cameras
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			}
-		} else {
-			console.warn(
-				"SVELTHREE > WebGLRenderer : get_camToRender: No Cameras available! $svelthreeStores[sti].cameras:",
-				{ cameras: $svelthreeStores[sti].cameras }
-			)
-			throw new Error("SVELTHREE Exception (see warning above)")
-		}
-	}
-
-	function deactivate_currentScene(): void {
-		if (currentScene.userData.isActive === true) {
-			currentScene.userData.isActive = false
-			$svelthreeStores[sti].activeScene = undefined
-			$svelthreeStores[sti].scenes[currentScene.userData.index_in_scenes].isActive = false
-		}
-	}
-
-	// TODO  / TOFIX  CHECK: this should be possible simpler. ( current approach seems to have something to do with resuming animations (?) (old approach?)...)
-	function activate_currentScene(): void {
-		// resume animations only if scene was being deactivated before
-		if (currentScene.userData.isActive === false) {
-			currentScene.userData.isActive = true
-			$svelthreeStores[sti].scenes[currentScene.userData.index_in_scenes].isActive = true
-			$svelthreeStores[sti].activeScene = currentScene
-			$svelthreeStores[sti].currentSceneIndex = currentScene.userData.index_in_scenes + 1
-		} else if (currentScene.userData.isActive === undefined) {
+	function activate_scene(scene: Scene, sti: number): void {
+		if (scene.userData.isActive === undefined) {
 			if (verbose && log_dev) {
 				console.debug(
-					...c_dev(c_name, "activate_currentScene! -> if (currentScene.userData.isActive === undefined) :", {
-						currentScene
+					...c_dev(c_name, "activate_scene! -> if (scene.userData.isActive === undefined) :", {
+						scene
 					})
 				)
 			}
+		}
 
-			currentScene.userData.isActive = true
-			$svelthreeStores[sti].scenes[currentScene.userData.index_in_scenes].isActive = true
-			$svelthreeStores[sti].activeScene = currentScene
-			$svelthreeStores[sti].currentSceneIndex = currentScene.userData.index_in_scenes + 1
+		scene.userData.isActive = true
+		$svelthreeStores[sti].scenes[scene.userData.index_in_scenes].isActive = true
+		$svelthreeStores[sti].activeScene = scene
+		$svelthreeStores[sti].currentSceneIndex = scene.userData.index_in_scenes + 1
+	}
+
+	function deactivate_scene(scene: Scene, store_index: number): void {
+		if (scene.userData.isActive === true) {
+			scene.userData.isActive = false
+			$svelthreeStores[store_index].activeScene = undefined
+			$svelthreeStores[store_index].scenes[scene.userData.index_in_scenes].isActive = false
 		}
 	}
 
-	function activate_currentScene_2(currentScene: Scene, sti: number): void {
-		// resume animations only if scene was being deactivated before
-		if (currentScene.userData.isActive === false) {
-			currentScene.userData.isActive = true
-			$svelthreeStores[sti].scenes[currentScene.userData.index_in_scenes].isActive = true
-			$svelthreeStores[sti].activeScene = currentScene
-			$svelthreeStores[sti].currentSceneIndex = currentScene.userData.index_in_scenes + 1
-		} else if (currentScene.userData.isActive === undefined) {
-			if (verbose && log_dev) {
-				console.debug(
-					...c_dev(c_name, "activate_currentScene! -> if (currentScene.userData.isActive === undefined) :", {
-						currentScene
-					})
-				)
-			}
-
-			currentScene.userData.isActive = true
-			$svelthreeStores[sti].scenes[currentScene.userData.index_in_scenes].isActive = true
-			$svelthreeStores[sti].activeScene = currentScene
-			$svelthreeStores[sti].currentSceneIndex = currentScene.userData.index_in_scenes + 1
-		}
-	}
-
-	// IMPORTANT  avoid component updates if not neccessary by e.g. by putting values into
-	// NOT EXPORTED top-level objects -> EXPORTED top-level objects will be reactive due to 'svelte-accmod'!
+	// IMPORTANT  avoid component updates if not neccessary by e.g. putting values into
+	// **NOT** EXPORTED top-level objects -> EXPORTED top-level objects will be reactive due to `svelte-accmod`!
 	const rAF = { id: undefined }
 	const frames = { total: 0 }
 
@@ -680,235 +533,280 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "start_renderer!"))
 
 		if (renderer.xr.enabled === false) {
-			render_standard()
+			if (mode === "always") schedule_render_always()
+			if (mode === "auto") rAF.id = requestAnimationFrame(render_standard)
 		} else {
 			throw new Error("SVELTHREE > You're using the non-XR svelthree version!")
 		}
 	}
 
-	let logOnce = true
+	let log_once = true
 
-	// TODO  CHECK / IMPROVE!
-	async function render_standard(): Promise<void> {
-		// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-		if (!inputs && currentCam.userData.renderer_currentcam_needsupdate) {
-			currentCam.userData.renderer_currentcam_needsupdate = false
-			set_currentCam()
-		}
-
-		// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-		if (!inputs && currentCam.userData.renderer_currentscene_needsupdate) {
-			currentCam.userData.renderer_currentscene_needsupdate = false
-			set_currentScene()
-		}
-
-		if (enabled) {
-			if (logOnce) doLogOnce(mode)
-
-			dispatch("before_render", { frame: frames.total })
-			dispatch("before_render_int", { frame: frames.total })
-			dispatch("before_render_scene", { frame: frames.total })
-
-			// VERY IMPORTANT  THREE  SVELTE :
-			// inserting await tick() here enables cross-referencing:
-			await tick()
-
-			// filter interactive objects in currently active (rendered) scene
-			dispatch("interaction_0")
-			// update raycaster intersections and cursor appearance (_if `canvas_comp.change_cursor = true`_)
-			dispatch("interaction_1")
-			// fire any interactivity events
-			dispatch("interaction_2")
-			// will currently update box-helpers only
-			dispatch("update_helpers")
-
-			// update OrbitControls (NonXR)
-			// required if `enableDamping` or `autoRotate` are set to `true`
-			if (inputs_queue.length) {
-				for (let i = 0; i < inputs_queue.length; i++) {
-					const queued = inputs_queue[i]
-					const sti = queued.sti
-
-					if ($svelthreeStores[sti].orbitcontrols.length) {
-						for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
-							let oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
-							if (oc.autoRotate || oc.enableDamping) oc.update()
-						}
-					}
-				}
-			} else {
-				if ($svelthreeStores[sti].orbitcontrols.length) {
-					for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
-						let oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
-						if (oc.autoRotate || oc.enableDamping) oc.update()
-					}
-				}
-			}
-
-			// update CubeCameras
-			if (inputs_queue.length) {
-				for (let i = 0; i < inputs_queue.length; i++) {
-					const queued = inputs_queue[i]
-					const sti = queued.sti
-
-					if ($svelthreeStores[sti].cubeCameras.length) {
-						for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
-							let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
-							if (cubeCamComponent.dynamic) {
-								cubeCamComponent.update_cubecam()
-							}
-						}
-					}
-				}
-			} else {
-				if ($svelthreeStores[sti].cubeCameras.length) {
-					for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
-						let cubeCamComponent: SvelteComponentDev = $svelthreeStores[sti].cubeCameras[i]
-						if (cubeCamComponent.dynamic) {
-							cubeCamComponent.update_cubecam()
-						}
-					}
-				}
-			}
-
-			if (inputs_queue.length) {
-				// outside only -> if the 'WebGLRenderer' component is placed outside of a 'Canvas' component
-				for (let i = 0; i < inputs_queue.length; i++) {
-					const inp = inputs_queue[i]
-					// inside should be false if inputs_queue.length
-					if (!outputs_queue?.length && inside === false) {
-						renderer.setSize(inp.dom_element.width, inp.dom_element.height)
-					}
-
-					if (outputs_queue?.length) {
-						for (let j = 0; j < outputs_queue.length; j++) {
-							const out = outputs_queue[j]
-
-							inp.cam.setViewOffset(
-								out.viewOffset[0],
-								out.viewOffset[1],
-								out.viewOffset[2],
-								out.viewOffset[3],
-								out.viewOffset[4],
-								out.viewOffset[5]
-							)
-							renderer.setSize(out.viewOffset[4], out.viewOffset[5])
-							renderer.render(inp.scene, inp.cam)
-
-							const context = out.dom_element.getContext("2d")
-							context.drawImage(renderer.domElement, 0, 0)
-							inp.cam.clearViewOffset()
-						}
-					} else {
-						renderer.render(inp.scene, inp.cam)
-						const context = inp.dom_element.getContext("2d")
-						context.drawImage(renderer.domElement, 0, 0)
-					}
-				}
-			} else {
-				// inside only -> if the 'WebGLRenderer' component is placed inside a 'Canvas' or a 'Scene' component
-				if (resizeRendererOnNextFrame) {
-					renderer.setSize($canvas_dim.w, $canvas_dim.h, true)
-					resizeRendererOnNextFrame = false
-				}
-
-				renderer.render(currentScene, currentCam)
-				const context = canvas_dom_element.getContext("2d")
-				context.drawImage(renderer.domElement, 0, 0)
-			}
-
-			switch (mode) {
-				case "always":
-					rAF.id = requestAnimationFrame(render_standard)
-					break
-				case "auto":
-					render_scheduled.status = false
-					break
-				default:
-					console.error(
-						`SVELTHREE -> WebGLRenderer : No \`mode:"${mode}"\` defined, using \`mode:"always"\` as fallback!`
-					)
-					rAF.id = requestAnimationFrame(render_standard)
-					break
-			}
-
-			frames.total++
-			dispatch("after_render", { frame: frames.total })
-		}
-	}
-
-	const render_scheduled: { status: boolean } = { status: false }
-
-	export function schedule_render(): void {
-		if (render_scheduled.status === false) {
-			if (currentScene && currentScene.userData.dirty) {
-				currentScene.userData.dirty = false
-				rAF.id = requestAnimationFrame(render_standard)
-				render_scheduled.status = true
-			}
-		}
-	}
-
-	function doLogOnce(renderMode: string): void {
-		logOnce = false
+	function do_log_once(render_mode: string): void {
+		log_once = false
 		if (verbose && log_dev)
 			console.warn(
-				...c_dev(c_name, `"SVELTHREE -> WebGLRenderer -> render_standard, mode:": ${renderMode}`, {
-					currentScene,
-					currentCam,
+				...c_dev(c_name, `"SVELTHREE -> WebGLRenderer -> render_standard, mode:": ${render_mode}`, {
+					current_scene,
+					current_cam,
 					canvas_dom_element
 				})
 			)
 	}
 
-	function stopAnimating(): void {
-		enabled = false
-		cancelAnimationFrame(rAF.id)
+	/**
+	 * Dispatches a custom event via component's dispatcher, see `dispatch`.
+	 * - Added as an alternative to calling `dispatch` directly in order to reduce anonnymous function calls count in the stack trace.
+	 * Every `dispatch(...)` call is creating a new custom event, calling `createEventDispatcher` alone shows two anonnymous functions in the stack trace.
+	 */
+	async function dispatch_render_event(event_name: string, detail: any = null): Promise<void> {
+		detail ? dispatch(event_name, detail) : dispatch(event_name)
+	}
+
+	async function render_standard(): Promise<void> {
+		if (mode === "auto") render_scheduled.status = false
+
+		// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+		if (!inputs && current_cam.userData.renderer_currentcam_needsupdate) {
+			current_cam.userData.renderer_currentcam_needsupdate = false
+			set_current_cam()
+		}
+
+		// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+		if (!inputs && current_cam.userData.renderer_currentscene_needsupdate) {
+			current_cam.userData.renderer_currentscene_needsupdate = false
+			set_current_scene()
+		}
+
+		if (enabled) {
+			if (log_once) do_log_once(mode)
+
+			// process
+			await svelthree_extra()
+			await tick()
+			await svelthree_rendering()
+			await tick()
+
+			frames.total++
+
+			await dispatch_render_event("after_render", { frame: frames.total })
+		}
+	}
+
+	async function svelthree_extra(): Promise<void> {
+		await dispatch_render_event("before_render", { frame: frames.total })
+		await dispatch_render_event("before_render_int", { frame: frames.total })
+		await dispatch_render_event("before_render_scene", { frame: frames.total })
+
+		// TODO  the comment below is very old, check / nail it down 100%!
+		// VERY IMPORTANT  THREE  SVELTE :
+		// inserting await tick() here enables cross-referencing:
+		await tick()
+
+		// filter interactive objects in currently active (rendered) scene
+		await dispatch_render_event("interaction_0")
+
+		// update raycaster intersections and cursor appearance (_if `canvas_comp.change_cursor = true`_)
+		await dispatch_render_event("interaction_1")
+
+		if (mode === "always") {
+			// fire any queued pointer interactivity
+			await dispatch_render_event("interaction_2")
+
+			// fire any queued focus / keyboard interactivity
+			await dispatch_render_event("interaction_3")
+		}
+
+		// will currently update box-helpers only
+		await dispatch_render_event("update_helpers")
+
+		// update OrbitControls (NonXR)
+		// required if `enableDamping` or `autoRotate` are set to `true`
+		if (inputs_queue.length) {
+			for (let i = 0; i < inputs_queue.length; i++) {
+				const queued = inputs_queue[i]
+				const sti = queued.sti
+
+				if ($svelthreeStores[sti].orbitcontrols.length) {
+					for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
+						const oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
+						if (oc.autoRotate || oc.enableDamping) oc.update()
+					}
+				}
+			}
+		} else {
+			if ($svelthreeStores[sti].orbitcontrols.length) {
+				for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
+					const oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
+					if (oc.autoRotate || oc.enableDamping) oc.update()
+				}
+			}
+		}
+
+		// update CubeCameras
+		if (inputs_queue.length) {
+			for (let i = 0; i < inputs_queue.length; i++) {
+				const queued = inputs_queue[i]
+				const sti = queued.sti
+
+				if ($svelthreeStores[sti].cubeCameras.length) {
+					for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
+						const cubecam: CubeCamera = $svelthreeStores[sti].cubeCameras[i]
+						if (cubecam.dynamic) {
+							cubecam.update_cubecam()
+						}
+					}
+				}
+			}
+		} else {
+			if ($svelthreeStores[sti].cubeCameras.length) {
+				for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
+					const cubecam: CubeCamera = $svelthreeStores[sti].cubeCameras[i]
+					if (cubecam.dynamic) {
+						cubecam.update_cubecam()
+					}
+				}
+			}
+		}
+	}
+
+	async function svelthree_rendering(): Promise<void> {
+		if (inputs_queue.length) {
+			// outside only -> if the `WebGLRenderer` component is placed outside of a `Canvas` component
+			for (let i = 0; i < inputs_queue.length; i++) {
+				const inp = inputs_queue[i]
+				// inside should be false if inputs_queue.length
+				if (!outputs_queue?.length && inside === false) {
+					renderer.setSize(inp.dom_element.width, inp.dom_element.height)
+				}
+
+				if (outputs_queue?.length) {
+					for (let j = 0; j < outputs_queue.length; j++) {
+						const out = outputs_queue[j]
+
+						inp.cam.setViewOffset(
+							out.viewOffset[0],
+							out.viewOffset[1],
+							out.viewOffset[2],
+							out.viewOffset[3],
+							out.viewOffset[4],
+							out.viewOffset[5]
+						)
+						renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+						renderer.render(inp.scene, inp.cam)
+
+						const context = out.dom_element.getContext("2d")
+						context.drawImage(renderer.domElement, 0, 0)
+						inp.cam.clearViewOffset()
+					}
+				} else {
+					renderer.render(inp.scene, inp.cam)
+					const context = inp.dom_element.getContext("2d")
+					context.drawImage(renderer.domElement, 0, 0)
+				}
+			}
+		} else {
+			// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+			if (resize_renderer_on_next_frame) {
+				renderer.setSize($canvas_dim.w, $canvas_dim.h, true)
+				resize_renderer_on_next_frame = false
+			}
+
+			renderer.render(current_scene, current_cam)
+			const context = canvas_dom_element.getContext("2d")
+			context.drawImage(renderer.domElement, 0, 0)
+		}
+	}
+
+	export const render_scheduled: { status: boolean } = { status: false }
+
+	/**
+	 * Schedules a render if the current scene has been marked as `dirty`. \
+	 * _Primarly called internally by components if `WebGLRenderer` component's `mode` is set to `"auto"`_.
+	 */
+	 export function schedule_render(scene:Scene = null): void {
+		if (enabled && render_scheduled.status === false) {
+			const scene_to_check: Scene = scene ? scene : current_scene
+			if (scene_to_check) {
+				if (scene_to_check && scene_to_check.userData.dirty) {
+					scene_to_check.userData.dirty = false
+					rAF.id = requestAnimationFrame(render_standard)
+					render_scheduled.status = true
+				}
+			} else {
+				console.error("SVELTHREE > WebGLRenderer > schedule_render : no scene to check 'dirty' status available!")
+			}
+		}
+	}
+
+	/**
+	 * Always schedules a render. Current scene doesn't have to be marked as `dirty`. \
+	 * _Called by the `render_standard()` function if `WebGLRenderer` component's `mode` is set to `"always"`_.
+	 */
+	function schedule_render_always(): void {
+		if (enabled) {
+			rAF.id = requestAnimationFrame(async () => {
+				await render_standard()
+				schedule_render_always()
+			})
+		}
 	}
 
 	// public methods
 
-	/** Render manually (_forced render_). */
-	export function update(): void {
+	// TODO  this has to be tested / used / optimized (_isn't used in any of the test scenes up to date_)
+	/** Cancel any scheduled `requestAnimationFrame` and disable further rendering. */
+	export function stop_rendering(): void {
+		enabled = false
+		cancelAnimationFrame(rAF.id)
+		render_scheduled.status = false
+	}
+
+	// TODO  this has to be tested / used / optimized (_isn't used in any of the test scenes up to date_)
+	/** Cancel any scheduled `requestAnimationFrame` and disable further rendering. */
+	export function start_rendering(): void {
+		enabled = true
 		start_renderer()
 	}
 
-	export function getRenderer(): WebGLRenderer {
+	/** Returns the **three.js instance** of the renderer. */
+	export function get_renderer(): WebGLRenderer {
 		return renderer
 	}
 
-	export function getCurrentCamera(): Camera {
-		return currentCam
+	/** Returns the **three.js instance** of `Camera` currently used by the renderer. */
+	export function get_current_camera(): Camera {
+		return current_cam
 	}
 
 	/** Get the total number of currently rendered frames. */
-	export function getCurrentFrame(): number {
+	export function get_current_frame(): number {
 		return frames.total
 	}
 
 	// TODO  different?
 
-	export function setRender(parameters = { sceneId: "", camId: "" }): void {
-		sceneToRenderId = parameters.sceneId
-		camToRenderId = parameters.camId
+	export function set_render(parameters = { sceneId: "", camId: "" }): void {
+		scene_to_render_id = parameters.sceneId
+		cam_to_render_id = parameters.camId
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
-
-		return () => {
-			if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
-			stopAnimating()
-			renderer.dispose()
-			renderer.forceContextLoss()
-		}
 	})
 
-	beforeUpdate(() => {
+	onDestroy(async () => {
+		if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
+		stop_rendering()
+		renderer.dispose()
+		renderer.forceContextLoss()
+	})
+
+	beforeUpdate(async () => {
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
 	})
 
-	afterUpdate(() => {
+	afterUpdate(async () => {
 		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
 	})
 </script>

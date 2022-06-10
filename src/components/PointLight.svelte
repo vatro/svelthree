@@ -42,7 +42,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
+
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
 	import { svelthreeStores } from "svelthree/stores"
@@ -59,9 +61,24 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
+	import type { Writable } from "svelte/store"
+
+	/**
+	 *  SVELTEKIT  SSR
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
+
+	const shadow_root: Writable<{ element: HTMLDivElement }> = getContext("shadow_root")
+	let shadow_root_el: HTMLDivElement
+	$: shadow_root_el = $shadow_root.element
 
 	const verbose: boolean = verbose_mode()
 
@@ -211,6 +228,51 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'light' to!", { light, our_parent, scene })
+		}
+	}
+
+	// accessability -> shadow dom element
+
+	/**
+	 *  IMPORTANT  TODO  TOFIX   \
+	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
+	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
+	 */
+	export let shadow_dom_target: HTMLDivElement = undefined
+
+	$: if (shadow_root_el && light && !shadow_dom_target) {
+		if (browser) {
+			shadow_dom_target = document.createElement("div")
+			shadow_dom_target.dataset.kind = "PointLight"
+			if (name) shadow_dom_target.dataset.name = name
+
+			const shadow_target: HTMLDivElement = our_parent
+				? our_parent.userData.svelthreeComponent.shadow_dom_target
+				: shadow_root_el
+
+			// see  TODO  above
+			if (shadow_target) shadow_target.appendChild(shadow_dom_target)
+		}
+	}
+
+	// accessability -> shadow dom focusable
+	export let tabindex: number = undefined
+
+	$: if (shadow_dom_target && tabindex !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+	}
+
+	// accessability -> shadow dom wai-aria
+	export let aria: Partial<ARIAMixin> = undefined
+
+	$: if (shadow_dom_target && aria !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+		for (const key in aria) {
+			if (key === "ariaLabel") {
+				shadow_dom_target.innerText += `${aria[key]}`
+			} else {
+				shadow_dom_target[key] = aria[key]
+			}
 		}
 	}
 
@@ -397,6 +459,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
 
+	/** Sets `focus()` on the component / it's shadow dom element. */
+	export const focused = (): void => shadow_dom_target.focus()
+
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
 	export let onMount_replace: (args?: any) => any = undefined
@@ -529,7 +594,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						root_scene.userData.dirty = true
-						$svelthreeStores[sti].rendererComponent.schedule_render()
+						$svelthreeStores[sti].rendererComponent.schedule_render(root_scene)
 					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
@@ -537,7 +602,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	)
 </script>
 
-<!-- using context -->
 <slot />
 
 <SvelthreeLightWithShadow

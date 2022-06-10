@@ -13,7 +13,6 @@ export default class SvelthreeAnimationProp {
 
 		try {
 			initiatedFn = this.fn(obj, args)
-			console.log("initiatedFn:", initiatedFn)
 
 			if (!initiatedFn.hasOwnProperty("onStart")) {
 				console.error("SVELTHREE > Provided animation is missing 'onStart' function!", {

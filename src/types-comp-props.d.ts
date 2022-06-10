@@ -22,5 +22,3 @@ export type MeshProps = OnlyWritableNonFunctionPropsPlus<
 		matrix?: Matrix4 | Parameters<Matrix4["set"]>
 	}
 >
-
-export type MeshInteractionHandler = (e?: CustomEvent) => void

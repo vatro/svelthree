@@ -39,12 +39,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
+
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
 	import { svelthreeStores } from "svelthree/stores"
@@ -58,10 +60,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { createEventDispatcher } from "svelte"
 	import type { Writable } from "svelte/store"
 
+	import type { SvelthreeModifiersProp } from "../constants/Interaction"
+	import type {
+		SvelthreePointerEventHandler,
+		SvelthreeFocusEventHandler,
+		SvelthreeKeyboardEventHandler,
+		SvelthreeWheelEventHandler
+	} from "../constants/Interaction"
+
 	import { BoxHelper } from "three"
-	import { once_on_render_event } from "../utils/RendererUtils.svelte"
 	import { get_root_scene } from "../utils/SceneUtils"
-	import type { WebGLRenderer } from "../components"
 
 	import type { BufferGeometry } from "three"
 
@@ -69,8 +77,22 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
 	import type { Material, PointsMaterial, Color } from "three"
 
+	/**
+	 *  SVELTEKIT  SSR
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
+
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
+
+	const shadow_root: Writable<{ element: HTMLDivElement }> = getContext("shadow_root")
+	let shadow_root_el: HTMLDivElement
+	$: shadow_root_el = $shadow_root.element
 
 	const verbose: boolean = verbose_mode()
 
@@ -330,6 +352,51 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
+	// accessability -> shadow dom element
+
+	/**
+	 *  IMPORTANT  TODO  TOFIX   \
+	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
+	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
+	 */
+	export let shadow_dom_target: HTMLDivElement = undefined
+
+	$: if (shadow_root_el && points && !shadow_dom_target) {
+		if (browser) {
+			shadow_dom_target = document.createElement("div")
+			shadow_dom_target.dataset.kind = "Points"
+			if (name) shadow_dom_target.dataset.name = name
+
+			const shadow_target: HTMLDivElement = our_parent
+				? our_parent.userData.svelthreeComponent.shadow_dom_target
+				: shadow_root_el
+
+			// see  TODO  above
+			if (shadow_target) shadow_target.appendChild(shadow_dom_target)
+		}
+	}
+
+	// accessability -> shadow dom focusable
+	export let tabindex: number = undefined
+
+	$: if (shadow_dom_target && tabindex !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+	}
+
+	// accessability -> shadow dom wai-aria
+	export let aria: Partial<ARIAMixin> = undefined
+
+	$: if (shadow_dom_target && aria !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+		for (const key in aria) {
+			if (key === "ariaLabel") {
+				shadow_dom_target.innerText += `${aria[key]}`
+			} else {
+				shadow_dom_target[key] = aria[key]
+			}
+		}
+	}
+
 	/** Override object's `.matrixAutoUpdate` set (*on initialzation*) by scene's `.matrixAutoUpdate` (*default is `true`*). Also: `mau` can be changed on-the-fly.*/
 	export let mau: boolean = undefined
 	$: if (points) points.matrixAutoUpdate = scene.matrixAutoUpdate
@@ -461,8 +528,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && points && points.userData.box && $svelthreeStores[sti].rendererComponent) {
-		once_on_render_event($svelthreeStores[sti].rendererComponent, "before_render", apply_box, 1)
+	$: if (box && points && points.userData.box && $svelthreeStores[sti].rendererComponent && root_scene) {
+		apply_box()
 	}
 
 	function apply_box(): void {
@@ -493,7 +560,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function remove_box_helper(): void {
-		if (remove_update_box_on_render_event) remove_update_box_on_render_event()
+		if (remove_update_box_on_render_event) {
+			remove_update_box_on_render_event()
+			remove_update_box_on_render_event = null
+		}
+
 		if (points.userData.box?.parent) {
 			points.userData.box.parent.remove(points.userData.box)
 			points.userData.box = null
@@ -551,67 +622,109 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	/** for `SvelthreeInteraction` component's reactive listener management only */
-	let callbacks = {}
+	/** `SvelthreeInteraction` component reference used for reactive listener management only. */
+	let interaction_comp = undefined
 
-	/** **svelthree** replacement for [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
-	 * but it doesn't return a function for removal of the listener (_like Svelte native does_), instead use `.remove(type, callback)` syntax.
-	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
-	export function on(type: any, callback: any): void {
-		self.$on(type, callback)
-		callbacks = callbacks
+	/**
+	 * **svelthree** replacement for [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * but it doesn't return a function for removal of the listener (_like Svelte native does_), instead use `.onx(type, callback)` syntax.
+	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_.
+	 *
+	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 */
+	export async function on(type: any, callback: any): Promise<void> {
+		if (interact) {
+			if (!interaction_comp) await tick()
+
+			self.$on(type, callback)
+			interaction_comp.update_listeners = true
+		} else {
+			console.error(
+				"SVELTHREE > Mesh > on : You can call the '.on(...)' function with interactive components only! Component's 'interact' prop has to be 'true'."
+			)
+		}
 	}
 
-	/** **svelthree** replacement for the _event listener removal function_ returned by [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
-	 * needed for **reactive** interaction listener management -> _internal svelthree functionality_. */
-	export function onx(type: any, callback: any): void {
-		const cbacks = self.$$.callbacks[type]
-		const index = cbacks.indexOf(callback)
-		if (index !== -1) cbacks.splice(index, 1)
-		callbacks = callbacks
+	/**
+	 * **svelthree** replacement for the _event listener removal function_ returned by [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
+	 * needed for **reactive** interaction listener management -> _internal svelthree functionality_. It additionaly allows programmatic removal of all callbacks of a certain type and
+	 * programmatic removal of 'forwarding' directives (no handlers) like `on:click`.
+	 *
+	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 */
+	export async function onx(type: any, callback: any): Promise<void> {
+		if (interact) {
+			if (!interaction_comp) await tick()
+
+			const cbacks = self.$$.callbacks[type]
+			if (callback) {
+				const index = cbacks.indexOf(callback)
+				if (index !== -1) cbacks.splice(index, 1)
+			} else {
+				// allows e.g. onx("click") -> will remove all callbacks and the callback type itself
+				// this way we can also programatically delete 'forwarding' directives (no handlers) like `on:click`
+				self.$$.callbacks[type].length = 0
+				delete self.$$.callbacks[type]
+			}
+
+			interaction_comp.update_listeners = true
+		} else {
+			console.error(
+				"SVELTHREE > Mesh > onx : You can call the '.onx(...)' function with interactive components only! Component's 'interact' prop has to be 'true'!"
+			)
+		}
 	}
 
-	export let on_click: PointsInteractionHandler = undefined
-	$: if (on_click !== undefined) callbacks = callbacks
+	/** Interaction modifiers. */
+	export let modifiers: SvelthreeModifiersProp = undefined
 
-	export let on_pointerup: PointsInteractionHandler = undefined
-	$: if (on_pointerup !== undefined) callbacks = callbacks
+	export let on_click: SvelthreePointerEventHandler = undefined
+	$: if (on_click !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointerdown: PointsInteractionHandler = undefined
-	$: if (on_pointerdown !== undefined) callbacks = callbacks
+	export let on_pointerup: SvelthreePointerEventHandler = undefined
+	$: if (on_pointerup !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointerover: PointsInteractionHandler = undefined
-	$: if (on_pointerover !== undefined) callbacks = callbacks
+	export let on_pointerdown: SvelthreePointerEventHandler = undefined
+	$: if (on_pointerdown !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointerout: PointsInteractionHandler = undefined
-	$: if (on_pointerout !== undefined) callbacks = callbacks
+	export let on_pointerover: SvelthreePointerEventHandler = undefined
+	$: if (on_pointerover !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointerenter: PointsInteractionHandler = undefined
-	$: if (on_pointerenter !== undefined) callbacks = callbacks
+	export let on_pointerout: SvelthreePointerEventHandler = undefined
+	$: if (on_pointerout !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointerleave: PointsInteractionHandler = undefined
-	$: if (on_pointerleave !== undefined) callbacks = callbacks
+	export let on_pointermove: SvelthreePointerEventHandler = undefined
+	$: if (on_pointermove !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointermove: PointsInteractionHandler = undefined
-	$: if (on_pointermove !== undefined) callbacks = callbacks
+	export let on_pointermoveover: SvelthreePointerEventHandler = undefined
+	$: if (on_pointermoveover !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointercapture: PointsInteractionHandler = undefined
-	$: if (on_pointercapture !== undefined) callbacks = callbacks
+	export let on_keydown: SvelthreeKeyboardEventHandler = undefined
+	$: if (on_keydown !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_lostpointercapture: PointsInteractionHandler = undefined
-	$: if (on_lostpointercapture !== undefined) callbacks = callbacks
+	export let on_keypress: SvelthreeKeyboardEventHandler = undefined
+	$: if (on_keypress !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_pointercancel: PointsInteractionHandler = undefined
-	$: if (on_pointercancel !== undefined) callbacks = callbacks
+	export let on_keyup: SvelthreeKeyboardEventHandler = undefined
+	$: if (on_keyup !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_keydown: PointsInteractionHandler = undefined
-	$: if (on_keydown !== undefined) callbacks = callbacks
+	export let on_focus: SvelthreeFocusEventHandler = undefined
+	$: if (on_focus !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_keypress: PointsInteractionHandler = undefined
-	$: if (on_keypress !== undefined) callbacks = callbacks
+	export let on_blur: SvelthreeFocusEventHandler = undefined
+	$: if (on_blur !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
-	export let on_keyup: PointsInteractionHandler = undefined
-	$: if (on_keyup !== undefined) callbacks = callbacks
+	export let on_focusin: SvelthreeFocusEventHandler = undefined
+	$: if (on_focusin !== undefined && interaction_comp) interaction_comp.update_listeners = true
+
+	export let on_focusout: SvelthreeFocusEventHandler = undefined
+	$: if (on_focusout !== undefined && interaction_comp) interaction_comp.update_listeners = true
+
+	export let on_wheel: SvelthreeWheelEventHandler = undefined // ->  TODO  implement
+	$: if (on_wheel !== undefined && interaction_comp) interaction_comp.update_listeners = true
+
+	export let on_wheelover: SvelthreeWheelEventHandler = undefined // -> TODO  implement
+	$: if (on_wheelover !== undefined && interaction_comp) interaction_comp.update_listeners = true
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
@@ -651,6 +764,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const start_animation = (): void => ani.startAni()
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
+
+	/** Sets `focus()` on the component / it's shadow dom element. */
+	export const focused = (): void => shadow_dom_target.focus()
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -781,7 +897,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						root_scene.userData.dirty = true
-						$svelthreeStores[sti].rendererComponent.schedule_render()
+						$svelthreeStores[sti].rendererComponent.schedule_render(root_scene)
 					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
@@ -789,9 +905,18 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	)
 </script>
 
-<!-- using context -->
 <slot />
 
-{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false}
-	<SvelthreeInteraction {dispatch} {callbacks} obj={points} parent={self} {interactionEnabled} {log_dev} {log_lc} />
+{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false && interact}
+	<SvelthreeInteraction
+		bind:this={interaction_comp}
+		{shadow_dom_target}
+		{modifiers}
+		{dispatch}
+		obj={points}
+		parent={self}
+		{interactionEnabled}
+		{log_dev}
+		{log_lc}
+	/>
 {/if}

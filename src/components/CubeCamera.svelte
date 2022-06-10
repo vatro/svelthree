@@ -45,7 +45,9 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
+
 	import type { Euler, Matrix4, Object3D, Quaternion } from "three"
 
 	import { svelthreeStores } from "svelthree/stores"
@@ -70,6 +72,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import type { RemoveLast, OnlyWritableNonFunctionProps } from "../types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as EmptySvelthreeComponent } from "./Empty.svelte"
+	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR
@@ -83,6 +86,10 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
+
+	const shadow_root: Writable<{ element: HTMLDivElement }> = getContext("shadow_root")
+	let shadow_root_el: HTMLDivElement
+	$: shadow_root_el = $shadow_root.element
 
 	const verbose: boolean = verbose_mode()
 
@@ -419,6 +426,51 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 		return wp
 	}
 
+	// accessability -> shadow dom element
+
+	/**
+	 *  IMPORTANT  TODO  TOFIX   \
+	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
+	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
+	 */
+	export let shadow_dom_target: HTMLDivElement = undefined
+
+	$: if (shadow_root_el && camera && !shadow_dom_target) {
+		if (browser) {
+			shadow_dom_target = document.createElement("div")
+			shadow_dom_target.dataset.kind = "CubeCamera"
+			if (name) shadow_dom_target.dataset.name = name
+
+			const shadow_target: HTMLDivElement = our_parent
+				? our_parent.userData.svelthreeComponent.shadow_dom_target
+				: shadow_root_el
+
+			// see  TODO  above
+			if (shadow_target) shadow_target.appendChild(shadow_dom_target)
+		}
+	}
+
+	// accessability -> shadow dom focusable
+	export let tabindex: number = undefined
+
+	$: if (shadow_dom_target && tabindex !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+	}
+
+	// accessability -> shadow dom wai-aria
+	export let aria: Partial<ARIAMixin> = undefined
+
+	$: if (shadow_dom_target && aria !== undefined) {
+		shadow_dom_target.tabIndex = tabindex
+		for (const key in aria) {
+			if (key === "ariaLabel") {
+				shadow_dom_target.innerText += `${aria[key]}`
+			} else {
+				shadow_dom_target[key] = aria[key]
+			}
+		}
+	}
+
 	/** Override object's `.matrixAutoUpdate` set (*on initialzation*) by scene's `.matrixAutoUpdate` (*default is `true`*). Also: `mau` can be changed on-the-fly.*/
 	export let mau: boolean = undefined
 	$: if (camera) camera.matrixAutoUpdate = scene.matrixAutoUpdate
@@ -551,7 +603,7 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 	}
 
 	// no 'params' -> CameraHelper takes only a cam instance as a parameter.
-	/** Creates and adds a  `CubeCameraHelper` (_no `helperParams`_). */
+	/** Creates and adds a `CubeCameraHelper` (_no `helperParams`_). */
 	export let helper: boolean = undefined
 
 	$: camera && !camera.userData.helper && helper === true ? add_helper() : null
@@ -608,6 +660,9 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 	export const start_animation = (): void => ani.startAni()
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
+
+	/** Sets `focus()` on the component / it's shadow dom element. */
+	export const focused = (): void => shadow_dom_target.focus()
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -738,7 +793,7 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						root_scene.userData.dirty = true
-						$svelthreeStores[sti].rendererComponent.schedule_render()
+						$svelthreeStores[sti].rendererComponent.schedule_render(root_scene)
 					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
@@ -746,5 +801,4 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 	)
 </script>
 
-<!-- using context -->
 <slot />

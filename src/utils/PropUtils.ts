@@ -6,7 +6,7 @@ import { not_equal } from "svelte/internal"
 import type { Light, Material, Object3D, Scene } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types-extra"
-import type { default as Empty } from "./components/Empty.svelte"
+import type { default as Empty } from "../components/Empty.svelte"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
@@ -503,7 +503,7 @@ export default class PropUtils {
 	}
 
 	/**
-	 * ☝️ Expects the value (`target`) to be an instance of Empty.getEmpty() : Object3D component!
+	 * ☝️ Expects the value (`target`) to be an instance of Empty (Object3D)!
 	 */
 	public static setLightTarget(obj: Object3D, val: Object3D | Empty) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val })
@@ -517,7 +517,7 @@ export default class PropUtils {
 				obj["target"] = val
 				//PropUtils.updateMatrixAndWorldMatrix(val as Object3D)
 			} else if (val["isEmpty"]) {
-				let obj3d: Object3D = (val as Empty).getEmpty()
+				let obj3d: Object3D = (val as Empty).get_instance()
 				obj["target"] = obj3d
 				//PropUtils.updateMatrixAndWorldMatrix(obj3d)
 			} else {

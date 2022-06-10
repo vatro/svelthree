@@ -24,6 +24,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeProps } from "../utils"
+
 	import type { Writable } from "svelte/store"
 
 	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
@@ -33,6 +34,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { default as OrthoCamSvelthreeComponent } from "./OrthographicCamera.svelte"
 	import type { default as CanvasSvelthreeComponent } from "../components/Canvas.svelte"
 	import type { OnlyWritableNonFunctionProps, PropBlackList } from "../types-extra"
+
+	/**
+	 *  SVELTEKIT  SSR
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -52,7 +63,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_orbitcontrols: boolean = true
 
-	/** Display a console warning if the `OrbitControls` component's `cam` attribute was assigned a currently _inactive_ camera (also adss a `CameraHelper` to the assigned Camera). Default is `true`. Set  `warn={false}` to hide the warning (_also: no `CameraHelper` be added_). */
+	/** Display a console warning if the `OrbitControls` component's `cam` attribute was assigned a currently _inactive_ camera (also adss a `CameraHelper` to the assigned Camera). Default is `true`. Set `warn={false}` to hide the warning (_also: no `CameraHelper` be added_). */
 	export let warn: boolean = true
 
 	let index_in_orbitcontrols: number = undefined
@@ -62,7 +73,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let dom_el: HTMLElement | CanvasSvelthreeComponent = undefined
 
 	/** mode `"auto"`: schedule render loop rAF id */
-	let raf_id = 0
+	let rAF = { id: 0 }
 
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
@@ -95,7 +106,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 				if (auto === true) {
 					// schedule render every animation frame
-					raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+					rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 				} else {
 					// schedule render on `"change"` event
 					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
@@ -114,10 +125,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// schedule render
 	function on_orbitcontrols_change(e: any): void {
 		orbitcontrols.object.userData.root_scene.userData.dirty = true
-		$svelthreeStores[sti].rendererComponent.schedule_render()
+		$svelthreeStores[sti].rendererComponent.schedule_render(orbitcontrols.object.userData.root_scene)
 
 		// schedule next render (loop) if function was not called by an event
-		if (e === null) raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+		if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 	}
 
 	function get_oc_cam(): PerspectiveCamera | OrthographicCamera {
@@ -197,22 +208,22 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 *
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.autoRotate) */
 	export let auto: boolean = false
-	$: if (orbitcontrols && (auto === true || !auto)) set_auto()
+	$: if (orbitcontrols && auto !== undefined) set_auto()
 
 	function set_auto(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "auto", auto))
 		orbitcontrols.autoRotate = !!auto
 
 		if (!orbitcontrols.autoRotate) {
-			if (raf_id) {
-				cancelAnimationFrame(raf_id)
-				raf_id = 0
+			if (rAF.id) {
+				cancelAnimationFrame(rAF.id)
+				rAF.id = 0
 				orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 			}
 		} else {
 			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 				orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
-				if (raf_id === 0) raf_id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+				if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 			}
 		}
 	}
@@ -296,10 +307,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if (onDestroy_inject_before) onDestroy_inject_before()
 
-					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
-						if (raf_id) cancelAnimationFrame(raf_id)
-						orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
-					}
+					if (rAF.id) cancelAnimationFrame(rAF.id)
+					orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
 
 					if (onDestroy_inject_after) onDestroy_inject_after()
 			  }

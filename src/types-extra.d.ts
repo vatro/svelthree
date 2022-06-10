@@ -255,4 +255,4 @@ export type StoreBody = {
 	useBVH: boolean
 }
 
-export type WebGLRendererMode = "always" | "auto"
+export type WebGLRendererMode = "auto" | "always"
