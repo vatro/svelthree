@@ -724,7 +724,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * Schedules a render if the current scene has been marked as `dirty`. \
 	 * _Primarly called internally by components if `WebGLRenderer` component's `mode` is set to `"auto"`_.
 	 */
-	 export function schedule_render(scene:Scene = null): void {
+	export function schedule_render(scene: Scene = null): void {
 		if (enabled && render_scheduled.status === false) {
 			const scene_to_check: Scene = scene ? scene : current_scene
 			if (scene_to_check) {
@@ -734,7 +734,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					render_scheduled.status = true
 				}
 			} else {
-				console.error("SVELTHREE > WebGLRenderer > schedule_render : no scene to check 'dirty' status available!")
+				console.error(
+					"SVELTHREE > WebGLRenderer > schedule_render : no scene to check 'dirty' status available!"
+				)
 			}
 		}
 	}
