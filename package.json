@@ -1,6 +1,6 @@
 {
 	"name": "svelthree",
-	"version": "1.0.0-next.0.68",
+	"version": "1.0.0-next.0.69",
 	"description": "Svelte powered three.js development",
 	"module": "index.js",
 	"main": "index",
@@ -37,8 +37,7 @@
 		"prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
 		"reinstall-packages": "rimraf node_modules && rimraf package-lock.json && npm i",
 		"pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
-		"test": "echo 'No test specified' && exit 1",
-		"generate": "node generate_svelthree_components.js"
+		"test": "echo 'No test specified' && exit 1"
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.49",
