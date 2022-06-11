@@ -1,7 +1,22 @@
 # svelthree changelog
 
-**✓ SAFE** = None API breaking changes | **⨉ WARNING** = API breaking changes
 
+
+### 1.0.0-next.0.70
+
+**Major refactor** incl. new interactivity, event handling / event propagation and accessability concept using shadow DOM. Most (important) changes were made to `SvelthreeInteraction` and `WebGLRenderer` components.
+
+**Highlights**:
+
+- New interactivity, DOM-like event handling / event propagation concept using shadow DOM.
+- Event modifiers (Svelte like) for `on:` directives and "prop actions" (svelthree specific).
+- Keyboard input handling with flexible `KeyboardEvent` listeners host selection.
+- Focus events handling + component / 3d object focusability via `tabindex` prop.
+- WAI-ARIA support via `aria` prop.
+- Improved reactive (mode `"auto"`) and continuous (mode `"always"`) rendering logic.
+- mode `"auto"` is the new default rendering mode. 👉 You may be more comfortable with mode `"always"`, try it out!
+
+Also, various mid and smaller fixes, minor changes, new TS types, comment improvements etc.
 
 
 
