@@ -1,6 +1,6 @@
 {
 	"name": "svelthree",
-	"version": "1.0.0-next.0.66",
+	"version": "1.0.0-next.0.68",
 	"description": "Svelte powered three.js development",
 	"module": "index.js",
 	"main": "index",
@@ -37,25 +37,26 @@
 		"prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
 		"reinstall-packages": "rimraf node_modules && rimraf package-lock.json && npm i",
 		"pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
-		"test": "echo 'No test specified' && exit 1"
+		"test": "echo 'No test specified' && exit 1",
+		"generate": "node generate_svelthree_components.js"
 	},
 	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.40",
-		"fs-extra": "^10.0.1",
+		"@sveltejs/vite-plugin-svelte": "^1.0.0-next.49",
+		"fs-extra": "^10.1.0",
 		"prettier": "^2.6.2",
-		"prettier-plugin-svelte": "^2.6.0",
-		"svelte-check": "^2.4.6",
-		"svelte-preprocess": "^4.10.5",
-		"typescript": "^4.6.3",
-		"vite": "^2.9.1"
+		"prettier-plugin-svelte": "^2.7.0",
+		"svelte-check": "^2.7.2",
+		"svelte-preprocess": "^4.10.7",
+		"typescript": "^4.7.3",
+		"vite": "^2.9.12"
 	},
 	"peerDependencies": {
-		"svelte": "3.44.2 - 3.46.6",
+		"svelte": "3.44.2 - 3.48.0",
 		"svelte-accmod-patch": "^1.0.0",
-		"three": "0.125.x - 0.139.x"
+		"three": "0.125.x - 0.141.x"
 	},
 	"optionalDependencies": {
-		"@types/three": "0.125.x - 0.139.x"
+		"@types/three": "0.141.x"
 	},
 	"author": "Vatroslav Vrbanic",
 	"repository": {
