@@ -1,5 +1,13 @@
 # svelthree changelog
 
+### 1.0.0-next.0.71
+- Allow handling clickable components / three.js object instances as `<a>` and `<button>` ([#68](https://github.com/vatro/svelthree/issues/68))
+	- New `button` and `link` props.
+	- New types: `SvelthreeShadowDOMElement`, `ButtonProp`, `LinkProp`.
+	- Slightly changed `aria` prop handling logic:
+		- Always add `ariaLabel` to shadow DOM if specified.
+		- Add `ariaLabel` as `innerText` to shadow DOM `<div>`s only.
+
 
 
 ### 1.0.0-next.0.70
