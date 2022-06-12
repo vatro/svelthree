@@ -1,6 +1,13 @@
 # svelthree changelog
 
+### Unreleased
+
+- Fix wrong `LinkProp` type
+
+
+
 ### 1.0.0-next.0.71
+
 - Allow handling clickable components / three.js object instances as `<a>` and `<button>` ([#68](https://github.com/vatro/svelthree/issues/68))
 	- New `button` and `link` props.
 	- New types: `SvelthreeShadowDOMElement`, `ButtonProp`, `LinkProp`.
