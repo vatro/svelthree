@@ -256,3 +256,5 @@ export type StoreBody = {
 }
 
 export type WebGLRendererMode = "auto" | "always"
+
+export type SvelthreeShadowDOMElement = HTMLDivElement | HTMLButtonElement | HTMLAnchorElement

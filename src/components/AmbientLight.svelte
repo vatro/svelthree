@@ -24,6 +24,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -210,15 +211,16 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
 	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
 	 */
-	export let shadow_dom_target: HTMLDivElement = undefined
+	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
 
 	$: if (shadow_root_el && light && !shadow_dom_target) {
 		if (browser) {
 			shadow_dom_target = document.createElement("div")
+
 			shadow_dom_target.dataset.kind = "AmbientLight"
 			if (name) shadow_dom_target.dataset.name = name
 
-			const shadow_target: HTMLDivElement = our_parent
+			const shadow_target: SvelthreeShadowDOMElement = our_parent
 				? our_parent.userData.svelthreeComponent.shadow_dom_target
 				: shadow_root_el
 
@@ -238,13 +240,14 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	export let aria: Partial<ARIAMixin> = undefined
 
 	$: if (shadow_dom_target && aria !== undefined) {
-		shadow_dom_target.tabIndex = tabindex
 		for (const key in aria) {
 			if (key === "ariaLabel") {
+				// add specified `ariaLabel` as text to generated shadow DOM `<div>` element (for better reader support / indexing (?))
+				//  TODO  RECONSIDER  needs to be tested more, may be obsolete (?).
 				shadow_dom_target.innerText += `${aria[key]}`
-			} else {
-				shadow_dom_target[key] = aria[key]
 			}
+
+			shadow_dom_target[key] = aria[key]
 		}
 	}
 

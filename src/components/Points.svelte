@@ -44,6 +44,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
 	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
@@ -75,6 +76,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { Points } from "three"
 	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
+	import type { ButtonProp, LinkProp } from "../types-comp-props"
 	import type { Material, PointsMaterial, Color } from "three"
 
 	/**
@@ -354,20 +356,41 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// accessability -> shadow dom element
 
+	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
+	export let button: ButtonProp = undefined
+
+	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
+	export let link: LinkProp = undefined
+
 	/**
 	 *  IMPORTANT  TODO  TOFIX   \
 	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
 	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
 	 */
-	export let shadow_dom_target: HTMLDivElement = undefined
+	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
 
 	$: if (shadow_root_el && points && !shadow_dom_target) {
 		if (browser) {
-			shadow_dom_target = document.createElement("div")
+			if (button) {
+				shadow_dom_target = document.createElement("button")
+
+				for (const key in button) {
+					shadow_dom_target[key] = button[key]
+				}
+			} else if (link) {
+				shadow_dom_target = document.createElement("a")
+
+				for (const key in link) {
+					shadow_dom_target[key] = link[key]
+				}
+			} else {
+				shadow_dom_target = document.createElement("div")
+			}
+
 			shadow_dom_target.dataset.kind = "Points"
 			if (name) shadow_dom_target.dataset.name = name
 
-			const shadow_target: HTMLDivElement = our_parent
+			const shadow_target: SvelthreeShadowDOMElement = our_parent
 				? our_parent.userData.svelthreeComponent.shadow_dom_target
 				: shadow_root_el
 
@@ -387,13 +410,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let aria: Partial<ARIAMixin> = undefined
 
 	$: if (shadow_dom_target && aria !== undefined) {
-		shadow_dom_target.tabIndex = tabindex
 		for (const key in aria) {
 			if (key === "ariaLabel") {
-				shadow_dom_target.innerText += `${aria[key]}`
-			} else {
-				shadow_dom_target[key] = aria[key]
+				// add specified `ariaLabel` as text to shadow DOM `<div>` element ONLY (for better reader support / indexing (?))
+				if (!link && !button) {
+					//  TODO  RECONSIDER  needs to be tested more, may be obsolete (?).
+					shadow_dom_target.innerText += `${aria[key]}`
+				}
 			}
+
+			shadow_dom_target[key] = aria[key]
 		}
 	}
 

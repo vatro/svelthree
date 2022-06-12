@@ -16,7 +16,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { PointerState } from "../types-extra"
+	import type { PointerState, SvelthreeShadowDOMElement } from "../types-extra"
 	import type { Writable } from "svelte/store"
 	import {
 		KEYBOARD_EVENTS,
@@ -143,7 +143,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
-	export let shadow_dom_target: HTMLDivElement = undefined
+	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
 
 	let listeners: boolean = false
 
@@ -464,7 +464,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// -  TODO  / CHECK e.g. `on:click` without handler (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
 	// the component itself should emit the event ... isn't this already like this?
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
-		if (has_on_directive(event_name)) {
+		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
+		if (has_on_directive(event_name) || parent.link || parent.button) {
 			if (event_not_registered(event_name, used_pointer_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
@@ -1301,7 +1302,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// will be queued in mode "always"
 		// will be dispatsched immediately in mode "auto" -> see 'pointerevents_handler'
-		if (using_event("click")) add_pointer_listener("click", true)
+		if (using_event("click") || parent.button || parent.link) add_pointer_listener("click", true)
 		if (using_event("pointerup")) add_pointer_listener("pointerup", true)
 		if (using_event("pointerdown")) add_pointer_listener("pointerdown", true)
 		//if (using_event("pointerenter")) add_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
@@ -1332,7 +1333,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// --- REMOVE / UNREGISTER UNUSED EVENTS / LISTENERS ---
 
-		if (not_using_event("click")) completely_remove_pointer_listener("click")
+		if (not_using_event("click") && !parent.button && !parent.link) completely_remove_pointer_listener("click")
 		if (not_using_event("pointerup")) completely_remove_pointer_listener("pointerup")
 		if (not_using_event("pointerdown")) completely_remove_pointer_listener("pointerdown")
 		//if (not_using_event("pointerenter")) completely_remove_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'

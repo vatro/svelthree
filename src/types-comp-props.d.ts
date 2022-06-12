@@ -1,4 +1,4 @@
-import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "./types-extra"
+import type { OnlyWritableNonFunctionProps, OnlyWritableNonFunctionPropsPlus, PropBlackList } from "./types-extra"
 import type { Quaternion, Vector3, Euler, Matrix4, Mesh } from "three"
 /** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
  * ```
@@ -22,3 +22,10 @@ export type MeshProps = OnlyWritableNonFunctionPropsPlus<
 		matrix?: Matrix4 | Parameters<Matrix4["set"]>
 	}
 >
+
+export type ButtonProp = {
+	[P in keyof OnlyWritableNonFunctionProps<HTMLButtonElement>]: OnlyWritableNonFunctionProps<HTMLButtonElement>[P]
+}
+export type LinkProp = {
+	[P in keyof OnlyWritableNonFunctionProps<HTMLButtonElement>]: OnlyWritableNonFunctionProps<HTMLButtonElement>[P]
+}
