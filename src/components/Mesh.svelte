@@ -280,19 +280,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: if (mesh && ((mesh_uuid && mesh_uuid !== mesh.uuid) || (mesh.parent !== our_parent && mesh !== our_parent)))
-		add_instance_to()
+	$: if (mesh && ((mesh_uuid && mesh_uuid !== mesh.uuid) || mesh.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'mesh' was already created or set via 'mesh' attribute before
 		if (mesh_uuid && mesh.uuid !== mesh_uuid) {
 			// remove old instance and update references where needed
 
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", mesh_uuid)
-
-			// update 'index_in_x'
 
 			if (old_instance.userData.helper?.parent) {
 				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
@@ -310,16 +305,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after mesh reassignment.
 			sProps = new SvelthreeProps(mesh)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !mesh.userData.helper)
 		}
 
 		// add `mesh` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `mesh !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (mesh.parent !== our_parent && mesh !== our_parent) {
+			if (mesh.parent !== our_parent) {
 				our_parent.add(mesh)
 				mesh_uuid = mesh.uuid
 
@@ -333,8 +323,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`mesh was already added to the ${get_comp_name(our_parent)}`, {mesh, our_parent, scene})
+				// silently nothing
+				//console.warn(`'mesh' was already added to (is a child of) ${get_comp_name(our_parent)}`, {mesh, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'mesh' to!", { mesh, our_parent, scene })

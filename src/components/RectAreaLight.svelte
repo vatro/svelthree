@@ -171,22 +171,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: if (
-		light &&
-		((light_uuid && light_uuid !== light.uuid) || (light.parent !== our_parent && light !== our_parent))
-	)
-		add_instance_to()
+	$: if (light && ((light_uuid && light_uuid !== light.uuid) || light.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'light' was already created or set via 'light' attribute before
 		if (light_uuid && light.uuid !== light_uuid) {
 			// remove old instance and update references where needed
 
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", light_uuid)
-
-			// update 'index_in_x'
 
 			if (old_instance.userData.helper?.parent) {
 				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
@@ -204,16 +196,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after light reassignment.
 			sProps = new SvelthreeProps(light)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !light.userData.helper)
 		}
 
 		// add `light` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `light !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (light.parent !== our_parent && light !== our_parent) {
+			if (light.parent !== our_parent) {
 				our_parent.add(light)
 				light_uuid = light.uuid
 
@@ -227,8 +214,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`light was already added to the ${get_comp_name(our_parent)}`, {light, our_parent, scene})
+				// silently nothing
+				//console.warn(`'light' was already added to (is a child of) ${get_comp_name(our_parent)}`, {light, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'light' to!", { light, our_parent, scene })

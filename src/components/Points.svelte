@@ -290,22 +290,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: if (
-		points &&
-		((points_uuid && points_uuid !== points.uuid) || (points.parent !== our_parent && points !== our_parent))
-	)
-		add_instance_to()
+	$: if (points && ((points_uuid && points_uuid !== points.uuid) || points.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'points' was already created or set via 'points' attribute before
 		if (points_uuid && points.uuid !== points_uuid) {
 			// remove old instance and update references where needed
 
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", points_uuid)
-
-			// update 'index_in_x'
 
 			if (old_instance.userData.helper?.parent) {
 				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
@@ -323,16 +315,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after points reassignment.
 			sProps = new SvelthreeProps(points)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !points.userData.helper)
 		}
 
 		// add `points` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `points !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (points.parent !== our_parent && points !== our_parent) {
+			if (points.parent !== our_parent) {
 				our_parent.add(points)
 				points_uuid = points.uuid
 
@@ -346,8 +333,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`points was already added to the ${get_comp_name(our_parent)}`, {points, our_parent, scene})
+				// silently nothing
+				//console.warn(`'points' was already added to (is a child of) ${get_comp_name(our_parent)}`, {points, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'points' to!", { points, our_parent, scene })

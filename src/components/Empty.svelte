@@ -162,22 +162,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: if (
-		empty &&
-		((empty_uuid && empty_uuid !== empty.uuid) || (empty.parent !== our_parent && empty !== our_parent))
-	)
-		add_instance_to()
+	$: if (empty && ((empty_uuid && empty_uuid !== empty.uuid) || empty.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'empty' was already created or set via 'empty' attribute before
 		if (empty_uuid && empty.uuid !== empty_uuid) {
 			// remove old instance and update references where needed
 
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", empty_uuid)
-
-			// update 'index_in_x'
 
 			if (old_instance.userData.helper?.parent) {
 				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
@@ -195,16 +187,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after empty reassignment.
 			sProps = new SvelthreeProps(empty)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !empty.userData.helper)
 		}
 
 		// add `empty` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `empty !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (empty.parent !== our_parent && empty !== our_parent) {
+			if (empty.parent !== our_parent) {
 				our_parent.add(empty)
 				empty_uuid = empty.uuid
 
@@ -218,8 +205,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`empty was already added to the ${get_comp_name(our_parent)}`, {empty, our_parent, scene})
+				// silently nothing
+				//console.warn(`'empty' was already added to (is a child of) ${get_comp_name(our_parent)}`, {empty, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'empty' to!", { empty, our_parent, scene })

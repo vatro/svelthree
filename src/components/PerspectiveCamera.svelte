@@ -191,15 +191,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// this statement is being triggered on creation / recreation
-	$: if (
-		camera &&
-		((camera_uuid && camera_uuid !== camera.uuid) || (camera.parent !== our_parent && camera !== our_parent))
-	)
-		add_instance_to()
+	$: if (camera && ((camera_uuid && camera_uuid !== camera.uuid) || camera.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'camera' was already created or set via 'camera' attribute before
 		if (camera_uuid && camera.uuid !== camera_uuid) {
 			// remove old instance and update references where needed
@@ -207,12 +201,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", camera_uuid)
 
 			// update 'index_in_x'
-
-			/*
-if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
-	index_in_cameras = $svelthreeStores[sti].cameras.indexOf(old_instance)
-}
-*/
 			index_in_cameras = old_instance.userData.index_in_cameras
 
 			if (old_instance.userData.helper?.parent) {
@@ -245,16 +233,11 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after camera reassignment.
 			sProps = new SvelthreeProps(camera)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !camera.userData.helper)
 		}
 
 		// add `camera` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `camera !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (camera.parent !== our_parent && camera !== our_parent) {
+			if (camera.parent !== our_parent) {
 				our_parent.add(camera)
 				camera_uuid = camera.uuid
 
@@ -268,8 +251,8 @@ if ($svelthreeStores[sti].cameras.indexOf(old_instance) !== index_in_cameras) {
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`camera was already added to the ${get_comp_name(our_parent)}`, {camera, our_parent, scene})
+				// silently nothing
+				//console.warn(`'camera' was already added to (is a child of) ${get_comp_name(our_parent)}`, {camera, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'camera' to!", { camera, our_parent, scene })

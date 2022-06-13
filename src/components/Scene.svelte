@@ -212,15 +212,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// GENERATOR REMARK: 'parent_logic_if_inst_not_provided' excluded for 'Scene'!
 
 	// this statement is being triggered on creation / recreation
-	$: if (
-		scene &&
-		((scene_uuid && scene_uuid !== scene.uuid) || (scene.parent !== our_parent && scene !== our_parent))
-	)
-		add_instance_to()
+	$: if (scene && ((scene_uuid && scene_uuid !== scene.uuid) || scene.parent !== our_parent)) add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'scene' was already created or set via 'scene' attribute before
 		if (scene_uuid && scene.uuid !== scene_uuid) {
 			// remove old instance and update references where needed
@@ -228,13 +222,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", scene_uuid)
 
 			// update 'index_in_x'
-
-			/*
-if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
-	index_in_scenes = $svelthreeStores[sti].scenes.indexOf(old_instance)
-}
-*/
-
 			index_in_scenes = old_instance.userData.index_in_scenes
 
 			if (old_instance.userData.helper?.parent) {
@@ -270,16 +257,11 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after scene reassignment.
 			sProps = new SvelthreeProps(scene)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !scene.userData.helper)
 		}
 
 		// add `scene` to `our_parent`
 		if (our_parent) {
-			// TODO  UNDERSTAND completely why we need the `scene !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
-			if (scene.parent !== our_parent && scene !== our_parent) {
+			if (scene.parent !== our_parent) {
 				our_parent.add(scene)
 				scene_uuid = scene.uuid
 
@@ -293,8 +275,8 @@ if ($svelthreeStores[sti].scenes.indexOf(old_instance) !== index_in_scenes) {
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`scene was already added to the ${get_comp_name(our_parent)}`, {scene, our_parent})
+				// silently nothing
+				//console.warn(`'scene' was already added to (is a child of) ${get_comp_name(our_parent)}`, {scene, our_parent})
 			}
 		} else {
 			// Nothing / no error for Scenes here.

@@ -268,8 +268,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		add_instance_to()
 
 	function add_instance_to(): void {
-		//let replacing = false
-
 		// if 'camera' was already created or set via 'camera' attribute before
 		if (camera_uuid && camera.uuid !== camera_uuid) {
 			// remove old instance and update references where needed
@@ -277,13 +275,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 			const old_instance: Object3D = scene.getObjectByProperty("uuid", camera_uuid)
 
 			// update 'index_in_x'
-
-			/*
-if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecameras) {
-	index_in_cubecameras = $svelthreeStores[sti].cubeCameras.indexOf(old_instance)
-}
-*/
-
 			index_in_cubecameras = old_instance.userData.index_in_cubecameras
 
 			if (old_instance.userData.helper?.parent) {
@@ -306,16 +297,11 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 			// - all initially set props will be applied to the new instance.
 			// - 'props' attribute can be used directly after camera reassignment.
 			sProps = new SvelthreeProps(camera)
-
-			// helpers will be recreated automatically
-			// (see corresponding reactive statement -> !camera.userData.helper)
 		}
 
 		// `CubeCamera`'s instance `camera` is always added to the `root_scene` no matter which component the `CubeCamera` component was added to.
 		// the `our_parent` is needed for positioning only.
 		if (root_scene) {
-			// TODO  UNDERSTAND completely why we need the `camera !== our_parent` check (was added as quick-fix)
-			// TODO  Update - we changed the approach, still needed?
 			if (root_scene !== our_parent) {
 				root_scene.add(camera)
 				camera_uuid = camera.uuid
@@ -330,8 +316,8 @@ if ($svelthreeStores[sti].cubeCameras.indexOf(old_instance) !== index_in_cubecam
 					)
 				}
 			} else {
-				// TODO / TOFIX  why is this happening if `!replacing`?
-				//if (!replacing) console.warn(`camera was already added to the ${get_comp_name(our_parent)}`, {camera, our_parent, scene})
+				// silently nothing
+				//console.warn(`'camera' was already added to (is a child of) ${get_comp_name(our_parent)}`, {camera, our_parent, scene})
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'camera' to!", { camera, our_parent, scene })
