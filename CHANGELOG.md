@@ -1,5 +1,12 @@
 # svelthree changelog
 
+### 1.0.0-next.0.74
+
+- Cleaned up / refactored `add_instance_to()` method and other related logic [#71](https://github.com/vatro/svelthree/issues/71)
+- Removed funding via Patreon -> if you'd like to support me, please use GitHub sponsoring! Thanks! 😁
+
+
+
 ### 1.0.0-next.0.72
 
 - Fix `LinkProp` type
