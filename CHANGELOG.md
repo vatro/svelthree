@@ -1,8 +1,8 @@
 # svelthree changelog
 
-### Unreleased
+### 1.0.0-next.0.72
 
-- Fix wrong `LinkProp` type
+- Fix `LinkProp` type
 
 
 
