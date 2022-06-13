@@ -2,9 +2,6 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 import type { Light, Mesh, Camera, Object3D, Group } from "three"
 
 export default class GLTF_utils {
-	// TODO  RECONSIDER  not needed ? -> `content.cameras` avilable:
-	/** Get an array of references to all **Cameras** (_all scenes_) inside the loaded GLTF content. */
-	/** Get an array of references to all **Cameras** in a specific scene inside the loaded GLTF content. */
 
 	/** Get an array of references to all **Meshes** (_all scenes_) inside the loaded GLTF content. */
 	public static async get_all_meshes(content: GLTF): Promise<Mesh[]> {

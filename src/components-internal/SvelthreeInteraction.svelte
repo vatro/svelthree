@@ -604,7 +604,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			last_pointer_move.clientX = e.clientX
 			last_pointer_move.clientY = e.clientY
 
-			// TODO  TOFIX  direct call to `pointerevents_handler` is not providing the cancel_fn!
 			// no check, no dispatch via shadow dom but also queue pointer move in "always" mode
 			pointerevents_handler(get_pointerevent_modified_clone(e))
 		}

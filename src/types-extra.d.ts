@@ -155,23 +155,6 @@ import type {
 	MeshPhysicalMaterialParameters
 } from "three"
 
-/* TODO  DELETE  we don't need this
-type AllMeshMaterialParameters =
-	& MeshToonMaterialParameters
-	& MeshBasicMaterialParameters
-	& MeshDepthMaterialParameters
-	& MaterialParameters
-	& MeshPhongMaterialParameters
-	& MeshMatcapMaterialParameters
-	& MeshNormalMaterialParameters
-	& MeshLambertMaterialParameters
-	& MeshStandardMaterialParameters
-	& MeshDistanceMaterialParameters
-	& MeshPhysicalMaterialParameters
-
-export type AnyMeshMaterialParameters = OnlyWritableNonFunctionProps<Omit<AllMeshMaterialParameters, PropBlackList>>
-*/
-
 import type {
 	MeshToonMaterial,
 	MeshBasicMaterial,
