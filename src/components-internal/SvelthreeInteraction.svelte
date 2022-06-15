@@ -752,7 +752,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
 		// also we cannot simply alter the value of `composed` via the event object like e.g. `e.composed = false`
 		for (const key in e) {
-			event_init[key] = e[key]
+			if (key !== "path") {
+				event_init[key] = e[key]
+			}
 		}
 
 		//  IMPORTANT  Setting `composed` to false:
