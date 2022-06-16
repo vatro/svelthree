@@ -97,11 +97,9 @@ If you use this approach you'll see a warning in the console if you define left,
 	export let id: string = undefined
 
 	if (!id) {
-		console.warn(
-			"SVELTHREE > OrthographicCamera : you have to provide an 'id' prop (not empty String) for Cameras in order to assign them to a 'WebGLRenderer' component!",
-			{ id: id }
+		throw new Error(
+			"SVELTHREE > OrthographicCamera : you have to provide an 'id' prop (not empty String) for Cameras in order to assign them to a 'WebGLRenderer' component!"
 		)
-		throw new Error("SVELTHREE Exception (see warning above)")
 	}
 
 	let scene: Scene = getContext("scene")
