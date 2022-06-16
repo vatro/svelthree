@@ -2,16 +2,16 @@
 
 ## 1.0.0-next.0.75
 
--   ( **!** ) Render mode `auto`: `render_scheduled.status = false` has been **moved to end** of the `render_standard()` function, because `on:before_render` **was scheduling multiple renders in a single AnimationFrame** (_on change_)! Putting `render_scheduled.status = false` to the very start of the `render_standard()` function **was completely wrong**! [[07120b0](https://github.com/vatro/svelthree/commit/07120b002240dd5a62f0db7a2501664dafb64f40)]
+-   ( **!** ) Render mode `auto`: `render_scheduled.status = false` has been **moved to end** of the `render_standard()` function, because `on:before_render` **was scheduling multiple renders in a single AnimationFrame** (_on change_)! Putting `render_scheduled.status = false` to the very start of the `render_standard()` function **was completely wrong**! ([07120b0](https://github.com/vatro/svelthree/commit/07120b002240dd5a62f0db7a2501664dafb64f40))
 
--   Closed [#72](https://github.com/vatro/svelthree/issues/72) -> Now, shadow DOM elements will be added / appended correctly, even for svelthree-components inside non-svelthree 'wrapper' / 'container' components. This is rather a "DUCKTAPE"-fix, because the observed problematic behavior where context was received in wrong order has something to do with Svelte, not svelthree. A **corresponding Svelte issue** has been submitted, see: [**Context value received in wrong order if `bind:this` is set on a slot**](https://github.com/sveltejs/svelte/issues/7606).
+-   Closed ([#72](https://github.com/vatro/svelthree/issues/72)) -> Now, shadow DOM elements will be added / appended correctly, even for svelthree-components inside non-svelthree 'wrapper' / 'container' components. This is rather a "DUCKTAPE"-fix, because the observed problematic behavior where context was received in wrong order has something to do with Svelte, not svelthree. A **corresponding Svelte issue** has been submitted, see: [**Context value received in wrong order if `bind:this` is set on a slot**](https://github.com/sveltejs/svelte/issues/7606).
 
--   Silenced Chromium `Event.path` deprecation warning [[4a1b781](https://github.com/vatro/svelthree/commit/4a1b7812e3f67195f2397505b199e19211cd275f)]
+-   Silenced Chromium `Event.path` deprecation warning ([4a1b781](https://github.com/vatro/svelthree/commit/4a1b7812e3f67195f2397505b199e19211cd275f))
 
 
 ## 1.0.0-next.0.74
 
--   Cleaned up / refactored `add_instance_to()` method and other related logic [#71](https://github.com/vatro/svelthree/issues/71)
+-   Cleaned up / refactored `add_instance_to()` method and other related logic ([#71](https://github.com/vatro/svelthree/issues/71))
 
 -   Removed funding via Patreon -> if you'd like to support me, please use GitHub sponsoring! Thanks! 😁
 
