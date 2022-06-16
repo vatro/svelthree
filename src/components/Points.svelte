@@ -349,15 +349,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
 	export let link: LinkProp = undefined
 
-	/**
-	 *  IMPORTANT  TODO  TOFIX   \
-	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
-	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
-	 */
+	/** Shadow DOM element created by the component, needed for accessability features, event propagation etc. */
 	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
 
-	$: if (shadow_root_el && points && !shadow_dom_target) {
+	$: if (shadow_root_el && points && !shadow_dom_target) create_shadow_dom_target()
+
+	async function create_shadow_dom_target() {
 		if (browser) {
+			// DUCKTAPE  `getContext()` wrong order fix, see [#72](https://github.com/vatro/svelthree/issues/72)
+			await tick()
+
 			if (button) {
 				shadow_dom_target = document.createElement("button")
 
@@ -377,12 +378,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			shadow_dom_target.dataset.kind = "Points"
 			if (name) shadow_dom_target.dataset.name = name
 
-			const shadow_target: SvelthreeShadowDOMElement = our_parent
-				? our_parent.userData.svelthreeComponent.shadow_dom_target
-				: shadow_root_el
+			const parent_shadow_dom_target = our_parent?.userData.svelthreeComponent.shadow_dom_target
+			const shadow_target: SvelthreeShadowDOMElement = parent_shadow_dom_target || shadow_root_el
 
-			// see  TODO  above
-			if (shadow_target) shadow_target.appendChild(shadow_dom_target)
+			if (shadow_target) {
+				shadow_target.appendChild(shadow_dom_target)
+			} else {
+				console.error(
+					"SVELTHREE > Points > create_shadow_dom_target > Wasn't able to append shadow DOM element, no 'shadow_target'!",
+					{ shadow_target },
+					{ parent_shadow_dom_target },
+					{ our_parent }
+				)
+			}
 		}
 	}
 
@@ -647,7 +655,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export async function on(type: any, callback: any): Promise<void> {
 		if (interact) {
-			if (!interaction_comp) await tick()
+			if (!interaction_comp || !shadow_dom_target) await tick()
 
 			self.$on(type, callback)
 			interaction_comp.update_listeners = true
@@ -667,7 +675,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export async function onx(type: any, callback: any): Promise<void> {
 		if (interact) {
-			if (!interaction_comp) await tick()
+			if (!interaction_comp || !shadow_dom_target) await tick()
 
 			const cbacks = self.$$.callbacks[type]
 			if (callback) {
@@ -692,52 +700,84 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let modifiers: SvelthreeModifiersProp = undefined
 
 	export let on_click: SvelthreePointerEventHandler = undefined
-	$: if (on_click !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_click !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointerup: SvelthreePointerEventHandler = undefined
-	$: if (on_pointerup !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointerup !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointerdown: SvelthreePointerEventHandler = undefined
-	$: if (on_pointerdown !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointerdown !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointerover: SvelthreePointerEventHandler = undefined
-	$: if (on_pointerover !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointerover !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointerout: SvelthreePointerEventHandler = undefined
-	$: if (on_pointerout !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointerout !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointermove: SvelthreePointerEventHandler = undefined
-	$: if (on_pointermove !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointermove !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_pointermoveover: SvelthreePointerEventHandler = undefined
-	$: if (on_pointermoveover !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_pointermoveover !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_keydown: SvelthreeKeyboardEventHandler = undefined
-	$: if (on_keydown !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_keydown !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_keypress: SvelthreeKeyboardEventHandler = undefined
-	$: if (on_keypress !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_keypress !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_keyup: SvelthreeKeyboardEventHandler = undefined
-	$: if (on_keyup !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_keyup !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_focus: SvelthreeFocusEventHandler = undefined
-	$: if (on_focus !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_focus !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_blur: SvelthreeFocusEventHandler = undefined
-	$: if (on_blur !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_blur !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_focusin: SvelthreeFocusEventHandler = undefined
-	$: if (on_focusin !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_focusin !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_focusout: SvelthreeFocusEventHandler = undefined
-	$: if (on_focusout !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_focusout !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_wheel: SvelthreeWheelEventHandler = undefined // ->  TODO  implement
-	$: if (on_wheel !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_wheel !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	export let on_wheelover: SvelthreeWheelEventHandler = undefined // -> TODO  implement
-	$: if (on_wheelover !== undefined && interaction_comp) interaction_comp.update_listeners = true
+	$: if (on_wheelover !== undefined && interaction_comp && shadow_dom_target) {
+		interaction_comp.update_listeners = true
+	}
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined

@@ -37,7 +37,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
@@ -221,26 +221,34 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// accessability -> shadow dom element
 
-	/**
-	 *  IMPORTANT  TODO  TOFIX   \
-	 * if we're combining components into a non-svelthree component, like e.g. a `Car`
-	 * component, there will be no `shadow_dom_target` or `shadow_root_el!
-	 */
+	/** Shadow DOM element created by the component, needed for accessability features, event propagation etc. */
 	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
 
-	$: if (shadow_root_el && light && !shadow_dom_target) {
+	$: if (shadow_root_el && light && !shadow_dom_target) create_shadow_dom_target()
+
+	async function create_shadow_dom_target() {
 		if (browser) {
+			// DUCKTAPE  `getContext()` wrong order fix, see [#72](https://github.com/vatro/svelthree/issues/72)
+			await tick()
+
 			shadow_dom_target = document.createElement("div")
 
 			shadow_dom_target.dataset.kind = "PointLight"
 			if (name) shadow_dom_target.dataset.name = name
 
-			const shadow_target: SvelthreeShadowDOMElement = our_parent
-				? our_parent.userData.svelthreeComponent.shadow_dom_target
-				: shadow_root_el
+			const parent_shadow_dom_target = our_parent?.userData.svelthreeComponent.shadow_dom_target
+			const shadow_target: SvelthreeShadowDOMElement = parent_shadow_dom_target || shadow_root_el
 
-			// see  TODO  above
-			if (shadow_target) shadow_target.appendChild(shadow_dom_target)
+			if (shadow_target) {
+				shadow_target.appendChild(shadow_dom_target)
+			} else {
+				console.error(
+					"SVELTHREE > PointLight > create_shadow_dom_target > Wasn't able to append shadow DOM element, no 'shadow_target'!",
+					{ shadow_target },
+					{ parent_shadow_dom_target },
+					{ our_parent }
+				)
+			}
 		}
 	}
 
