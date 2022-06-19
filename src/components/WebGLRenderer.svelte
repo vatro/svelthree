@@ -777,6 +777,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			rAF.id = requestAnimationFrame(render_standard)
 		}
 	}
+
 	/** Returns the **three.js instance** of the renderer. */
 	export function get_renderer(): WebGLRenderer {
 		return renderer

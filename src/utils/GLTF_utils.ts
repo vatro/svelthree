@@ -2,7 +2,6 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 import type { Light, Mesh, Camera, Object3D, Group } from "three"
 
 export default class GLTF_utils {
-
 	/** Get an array of references to all **Meshes** (_all scenes_) inside the loaded GLTF content. */
 	public static async get_all_meshes(content: GLTF): Promise<Mesh[]> {
 		const found_meshes: Mesh[] = []
