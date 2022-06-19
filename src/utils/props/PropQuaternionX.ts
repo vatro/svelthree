@@ -7,33 +7,35 @@ export default class PropQuaternionX {
 	prev: Quaternion
 	prevValues: { x: number; y: number; z: number; w: number }
 
-	public update(obj: any, key: string, value: Quaternion) {
+	constructor(private key: string, private obj_type: string, private origin: string) {}
+
+	public update(obj: any, value: Quaternion): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value
 				// hot!
-				Propeller.update(obj, key, value, "Quaternion")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Quaternion")
 				this.setPrevValues(value)
-				break
+				return true
 
 			case value:
 				// same object, perform deep check
 				for (let k in value) {
 					if (not_equal(this.prevValues[k], value[k])) {
-						Propeller.update(obj, key, value, "Quaternion")
+						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Quaternion")
 						this.setPrevValues(value)
 						this.prev = value
-						return
+						return true
 					}
 				}
 
-				break
+				return false
 			default:
 				// not undefined but !== value --> hot!
-				Propeller.update(obj, key, value, "Quaternion")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Quaternion")
 				this.setPrevValues(value)
 				this.prev = value
-				break
+				return true
 		}
 	}
 

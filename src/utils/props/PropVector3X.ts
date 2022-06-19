@@ -7,33 +7,34 @@ export default class PropVector3X {
 	prev: Vector3
 	prevValues: { x: number; y: number; z: number }
 
-	public update(obj: any, key: string, value: Vector3) {
+	constructor(private key: string, private obj_type: string, private origin: string) {}
+
+	public update(obj: any, value: Vector3): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value
 				// hot!
-				Propeller.update(obj, key, value, "Vector3")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector3")
 				this.setPrevValues(value)
-				break
+				return true
 
 			case value:
 				// same object, perform deep check
 				for (let k in value) {
 					if (not_equal(this.prevValues[k], value[k])) {
-						Propeller.update(obj, key, value, "Vector3")
+						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector3")
 						this.setPrevValues(value)
 						this.prev = value
-						return
+						return true
 					}
 				}
-
-				break
+				return false
 			default:
 				// not undefined but !== value --> hot!
-				Propeller.update(obj, key, value, "Vector3")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector3")
 				this.setPrevValues(value)
 				this.prev = value
-				break
+				return true
 		}
 	}
 

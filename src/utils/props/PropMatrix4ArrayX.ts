@@ -7,33 +7,35 @@ export default class PropMatrix4ArrayX {
 	prev: Matrix4
 	prevValues: Parameters<Matrix4["set"]>
 
-	public update(obj: any, key: string, value: Matrix4) {
+	constructor(private key: string, private obj_type: string, private origin: string) {}
+
+	public update(obj: any, value: Matrix4): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value
 				// hot!
-				Propeller.update(obj, key, value, "Matrix4ParamsArray")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Matrix4ParamsArray")
 				this.setPrevValues(value)
-				break
+				return true
 
 			case value:
 				// same object, perform deep check
 				for (let i = 0; i < 16; i++) {
 					if (not_equal(this.prevValues[i], value.elements[i])) {
-						Propeller.update(obj, key, value, "Matrix4ParamsArray")
+						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Matrix4ParamsArray")
 						this.setPrevValues(value)
 						this.prev = value
-						return
+						return true
 					}
 				}
 
-				break
+				return false
 			default:
 				// not undefined but !== value --> hot!
-				Propeller.update(obj, key, value, "Matrix4ParamsArray")
+				Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Matrix4ParamsArray")
 				this.setPrevValues(value)
 				this.prev = value
-				break
+				return true
 		}
 	}
 

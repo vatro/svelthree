@@ -10,7 +10,10 @@ import type { default as Empty } from "../components/Empty.svelte"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
- * Containes public static methods for checking types of properties.
+ * Collection of static utility methods which allow setting props to various values.
+ * `PropUtils` are being used by:
+ * - component's props directly / on change of component's attributes (reactive)
+ * - `SvelthreeProps` (`sProps`) via `Propeller`
  */
 export default class PropUtils {
 	public static getShortHandAttrWarnings(prefix: string): { [key: string]: any } {
@@ -86,7 +89,7 @@ export default class PropUtils {
 		return p?.constructor === Array && p.length === 4 && p.every((el) => !isNaN(el))
 	}
 
-	public static checkIfComplexValueType(val: any): ComplexValueType {
+	public static checkIfComplexValueType(val: any): ComplexValueType | undefined {
 		if (Array.isArray(val)) {
 			if (PropUtils.isArray3Nums(val)) return "Array3Nums"
 			if (PropUtils.isEulerParamsArray(val)) return "EulerParamsArray"
@@ -612,19 +615,15 @@ export default class PropUtils {
 		}
 	}
 
+	/** Simply set property `a` to value `x` -> no special method was assigned to the prop via `Propeller`. */
 	public static applyValueToProp(obj: any, val: any, key: string, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> applyValueToProp : ", { obj, val, key, complex })
 		}
-		// v1
 		try {
 			obj[key] = val
-			// TODO  Nail it / write down why we don't need this.
-			//if (obj.matrixAutoUpdate === false) PropUtils.updateMatrixAndWorldMatrix(obj)
 		} catch (error) {
 			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj: obj, value: val, key: key })
-			throw new Error("SVELTHREE Exception! " + error)
 		}
 	}
-
 }
