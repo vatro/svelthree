@@ -63,6 +63,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { CameraUtils } from "../utils"
 	import { CameraValues } from "../constants"
 	import { get_root_scene } from "../utils/SceneUtils"
+	import { CAM_PROPS_PMU } from "../constants/Cameras"
 	import type { Writable } from "svelte/store"
 
 	/**
@@ -375,6 +376,9 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	let sProps: SvelthreeProps
 
+	/** If `.status` is `true`, camera's projection matrix will be updated on `afterUpdate` (_on change of any of the related props_). */
+	let update_projection_matrix = { status: false }
+
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
 	export let props: { [P in keyof OrthographicCameraProps]: OrthographicCameraProps[P] } = undefined
@@ -383,7 +387,18 @@ If you use this approach you'll see a warning in the console if you define left,
 	$: if (props && sProps) update_props()
 	function update_props() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
-		sProps.update(props)
+
+		const updated_keys: string[] = sProps.update(props)
+		if (updated_keys_need_pmu(updated_keys)) {
+			update_projection_matrix.status = true
+		}
+	}
+
+	function updated_keys_need_pmu(updated_keys: string[]): boolean {
+		for (let i = 0; i < updated_keys.length; i++) {
+			if (CAM_PROPS_PMU.has(updated_keys[i])) return true
+		}
+		return false
 	}
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
@@ -457,6 +472,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	function set_far(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "far", far))
 		camera.far = far
+		update_projection_matrix.status = true
 	}
 
 	/** Camera frustum near plane. Default is `0.1`.
@@ -466,6 +482,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	function set_near(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "near", near))
 		camera.near = near
+		update_projection_matrix.status = true
 	}
 
 	/** Frustum window specification or `null`. This is set using the `.setViewOffset` method and cleared using `.clearViewOffset`.
@@ -475,6 +492,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	function set_view(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "view", view))
 		camera.view = view
+		update_projection_matrix.status = true
 	}
 
 	/** Gets or sets the zoom factor of the camera. Default is `1`.
@@ -484,6 +502,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	function set_zoom(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "zoom", zoom))
 		camera.zoom = zoom
+		update_projection_matrix.status = true
 	}
 
 	// IMPORTANT  `matrix` 'shorthand' attribute will override all other transforms ('shorthand' attributes)!
@@ -680,6 +699,11 @@ If you use this approach you'll see a warning in the console if you define left,
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
 					if (!camera.matrixAutoUpdate) camera.updateMatrix()
+
+					if (update_projection_matrix.status === true) {
+						update_projection_matrix.status = false
+						camera.updateProjectionMatrix()
+					}
 
 					if (verbose && !camera.matrixAutoUpdate && log_mau) {
 						console.debug(

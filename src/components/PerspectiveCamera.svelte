@@ -56,6 +56,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { PerspectiveCamera, CameraHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
+	import { CAM_PROPS_PMU } from "../constants/Cameras"
 	import type { Writable } from "svelte/store"
 
 	/**
@@ -327,6 +328,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	let sProps: SvelthreeProps
 
+	/** If `.status` is `true`, camera's projection matrix will be updated on `afterUpdate` (_on change of any of the related props_). */
+	let update_projection_matrix = { status: false }
+
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
 	export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined
@@ -335,7 +339,18 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (props && sProps) update_props()
 	function update_props() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
-		sProps.update(props)
+
+		const updated_keys: string[] = sProps.update(props)
+		if (updated_keys_need_pmu(updated_keys)) {
+			update_projection_matrix.status = true
+		}
+	}
+
+	function updated_keys_need_pmu(updated_keys: string[]): boolean {
+		for (let i = 0; i < updated_keys.length; i++) {
+			if (CAM_PROPS_PMU.has(updated_keys[i])) return true
+		}
+		return false
 	}
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
@@ -438,6 +453,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_far(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "far", far))
 		camera.far = far
+		update_projection_matrix.status = true
 	}
 
 	/** Film size used for the larger axis. Default is `35` (millimeters). This parameter does not influence the projection matrix unless `.filmOffset` is set to a `nonzero` value.
@@ -447,6 +463,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_filmGauge(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "filmGauge", filmGauge))
 		camera.filmGauge = filmGauge
+		update_projection_matrix.status = true
 	}
 
 	/** Horizontal off-center offset in the same unit as `.filmGauge`. Default is `0`.
@@ -456,6 +473,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_filmOffset(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "filmOffset", filmOffset))
 		camera.filmOffset = filmOffset
+		update_projection_matrix.status = true
 	}
 
 	/** Object distance used for stereoscopy and depth-of-field effects. This parameter does not influence the projection matrix unless a [`StereoCamera`](https://threejs.org/docs/#api/en/cameras/StereoCamera) is being used. Default is `10`.
@@ -465,6 +483,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_focus(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "focus", focus))
 		camera.focus = focus
+		update_projection_matrix.status = true
 	}
 
 	/** Camera frustum vertical field of view, from bottom to top of view, in degrees. Default is `50`.
@@ -474,6 +493,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_fov(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "fov", fov))
 		camera.fov = fov
+		update_projection_matrix.status = true
 	}
 
 	/** Camera frustum near plane. Default is `0.1`.
@@ -483,6 +503,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_near(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "near", near))
 		camera.near = near
+		update_projection_matrix.status = true
 	}
 
 	/** Frustum window specification or `null`. This is set using the `.setViewOffset` method and cleared using `.clearViewOffset`.
@@ -492,6 +513,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_view(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "view", view))
 		camera.view = view
+		update_projection_matrix.status = true
 	}
 
 	/** Gets or sets the zoom factor of the camera. Default is `1`.
@@ -501,6 +523,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function set_zoom(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "zoom", zoom))
 		camera.zoom = zoom
+		update_projection_matrix.status = true
 	}
 
 	// IMPORTANT  `matrix` 'shorthand' attribute will override all other transforms ('shorthand' attributes)!
@@ -697,6 +720,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
 					if (!camera.matrixAutoUpdate) camera.updateMatrix()
+
+					if (update_projection_matrix.status === true) {
+						update_projection_matrix.status = false
+						camera.updateProjectionMatrix()
+					}
 
 					if (verbose && !camera.matrixAutoUpdate && log_mau) {
 						console.debug(
