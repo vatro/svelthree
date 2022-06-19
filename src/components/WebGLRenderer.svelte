@@ -737,8 +737,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/**
-	 * Always schedules a render. Current scene doesn't have to be marked as `dirty`. \
-	 * _Called by the `render_standard()` function if `WebGLRenderer` component's `mode` is set to `"always"`_.
+	 * Starts a render loop. Current scene doesn't have to be marked as `dirty`. \
+	 * _Called by the `start_renderer()` function if `WebGLRenderer` component's `mode` is set to `"always"`_.
 	 */
 	function schedule_render_always(): void {
 		if (enabled) {
