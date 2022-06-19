@@ -627,40 +627,4 @@ export default class PropUtils {
 		}
 	}
 
-	public static getChangedKeys(newProps: { [key: string]: any }, prevProps: { [key: string]: any }): string[] {
-		return Object.keys(newProps).filter((key) => not_equal(newProps[key], prevProps[key]))
-	}
-
-	/**
-	 * Updates changes props, but only the ones not being handled by a specific Prop component ( PropUtils.isPropType(val) => false ).
-	 */
-	// TODO  CLEANUP !
-	// TODO  CHECK HOW THIS USED / NAIL TI DOWN!
-	public static updateProps(
-		keysToUpdate: string[],
-		newProps: { [key: string]: any },
-		updateMethod: any,
-		obj: any
-	): void {
-		if (verbose_mode() && log_prop_utils(obj)) {
-			console.debug("[ PropUtils ] -> updateProps : ", { keysToUpdate, newProps, updateMethod, obj })
-		}
-		for (let i = 0; i < keysToUpdate.length; i++) {
-			const key: string = keysToUpdate[i]
-			const val: any = newProps[key]
-
-			// 👇 condition prevents double updating on complex type value recreation!
-			if (!PropUtils.isPropType(val)) {
-				//console.debug(`[ PropUtils ] -> updateProps!`, { key: key, value: val })
-				updateMethod(obj, key, val)
-			} else {
-				/*
-				console.warn(
-					`[ PropUtils ] -> updateProps > skipped updating "${key}" beacuse it's a complex type handled by a specific Prop component!`,
-					{ key: key, value: val }
-				)
-				*/
-			}
-		}
-	}
 }

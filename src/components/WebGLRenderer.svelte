@@ -14,10 +14,10 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer } from "three"
-	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera } from "three"
+	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera, WebGLRendererParameters } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { svelthreeStores } from "svelthree/stores"
-	import { Propeller, PropUtils } from "../utils"
+	import { SvelthreeProps } from "../utils"
 
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
@@ -25,6 +25,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
 	import type { WebGLRendererMode } from "../types-extra"
+	import type { WebGLRendererProps } from "../types-comp-props"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -222,7 +223,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	$: if (inputs?.length && inputs_processed && (!outputs || (outputs?.length && outputs_processed))) create_renderer()
 
-	export let config: { [key: string]: any } = undefined
+	export let params: { [P in keyof WebGLRendererParameters]: WebGLRendererParameters[P] } = undefined
 
 	let renderer: WebGLRenderer
 
@@ -236,7 +237,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 		// 'context.drawImage( renderer.domElement, 0, 0 )' approach:
 		// we're not linking the canvas_dom_element directly to the renderer.
-		renderer = new WebGLRenderer({ ...config })
+		renderer = new WebGLRenderer({ ...params })
 		renderer.setPixelRatio(window.devicePixelRatio)
 
 		if (inputs_queue.length) {
@@ -255,6 +256,21 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	export let enable_shadowmap = false
+	let sProps: SvelthreeProps
+
+	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
+	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	export let props: { [P in keyof WebGLRendererProps]: WebGLRendererProps[P] } = undefined
+
+	$: if (!sProps && renderer && props) sProps = new SvelthreeProps(renderer)
+	$: if (props && sProps) update_props()
+	function update_props() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
+		sProps.update(props)
+	}
+
+	// 'shorthand' attributes
+
 	$: if (renderer) set_ShadowMap_status()
 
 	function set_ShadowMap_status(): void {
@@ -293,27 +309,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					"shadowMap.type": renderer.shadowMap.type
 				})
 			)
-		}
-	}
-
-	// TODO  check / refactor -> looks outdated
-	// props object can be filled with anything, ideally available THREE props of course.
-	export let props: { [key: string]: any } = undefined
-	let props_prev: typeof props = undefined
-	$: if (renderer && props) update_props()
-
-	function update_props(): void {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "update_props! ->", { props }))
-
-		// TODO  check / refactor -> looks outdated
-		if (props_prev === undefined) {
-			const all_keys = Object.keys(props)
-			PropUtils.updateProps(all_keys, props, Propeller.update, renderer)
-			props_prev = { ...props }
-		} else {
-			const keys_of_changed_props = PropUtils.getChangedKeys(props, props_prev)
-			PropUtils.updateProps(keys_of_changed_props, props, Propeller.update, renderer)
-			props_prev = { ...props }
 		}
 	}
 

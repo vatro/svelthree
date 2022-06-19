@@ -1,11 +1,8 @@
 import type { OnlyWritableNonFunctionProps, OnlyWritableNonFunctionPropsPlus, PropBlackList } from "./types-extra"
-import type { Quaternion, Vector3, Euler, Matrix4, Mesh } from "three"
-/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
- * ```
- * const my_init_props: MeshProps = {...}
- * component_ref.props = my_init_props
- * ```
- * */
+import type { Quaternion, Vector3, Euler, Matrix4, Mesh, WebGLRenderer } from "three"
+
+export type WebGLRendererProps = OnlyWritableNonFunctionProps<Omit<WebGLRenderer, PropBlackList>>
+
 export type MeshProps = OnlyWritableNonFunctionPropsPlus<
 	Omit<Mesh, PropBlackList>,
 	{
