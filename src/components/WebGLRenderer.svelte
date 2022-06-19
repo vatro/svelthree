@@ -559,19 +559,19 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	async function render_standard(): Promise<void> {
-		// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
-		if (!inputs && current_cam.userData.renderer_currentcam_needsupdate) {
-			current_cam.userData.renderer_currentcam_needsupdate = false
-			set_current_cam()
-		}
-
-		// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
-		if (!inputs && current_cam.userData.renderer_currentscene_needsupdate) {
-			current_cam.userData.renderer_currentscene_needsupdate = false
-			set_current_scene()
-		}
-
 		if (enabled) {
+			// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+			if (!inputs && current_cam.userData.renderer_currentcam_needsupdate) {
+				current_cam.userData.renderer_currentcam_needsupdate = false
+				set_current_cam()
+			}
+
+			// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
+			if (!inputs && current_cam.userData.renderer_currentscene_needsupdate) {
+				current_cam.userData.renderer_currentscene_needsupdate = false
+				set_current_scene()
+			}
+
 			if (log_once) do_log_once(mode)
 
 			// process
@@ -583,9 +583,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			frames.total++
 
 			await dispatch_render_event("after_render", { frame: frames.total })
-		}
 
-		if (mode === "auto") render_scheduled.status = false
+			if (mode === "auto") render_scheduled.status = false
+		}
 	}
 
 	async function svelthree_extra(): Promise<void> {
