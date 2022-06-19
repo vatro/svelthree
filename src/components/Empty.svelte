@@ -222,9 +222,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let link: LinkProp = undefined
 
 	/** Shadow DOM element created by the component, needed for accessability features, event propagation etc. */
-	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
+	export let shadow_dom_el: SvelthreeShadowDOMElement = undefined
 
-	$: if (shadow_root_el && empty && !shadow_dom_target) create_shadow_dom_target()
+	$: if (shadow_root_el && empty && !shadow_dom_el) create_shadow_dom_target()
 
 	async function create_shadow_dom_target() {
 		if (browser) {
@@ -232,29 +232,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			await tick()
 
 			if (button) {
-				shadow_dom_target = document.createElement("button")
+				shadow_dom_el = document.createElement("button")
 
 				for (const key in button) {
-					shadow_dom_target[key] = button[key]
+					shadow_dom_el[key] = button[key]
 				}
 			} else if (link) {
-				shadow_dom_target = document.createElement("a")
+				shadow_dom_el = document.createElement("a")
 
 				for (const key in link) {
-					shadow_dom_target[key] = link[key]
+					shadow_dom_el[key] = link[key]
 				}
 			} else {
-				shadow_dom_target = document.createElement("div")
+				shadow_dom_el = document.createElement("div")
 			}
 
-			shadow_dom_target.dataset.kind = "Empty"
-			if (name) shadow_dom_target.dataset.name = name
+			shadow_dom_el.dataset.kind = "Empty"
+			if (name) shadow_dom_el.dataset.name = name
 
-			const parent_shadow_dom_target = our_parent?.userData.svelthreeComponent.shadow_dom_target
+			const parent_shadow_dom_target = our_parent?.userData.svelthreeComponent.shadow_dom_el
 			const shadow_target: SvelthreeShadowDOMElement = parent_shadow_dom_target || shadow_root_el
 
 			if (shadow_target) {
-				shadow_target.appendChild(shadow_dom_target)
+				shadow_target.appendChild(shadow_dom_el)
 			} else {
 				console.error(
 					"SVELTHREE > Empty > create_shadow_dom_target > Wasn't able to append shadow DOM element, no 'shadow_target'!",
@@ -269,24 +269,24 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// accessability -> shadow dom focusable
 	export let tabindex: number = undefined
 
-	$: if (shadow_dom_target && tabindex !== undefined) {
-		shadow_dom_target.tabIndex = tabindex
+	$: if (shadow_dom_el && tabindex !== undefined) {
+		shadow_dom_el.tabIndex = tabindex
 	}
 
 	// accessability -> shadow dom wai-aria
 	export let aria: Partial<ARIAMixin> = undefined
 
-	$: if (shadow_dom_target && aria !== undefined) {
+	$: if (shadow_dom_el && aria !== undefined) {
 		for (const key in aria) {
 			if (key === "ariaLabel") {
 				// add specified `ariaLabel` as text to shadow DOM `<div>` element ONLY (for better reader support / indexing (?))
 				if (!link && !button) {
 					//  TODO  RECONSIDER  needs to be tested more, may be obsolete (?).
-					shadow_dom_target.innerText += `${aria[key]}`
+					shadow_dom_el.innerText += `${aria[key]}`
 				}
 			}
 
-			shadow_dom_target[key] = aria[key]
+			shadow_dom_el[key] = aria[key]
 		}
 	}
 
@@ -483,7 +483,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const start_ani = start_animation
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
-	export const focused = (): void => shadow_dom_target.focus()
+	export const focused = (): void => shadow_dom_el.focus()
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */

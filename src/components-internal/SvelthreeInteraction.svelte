@@ -143,13 +143,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
-	export let shadow_dom_target: SvelthreeShadowDOMElement = undefined
+	export let shadow_dom_el: SvelthreeShadowDOMElement = undefined
 
 	let listeners: boolean = false
 
 	// --- Reactively add listeners ---
 
-	$: if (c && shadow_dom_target && raycaster && interactionEnabled && obj && !obj.userData.interact) {
+	$: if (c && shadow_dom_el && raycaster && interactionEnabled && obj && !obj.userData.interact) {
 		obj.userData.interact = true
 		listeners = true
 	}
@@ -532,8 +532,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		handler: (e: PointerEvent) => void
 	): void {
 		listener_options
-			? shadow_dom_target.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_target.addEventListener(event_name, handler)
+			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
+			: shadow_dom_el.addEventListener(event_name, handler)
 	}
 
 	/*  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  */
@@ -643,7 +643,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				last_pointer_moveover.clientY = e.clientY
 
 				// immediatelly dispatch component event via shadow dom listener / handler
-				shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e, "pointermoveover"))
+				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointermoveover"))
 			}
 		}
 	}
@@ -672,7 +672,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				pointer_is_out = false
 
 				if (used_pointer_events.has("pointerover")) {
-					shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e, "pointerover"))
+					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointerover"))
 				}
 			}
 		} else {
@@ -681,7 +681,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				pointer_is_over = false
 
 				if (used_pointer_events.has("pointerout")) {
-					shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e, "pointerout"))
+					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointerout"))
 				}
 			}
 		}
@@ -698,7 +698,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function check_pointer_pointerdown(e: PointerEvent) {
 		if (intersects()) {
-			shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e))
+			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
 		}
 	}
 
@@ -713,7 +713,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function check_pointer_pointerup(e: PointerEvent) {
 		if (intersects()) {
-			shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e))
+			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
 		}
 	}
 
@@ -730,7 +730,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 */
 	function check_pointer_click(e: PointerEvent) {
 		if (intersects()) {
-			shadow_dom_target.dispatchEvent(get_pointerevent_modified_clone(e))
+			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
 		}
 	}
 
@@ -924,8 +924,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		handler: (e: FocusEvent) => void
 	): void {
 		listener_options
-			? shadow_dom_target.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_target.addEventListener(event_name, handler)
+			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
+			: shadow_dom_el.addEventListener(event_name, handler)
 	}
 
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -1062,8 +1062,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		handler: (e: KeyboardEvent) => void
 	): void {
 		listener_options
-			? shadow_dom_target.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_target.addEventListener(event_name, handler)
+			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
+			: shadow_dom_el.addEventListener(event_name, handler)
 	}
 
 	/** Keyboard events are also being provided (re-dispatched) by the Canvas component. */
@@ -1495,10 +1495,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			shadow_dom_target.removeEventListener(event_name, keyboardevents_handler_action, false)
-			shadow_dom_target.removeEventListener(event_name, keyboardevents_handler_action, true)
-			shadow_dom_target.removeEventListener(event_name, keyboardevents_handler_directive, false)
-			shadow_dom_target.removeEventListener(event_name, keyboardevents_handler_directive, true)
+			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action, false)
+			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action, true)
+			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive, false)
+			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive, true)
 
 			unregister_keyboard_event(event_name)
 		}
@@ -1521,10 +1521,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// remove unused but registered (were used) listeners
 	function completely_remove_focus_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		if (event_is_registered(event_name, used_focus_events)) {
-			shadow_dom_target.removeEventListener(event_name, focusevents_handler_action, true)
-			shadow_dom_target.removeEventListener(event_name, focusevents_handler_action, false)
-			shadow_dom_target.removeEventListener(event_name, focusevents_handler_directive, true)
-			shadow_dom_target.removeEventListener(event_name, focusevents_handler_directive, false)
+			shadow_dom_el.removeEventListener(event_name, focusevents_handler_action, true)
+			shadow_dom_el.removeEventListener(event_name, focusevents_handler_action, false)
+			shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive, true)
+			shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive, false)
 
 			unregister_focus_event(event_name)
 		}
@@ -1566,10 +1566,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			shadow_dom_target.removeEventListener(event_name, pointerevents_handler_action, false)
-			shadow_dom_target.removeEventListener(event_name, pointerevents_handler_action, true)
-			shadow_dom_target.removeEventListener(event_name, pointerevents_handler_directive, false)
-			shadow_dom_target.removeEventListener(event_name, pointerevents_handler_directive, true)
+			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action, false)
+			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action, true)
+			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive, false)
+			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive, true)
 
 			unregister_pointer_event(event_name)
 		}
