@@ -766,6 +766,17 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		start_renderer()
 	}
 
+	// TODO  this has to be further tested / used / optimized (_which use cases, pitfalls etc._)
+	/**
+	 * Schedules a render once on next AnimationFrame. Current scene doesn't have to be marked as `dirty`. \
+	 * _For scheduling a render **manually** in an e.g. animation function_.
+	 */
+	export function schedule_render(): void {
+		if (enabled) {
+			if (rAF.id) cancelAnimationFrame(rAF.id)
+			rAF.id = requestAnimationFrame(render_standard)
+		}
+	}
 	/** Returns the **three.js instance** of the renderer. */
 	export function get_renderer(): WebGLRenderer {
 		return renderer
