@@ -986,11 +986,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						if (root_scene) {
 							root_scene.userData.dirty = true
-							$svelthreeStores[sti].rendererComponent.schedule_render(root_scene)
+							$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 						} else {
 							// we are the root scene
 							scene.userData.dirty = true
-							$svelthreeStores[sti].rendererComponent.schedule_render(scene)
+							$svelthreeStores[sti].rendererComponent.schedule_render_auto(scene)
 						}
 					}
 

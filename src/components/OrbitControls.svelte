@@ -125,7 +125,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// schedule render
 	function on_orbitcontrols_change(e: any): void {
 		orbitcontrols.object.userData.root_scene.userData.dirty = true
-		$svelthreeStores[sti].rendererComponent.schedule_render(orbitcontrols.object.userData.root_scene)
+		$svelthreeStores[sti].rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
 
 		// schedule next render (loop) if function was not called by an event
 		if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))

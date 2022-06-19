@@ -790,7 +790,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						root_scene.userData.dirty = true
-						$svelthreeStores[sti].rendererComponent.schedule_render(root_scene)
+						$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 					}
 
 					if (afterUpdate_inject_after) afterUpdate_inject_after()
