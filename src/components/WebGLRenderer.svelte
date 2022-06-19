@@ -255,7 +255,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
-	export let enable_shadowmap = false
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
@@ -271,15 +270,16 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// 'shorthand' attributes
 
+	export let shadowmap = false
 	$: if (renderer) set_ShadowMap_status()
 
 	function set_ShadowMap_status(): void {
-		renderer.shadowMap.enabled = !!enable_shadowmap
+		renderer.shadowMap.enabled = !!shadowmap
 
 		if (verbose && log_rs) {
 			console.debug(
 				...c_rs(c_name, "set_ShadowMap_status! ->", {
-					enable_shadowmap,
+					shadowmap,
 					"renderer.shadowMap.enabled": renderer.shadowMap.enabled
 				})
 			)
