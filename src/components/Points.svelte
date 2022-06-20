@@ -521,8 +521,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function material_needs_update(): void {
-		const current_single_material = material as Material
-		current_single_material.needsUpdate = true
+		const m: Material = (material as Material) || (points.material as Material)
+		m.needsUpdate = true
 	}
 
 	/** ☝️ `matrix` **shorthand** attribute overrides ( *are ignored* ) `pos`, `rot`, `quat`, `scale` and `lookAt` 'shorthand' attributes! */
