@@ -152,6 +152,91 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		setContext("parent", container)
 	}
 
+	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
+	export let button: ButtonProp = undefined
+
+	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
+	export let link: LinkProp = undefined
+
+	$: if (container && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+
+	function set_parent_shadow_dom_el() {
+		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+
+		// share our own shadow_dom_el as parent_shadow_dom_el
+		if (shadow_dom_el) {
+			// recreate shadow_dom_el
+			remove_shadow_dom_el()
+			create_shadow_dom_el()
+		} else {
+			create_shadow_dom_el()
+		}
+
+		if (shadow_dom_el) {
+			setContext("parent_shadow_dom_el", shadow_dom_el)
+		} else {
+			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
+		}
+	}
+
+	function remove_shadow_dom_el() {
+		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
+	}
+
+	function create_shadow_dom_el(): void {
+		if (button) {
+			shadow_dom_el = document.createElement("button")
+
+			for (const key in button) {
+				shadow_dom_el[key] = button[key]
+			}
+		} else if (link) {
+			shadow_dom_el = document.createElement("a")
+
+			for (const key in link) {
+				shadow_dom_el[key] = link[key]
+			}
+		} else {
+			shadow_dom_el = document.createElement("div")
+		}
+
+		shadow_dom_el.dataset.kind = `${c_name}`
+
+		if (our_parent_shadow_dom_el) {
+			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
+			//console.log(`SVELTHREE > ${c_name} > create_shadow_dom_el > shadow dom appended!:`, our_parent_shadow_dom_el)
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
+				our_parent_shadow_dom_el
+			)
+		}
+	}
+
+	// accessability -> shadow dom focusable
+	export let tabindex: number = undefined
+
+	$: if (shadow_dom_el && tabindex !== undefined) {
+		shadow_dom_el.tabIndex = tabindex
+	}
+
+	// accessability -> shadow dom wai-aria
+	export let aria: Partial<ARIAMixin> = undefined
+
+	$: if (shadow_dom_el && aria !== undefined) {
+		for (const key in aria) {
+			if (key === "ariaLabel") {
+				// add specified `ariaLabel` as text to shadow DOM `<div>` element ONLY (for better reader support / indexing (?))
+				if (!link && !button) {
+					//  TODO  RECONSIDER  needs to be tested more, may be obsolete (?).
+					shadow_dom_el.innerText += `${aria[key]}`
+				}
+			}
+
+			shadow_dom_el[key] = aria[key]
+		}
+	}
+
 	/** If the `add` attribute is set to `true` (_default_) the contents of the loaded GLTF will be added to the `container`,
 	 * which will then be added to it's parent component / parent object (three) instance.
 	 * If the `add` attribute is set to `false`, the `container` instance will be `undefined`
@@ -255,30 +340,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 				our_parent.add(container)
 			}
-		}
-	}
-
-	// accessability -> shadow dom focusable
-	export let tabindex: number = undefined
-
-	$: if (shadow_dom_el && tabindex !== undefined) {
-		shadow_dom_el.tabIndex = tabindex
-	}
-
-	// accessability -> shadow dom wai-aria
-	export let aria: Partial<ARIAMixin> = undefined
-
-	$: if (shadow_dom_el && aria !== undefined) {
-		for (const key in aria) {
-			if (key === "ariaLabel") {
-				// add specified `ariaLabel` as text to shadow DOM `<div>` element ONLY (for better reader support / indexing (?))
-				if (!link && !button) {
-					//  TODO  RECONSIDER  needs to be tested more, may be obsolete (?).
-					shadow_dom_el.innerText += `${aria[key]}`
-				}
-			}
-
-			shadow_dom_el[key] = aria[key]
 		}
 	}
 
