@@ -429,7 +429,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
 	/** **shorthand** attribute for setting properties of a `Material` using key-value pairs in an `Object`. */
 	export let mat: { [P in keyof AnyMaterialProps]: AnyMaterialProps[P] } = undefined
-	$: if (mat && sMat) sMat.update(mat)
+
+	$: if (mat && sMat) {
+		const updated_keys: string[] = sMat.update(mat)
+		if (updated_keys.length) material_needs_update()
+	}
+
+	function material_needs_update(): void {
+		const current_single_material = material as Material
+		current_single_material.needsUpdate = true
+	}
 
 	/** ☝️ `matrix` **shorthand** attribute overrides ( *are ignored* ) `pos`, `rot`, `quat`, `scale` and `lookAt` 'shorthand' attributes! */
 	export let matrix: Matrix4 | Parameters<Matrix4["set"]> = undefined
