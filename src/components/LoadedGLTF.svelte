@@ -146,6 +146,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${container.type} created!`, { container }))
 	}
+	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'LoadedGLTF'!
 
 	// Determining 'parent' if 'container' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (container && !our_parent) set_parent()
@@ -204,7 +205,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (our_parent_shadow_dom_el) {
 			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-			//console.log(`SVELTHREE > ${c_name} > create_shadow_dom_el > shadow dom appended!:`, our_parent_shadow_dom_el)
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,

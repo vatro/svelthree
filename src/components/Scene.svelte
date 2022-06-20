@@ -152,7 +152,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		// check if type of provided instance is correct and then do something with it...
 		if (scene.type === "Scene") {
 			scene.userData.initScale = scene.scale.x
 			scene.userData.svelthreeComponent = self
@@ -189,7 +188,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
 		}
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'Scene'!
+	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'Scene'!
 
 	$: if (!scene && create) {
 		// handle Scene as normal Object3D if it has a parent
@@ -257,6 +256,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${scene.type} created!`, { scene }))
 	}
+	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'Scene'!
 
 	// GENERATOR REMARK: 'parent_logic_if_inst_not_provided' excluded for 'Scene'!
 
@@ -390,8 +390,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// silently nothing
-				//console.warn(`'scene' was already added to (is a child of) ${get_comp_name(our_parent)}`, {scene, our_parent})
+				// prevent executing `add_instance_to` again on component update.
+				scene_uuid = scene.uuid
+				console.warn(
+					`SVELTHREE > ${c_name} : The 'scene' instance you've provided was already added to: ${get_comp_name(
+						our_parent
+					)}. ` +
+						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
+						`the 'scene' instance will be affected by all components it was provided to. ` +
+						`Consider cloning the '${c_name}' instance per component.`,
+					{ scene, uuid: scene.uuid, parent: our_parent }
+				)
 			}
 		} else {
 			// Nothing / no error for Scenes here.

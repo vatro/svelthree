@@ -123,7 +123,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		// check if type of provided instance is correct and then do something with it...
 		if (light.type === "PointLight") {
 			light.userData.initScale = light.scale.x
 			light.userData.svelthreeComponent = self
@@ -159,7 +158,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
 		}
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'PointLight'!
+	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'PointLight'!
 
 	/** Initializes `PointLight` with provided constructor parameters.*/
 	export let params: ConstructorParameters<typeof PointLight> = undefined
@@ -178,6 +177,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${light.type} created!`, { light }))
 	}
+	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'PointLight'!
 
 	// Determining 'parent' if 'light' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (light && create && scene && !our_parent) set_parent()
@@ -222,7 +222,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (our_parent_shadow_dom_el) {
 			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-			//console.log(`SVELTHREE > ${c_name} > create_shadow_dom_el > shadow dom appended!:`, our_parent_shadow_dom_el)
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
@@ -297,8 +296,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// silently nothing
-				//console.warn(`'light' was already added to (is a child of) ${get_comp_name(our_parent)}`, {light, our_parent, scene})
+				// prevent executing `add_instance_to` again on component update.
+				light_uuid = light.uuid
+				console.warn(
+					`SVELTHREE > ${c_name} : The 'light' instance you've provided was already added to: ${get_comp_name(
+						our_parent
+					)}. ` +
+						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
+						`the 'light' instance will be affected by all components it was provided to. ` +
+						`Consider cloning the '${c_name}' instance per component.`,
+					{ light, uuid: light.uuid, parent: our_parent }
+				)
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'light' to!", { light, our_parent, scene })
