@@ -132,13 +132,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		// check if type of provided instance is correct and then do something with it...
 		if (mesh.type === "Mesh") {
 			if (mesh.geometry) {
 				geometry = mesh.geometry
 				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved geometry:", { geometry }))
 			} else {
-				// this will most probably never happen ( TODO  when would it?)
 				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no geometry!")
 			}
 
@@ -146,7 +144,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				material = mesh.material as AnyMaterial
 				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved material:", { material }))
 			} else {
-				// this will most probably never happen ( TODO  when would it?)
 				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no material!")
 			}
 
@@ -185,53 +182,47 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactive creating / recreating mesh
+	// component was initialized via 'mesh' prop
+	$: if (geometry && !create && geometry !== mesh.geometry) update_geometry_if_initialized_by_meshprop()
 
-	$: if (geometry && create) on_geometry_provided()
-	$: if (material && create) on_material_provided()
-
-	function on_geometry_provided() {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
-		try_geometry_update()
-	}
-
-	function on_material_provided() {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
-		try_material_update()
-	}
-
-	// change geometry and material on provided mesh
-
-	// we know mesh has geometry if geometry is available and !create, it was referenced on_instance_provided()
-	$: if (geometry && !create) {
-		if (geometry !== mesh.geometry) try_geometry_update()
-	}
-
-	// we know mesh has material if material is available and !create, it was referenced on_instance_provided()
-	$: if (material && !create) {
-		if (material !== mesh.material) try_material_update()
-	}
-
-	function try_geometry_update(): void {
-		if (mesh) {
+	function update_geometry_if_initialized_by_meshprop(): void {
+		// mesh didn't change only geometry -> apply geometry to mesh
+		if (mesh_uuid === mesh.uuid) {
 			mesh.geometry = geometry as BufferGeometry
-
-			// update BoxHelper if any
-			if (mesh.userData.box) mesh.userData.box.update()
-
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
 		}
+
+		// mesh changed -> update gemetry reference
+		if (mesh_uuid !== mesh.uuid) {
+			geometry = mesh.geometry as BufferGeometry
+		}
+
+		// update BoxHelper if any
+		if (mesh.userData.box) mesh.userData.box.update()
 	}
 
-	function try_material_update(): void {
-		if (mesh) {
+	// component was initialized via 'mesh' prop
+	$: if (material && !create && material !== mesh.material) update_material_if_initialized_by_meshprop()
+
+	function update_material_if_initialized_by_meshprop(): void {
+		// mesh didn't change, material did -> apply material to mesh
+		if (mesh_uuid === mesh.uuid) {
 			mesh.material = material
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
-			force_material_update()
 		}
+
+		// mesh changed -> update material reference
+		if (mesh_uuid !== mesh.uuid) {
+			material = mesh.material as Material
+		}
+
+		refresh_material()
 	}
 
-	function force_material_update(): void {
+	/** Recreates `sMat` with the current `material` reference and applies the `mat` prop object to it.
+	 * Called if:
+	 * - a new Mesh (clone or reference) was provided via `mesh` prop attribute after the `material` reference has been updated
+	 * - a new Material (clone or reference) was provided via `material` prop attribute.
+	 */
+	function refresh_material(): void {
 		// recreate 'sMat' in case sMat was created with / is bound to 'mesh.material'
 		sMat = new SvelthreeProps(material)
 		if (sMat && mat) sMat.update(mat)
@@ -297,6 +288,47 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
+	// component was initialized via `geometry` / `material` props.
+	$: if (geometry && create) update_geometry_if_initialized_by_geometryprop()
+
+	function update_geometry_if_initialized_by_geometryprop(): void {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
+		// we don't want `mesh` to be a part of the reactive statement conditional,
+		// otherwise it would react to `mesh` prop changes.
+		if (mesh) {
+			mesh.geometry = geometry as BufferGeometry
+
+			// update BoxHelper if any
+			if (mesh.userData.box) mesh.userData.box.update()
+
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > update_geometry_if_initialized_by_geometryprop > geometry update failed, 'mesh' not available!`,
+				mesh
+			)
+		}
+	}
+
+	// component was initialized via `geometry` / `material` props.
+	$: if (material && create) update_material_if_initialized_by_materialprop()
+
+	function update_material_if_initialized_by_materialprop(): void {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
+		// we don't want `mesh` to be a part of the reactive statement conditional,
+		// otherwise it would react to `mesh` prop changes.
+		if (mesh) {
+			mesh.material = material
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
+			refresh_material()
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > update_material_if_initialized_by_materialprop > material update failed, 'mesh' not available!`,
+				mesh
+			)
+		}
+	}
+
 	// Determining 'parent' if 'mesh' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (mesh && create && scene && !our_parent) set_parent()
 
@@ -354,7 +386,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (our_parent_shadow_dom_el) {
 			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-			//console.log(`SVELTHREE > ${c_name} > create_shadow_dom_el > shadow dom appended!:`, our_parent_shadow_dom_el)
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
@@ -431,8 +462,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// silently nothing
-				//console.warn(`'mesh' was already added to (is a child of) ${get_comp_name(our_parent)}`, {mesh, our_parent, scene})
+				// prevent executing `add_instance_to` again on component update.
+				mesh_uuid = mesh.uuid
+				console.warn(
+					`SVELTHREE > ${c_name} : The 'mesh' instance you've provided was already added to: ${get_comp_name(
+						our_parent
+					)}. ` +
+						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
+						`the 'mesh' instance will be affected by all components it was provided to. ` +
+						`Consider cloning the '${c_name}' instance per component.`,
+					{ mesh, uuid: mesh.uuid, parent: our_parent }
+				)
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'mesh' to!", { mesh, our_parent, scene })

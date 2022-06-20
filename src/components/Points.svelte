@@ -158,7 +158,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		// check if type of provided instance is correct and then do something with it...
 		if (points.type === "Points") {
 			points.userData.initScale = points.scale.x
 			points.userData.svelthreeComponent = self
@@ -195,53 +194,47 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactive creating / recreating points
+	// component was initialized via 'points' prop
+	$: if (geometry && !create && geometry !== points.geometry) update_geometry_if_initialized_by_pointsprop()
 
-	$: if (geometry && create) on_geometry_provided()
-	$: if (material && create) on_material_provided()
-
-	function on_geometry_provided() {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
-		try_geometry_update()
-	}
-
-	function on_material_provided() {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
-		try_material_update()
-	}
-
-	// change geometry and material on provided points
-
-	// we know points has geometry if geometry is available and !create, it was referenced on_instance_provided()
-	$: if (geometry && !create) {
-		if (geometry !== points.geometry) try_geometry_update()
-	}
-
-	// we know points has material if material is available and !create, it was referenced on_instance_provided()
-	$: if (material && !create) {
-		if (material !== points.material) try_material_update()
-	}
-
-	function try_geometry_update(): void {
-		if (points) {
+	function update_geometry_if_initialized_by_pointsprop(): void {
+		// points didn't change only geometry -> apply geometry to points
+		if (points_uuid === points.uuid) {
 			points.geometry = geometry as BufferGeometry
-
-			// update BoxHelper if any
-			if (points.userData.box) points.userData.box.update()
-
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
 		}
+
+		// points changed -> update gemetry reference
+		if (points_uuid !== points.uuid) {
+			geometry = points.geometry as BufferGeometry
+		}
+
+		// update BoxHelper if any
+		if (points.userData.box) points.userData.box.update()
 	}
 
-	function try_material_update(): void {
-		if (points) {
+	// component was initialized via 'points' prop
+	$: if (material && !create && material !== points.material) update_material_if_initialized_by_pointsprop()
+
+	function update_material_if_initialized_by_pointsprop(): void {
+		// points didn't change, material did -> apply material to points
+		if (points_uuid === points.uuid) {
 			points.material = material
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
-			force_material_update()
 		}
+
+		// points changed -> update material reference
+		if (points_uuid !== points.uuid) {
+			material = points.material as Material
+		}
+
+		refresh_material()
 	}
 
-	function force_material_update(): void {
+	/** Recreates `sMat` with the current `material` reference and applies the `mat` prop object to it.
+	 * Called if:
+	 * - a new Mesh (clone or reference) was provided via `points` prop attribute after the `material` reference has been updated
+	 * - a new Material (clone or reference) was provided via `material` prop attribute.
+	 */
+	function refresh_material(): void {
 		// recreate 'sMat' in case sMat was created with / is bound to 'points.material'
 		sMat = new SvelthreeProps(material)
 		if (sMat && mat) sMat.update(mat)
@@ -307,6 +300,47 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
+	// component was initialized via `geometry` / `material` props.
+	$: if (geometry && create) update_geometry_if_initialized_by_geometryprop()
+
+	function update_geometry_if_initialized_by_geometryprop(): void {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
+		// we don't want `points` to be a part of the reactive statement conditional,
+		// otherwise it would react to `points` prop changes.
+		if (points) {
+			points.geometry = geometry as BufferGeometry
+
+			// update BoxHelper if any
+			if (points.userData.box) points.userData.box.update()
+
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > update_geometry_if_initialized_by_geometryprop > geometry update failed, 'points' not available!`,
+				points
+			)
+		}
+	}
+
+	// component was initialized via `geometry` / `material` props.
+	$: if (material && create) update_material_if_initialized_by_materialprop()
+
+	function update_material_if_initialized_by_materialprop(): void {
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
+		// we don't want `points` to be a part of the reactive statement conditional,
+		// otherwise it would react to `points` prop changes.
+		if (points) {
+			points.material = material
+			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
+			refresh_material()
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > update_material_if_initialized_by_materialprop > material update failed, 'points' not available!`,
+				points
+			)
+		}
+	}
+
 	// Determining 'parent' if 'points' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (points && create && scene && !our_parent) set_parent()
 
@@ -364,7 +398,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		if (our_parent_shadow_dom_el) {
 			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-			//console.log(`SVELTHREE > ${c_name} > create_shadow_dom_el > shadow dom appended!:`, our_parent_shadow_dom_el)
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
@@ -441,8 +474,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				// silently nothing
-				//console.warn(`'points' was already added to (is a child of) ${get_comp_name(our_parent)}`, {points, our_parent, scene})
+				// prevent executing `add_instance_to` again on component update.
+				points_uuid = points.uuid
+				console.warn(
+					`SVELTHREE > ${c_name} : The 'points' instance you've provided was already added to: ${get_comp_name(
+						our_parent
+					)}. ` +
+						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
+						`the 'points' instance will be affected by all components it was provided to. ` +
+						`Consider cloning the '${c_name}' instance per component.`,
+					{ points, uuid: points.uuid, parent: our_parent }
+				)
 			}
 		} else {
 			console.error("No 'our_parent' (or 'scene')! Nothing to add 'points' to!", { points, our_parent, scene })
