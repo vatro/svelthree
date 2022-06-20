@@ -146,7 +146,7 @@ export default class SvelthreeProps {
 					this.updatedKeys.push(k)
 				}
 			} else {
-				console.error(
+				console.warn(
 					`SVELTHREE > SvelthreeProps > unknown property '${k}' in 'props' object -> not available on ${this.obj_type}`
 				)
 			}
