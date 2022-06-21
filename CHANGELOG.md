@@ -1,5 +1,31 @@
 # svelthree changelog
 
+## 1.0.0-next.0.76
+
+Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github.com/vatro/svelthree/issues/70) **sprint**.
+
+### _API_
+
+- **renamed** `WebGLRenderer` **prop** from _old_ `enable_shadowmap` to **new** `shadowmap`
+
+- **renamed** `WebGLRenderer` **public method** (_actually for internal use: mode `"auto"` logic_) from _old_ `schedule_render()` to **new** `schedule_render_auto()`
+
+- **new** `WebGLRenderer` **public method**: `schedule_render()`: might be useful, but also potentially confusing. It's basically a 3rd (_manual_) possibility to schedule a render in mode `auto`, e.g. if a user wants to mix manual and `auto` rendering. Needs to be further tested / used / optimized (_example use cases, pitfalls etc._).
+
+### _internal_ ( _most important_ )
+
+-  **Refactored props updating logic**, should improve performance when using the `props` attribute ([c7b86ce](https://github.com/vatro/svelthree/commit/c7b86cea33a420ee6ecdf7e52874b92d8bf36b9f)) ([#102](https://github.com/vatro/svelthree/issues/102), [#77](https://github.com/vatro/svelthree/issues/77)):
+	- `Propeller` : `.update(...)` now doesn't check if `prop` object's property is valid, if it is 'own' or 'inherited' or the type of the thee.js instance, all of this is now being done in `SvelthreeProps` on initialization + the information is saved inside `valuators`.
+	
+	- `SvelthreeProps` : `.update(props)` now returns an array of changed props (keys), so it's possible to use them / insert some extra logic inside component's corresponding reactive functionality where needed. This was done primarily for reactive / conditional updating of cameras' projection matrix.
+	
+	- `SvelthreeProps` : Nested objects and function property values inside `props` object will now always be updated / reassigned (_on `props` object change_) -> `checkProps` now using Svelte's `safe_not_equal` instead of `not_equal`.
+	
+- **Refactored / fixed Shadow DOM generation** ((#72)[https://github.com/vatro/svelthree/issues/72])
+
+- **Fixed updating of camera's projection matri**x on props change. ([dc5b847](https://github.com/vatro/svelthree/commit/dc5b847a9851ebe8c0f22af96dc38169b0a38d1f))
+
+
 ## 1.0.0-next.0.75
 
 -   ( **!** ) Render mode `auto`: `render_scheduled.status = false` has been **moved to end** of the `render_standard()` function, because `on:before_render` **was scheduling multiple renders in a single AnimationFrame** (_on change_)! Putting `render_scheduled.status = false` to the very start of the `render_standard()` function **was completely wrong**! ([07120b0](https://github.com/vatro/svelthree/commit/07120b002240dd5a62f0db7a2501664dafb64f40))

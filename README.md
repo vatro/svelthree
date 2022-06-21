@@ -23,7 +23,7 @@
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.75.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.76.tgz",
       ...
   }
   ```
