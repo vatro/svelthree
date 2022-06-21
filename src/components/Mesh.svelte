@@ -206,12 +206,12 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function update_material_if_initialized_by_meshprop(): void {
 		// mesh didn't change, material did -> apply material to mesh
 		if (mesh_uuid === mesh.uuid) {
-			mesh.material = material
+			mesh.material = material as Material
 		}
 
 		// mesh changed -> update material reference
 		if (mesh_uuid !== mesh.uuid) {
-			material = mesh.material as Material
+			material = mesh.material as AnyMaterial
 		}
 
 		refresh_material()

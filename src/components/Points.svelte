@@ -218,12 +218,12 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function update_material_if_initialized_by_pointsprop(): void {
 		// points didn't change, material did -> apply material to points
 		if (points_uuid === points.uuid) {
-			points.material = material
+			points.material = material as Material
 		}
 
 		// points changed -> update material reference
 		if (points_uuid !== points.uuid) {
-			material = points.material as Material
+			material = points.material as AnyMaterial
 		}
 
 		refresh_material()
