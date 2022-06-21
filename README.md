@@ -147,8 +147,9 @@
   <WebGLRenderer
     sceneId="scene1"
     camId="cam1"
+    mode="always"
     config={{ antialias: true, alpha: false }}
-    enableShadowMap
+    shadowmap
     />
 
 </Canvas>
