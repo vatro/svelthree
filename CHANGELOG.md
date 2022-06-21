@@ -6,11 +6,11 @@ Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github
 
 ### _API_
 
-- **renamed** `WebGLRenderer` **prop** from _old_ `enable_shadowmap` to **new** `shadowmap`
+- **renamed** `WebGLRenderer` **prop** from _old_ `enable_shadowmap` to **new** `shadowmap` ([4f0c751](https://github.com/vatro/svelthree/commit/4f0c7510769b85be6fa7faf2d5b9ca7a8a0b85a5))
 
-- **renamed** `WebGLRenderer` **public method** (_actually for internal use: mode `"auto"` logic_) from _old_ `schedule_render()` to **new** `schedule_render_auto()`
+- **renamed** `WebGLRenderer` **public method** (_actually for internal use: mode `"auto"` logic_) from _old_ `schedule_render()` to **new** `schedule_render_auto()` ([30f5a51](https://github.com/vatro/svelthree/commit/30f5a5104bc14960131fe916e3ffdecc8fbf7de8))
 
-- **new** `WebGLRenderer` **public method**: `schedule_render()`: might be useful, but also potentially confusing. It's basically a 3rd (_manual_) possibility to schedule a render in mode `auto`, e.g. if a user wants to mix manual and `auto` rendering. Needs to be further tested / used / optimized (_example use cases, pitfalls etc._).
+- **new** `WebGLRenderer` **public method**: `schedule_render()`: might be useful, but also potentially confusing. It's basically a 3rd (_manual_) possibility to schedule a render in mode `auto`, e.g. if a user wants to mix manual and `auto` rendering. Needs to be further tested / used / optimized (_example use cases, pitfalls etc._). ([b4169c5](https://github.com/vatro/svelthree/commit/b4169c53c597ea82140e6c6e430839e384333e76))
 
 ### _internal_ ( _most important_ )
 
@@ -21,9 +21,9 @@ Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github
 	
 	- `SvelthreeProps` : Nested objects and function property values inside `props` object will now always be updated / reassigned (_on `props` object change_) -> `checkProps` now using Svelte's `safe_not_equal` instead of `not_equal`.
 	
-- **Refactored / fixed Shadow DOM generation** ((#72)[https://github.com/vatro/svelthree/issues/72])
+- **Refactored / fixed Shadow DOM generation** ([#72](https://github.com/vatro/svelthree/issues/72))
 
-- **Fixed updating of camera's projection matri**x on props change. ([dc5b847](https://github.com/vatro/svelthree/commit/dc5b847a9851ebe8c0f22af96dc38169b0a38d1f))
+- **Fixed updating of camera's projection matrix** on props change. ([dc5b847](https://github.com/vatro/svelthree/commit/dc5b847a9851ebe8c0f22af96dc38169b0a38d1f))
 
 
 ## 1.0.0-next.0.75
