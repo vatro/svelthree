@@ -31,47 +31,54 @@ export default class PropUtils {
 		console.warn(message)
 	}
 
-	public static isPropType(p: any): boolean {
-		if (p?.constructor === Array) return true
-		if (p?.constructor === Vector3) return true
-		if (p?.constructor === Color) return true
-		if (p?.constructor === Matrix4) return true
-		if (p?.constructor === Euler) return true
-		if (p?.constructor === Quaternion) return true
-		return false
-	}
-
 	public static isArray3Nums(p: any): boolean {
-		return p?.constructor === Array && p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
+		return Array.isArray(p) && p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
 	}
 
-	public static isArray(p: any): boolean {
-		return p?.constructor === Array
+	/** Check if an Array contains exactly 3 numbers. */
+	public static is3Nums(p: any): boolean {
+		return p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
 	}
 
 	public static isColor(p: any): boolean {
-		return p?.constructor === Color
+		return p?.constructor?.name === "Color"
 	}
 
 	public static isVector3(p: any): boolean {
-		return p?.constructor === Vector3
+		return p?.constructor?.name === "Vector3"
 	}
 
 	public static isMatrix4(p: any): boolean {
-		return p?.constructor === Matrix4
+		return p?.constructor?.name === "Matrix4"
 	}
 
 	public static isMatrix4ParamsArray(p: any): boolean {
-		return p?.constructor === Array && p.length === 16 && p.every((el) => !isNaN(el))
+		return Array.isArray(p) && p.length === 16 && p.every((el) => !isNaN(el))
+	}
+
+	/** Check if an Array contains exactly 16 numbers. */
+	public static isMatrix4Params(p: any): boolean {
+		return p.length === 16 && p.every((el) => !isNaN(el))
 	}
 
 	public static isEuler(p: any): boolean {
-		return p?.constructor === Euler
+		return p?.constructor?.name === "Euler"
 	}
 
 	public static isEulerParamsArray(p: any): boolean {
 		return (
-			p?.constructor === Array &&
+			Array.isArray(p) &&
+			p.length === 4 &&
+			!isNaN(p[0]) &&
+			!isNaN(p[1]) &&
+			!isNaN(p[2]) &&
+			typeof p[3] === "string"
+		)
+	}
+
+	/** Check if an Array contains exactly 3 numbers and one string. */
+	public static isEulerParams(p: any): boolean {
+		return (
 			p.length === 4 &&
 			!isNaN(p[0]) &&
 			!isNaN(p[1]) &&
@@ -81,19 +88,24 @@ export default class PropUtils {
 	}
 
 	public static isQuaternion(p: any): boolean {
-		return p?.constructor === Quaternion
+		return p?.constructor?.name === "Quaternion"
 	}
 
 	public static isQuaternionParamsArray(p: any): boolean {
-		return p?.constructor === Array && p.length === 4 && p.every((el) => !isNaN(el))
+		return Array.isArray(p) && p.length === 4 && p.every((el) => !isNaN(el))
+	}
+
+	/** Check if an Array contains exactly 4 numbers. */
+	public static isQuaternionParams(p: any): boolean {
+		return p.length === 4 && p.every((el) => !isNaN(el))
 	}
 
 	public static checkIfComplexValueType(val: any): ComplexValueType | undefined {
 		if (Array.isArray(val)) {
-			if (PropUtils.isArray3Nums(val)) return "Array3Nums"
-			if (PropUtils.isEulerParamsArray(val)) return "EulerParamsArray"
-			if (PropUtils.isQuaternionParamsArray(val)) return "QuaternionParamsArray"
-			if (PropUtils.isMatrix4ParamsArray(val)) return "Matrix4ParamsArray"
+			if (PropUtils.is3Nums(val)) return "Array3Nums"
+			if (PropUtils.isEulerParams(val)) return "EulerParamsArray"
+			if (PropUtils.isQuaternionParams(val)) return "QuaternionParamsArray"
+			if (PropUtils.isMatrix4Params(val)) return "Matrix4ParamsArray"
 		} else {
 			if (PropUtils.isVector3(val)) return "Vector3"
 			if (PropUtils.isColor(val)) return "Color"
@@ -109,11 +121,11 @@ export default class PropUtils {
 		switch (complex) {
 			case undefined:
 				if (Array.isArray(val)) {
-					PropUtils.isArray3Nums(val)
+					PropUtils.is3Nums(val)
 						? PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
-						: PropUtils.isEulerParamsArray(val)
+						: PropUtils.isEulerParams(val)
 						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
-						: PropUtils.isQuaternionParamsArray(val)
+						: PropUtils.isQuaternionParams(val)
 						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
 						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
