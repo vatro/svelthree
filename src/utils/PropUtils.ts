@@ -40,18 +40,6 @@ export default class PropUtils {
 		return p.length === 3 && p.every((el: any) => !isNaN(el))
 	}
 
-	public static isColor(p: any): boolean {
-		return p?.constructor?.name === "Color"
-	}
-
-	public static isVector3(p: any): boolean {
-		return p?.constructor?.name === "Vector3"
-	}
-
-	public static isMatrix4(p: any): boolean {
-		return p?.constructor?.name === "Matrix4"
-	}
-
 	public static isMatrix4ParamsArray(p: any): boolean {
 		return Array.isArray(p) && p.length === 16 && p.every((el: any) => !isNaN(el))
 	}
@@ -59,10 +47,6 @@ export default class PropUtils {
 	/** Check if an Array contains exactly 16 numbers. */
 	public static isMatrix4Params(p: any): boolean {
 		return p.length === 16 && p.every((el: any) => !isNaN(el))
-	}
-
-	public static isEuler(p: any): boolean {
-		return p?.constructor?.name === "Euler"
 	}
 
 	public static isEulerParamsArray(p: any): boolean {
@@ -79,10 +63,6 @@ export default class PropUtils {
 	/** Check if an Array contains exactly three numbers and one string. */
 	public static isEulerParams(p: any): boolean {
 		return p.length === 4 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2]) && typeof p[3] === "string"
-	}
-
-	public static isQuaternion(p: any): boolean {
-		return p?.constructor?.name === "Quaternion"
 	}
 
 	public static isQuaternionParamsArray(p: any): boolean {
