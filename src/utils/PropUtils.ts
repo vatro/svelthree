@@ -76,15 +76,9 @@ export default class PropUtils {
 		)
 	}
 
-	/** Check if an Array contains exactly 3 numbers and one string. */
+	/** Check if an Array contains exactly three numbers and one string. */
 	public static isEulerParams(p: any): boolean {
-		return (
-			p.length === 4 &&
-			!isNaN(p[0]) &&
-			!isNaN(p[1]) &&
-			!isNaN(p[2]) &&
-			typeof p[3] === "string"
-		)
+		return p.length === 4 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2]) && typeof p[3] === "string"
 	}
 
 	public static isQuaternion(p: any): boolean {
