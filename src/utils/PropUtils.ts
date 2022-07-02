@@ -100,12 +100,12 @@ export default class PropUtils {
 			if (PropUtils.isEulerParams(val)) return "EulerParamsArray"
 			if (PropUtils.isQuaternionParams(val)) return "QuaternionParamsArray"
 			if (PropUtils.isMatrix4Params(val)) return "Matrix4ParamsArray"
-		} else {
-			if (PropUtils.isVector3(val)) return "Vector3"
-			if (PropUtils.isColor(val)) return "Color"
-			if (PropUtils.isEuler(val)) return "Euler"
-			if (PropUtils.isQuaternion(val)) return "Quaternion"
-			if (PropUtils.isMatrix4(val)) return "Matrix4"
+		} else if (val) {
+			if (val.isVector3) return "Vector3"
+			if (val.isColor) return "Color"
+			if (val.isEuler) return "Euler"
+			if (val.isQuaternion) return "Quaternion"
+			if (val.isMatrix4) return "Matrix4"
 		}
 
 		return undefined
@@ -125,17 +125,22 @@ export default class PropUtils {
 								obj: obj,
 								value: val
 						  })
-				} else {
-					PropUtils.isEuler(val)
+				} else if (val) {
+					val.isEuler
 						? PropUtils.setRotEuler(obj, val)
-						: PropUtils.isVector3(val)
+						: val.isVector3
 						? PropUtils.setRotVector3(obj, val)
-						: PropUtils.isQuaternion(val)
+						: val.isQuaternion
 						? PropUtils.setRotQuaternion(obj, val)
 						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
 								value: val
 						  })
+				} else {
+					console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
+						obj: obj,
+						value: val
+					})
 				}
 				break
 			case "Euler":
@@ -213,7 +218,7 @@ export default class PropUtils {
 			case undefined:
 				PropUtils.isArray3Nums(val)
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
-					: PropUtils.isVector3(val)
+					: val?.["isVector3"]
 					? PropUtils.setPositionFromVector3(obj, val as Vector3)
 					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
@@ -263,14 +268,22 @@ export default class PropUtils {
 		}
 		switch (complex) {
 			case undefined:
-				PropUtils.isArray3Nums(val)
-					? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
-					: PropUtils.isVector3(val)
-					? PropUtils.setScaleFromVector3(obj, val as Vector3)
-					: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
-							obj: obj,
-							value: val
-					  })
+				if (val) {
+					PropUtils.isArray3Nums(val)
+						? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
+						: val["isVector3"]
+						? PropUtils.setScaleFromVector3(obj, val as Vector3)
+						: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
+								obj: obj,
+								value: val
+						  })
+				} else {
+					console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
+						obj: obj,
+						value: val
+					})
+				}
+
 				break
 			case "Array3Nums":
 				PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
@@ -378,10 +391,17 @@ export default class PropUtils {
 					})
 				}
 			} else {
-				if (PropUtils.isArray3Nums(tVal)) {
-					obj.lookAt(tVal[0], tVal[1], tVal[2])
-				} else if (PropUtils.isVector3(tVal)) {
-					obj.lookAt(tVal as Vector3)
+				if (tVal) {
+					if (PropUtils.isArray3Nums(tVal)) {
+						obj.lookAt(tVal[0], tVal[1], tVal[2])
+					} else if (tVal?.isVector3) {
+						obj.lookAt(tVal as Vector3)
+					} else {
+						console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
+							obj: obj,
+							value: tVal
+						})
+					}
 				} else {
 					console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 						obj: obj,
@@ -407,20 +427,28 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromValueKey : ", { obj, val, key, complex })
 		}
-		PropUtils.isArray3Nums(val)
-			? PropUtils.setColorFromArray(obj, val, key)
-			: !isNaN(val)
-			? PropUtils.setColorFromNumber(obj, val, key)
-			: PropUtils.isColor(val)
-			? PropUtils.setColorFromColor(obj, val, key)
-			: PropUtils.isVector3(val)
-			? PropUtils.setColorFromVector3(obj, val, key)
-			: typeof val === "string"
-			? PropUtils.setColorFromString(obj, val, key)
-			: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
-					obj: obj,
-					value: val
-			  })
+		// color value can be `0`
+		if (val || val === 0) {
+			PropUtils.isArray3Nums(val)
+				? PropUtils.setColorFromArray(obj, val, key)
+				: !isNaN(val)
+				? PropUtils.setColorFromNumber(obj, val, key)
+				: val.isColor
+				? PropUtils.setColorFromColor(obj, val, key)
+				: val.isVector3
+				? PropUtils.setColorFromVector3(obj, val, key)
+				: typeof val === "string"
+				? PropUtils.setColorFromString(obj, val, key)
+				: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
+						obj: obj,
+						value: val
+				  })
+		} else {
+			console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
+				obj: obj,
+				value: val
+			})
+		}
 	}
 
 	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {
@@ -545,7 +573,7 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj))
 			console.debug("[ PropUtils ] -> setMatrixFromValue! : ", { obj, val })
 
-		if (PropUtils.isMatrix4(val)) {
+		if (val?.isMatrix4) {
 			// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
 			//mesh.applyMatrix4(matrix)
 
@@ -601,7 +629,7 @@ export default class PropUtils {
 			console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val, complex })
 		}
 
-		if (PropUtils.isQuaternion(val)) {
+		if (val?.isQuaternion) {
 			// see https://threejs.org/docs/#api/en/core/Object3D.setRotationFromQuaternion
 
 			// Copy the given quat into '.quat'.
