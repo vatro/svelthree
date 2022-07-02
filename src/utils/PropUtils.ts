@@ -32,12 +32,12 @@ export default class PropUtils {
 	}
 
 	public static isArray3Nums(p: any): boolean {
-		return Array.isArray(p) && p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
+		return Array.isArray(p) && p.length === 3 && p.every((el: any) => !isNaN(el))
 	}
 
 	/** Check if an Array contains exactly 3 numbers. */
 	public static is3Nums(p: any): boolean {
-		return p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])
+		return p.length === 3 && p.every((el: any) => !isNaN(el))
 	}
 
 	public static isColor(p: any): boolean {
@@ -53,12 +53,12 @@ export default class PropUtils {
 	}
 
 	public static isMatrix4ParamsArray(p: any): boolean {
-		return Array.isArray(p) && p.length === 16 && p.every((el) => !isNaN(el))
+		return Array.isArray(p) && p.length === 16 && p.every((el: any) => !isNaN(el))
 	}
 
 	/** Check if an Array contains exactly 16 numbers. */
 	public static isMatrix4Params(p: any): boolean {
-		return p.length === 16 && p.every((el) => !isNaN(el))
+		return p.length === 16 && p.every((el: any) => !isNaN(el))
 	}
 
 	public static isEuler(p: any): boolean {
@@ -86,12 +86,12 @@ export default class PropUtils {
 	}
 
 	public static isQuaternionParamsArray(p: any): boolean {
-		return Array.isArray(p) && p.length === 4 && p.every((el) => !isNaN(el))
+		return Array.isArray(p) && p.length === 4 && p.every((el: any) => !isNaN(el))
 	}
 
 	/** Check if an Array contains exactly 4 numbers. */
 	public static isQuaternionParams(p: any): boolean {
-		return p.length === 4 && p.every((el) => !isNaN(el))
+		return p.length === 4 && p.every((el: any) => !isNaN(el))
 	}
 
 	public static checkIfComplexValueType(val: any): ComplexValueType | undefined {
