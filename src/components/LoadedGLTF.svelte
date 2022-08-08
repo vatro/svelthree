@@ -333,6 +333,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	let sProps: SvelthreeProps
 
+	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
+	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	export let props: { [P in keyof LoadedGLTFProps]: LoadedGLTFProps[P] } = undefined
+
+	$: if (!sProps && container && props) sProps = new SvelthreeProps(container)
+	$: if (props && sProps) update_props()
+	function update_props() {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
+		sProps.update(props)
+	}
+
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
 	/** **shorthand** attribute for setting the `position` property. */
