@@ -1363,10 +1363,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (not_using_event("focusin")) completely_remove_focus_listener("focusin")
 		if (not_using_event("focusout")) completely_remove_focus_listener("focusout")
 
-		// interact is true, but there are no pointer listeners added:
-		// - cursor should not change on pointerover ...
-		// - ... but the object will be raycasted / block the raycaster ray.
-		obj.userData.block = used_pointer_events.size === 0
+		set_block_status()
 
 		if (!obj.userData.block) {
 			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
@@ -1381,6 +1378,27 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_3_listener) {
 			add_interaction_3_listener()
+		}
+	}
+
+	/**
+	 * Changes component's `block` status based on pointer listeners' total count.
+	 * If no pointer listeners are set, `block` will be set to `true`, means
+	 * cursor will not change (_cursor changes on `interact: true` + `block: false` only_).
+	 */
+	function set_block_status(): void {
+		//cursor will change on `interact: true` + `block: false`
+		console.warn("SvelthreeInteraction > set_block_status > used_pointer_events.size:", used_pointer_events.size)
+		if (used_pointer_events.size === 0) {
+			// cursor will not change
+			parent.block = true
+			obj.userData.block = true
+			console.warn("SvelthreeInteraction > set_block_status > parent.block, obj.userData.block -> true")
+		} else {
+			// cursor will change
+			parent.block = false
+			console.warn("SvelthreeInteraction > set_block_status > parent.block -> false")
+			//obj.userData.block = false
 		}
 	}
 
@@ -1449,7 +1467,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		remove_all_pointer_listeners()
 		pointer_events_queue.length = 0
-		obj.userData.block = true
 
 		// SVELTEKIT  SSR  keyboard event listeners are being added to `window`.
 		if (browser) {
