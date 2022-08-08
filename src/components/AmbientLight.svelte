@@ -343,7 +343,12 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	/** The root scene -> `scene.parent = null`. */
 	let root_scene: Scene | null = undefined
-	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+	let root_scene_obj = { value: undefined }
+
+	$: if (root_scene === undefined) {
+		root_scene = get_root_scene(getContext("scene"))
+		root_scene_obj.value = root_scene
+	}
 
 	$: if (light && root_scene) {
 		light.userData.root_scene = root_scene
@@ -503,7 +508,8 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 					}
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
-						root_scene.userData.dirty = true
+						// prevent an additional component update by not accessing the `root_scene` prop directly.
+						root_scene_obj.value.userData.dirty = true
 						$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 					}
 

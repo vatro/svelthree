@@ -107,7 +107,12 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	/** `CubeCamera` instances are always added to the `root_scene`
 	 * no matter which component the `CubeCamera` component was added to. */
 	let root_scene: Scene | null = undefined
-	$: if (root_scene === undefined) root_scene = get_root_scene(getContext("scene"))
+	let root_scene_obj = { value: undefined }
+
+	$: if (root_scene === undefined) {
+		root_scene = get_root_scene(getContext("scene"))
+		root_scene_obj.value = root_scene
+	}
 
 	/** Bind `CubeCamera`'s position to the specified component / object (three) instance
 	 * ☝️ The `pos` shorthand attribute will override `bind_pos`! _Alternatively (standard)_:
@@ -830,7 +835,8 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 					}
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
-						root_scene.userData.dirty = true
+						// prevent an additional component update by not accessing the `root_scene` prop directly.
+						root_scene_obj.value.userData.dirty = true
 						$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 					}
 
