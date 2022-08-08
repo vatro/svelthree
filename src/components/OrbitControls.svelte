@@ -33,7 +33,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { default as PerspCamSvelthreeComponent } from "./PerspectiveCamera.svelte"
 	import type { default as OrthoCamSvelthreeComponent } from "./OrthographicCamera.svelte"
 	import type { default as CanvasSvelthreeComponent } from "../components/Canvas.svelte"
-	import type { OnlyWritableNonFunctionProps, PropBlackList } from "../types-extra"
 
 	/**
 	 *  SVELTEKIT  SSR

@@ -12,7 +12,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"

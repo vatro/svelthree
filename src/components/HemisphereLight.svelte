@@ -11,7 +11,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
@@ -31,7 +31,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Color, Vector3, Object3D } from "three"
 	import type { RemoveFirst } from "../types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
-	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR
