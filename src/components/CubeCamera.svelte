@@ -9,34 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _CubeCamera_ Component.
 Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236).     
 [ tbd ]  Link to Docs. -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: CubeCameraProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type CubeCameraProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<CubeCamera, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
-	export type WebGLCubeRenderTargetProps = OnlyWritableNonFunctionProps<Omit<WebGLCubeRenderTarget, PropBlackList>>
-	export type WebGLCubeRenderTargetOpt = { [P in keyof WebGLRenderTargetOptions]: WebGLRenderTargetOptions[P] }
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -47,7 +19,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion } from "three"
 
@@ -58,6 +29,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { CubeCamera, WebGLCubeRenderTarget } from "three"
+	import type { CubeCameraProps, WebGLCubeRenderTargetProps } from "../types-comp-props"
 	// custom CubeCameraHelper
 	import { CubeCameraHelper } from "../utils"
 	import { get_root_scene } from "../utils/SceneUtils"

@@ -9,31 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _PerspectiveCamera_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: PerspectiveCameraProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type PerspectiveCameraProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<PerspectiveCamera, PropBlackList>,
-		{
-			lookAt?: Vector3 | Parameters<Vector3["set"]> | Object3D
-			position?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -44,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -55,6 +29,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { PerspectiveCamera, CameraHelper } from "three"
+	import type { PerspectiveCameraProps } from "../types-comp-props"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { CAM_PROPS_PMU } from "../constants/Cameras"
 	import type { Writable } from "svelte/store"

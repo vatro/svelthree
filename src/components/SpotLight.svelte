@@ -9,26 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _SpotLight_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	export type SpotLightProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<SpotLight, PropBlackList>,
-		{
-			// CUSTOM  actually no `lookAt` on SpotlLight, we're using custom solution!
-			lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-
-			position?: Vector3 | Parameters<Vector3["set"]>
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//rotation?: never
-
-			// EXCLUDED  THREE :Lights with `target` property use the target for rotation calulation!
-			//quaternion?: never
-
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -39,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 
@@ -58,6 +37,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { Object3D } from "three"
 
 	import { SpotLight, SpotLightHelper } from "three"
+	import type { SpotLightProps } from "../types-comp-props"
 	import type { SpotLightShadow } from "three"
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types-extra"

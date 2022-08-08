@@ -9,33 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _LoadedGLTF_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: Object3DProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type Object3DProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Object3D, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
-	export type GLTFContainerInteractionHandler = (e?: CustomEvent) => void
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -46,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 
@@ -76,6 +48,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { AnimationClip, Group, Camera, Mesh, Light } from "three"
+	import type { LoadedGLTFProps } from "../types-comp-props"
 	import { Object3D, LoadingManager } from "three"
 	import type { RemoveFirst } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"

@@ -9,35 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _Scene_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: SceneProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type SceneProps = OnlyWritableNonFunctionPropsOverwritten<
-		Omit<Scene, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-
-			background?: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3
-		}
-	>
-
-	export type SceneInteractionHandler = (e?: CustomEvent) => void
-</script>
-
 <script lang="ts">
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -73,7 +44,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { Scene } from "three"
 	import type { FogBase, Color, Mapping, Texture } from "three"
 	import { EquirectangularReflectionMapping, TextureLoader } from "three"
-	import type { RemoveFirst, OnlyWritableNonFunctionPropsOverwritten, PropBlackList } from "../types-extra"
+	import type { RemoveFirst } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"
 
 	/**

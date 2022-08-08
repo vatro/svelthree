@@ -19,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -48,8 +47,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { BufferGeometry } from "three"
 
 	import { Mesh } from "three"
-	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
 	import type { MeshProps } from "../types-comp-props"
+	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst, PropBlackList } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"
 	import type { Material, Color } from "three"
 

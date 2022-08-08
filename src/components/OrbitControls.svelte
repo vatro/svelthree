@@ -9,10 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _OrbitControls_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	export type OrbitControlsProps = OnlyWritableNonFunctionProps<Omit<OrbitControls, PropBlackList>>
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -28,6 +24,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Writable } from "svelte/store"
 
 	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+	import type { OrbitControlsProps } from "../types-comp-props"
 	import { CameraHelper } from "three"
 	import type { Vector3, PerspectiveCamera, OrthographicCamera } from "three"
 	import type { default as PerspCamSvelthreeComponent } from "./PerspectiveCamera.svelte"

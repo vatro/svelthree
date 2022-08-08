@@ -8,15 +8,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 @component
 **svelthree** _HemisphereLight_ Component.
 [ tbd ]  Link to Docs. -->
-<script context="module" lang="ts">
-	export type HemisphereLightProps = {
-		color?: Color | string | number | [r: number, g: number, b: number] | Vector3
-		groundColor?: Color | string | number | [r: number, g: number, b: number] | Vector3
-		intensity?: number
-		position?: Vector3 | Parameters<Vector3["set"]>
-	}
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -34,6 +25,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { HemisphereLight, HemisphereLightHelper } from "three"
+	import type { HemisphereLightProps } from "../types-comp-props"
 	import type { Color, Vector3, Object3D } from "three"
 	import type { RemoveFirst } from "../types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"

@@ -14,31 +14,6 @@ If you use this approach you'll see a warning in the console if you define left,
 - Use `params` attribute to initialize the camera and `props` attribute to set it's properties. 
 - Use `props` attribute only: Camera will be initialized with default constructor values and `props` attribute will set it's properties. 
 [ tbd ]  Link to Docs. -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: OrthographicCameraProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type OrthographicCameraProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<OrthographicCamera, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -49,7 +24,6 @@ If you use this approach you'll see a warning in the console if you define left,
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -60,6 +34,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { OrthographicCamera, CameraHelper } from "three"
+	import type { OrthographicCameraProps } from "../types-comp-props"
 	import { CameraUtils } from "../utils"
 	import { CameraValues } from "../constants"
 	import { get_root_scene } from "../utils/SceneUtils"

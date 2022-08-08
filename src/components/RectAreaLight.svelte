@@ -9,31 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _RectAreaLight_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: RectAreaLightProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type RectAreaLightProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<RectAreaLight, PropBlackList>,
-		{
-			lookAt?: Vector3 | Parameters<Vector3["set"]> | Object3D
-			position?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -44,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -55,6 +29,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { RectAreaLight } from "three"
+	import type { RectAreaLightProps } from "../types-comp-props"
 	import type { Color } from "three"
 	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
 	import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js"

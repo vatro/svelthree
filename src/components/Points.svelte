@@ -9,33 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _Points_ Component.
 [ tbd ]  Link to Docs.
 -->
-<script context="module" lang="ts">
-	/** For typed objects being set as `props` 'shorthand' attribute values, e.g.:
-	 * ```
-	 * const my_init_props: PointsProps = {...}
-	 * component_ref.props = my_init_props
-	 * ```
-	 * */
-	export type PointsProps = OnlyWritableNonFunctionPropsPlus<
-		Omit<Points, PropBlackList>,
-		{
-			position?: Vector3 | Parameters<Vector3["set"]>
-			scale?: Vector3 | Parameters<Vector3["set"]>
-			rotation?:
-				| Euler
-				| Parameters<Euler["set"]>
-				| Quaternion
-				| Parameters<Quaternion["set"]>
-				| Vector3
-				| Parameters<Vector3["set"]>
-			quaternion?: Quaternion | Parameters<Quaternion["set"]>
-			matrix?: Matrix4 | Parameters<Matrix4["set"]>
-		}
-	>
-
-	export type PointsInteractionHandler = (e?: CustomEvent) => void
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -46,7 +19,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
 
-	import type { OnlyWritableNonFunctionPropsPlus, PropBlackList } from "../types-extra"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -75,6 +47,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { BufferGeometry } from "three"
 
 	import { Points } from "three"
+	import type { PointsProps } from "../types-comp-props"
 	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"
 	import type { Material, PointsMaterial, Color } from "three"

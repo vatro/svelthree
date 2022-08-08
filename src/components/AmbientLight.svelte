@@ -9,13 +9,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 **svelthree** _AmbientLight_ Component.
 AmbientLight cannot be used to cast shadows as it doesn't have a direction. Position is also irrelevant. See https://threejs.org/docs/#api/en/lights/AmbientLight.
 [ tbd ]  Link to Docs. -->
-<script context="module" lang="ts">
-	export type AmbientLightProps = {
-		color?: Color | string | number | [r: number, g: number, b: number] | Vector3
-		intensity?: number
-	}
-</script>
-
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -33,6 +26,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { AmbientLight } from "three"
+	import type { AmbientLightProps } from "../types-comp-props"
 	import type { Color, Vector3, Object3D } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import type { Writable } from "svelte/store"
