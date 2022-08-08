@@ -49,7 +49,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import type { Writable } from "svelte/store"
 
 	/**
-	 *  SVELTEKIT  SSR
+	 *  SVELTEKIT  SSR /
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
 	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
 	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.

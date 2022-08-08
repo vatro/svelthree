@@ -35,7 +35,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { default as CanvasSvelthreeComponent } from "../components/Canvas.svelte"
 
 	/**
-	 *  SVELTEKIT  SSR
+	 *  SVELTEKIT  SSR /
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
 	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
 	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
