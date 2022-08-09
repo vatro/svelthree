@@ -806,9 +806,9 @@ This is a **svelthree** _Canvas_ Component.
 			c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 			c.removeEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_capture)
 
-			c.removeEventListener("click", update_pointer_state, pointer_capture)
-			c.removeEventListener("pointerdown", on_pointer_enter, pointer_capture)
-			c.removeEventListener("pointerup", on_pointer_leave, pointer_capture)
+			c.removeEventListener("click", on_pointer_event_handler, pointer_capture)
+			c.removeEventListener("pointerdown", on_pointer_event_handler, pointer_capture)
+			c.removeEventListener("pointerup", on_pointer_event_handler, pointer_capture)
 
 			keyboard_listeners_host.removeEventListener("keydown", on_keyboard_event_handler, keyboard_capture)
 			keyboard_listeners_host.removeEventListener("keyup", on_keyboard_event_handler, keyboard_capture)
