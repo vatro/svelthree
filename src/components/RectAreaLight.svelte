@@ -373,6 +373,24 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setMatrixFromValue(light, matrix)
 	}
 
+	/**
+	 * [See threejs-docs.](https://threejs.org/docs/#api/en/lights/RectAreaLight.height) */
+	export let height: number = undefined
+	$: if (light && height !== undefined) set_height()
+	function set_height(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "height", height))
+		light.height = height
+	}
+
+	/**
+	 * [See threejs-docs.](https://threejs.org/docs/#api/en/lights/RectAreaLight.width) */
+	export let width: number = undefined
+	$: if (light && width !== undefined) set_width()
+	function set_width(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "width", width))
+		light.width = width
+	}
+
 	export let color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 = undefined
 	$: if (color) set_color()
 	function set_color(): void {
