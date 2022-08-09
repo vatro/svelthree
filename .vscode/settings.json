@@ -22,6 +22,7 @@
 	"svelte.plugin.svelte.compilerWarnings": {
 		//"unused-export-let": "ignore"
 	},
+	"editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?",
 	"todohighlight.keywords": [
 		{
 			"text": " TODO ",
@@ -65,6 +66,14 @@
 		},
 		{
 			"text": " BAD ",
+			"border": "2px solid #ff0000",
+			"fontWeight": "bold",
+			"color": "#ff0000",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey"
+		},
+		{
+			"text": " CAUTION ",
 			"border": "2px solid #ff0000",
 			"fontWeight": "bold",
 			"color": "#ff0000",
@@ -460,6 +469,78 @@
 			"color": "#a3e635",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-		}
+		},
+		{
+			"text": " CREATION ",
+			"border": "2px solid fuchsia",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " INJECTION ",
+			"border": "2px solid white",
+			"fontWeight": "normal",
+			"color": "fuchsia",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " INITIALIZATION ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#000000",
+			"backgroundColor": "#ffff00",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " ON ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#ffff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " ONCE ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#000000",
+			"backgroundColor": "#ffff00",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " AFTER ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#ffff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " GEOMETRY ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#ffff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
+		{
+			"text": " MATERIAL ",
+			"border": "2px solid #ffff00",
+			"fontWeight": "bold",
+			"color": "#ffff00",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px",
+		},
 	]
 }
