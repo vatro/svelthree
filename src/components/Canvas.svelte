@@ -683,7 +683,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/**
-	 * Decreased the usage counter of a `click` **related** ( **!** ) event listener.
+	 * Decreases the usage counter of a `click` **related** ( **!** ) event listener.
 	 * Called internally by `SvelthreeInteraction.unregister_pointer_event(...)`.
 	 */
 	export function unregister_canvas_listener(event_name: SvelthreeSupportedPointerEvent) {
