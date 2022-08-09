@@ -1,6 +1,6 @@
 {
 	"name": "svelthree",
-	"version": "1.0.0-next.0.84",
+	"version": "1.0.0-next.0.85",
 	"description": "Svelte powered three.js development",
 	"module": "index.js",
 	"main": "index",
@@ -62,7 +62,7 @@
 		"vite": "^3.0.0"
 	},
 	"peerDependencies": {
-		"svelte": "3.44.2 - 3.48.0",
+		"svelte": "3.44.2 - 3.49.0",
 		"svelte-accmod-patch": "^1.0.0",
 		"three": "0.125.x - 0.141.x"
 	},
