@@ -49,7 +49,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { Points } from "three"
 	import type { PointsProps } from "../types-comp-props"
-	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst } from "../types-extra"
+	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst, PropBlackList } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"
 	import type { Material, PointsMaterial, Color } from "three"
 
