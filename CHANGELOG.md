@@ -1,5 +1,26 @@
 # svelthree changelog
 
+## 1.0.0-next.0.85
+
+Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github.com/vatro/svelthree/issues/70) **sprint** toward `1.0.0-next.1`
+
+- **Major refactor** of instance creation / recreation / premade instance injection. ([#116](https://github.com/vatro/svelthree/issues/116))
+
+- **Project structure change**: added new modules in order to move more logic out of components (in future) and moved some components' logic into those modules. ([#113](https://github.com/vatro/svelthree/issues/113) / [#116](https://github.com/vatro/svelthree/issues/116))
+
+- **Improved type checking inside `PropUtils.ts`**: using `Array.isArray()`, using three's `.is*` properties, refactored some parts / added new functions in order to avoid redundant checks. ([#115](https://github.com/vatro/svelthree/issues/115))
+
+- All `*Prop` types have been refactored (_simplified_) and moved to `types-comp-props.d.ts` (_not exported by components anymore_) ([#119](https://github.com/vatro/svelthree/issues/119))
+
+- `LoadedGLTF`: added missing `props` / `sProps` logic. ([#120](https://github.com/vatro/svelthree/issues/120))
+
+- `RectAreaLight`: added `width` and `height` shorthand props. ([#122](https://github.com/vatro/svelthree/issues/122))
+
+- Some performance and SvelteKit-SSR related optimizations / fixes.
+
+- Various minor fixes, code optimizations and refactors.
+
+
 ## 1.0.0-next.0.76
 
 Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github.com/vatro/svelthree/issues/70) **sprint**.

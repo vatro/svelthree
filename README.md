@@ -23,7 +23,7 @@
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.76.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.85.tgz",
       ...
   }
   ```
@@ -51,7 +51,7 @@
 
 ### Install
 
-​	In your **Svelte** 3.44.2 - 3.48.0 project (also **SvelteKit**):
+​	In your **Svelte** 3.44.2 - 3.49.0 project (also **SvelteKit**):
 
 - install **three.js** along with **three.js types** (*if available*):
 
