@@ -18,7 +18,8 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Object3D, Quaternion } from "three"
 
@@ -146,10 +147,15 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	export let renderTarget: WebGLCubeRenderTarget = undefined
 
 	let camera_uuid: string = undefined
+
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
 	let index_in_cubecameras: number = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_camera: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (camera) {
 		create = false
@@ -158,12 +164,11 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (camera.type === "CubeCamera") {
-			camera.userData.initScale = camera.scale.x
-			camera.userData.svelthreeComponent = self
-
 			// with `CubeCameras` we push the component reference to svelthreeStores,
 			// beacuse we need to access it's `update()` function from the `WebGLRenderer` component.
 
@@ -172,37 +177,27 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 			index_in_cubecameras = camera.userData.index_in_cubecameras
 		} else {
 			throw new Error(
-				`SVELTHREE > CubeCamera Error: provided 'camera' instance has wrong type '${camera.type}', should be 'CubeCamera'!`
+				`SVELTHREE > ${c_name} provided 'camera' instance has wrong type '${camera.type}', should be '${c_name}'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'camera' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'CubeCamera'!
 
 	/** Initializes `renderTarget` with provided constructor parameters.*/
 	export let renderTargetParams: ConstructorParameters<typeof WebGLCubeRenderTarget> = undefined
@@ -236,10 +231,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 			)
 		}
 
-		camera_uuid = camera.uuid
-
-		camera.userData.initScale = camera.scale.x
-		camera.userData.svelthreeComponent = self
+		set_initial_userdata(camera, self)
 
 		// with `CubeCameras` we push the component reference to svelthreeStores,
 		// beacuse we need to access it's `update()` function from the `WebGLRenderer` component.
@@ -250,56 +242,55 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${camera.type} created!`, { camera }))
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'CubeCamera'!
+
+	// ---  AFTER  INITIALIZATION  --- //
+
+	// set camera_uuid the first time
+	$: if (camera && camera_uuid === undefined) set_uuid()
+
+	function set_uuid(): void {
+		camera_uuid = camera.uuid
+	}
+
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'CubeCamera'!
 
 	// Determining 'parent' if 'camera' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (camera && create && scene && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 	}
 
-	$: if (camera && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (camera && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, null, null, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		shadow_dom_el = document.createElement("div")
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -325,73 +316,42 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (camera && ((camera_uuid && camera_uuid !== camera.uuid) || (root_scene && camera.parent !== root_scene)))
-		add_instance_to()
+	// this reactive statement willl be triggered on any 'camera' instance change (also e.g. `camera.foo = value`)
+	$: if (camera) if$_instance_change(camera, root_scene, camera_uuid, create, "camera", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'camera' was already created or set via 'camera' attribute before
-		if (camera_uuid && camera.uuid !== camera_uuid) {
-			// remove old instance and update references where needed
-
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", camera_uuid)
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
+			const uuid_to_remove: string = camera_uuid || camera.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
 			// update 'index_in_x'
 			index_in_cubecameras = old_instance.userData.index_in_cubecameras
-
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove()
-				old_instance.userData.helper = null
-			}
-
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
 			camera.userData.index_in_cubecameras = index_in_cubecameras
 
-			$svelthreeStores[sti].cubeCameras[index_in_cubecameras] = self
+			remove_instance(old_instance, "camera", camera, self)
 
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after camera reassignment.
-			sProps = new SvelthreeProps(camera)
+			if (props) sProps = new SvelthreeProps(camera)
+
+			// update store
+			$svelthreeStores[sti].cubeCameras[index_in_cubecameras] = self
 		}
+
+		set_initial_userdata(camera, self)
 
 		// `CubeCamera`'s instance `camera` is always added to the `root_scene` no matter which component the `CubeCamera` component was added to.
 		// the `our_parent` is needed for positioning only.
-		if (root_scene) {
-			if (root_scene !== our_parent) {
-				root_scene.add(camera)
-				camera_uuid = camera.uuid
+		root_scene.add(camera)
+		camera_uuid = camera.uuid
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${camera.type} was added to ${our_parent.type}!`, {
-							camera,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				camera_uuid = camera.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'camera' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'camera' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ camera, uuid: camera.uuid, parent: our_parent }
-				)
-			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'camera' to!", { camera, our_parent, scene })
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${camera.type} was added to ${root_scene.type}!`, {
+					camera,
+					root_scene,
+					total: root_scene.children.length
+				})
+			)
 		}
 	}
 
@@ -488,8 +448,6 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	export let mau: boolean = undefined
 	$: if (camera) camera.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (camera && mau !== undefined) camera.matrixAutoUpdate = mau
-
-	export let name: string = undefined
 
 	$: if (camera && name) camera.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
@@ -652,10 +610,14 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
 		// SVELTEKIT  SSR
-		if (browser && camera.parent) camera.parent.remove(camera)
+		if (browser) {
+			const removed: boolean = await remove_instance(camera, "camera")
+			return removed
+		}
+		return false
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -678,6 +640,22 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		camera = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `camera_uuid` if a cleared component recevies a camera
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		camera_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -795,7 +773,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!camera.matrixAutoUpdate) camera.updateMatrix()
+					if (camera && !camera.matrixAutoUpdate) camera.updateMatrix()
 
 					if (verbose && !camera.matrixAutoUpdate && log_mau) {
 						console.debug(

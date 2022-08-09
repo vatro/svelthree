@@ -18,6 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
@@ -91,8 +93,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let light: DirectionalLight = undefined
 	let light_uuid: string = undefined
 
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
+
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_light: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (light) {
 		create = false
@@ -101,44 +108,34 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (light.type === "DirectionalLight") {
-			light.userData.initScale = light.scale.x
-			light.userData.svelthreeComponent = self
 		} else {
 			throw new Error(
-				`SVELTHREE > DirectionalLight Error: provided 'light' instance has wrong type '${light.type}', should be 'DirectionalLight'!`
+				`SVELTHREE > ${c_name} provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'light' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", light)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'DirectionalLight'!
 
 	/** Initializes `DirectionalLight` with provided constructor parameters.*/
 	export let params: ConstructorParameters<typeof DirectionalLight> = undefined
@@ -150,63 +147,59 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			light = new DirectionalLight()
 		}
 
-		light_uuid = light.uuid
-
-		light.userData.initScale = light.scale.x
-		light.userData.svelthreeComponent = self
+		set_initial_userdata(light, self)
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${light.type} created!`, { light }))
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'DirectionalLight'!
+
+	// ---  AFTER  INITIALIZATION  --- //
+
+	// set light_uuid the first time
+	$: if (light && light_uuid === undefined) set_uuid()
+
+	function set_uuid(): void {
+		light_uuid = light.uuid
+	}
+
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'DirectionalLight'!
 
 	// Determining 'parent' if 'light' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (light && create && scene && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", light)
 	}
 
-	$: if (light && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (light && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, null, null, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		shadow_dom_el = document.createElement("div")
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -232,64 +225,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (light && ((light_uuid && light_uuid !== light.uuid) || light.parent !== our_parent)) add_instance_to()
+	// this reactive statement willl be triggered on any 'light' instance change (also e.g. `light.foo = value`)
+	$: if (light) if$_instance_change(light, our_parent, light_uuid, create, "light", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'light' was already created or set via 'light' attribute before
-		if (light_uuid && light.uuid !== light_uuid) {
-			// remove old instance and update references where needed
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		if ((light_uuid && light.uuid !== light_uuid) || !light_uuid) {
+			const uuid_to_remove: string = light_uuid || light.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", light_uuid)
+			remove_instance(old_instance, "light", light, self)
 
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.helper = null
-			}
-
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after light reassignment.
-			sProps = new SvelthreeProps(light)
+			if (props) sProps = new SvelthreeProps(light)
 		}
 
-		// add `light` to `our_parent`
-		if (our_parent) {
-			if (light.parent !== our_parent) {
-				our_parent.add(light)
-				light_uuid = light.uuid
+		set_initial_userdata(light, self)
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${light.type} was added to ${our_parent.type}!`, {
-							light,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				light_uuid = light.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'light' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'light' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ light, uuid: light.uuid, parent: our_parent }
-				)
-			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'light' to!", { light, our_parent, scene })
+		our_parent.add(light)
+		light_uuid = light.uuid
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${light.type} was added to ${our_parent.type}!`, {
+					light,
+					scene,
+					total: scene.children.length
+				})
+			)
 		}
 	}
 
@@ -356,8 +318,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (light) light.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (light && mau !== undefined) light.matrixAutoUpdate = mau
 
-	export let name: string = undefined
-
 	$: if (light && name) light.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
 
@@ -407,7 +367,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	export let color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 = undefined
-	$: if (color) set_color()
+	$: if (light && color) set_color()
 	function set_color(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "color", color))
 		PropUtils.setColorFromValueKey(light, color, "color")
@@ -492,9 +452,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export const get_helper = (): DirectionalLightHelper => light.userData.helper as DirectionalLightHelper
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (light.parent) light.parent.remove(light)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(light, "light")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -517,6 +478,22 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		light = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `light_uuid` if a cleared component recevies a light
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		light_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -635,7 +612,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!light.matrixAutoUpdate) light.updateMatrix()
+					if (light && !light.matrixAutoUpdate) light.updateMatrix()
 
 					if (verbose && !light.matrixAutoUpdate && log_mau) {
 						console.debug(

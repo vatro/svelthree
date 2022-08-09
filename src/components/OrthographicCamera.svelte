@@ -23,7 +23,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -99,11 +100,16 @@ If you use this approach you'll see a warning in the console if you define left,
 	/** Returns the `camera` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrthographicCamera` instances. */
 	export let camera: OrthographicCamera = undefined
 	let camera_uuid: string = undefined
+
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
 	let camera_is_active: boolean = undefined
 	let index_in_cameras: number = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_camera: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (camera) {
 		create = false
@@ -112,12 +118,11 @@ If you use this approach you'll see a warning in the console if you define left,
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (camera.type === "OrthographicCamera") {
-			camera.userData.initScale = camera.scale.x
-			camera.userData.svelthreeComponent = self
-
 			camera.userData.id = id
 
 			camera_is_active = false
@@ -132,37 +137,27 @@ If you use this approach you'll see a warning in the console if you define left,
 			index_in_cameras = camera.userData.index_in_cameras
 		} else {
 			throw new Error(
-				`SVELTHREE > OrthographicCamera Error: provided 'camera' instance has wrong type '${camera.type}', should be 'OrthographicCamera'!`
+				`SVELTHREE > ${c_name} provided 'camera' instance has wrong type '${camera.type}', should be '${c_name}'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'camera' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'OrthographicCamera'!
 
 	/** Alternative to setting `frustumSize = { 1 }`. Setting `aspect:boolean` (e.g. `aspect = { true }` or just adding `aspect`) will internally set `frustumSize = 1 ` resulting in **reactive aspect updates** on canvas dimensions change. */
 	export let aspect: boolean = undefined
@@ -202,10 +197,7 @@ If you use this approach you'll see a warning in the console if you define left,
 			camera = new OrthographicCamera(...defaultParams)
 		}
 
-		camera_uuid = camera.uuid
-
-		camera.userData.initScale = camera.scale.x
-		camera.userData.svelthreeComponent = self
+		set_initial_userdata(camera, self)
 
 		camera.userData.id = id
 
@@ -222,56 +214,55 @@ If you use this approach you'll see a warning in the console if you define left,
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${camera.type} created!`, { camera }))
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'OrthographicCamera'!
+
+	// ---  AFTER  INITIALIZATION  --- //
+
+	// set camera_uuid the first time
+	$: if (camera && camera_uuid === undefined) set_uuid()
+
+	function set_uuid(): void {
+		camera_uuid = camera.uuid
+	}
+
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'OrthographicCamera'!
 
 	// Determining 'parent' if 'camera' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (camera && create && scene && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 	}
 
-	$: if (camera && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (camera && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, null, null, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		shadow_dom_el = document.createElement("div")
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -297,81 +288,33 @@ If you use this approach you'll see a warning in the console if you define left,
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (camera && ((camera_uuid && camera_uuid !== camera.uuid) || camera.parent !== our_parent)) add_instance_to()
+	// this reactive statement willl be triggered on any 'camera' instance change (also e.g. `camera.foo = value`)
+	$: if (camera) if$_instance_change(camera, our_parent, camera_uuid, create, "camera", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'camera' was already created or set via 'camera' attribute before
-		if (camera_uuid && camera.uuid !== camera_uuid) {
-			// remove old instance and update references where needed
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
+			const uuid_to_remove: string = camera_uuid || camera.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", camera_uuid)
+			remove_instance(old_instance, "camera", camera, self)
 
-			// update 'index_in_x'
-			index_in_cameras = old_instance.userData.index_in_cameras
-
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.helper = null
-			}
-
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
-			camera.userData.id = id
-			camera.userData.index_in_cameras = index_in_cameras
-
-			$svelthreeStores[sti].cameras[index_in_cameras].camera = camera
-
-			camera.userData.isActive = $svelthreeStores[sti].cameras[index_in_cameras].isActive
-
-			if (camera.userData.isActive) {
-				$svelthreeStores[sti].activeCamera = camera
-
-				// tells renderer to update the 'current_cam' instance (on-the-fly), see 'WebGLRenderer.renderStandard()'.
-				old_instance.userData.renderer_currentcam_needsupdate = true
-			}
-
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after camera reassignment.
-			sProps = new SvelthreeProps(camera)
+			if (props) sProps = new SvelthreeProps(camera)
 		}
 
-		// add `camera` to `our_parent`
-		if (our_parent) {
-			if (camera.parent !== our_parent) {
-				our_parent.add(camera)
-				camera_uuid = camera.uuid
+		set_initial_userdata(camera, self)
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${camera.type} was added to ${our_parent.type}!`, {
-							camera,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				camera_uuid = camera.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'camera' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'camera' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ camera, uuid: camera.uuid, parent: our_parent }
-				)
-			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'camera' to!", { camera, our_parent, scene })
+		our_parent.add(camera)
+		camera_uuid = camera.uuid
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${camera.type} was added to ${our_parent.type}!`, {
+					camera,
+					scene,
+					total: scene.children.length
+				})
+			)
 		}
 	}
 
@@ -379,8 +322,6 @@ If you use this approach you'll see a warning in the console if you define left,
 	export let mau: boolean = undefined
 	$: if (camera) camera.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (camera && mau !== undefined) camera.matrixAutoUpdate = mau
-
-	export let name: string = undefined
 
 	$: if (camera && name) camera.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
@@ -576,9 +517,10 @@ If you use this approach you'll see a warning in the console if you define left,
 		camera.userData.root_scene = root_scene
 	}
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (camera.parent) camera.parent.remove(camera)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(camera, "camera")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -601,6 +543,22 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		camera = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `camera_uuid` if a cleared component recevies a camera
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		camera_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -719,7 +677,7 @@ If you use this approach you'll see a warning in the console if you define left,
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!camera.matrixAutoUpdate) camera.updateMatrix()
+					if (camera && !camera.matrixAutoUpdate) camera.updateMatrix()
 
 					if (update_projection_matrix.status === true) {
 						update_projection_matrix.status = false

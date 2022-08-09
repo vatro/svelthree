@@ -18,7 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -107,6 +108,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let points: Points = undefined
 	let points_uuid: string = undefined
 
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
+
 	// Generic Material type and props
 	// COOL!  This is possible now! see https://github.com/sveltejs/language-tools/issues/442#issuecomment-977803507
 	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
@@ -116,11 +120,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		Omit<AnyMaterial, PropBlackList>,
 		{ color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 }
 	>
+
+	let extracted_material: AnyMaterial = undefined
 	export let material: AnyMaterial = undefined
+	let material_ref: AnyMaterial = undefined
+
+	let extracted_geometry: BufferGeometry = undefined
 	export let geometry: BufferGeometry = undefined
+	let geometry_ref: BufferGeometry = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_points: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (points) {
 		create = false
@@ -129,91 +141,36 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (points.type === "Points") {
-			points.userData.initScale = points.scale.x
-			points.userData.svelthreeComponent = self
 		} else {
 			throw new Error(
-				`SVELTHREE > Points Error: provided 'points' instance has wrong type '${points.type}', should be 'Points'!`
+				`SVELTHREE > ${c_name} provided 'points' instance has wrong type '${points.type}', should be '${c_name}'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'points' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", points)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
 
-	// component was initialized via 'points' prop
-	$: if (geometry && !create && geometry !== points.geometry) update_geometry_if_initialized_by_pointsprop()
-
-	function update_geometry_if_initialized_by_pointsprop(): void {
-		// points didn't change only geometry -> apply geometry to points
-		if (points_uuid === points.uuid) {
-			points.geometry = geometry as BufferGeometry
-		}
-
-		// points changed -> update gemetry reference
-		if (points_uuid !== points.uuid) {
-			geometry = points.geometry as BufferGeometry
-		}
-
-		// update BoxHelper if any
-		if (points.userData.box) points.userData.box.update()
-	}
-
-	// component was initialized via 'points' prop
-	$: if (material && !create && material !== points.material) update_material_if_initialized_by_pointsprop()
-
-	function update_material_if_initialized_by_pointsprop(): void {
-		// points didn't change, material did -> apply material to points
-		if (points_uuid === points.uuid) {
-			points.material = material as Material
-		}
-
-		// points changed -> update material reference
-		if (points_uuid !== points.uuid) {
-			material = points.material as AnyMaterial
-		}
-
-		refresh_material()
-	}
-
-	/** Recreates `sMat` with the current `material` reference and applies the `mat` prop object to it.
-	 * Called if:
-	 * - a new Mesh (clone or reference) was provided via `points` prop attribute after the `material` reference has been updated
-	 * - a new Material (clone or reference) was provided via `material` prop attribute.
-	 */
-	function refresh_material(): void {
-		// recreate 'sMat' in case sMat was created with / is bound to 'points.material'
-		sMat = new SvelthreeProps(material)
-		if (sMat && mat) sMat.update(mat)
-	}
-
-	// creation using provided geometry & material or constructor 'params' shorthand
+	//  CREATION  ONCE  AFTER  INITIALIZATION //
 
 	/** Initializes `Points` with provided constructor parameters.*/
 	export let params: ConstructorParameters<typeof Points> = undefined
@@ -227,11 +184,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			// letting threejs throw errors if anything's wrong with 'geometry' or 'material'
 			points = new Points(geometry, material)
-
-			points_uuid = points.uuid
-
-			points.userData.initScale = points.scale.x
-			points.userData.svelthreeComponent = self
 
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { points }))
 			if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (created):", geometry))
@@ -258,60 +210,97 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					// will create a blank 'BufferGeometry' and a blank PointsMaterial
 					points = new Points()
 				}
+			} else if (geometry === null || material === null) {
+				// was cleared -> nothing, don't create a new one
+				//console.warn(`SVELTHREE > component was cleared before, won't create a new / blank Mesh!`)
 			} else {
 				// no 'geometry', no 'material' and no 'params'
 				// will create a blank 'BufferGeometry' or a blank PointsMaterial or both.
 				points = new Points(geometry, material)
 			}
 
-			points_uuid = points.uuid
-
-			points.userData.initScale = points.scale.x
-			points.userData.svelthreeComponent = self
-
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { points }))
 		}
 	}
 
-	// component was initialized via `geometry` / `material` props.
-	$: if (geometry && create) update_geometry_if_initialized_by_geometryprop()
+	// ---  AFTER  INITIALIZATION  --- //
 
-	function update_geometry_if_initialized_by_geometryprop(): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
-		// we don't want `points` to be a part of the reactive statement conditional,
-		// otherwise it would react to `points` prop changes.
-		if (points) {
-			points.geometry = geometry as BufferGeometry
+	// set points_uuid the first time
+	$: if (points && points_uuid === undefined) set_uuid()
 
-			// update BoxHelper if any
-			if (points.userData.box) points.userData.box.update()
+	function set_uuid(): void {
+		points_uuid = points.uuid
+	}
 
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
+	let changed = []
+
+	$: if (points || material || geometry) reset_changed_status()
+
+	function reset_changed_status() {
+		changed.length = 0
+	}
+
+	$: if (points) extract()
+
+	function extract() {
+		extracted_geometry = points.geometry as BufferGeometry
+		extracted_material = points.material as AnyMaterial
+	}
+
+	$: if (geometry) on_geometry()
+
+	function on_geometry() {
+		changed.push("geometry")
+	}
+
+	$: if (material) on_material()
+
+	function on_material() {
+		changed.push("material")
+	}
+
+	$: if (points || material || geometry) handle_prop_changes()
+
+	function handle_prop_changes() {
+		const geometry_changed = changed.includes("geometry")
+		const material_changed = changed.includes("material")
+
+		if (geometry_changed) {
+			// apply material
+			if (points && points.geometry !== geometry) {
+				points.geometry = geometry
+				geometry_ref = geometry
+				if (points.userData.box) points.userData.box.update()
+			}
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > update_geometry_if_initialized_by_geometryprop > geometry update failed, 'points' not available!`,
-				points
-			)
+			// extracted_geometry doesn't need to be applied
+			if (geometry_ref !== extracted_geometry) {
+				geometry_ref = extracted_geometry
+				if (points.userData.box) points.userData.box.update()
+			}
+		}
+
+		if (material_changed) {
+			// apply material
+			if (points && points.material !== material) {
+				points.material = material
+				material_ref = material
+				refresh_material()
+			}
+		} else {
+			// extracted_material doesn't need to be applied
+			if (material_ref !== extracted_material) {
+				material_ref = extracted_material
+				refresh_material()
+			}
 		}
 	}
 
-	// component was initialized via `geometry` / `material` props.
-	$: if (material && create) update_material_if_initialized_by_materialprop()
-
-	function update_material_if_initialized_by_materialprop(): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
-		// we don't want `points` to be a part of the reactive statement conditional,
-		// otherwise it would react to `points` prop changes.
-		if (points) {
-			points.material = material
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
-			refresh_material()
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > update_material_if_initialized_by_materialprop > material update failed, 'points' not available!`,
-				points
-			)
-		}
+	/** Recreates `sMat` with the current `material_ref` reference and applies the `mat` prop object to it. */
+	function refresh_material(): void {
+		sMat = new SvelthreeProps(material_ref)
+		if (sMat && mat) sMat.update(mat)
+		// TODO  Check using `material_needs_update()` here.
 	}
 
 	// Determining 'parent' if 'points' instance has to be created first / was not provided on initialization ('create' is true).
@@ -319,63 +308,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", points)
 	}
 
-	$: if (points && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (points && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, button, link, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		if (button) {
-			shadow_dom_el = document.createElement("button")
-
-			for (const key in button) {
-				shadow_dom_el[key] = button[key]
-			}
-		} else if (link) {
-			shadow_dom_el = document.createElement("a")
-
-			for (const key in link) {
-				shadow_dom_el[key] = link[key]
-			}
-		} else {
-			shadow_dom_el = document.createElement("div")
-		}
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -403,64 +367,51 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (points && ((points_uuid && points_uuid !== points.uuid) || points.parent !== our_parent)) add_instance_to()
+	// this reactive statement willl be triggered on any 'points' instance change (also e.g. `points.foo = value`)
+	$: if (points) if$_instance_change(points, our_parent, points_uuid, create, "points", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'points' was already created or set via 'points' attribute before
-		if (points_uuid && points.uuid !== points_uuid) {
-			// remove old instance and update references where needed
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		let old_raycast = false
+		let old_block = false
 
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", points_uuid)
+		if ((points_uuid && points.uuid !== points_uuid) || !points_uuid) {
+			const uuid_to_remove: string = points_uuid || points.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.helper = null
+			remove_instance(old_instance, "points", points, self)
+
+			// remove `old_instance` from raycast if needed
+			if (raycast.includes(old_instance)) {
+				old_raycast = true
+				old_block = old_instance.userData.block
+				raycast.splice(old_instance.userData.index_in_raycast, 1)
 			}
 
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after points reassignment.
-			sProps = new SvelthreeProps(points)
+			if (props) sProps = new SvelthreeProps(points)
 		}
 
-		// add `points` to `our_parent`
-		if (our_parent) {
-			if (points.parent !== our_parent) {
-				our_parent.add(points)
-				points_uuid = points.uuid
+		set_initial_userdata(points, self)
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${points.type} was added to ${our_parent.type}!`, {
-							points,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				points_uuid = points.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'points' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'points' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ points, uuid: points.uuid, parent: our_parent }
-				)
+		// add 'points' (provided instance) to raycast if needed
+		if (old_raycast) {
+			if (!raycast.includes(points)) {
+				points.userData.block = old_block // will this somehow be handeled automatically?
+				raycast.push(points)
 			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'points' to!", { points, our_parent, scene })
+		}
+
+		our_parent.add(points)
+		points_uuid = points.uuid
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${points.type} was added to ${our_parent.type}!`, {
+					points,
+					scene,
+					total: scene.children.length
+				})
+			)
 		}
 	}
 
@@ -468,8 +419,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let mau: boolean = undefined
 	$: if (points) points.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (points && mau !== undefined) points.matrixAutoUpdate = mau
-
-	export let name: string = undefined
 
 	$: if (points && name) points.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
@@ -598,7 +547,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && points && !points.userData.box) add_box_helper()
-	$: if (!box && points.userData.box) remove_box_helper()
+	$: if (!box && points?.userData.box) remove_box_helper()
 
 	function add_box_helper() {
 		if (boxParams) {
@@ -639,7 +588,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function update_box(): void {
-		points.userData.box.update()
+		// `points` may have been nullified by `clear()`
+		if (points) points.userData.box.update()
 	}
 
 	function remove_box_helper(): void {
@@ -648,7 +598,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			remove_update_box_on_render_event = null
 		}
 
-		if (points.userData.box?.parent) {
+		// `points` may have been nullified by `clear()`
+		if (points?.userData.box?.parent) {
 			points.userData.box.parent.remove(points.userData.box)
 			points.userData.box = null
 		}
@@ -666,6 +617,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export let block: boolean = false
 
+	const interaction_on_clear = {
+		interact: undefined,
+		block: undefined
+	}
+
+	$: if (points) restore_interaction_props()
+	async function restore_interaction_props(): Promise<void> {
+		//console.warn(`comp '${name}' restore_interaction_props!`, { points, points_uuid, interact: points.userData.interact })
+		if (typeof interaction_on_clear.interact === "boolean") {
+			await tick()
+
+			//console.warn(`comp '${name}' restoring 'interact' prop!`, interaction_on_clear.interact)
+			interact = interaction_on_clear.interact
+			interaction_on_clear.interact = null
+
+			if (interaction_on_clear.block !== undefined && interaction_on_clear.block !== null) {
+				//console.warn(`comp '${name}' restoring 'block' prop!`, interaction_on_clear.block)
+				block = interaction_on_clear.block
+				interaction_on_clear.block = null
+			}
+		}
+	}
+
 	let interactive: boolean = undefined
 	const canvas_interactivity: Writable<{ enabled: boolean }> = getContext("canvas_interactivity")
 
@@ -677,7 +651,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
-	// reactively enable raycasting to the created three.js instance
+	// Reactively ENABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
+	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
 	$: if (interactionEnabled && raycast && !block) {
 		if (!raycast.includes(points)) {
 			points.userData.block = false
@@ -687,7 +662,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively enable raycasting to the created three.js instance if it's an 'interaction occluder / blocker'
+	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
+	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
+	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && block) {
 		if (!raycast.includes(points)) {
 			points.userData.block = true
@@ -697,7 +674,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively disable raycasting to the created three.js instance
+	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
+	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && !block) {
 		if (raycast.includes(points)) {
 			raycast.splice(points.userData.index_in_raycast, 1)
@@ -857,9 +835,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (points.parent) points.parent.remove(points)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(points, "points")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -882,6 +861,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		interaction_on_clear.interact = interact
+		interaction_on_clear.block = block
+		interact = null
+
+		points = null
+
+		geometry = null
+		material = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `points_uuid` if a cleared component recevies a points
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		points_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -999,7 +1001,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!points.matrixAutoUpdate) points.updateMatrix()
+					if (points && !points.matrixAutoUpdate) points.updateMatrix()
 
 					if (verbose && !points.matrixAutoUpdate && log_mau) {
 						console.debug(

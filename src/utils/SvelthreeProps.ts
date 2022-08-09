@@ -50,7 +50,7 @@ type ComplexValuator = typeof PropArray3X
  */
 export default class SvelthreeProps {
 	obj: any
-	obj_type: string
+	obj_type: string | null
 	propsPrev: { [key: string]: any }
 	simpleValues: SimpleValueItem[]
 
@@ -69,13 +69,17 @@ export default class SvelthreeProps {
 		Color: PropColorX
 	}
 
-	constructor(obj: any) {
+	constructor(obj: any | null) {
 		this.obj = obj
 		this.obj_type = this.get_obj_type()
 	}
 
-	get_obj_type(): string {
-		return this.obj["type"] || this.obj.constructor.name
+	get_obj_type(): string | null {
+		if (this.obj) {
+			return this.obj["type"] || this.obj.constructor.name
+		} else {
+			return null
+		}
 	}
 
 	/**
@@ -86,28 +90,32 @@ export default class SvelthreeProps {
 	 * not at each (reactive) properties change._
 	 */
 	public update(props: { [key: string]: any }): string[] {
-		// UPDATE -> `props` has already been processed at least once -> `this.propsPrev` available
-		if (this.propsPrev) {
-			// `props` was assigned a new object different from the initially processed one (`this.propsPrev`)
-			if (this.propsPrev !== props) {
-				// clear everything and 'map' the new `props` object
+		if (this.obj) {
+			// UPDATE -> `props` has already been processed at least once -> `this.propsPrev` available
+			if (this.propsPrev) {
+				// `props` was assigned a new object different from the initially processed one (`this.propsPrev`)
+				if (this.propsPrev !== props) {
+					// clear everything and 'map' the new `props` object
+					this.resetAndMap(props)
+					this.propsPrev = props
+				}
+				// `props` is the same object as the initially processed one (`this.propsPrev`)
+				else {
+					// clear `updatedKeys` and check which properties inside the object have changed.
+					this.updatedKeys = []
+					this.checkProps(props)
+				}
+			} else {
+				// INITIALIZE -> `props` was not processed yet -> `this.propsPrev` not available
 				this.resetAndMap(props)
 				this.propsPrev = props
 			}
-			// `props` is the same object as the initially processed one (`this.propsPrev`)
-			else {
-				// clear `updatedKeys` and check which properties inside the object have changed.
-				this.updatedKeys = []
-				this.checkProps(props)
-			}
-		} else {
-			// INITIALIZE -> `props` was not processed yet -> `this.propsPrev` not available
-			this.resetAndMap(props)
-			this.propsPrev = props
-		}
 
-		// return an array of updated keys after update
-		return this.updatedKeys
+			// return an array of updated keys after update
+			return this.updatedKeys
+		} else {
+			return []
+		}
 	}
 
 	// `props` object is a new one (changed)

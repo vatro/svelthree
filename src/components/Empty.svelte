@@ -18,7 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 
@@ -91,8 +92,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let empty: Object3D = undefined
 	let empty_uuid: string = undefined
 
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
+
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_empty: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (empty) {
 		create = false
@@ -101,119 +107,91 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (empty.type === "Object3D") {
-			empty.userData.initScale = empty.scale.x
-			empty.userData.svelthreeComponent = self
 		} else {
 			throw new Error(
-				`SVELTHREE > Empty Error: provided 'empty' instance has wrong type '${empty.type}', should be 'Object3D'!`
+				`SVELTHREE > ${c_name} provided 'empty' instance has wrong type '${empty.type}', should be 'Object3D'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'empty' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", empty)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_1' not implemented for 'Empty'!
 
 	$: if (!empty && create) {
 		empty = new Object3D()
 
-		empty_uuid = empty.uuid
-
-		empty.userData.initScale = empty.scale.x
-		empty.userData.svelthreeComponent = self
+		set_initial_userdata(empty, self)
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${empty.type} created!`, { empty }))
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'Empty'!
+
+	// ---  AFTER  INITIALIZATION  --- //
+
+	// set empty_uuid the first time
+	$: if (empty && empty_uuid === undefined) set_uuid()
+
+	function set_uuid(): void {
+		empty_uuid = empty.uuid
+	}
+
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'Empty'!
 
 	// Determining 'parent' if 'empty' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (empty && create && scene && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", empty)
 	}
 
-	$: if (empty && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (empty && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, button, link, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		if (button) {
-			shadow_dom_el = document.createElement("button")
-
-			for (const key in button) {
-				shadow_dom_el[key] = button[key]
-			}
-		} else if (link) {
-			shadow_dom_el = document.createElement("a")
-
-			for (const key in link) {
-				shadow_dom_el[key] = link[key]
-			}
-		} else {
-			shadow_dom_el = document.createElement("div")
-		}
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -241,64 +219,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (empty && ((empty_uuid && empty_uuid !== empty.uuid) || empty.parent !== our_parent)) add_instance_to()
+	// this reactive statement willl be triggered on any 'empty' instance change (also e.g. `empty.foo = value`)
+	$: if (empty) if$_instance_change(empty, our_parent, empty_uuid, create, "empty", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'empty' was already created or set via 'empty' attribute before
-		if (empty_uuid && empty.uuid !== empty_uuid) {
-			// remove old instance and update references where needed
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		if ((empty_uuid && empty.uuid !== empty_uuid) || !empty_uuid) {
+			const uuid_to_remove: string = empty_uuid || empty.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", empty_uuid)
+			remove_instance(old_instance, "empty", empty, self)
 
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.helper = null
-			}
-
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after empty reassignment.
-			sProps = new SvelthreeProps(empty)
+			if (props) sProps = new SvelthreeProps(empty)
 		}
 
-		// add `empty` to `our_parent`
-		if (our_parent) {
-			if (empty.parent !== our_parent) {
-				our_parent.add(empty)
-				empty_uuid = empty.uuid
+		set_initial_userdata(empty, self)
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${empty.type} was added to ${our_parent.type}!`, {
-							empty,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				empty_uuid = empty.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'empty' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'empty' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ empty, uuid: empty.uuid, parent: our_parent }
-				)
-			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'empty' to!", { empty, our_parent, scene })
+		our_parent.add(empty)
+		empty_uuid = empty.uuid
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${empty.type} was added to ${our_parent.type}!`, {
+					empty,
+					scene,
+					total: scene.children.length
+				})
+			)
 		}
 	}
 
@@ -306,8 +253,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let mau: boolean = undefined
 	$: if (empty) empty.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (empty && mau !== undefined) empty.matrixAutoUpdate = mau
-
-	export let name: string = undefined
 
 	$: if (empty && name) empty.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
@@ -406,7 +351,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && empty && !empty.userData.box) add_box_helper()
-	$: if (!box && empty.userData.box) remove_box_helper()
+	$: if (!box && empty?.userData.box) remove_box_helper()
 
 	function add_box_helper() {
 		if (boxParams) {
@@ -447,7 +392,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function update_box(): void {
-		empty.userData.box.update()
+		// `empty` may have been nullified by `clear()`
+		if (empty) empty.userData.box.update()
 	}
 
 	function remove_box_helper(): void {
@@ -456,7 +402,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			remove_update_box_on_render_event = null
 		}
 
-		if (empty.userData.box?.parent) {
+		// `empty` may have been nullified by `clear()`
+		if (empty?.userData.box?.parent) {
 			empty.userData.box.parent.remove(empty.userData.box)
 			empty.userData.box = null
 		}
@@ -478,9 +425,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (empty.parent) empty.parent.remove(empty)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(empty, "empty")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -503,6 +451,22 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		empty = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `empty_uuid` if a cleared component recevies a empty
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		empty_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -620,7 +584,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!empty.matrixAutoUpdate) empty.updateMatrix()
+					if (empty && !empty.matrixAutoUpdate) empty.updateMatrix()
 
 					if (verbose && !empty.matrixAutoUpdate && log_mau) {
 						console.debug(

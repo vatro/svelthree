@@ -18,7 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
@@ -107,6 +108,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let mesh: Mesh = undefined
 	let mesh_uuid: string = undefined
 
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
+
 	// Generic Material type and props
 	// COOL!  This is possible now! see https://github.com/sveltejs/language-tools/issues/442#issuecomment-977803507
 	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
@@ -116,11 +120,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		Omit<AnyMaterial, PropBlackList>,
 		{ color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 }
 	>
+
+	let extracted_material: AnyMaterial = undefined
 	export let material: AnyMaterial = undefined
+	let material_ref: AnyMaterial = undefined
+
+	let extracted_geometry: BufferGeometry = undefined
 	export let geometry: BufferGeometry = undefined
+	let geometry_ref: BufferGeometry = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_mesh: boolean = true
+
+	//  ONCE  ON  INITIALIZATION  //
 
 	if (mesh) {
 		create = false
@@ -129,105 +141,43 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		create = true
 	}
 
-	/** IMPORTANT  Executed when / if an instance was provided **on initializiation** -> only once if at all! */
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
+	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (mesh.type === "Mesh") {
-			if (mesh.geometry) {
-				geometry = mesh.geometry
-				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved geometry:", { geometry }))
-			} else {
-				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no geometry!")
+			if (!mesh.geometry) {
+				throw new Error(`SVELTHREE > ${c_name} : provided 'mesh' instance has no geometry!`)
 			}
 
-			if (mesh.material) {
-				material = mesh.material as AnyMaterial
-				if (verbose && log_dev) console.debug(...c_dev(c_name, "saved material:", { material }))
-			} else {
-				throw new Error("SVELTHREE > Mesh : 'mesh' provided, but has no material!")
+			if (!mesh.material) {
+				throw new Error(`SVELTHREE > ${c_name} : provided 'mesh' instance has no material!`)
 			}
-
-			mesh.userData.initScale = mesh.scale.x
-			mesh.userData.svelthreeComponent = self
 		} else {
 			throw new Error(
-				`SVELTHREE > Mesh Error: provided 'mesh' instance has wrong type '${mesh.type}', should be 'Mesh'!`
+				`SVELTHREE > ${c_name} provided 'mesh' instance has wrong type '${mesh.type}', should be '${c_name}'!`
 			)
 		}
 	}
 
-	// Determining 'parent' on initialization if 'mesh' instance was provided ('create' is false).
+	//  INJECTION  ONCE  ON  INITIALIZATION  //
+
 	if (!create) {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 		// get the shadow DOM element that was shared to us by our parent component or use fallback.
+
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", mesh)
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
-
-		if (shadow_dom_el) {
-			setContext("parent_shadow_dom_el", shadow_dom_el)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
 	}
 
-	// component was initialized via 'mesh' prop
-	$: if (geometry && !create && geometry !== mesh.geometry) update_geometry_if_initialized_by_meshprop()
-
-	function update_geometry_if_initialized_by_meshprop(): void {
-		// mesh didn't change only geometry -> apply geometry to mesh
-		if (mesh_uuid === mesh.uuid) {
-			mesh.geometry = geometry as BufferGeometry
-		}
-
-		// mesh changed -> update gemetry reference
-		if (mesh_uuid !== mesh.uuid) {
-			geometry = mesh.geometry as BufferGeometry
-		}
-
-		// update BoxHelper if any
-		if (mesh.userData.box) mesh.userData.box.update()
-	}
-
-	// component was initialized via 'mesh' prop
-	$: if (material && !create && material !== mesh.material) update_material_if_initialized_by_meshprop()
-
-	function update_material_if_initialized_by_meshprop(): void {
-		// mesh didn't change, material did -> apply material to mesh
-		if (mesh_uuid === mesh.uuid) {
-			mesh.material = material as Material
-		}
-
-		// mesh changed -> update material reference
-		if (mesh_uuid !== mesh.uuid) {
-			material = mesh.material as AnyMaterial
-		}
-
-		refresh_material()
-	}
-
-	/** Recreates `sMat` with the current `material` reference and applies the `mat` prop object to it.
-	 * Called if:
-	 * - a new Mesh (clone or reference) was provided via `mesh` prop attribute after the `material` reference has been updated
-	 * - a new Material (clone or reference) was provided via `material` prop attribute.
-	 */
-	function refresh_material(): void {
-		// recreate 'sMat' in case sMat was created with / is bound to 'mesh.material'
-		sMat = new SvelthreeProps(material)
-		if (sMat && mat) sMat.update(mat)
-	}
-
-	// creation using provided geometry & material or constructor 'params' shorthand
+	//  CREATION  ONCE  AFTER  INITIALIZATION //
 
 	/** Initializes `Mesh` with provided constructor parameters.*/
 	export let params: ConstructorParameters<typeof Mesh> = undefined
@@ -241,11 +191,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			// letting threejs throw errors if anything's wrong with 'geometry' or 'material'
 			mesh = new Mesh(geometry, material)
-
-			mesh_uuid = mesh.uuid
-
-			mesh.userData.initScale = mesh.scale.x
-			mesh.userData.svelthreeComponent = self
 
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
 			if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (created):", geometry))
@@ -272,60 +217,97 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					// will create a blank 'BufferGeometry' and a blank Material
 					mesh = new Mesh()
 				}
+			} else if (geometry === null || material === null) {
+				// was cleared -> nothing, don't create a new one
+				//console.warn(`SVELTHREE > component was cleared before, won't create a new / blank Mesh!`)
 			} else {
 				// no 'geometry', no 'material' and no 'params'
 				// will create a blank 'BufferGeometry' or a blank Material or both.
 				mesh = new Mesh(geometry, material)
 			}
 
-			mesh_uuid = mesh.uuid
-
-			mesh.userData.initScale = mesh.scale.x
-			mesh.userData.svelthreeComponent = self
-
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
 		}
 	}
 
-	// component was initialized via `geometry` / `material` props.
-	$: if (geometry && create) update_geometry_if_initialized_by_geometryprop()
+	// ---  AFTER  INITIALIZATION  --- //
 
-	function update_geometry_if_initialized_by_geometryprop(): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' provided!"))
-		// we don't want `mesh` to be a part of the reactive statement conditional,
-		// otherwise it would react to `mesh` prop changes.
-		if (mesh) {
-			mesh.geometry = geometry as BufferGeometry
+	// set mesh_uuid the first time
+	$: if (mesh && mesh_uuid === undefined) set_uuid()
 
-			// update BoxHelper if any
-			if (mesh.userData.box) mesh.userData.box.update()
+	function set_uuid(): void {
+		mesh_uuid = mesh.uuid
+	}
 
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'geometry' updated!"))
+	let changed = []
+
+	$: if (mesh || material || geometry) reset_changed_status()
+
+	function reset_changed_status() {
+		changed.length = 0
+	}
+
+	$: if (mesh) extract()
+
+	function extract() {
+		extracted_geometry = mesh.geometry as BufferGeometry
+		extracted_material = mesh.material as AnyMaterial
+	}
+
+	$: if (geometry) on_geometry()
+
+	function on_geometry() {
+		changed.push("geometry")
+	}
+
+	$: if (material) on_material()
+
+	function on_material() {
+		changed.push("material")
+	}
+
+	$: if (mesh || material || geometry) handle_prop_changes()
+
+	function handle_prop_changes() {
+		const geometry_changed = changed.includes("geometry")
+		const material_changed = changed.includes("material")
+
+		if (geometry_changed) {
+			// apply material
+			if (mesh && mesh.geometry !== geometry) {
+				mesh.geometry = geometry
+				geometry_ref = geometry
+				if (mesh.userData.box) mesh.userData.box.update()
+			}
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > update_geometry_if_initialized_by_geometryprop > geometry update failed, 'mesh' not available!`,
-				mesh
-			)
+			// extracted_geometry doesn't need to be applied
+			if (geometry_ref !== extracted_geometry) {
+				geometry_ref = extracted_geometry
+				if (mesh.userData.box) mesh.userData.box.update()
+			}
+		}
+
+		if (material_changed) {
+			// apply material
+			if (mesh && mesh.material !== material) {
+				mesh.material = material
+				material_ref = material
+				refresh_material()
+			}
+		} else {
+			// extracted_material doesn't need to be applied
+			if (material_ref !== extracted_material) {
+				material_ref = extracted_material
+				refresh_material()
+			}
 		}
 	}
 
-	// component was initialized via `geometry` / `material` props.
-	$: if (material && create) update_material_if_initialized_by_materialprop()
-
-	function update_material_if_initialized_by_materialprop(): void {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' provided!"))
-		// we don't want `mesh` to be a part of the reactive statement conditional,
-		// otherwise it would react to `mesh` prop changes.
-		if (mesh) {
-			mesh.material = material
-			if (verbose && log_dev) console.debug(...c_dev(c_name, "'material' updated!"))
-			refresh_material()
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > update_material_if_initialized_by_materialprop > material update failed, 'mesh' not available!`,
-				mesh
-			)
-		}
+	/** Recreates `sMat` with the current `material_ref` reference and applies the `mat` prop object to it. */
+	function refresh_material(): void {
+		sMat = new SvelthreeProps(material_ref)
+		if (sMat && mat) sMat.update(mat)
+		// TODO  Check using `material_needs_update()` here.
 	}
 
 	// Determining 'parent' if 'mesh' instance has to be created first / was not provided on initialization ('create' is true).
@@ -333,63 +315,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", mesh)
 	}
 
-	$: if (mesh && create && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (mesh && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, button, link, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		if (button) {
-			shadow_dom_el = document.createElement("button")
-
-			for (const key in button) {
-				shadow_dom_el[key] = button[key]
-			}
-		} else if (link) {
-			shadow_dom_el = document.createElement("a")
-
-			for (const key in link) {
-				shadow_dom_el[key] = link[key]
-			}
-		} else {
-			shadow_dom_el = document.createElement("div")
-		}
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -417,64 +374,51 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// this statement is being triggered on creation / recreation
-	$: if (mesh && ((mesh_uuid && mesh_uuid !== mesh.uuid) || mesh.parent !== our_parent)) add_instance_to()
+	// this reactive statement willl be triggered on any 'mesh' instance change (also e.g. `mesh.foo = value`)
+	$: if (mesh) if$_instance_change(mesh, our_parent, mesh_uuid, create, "mesh", name, handle_instance_change)
 
-	function add_instance_to(): void {
-		// if 'mesh' was already created or set via 'mesh' attribute before
-		if (mesh_uuid && mesh.uuid !== mesh_uuid) {
-			// remove old instance and update references where needed
+	/** Called from by the `if$_instance_change` logic if needed. */
+	function handle_instance_change(): void {
+		let old_raycast = false
+		let old_block = false
 
-			const old_instance: Object3D = scene.getObjectByProperty("uuid", mesh_uuid)
+		if ((mesh_uuid && mesh.uuid !== mesh_uuid) || !mesh_uuid) {
+			const uuid_to_remove: string = mesh_uuid || mesh.uuid
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			if (old_instance.userData.helper?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.helper = null
+			remove_instance(old_instance, "mesh", mesh, self)
+
+			// remove `old_instance` from raycast if needed
+			if (raycast.includes(old_instance)) {
+				old_raycast = true
+				old_block = old_instance.userData.block
+				raycast.splice(old_instance.userData.index_in_raycast, 1)
 			}
 
-			if (old_instance.userData.box?.parent) {
-				old_instance.userData.helper.parent.remove(old_instance.userData.helper)
-				old_instance.userData.box = null
-			}
-
-			if (old_instance.parent) old_instance.parent.remove(old_instance)
-
-			// recreate 'SvelthreeProps'
-			// - all initially set props will be applied to the new instance.
-			// - 'props' attribute can be used directly after mesh reassignment.
-			sProps = new SvelthreeProps(mesh)
+			if (props) sProps = new SvelthreeProps(mesh)
 		}
 
-		// add `mesh` to `our_parent`
-		if (our_parent) {
-			if (mesh.parent !== our_parent) {
-				our_parent.add(mesh)
-				mesh_uuid = mesh.uuid
+		set_initial_userdata(mesh, self)
 
-				if (verbose && log_dev) {
-					console.debug(
-						...c_dev(c_name, `${geometry.type} was added to ${our_parent.type}!`, {
-							mesh,
-							scene,
-							total: scene.children.length
-						})
-					)
-				}
-			} else {
-				// prevent executing `add_instance_to` again on component update.
-				mesh_uuid = mesh.uuid
-				console.warn(
-					`SVELTHREE > ${c_name} : The 'mesh' instance you've provided was already added to: ${get_comp_name(
-						our_parent
-					)}. ` +
-						`You've probably provided the same, premade '${c_name}' instance to multiple components which can lead to undesired effects: ` +
-						`the 'mesh' instance will be affected by all components it was provided to. ` +
-						`Consider cloning the '${c_name}' instance per component.`,
-					{ mesh, uuid: mesh.uuid, parent: our_parent }
-				)
+		// add 'mesh' (provided instance) to raycast if needed
+		if (old_raycast) {
+			if (!raycast.includes(mesh)) {
+				mesh.userData.block = old_block // will this somehow be handeled automatically?
+				raycast.push(mesh)
 			}
-		} else {
-			console.error("No 'our_parent' (or 'scene')! Nothing to add 'mesh' to!", { mesh, our_parent, scene })
+		}
+
+		our_parent.add(mesh)
+		mesh_uuid = mesh.uuid
+
+		if (verbose && log_dev) {
+			console.debug(
+				...c_dev(c_name, `${mesh.type} was added to ${our_parent.type}!`, {
+					mesh,
+					scene,
+					total: scene.children.length
+				})
+			)
 		}
 	}
 
@@ -482,8 +426,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let mau: boolean = undefined
 	$: if (mesh) mesh.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (mesh && mau !== undefined) mesh.matrixAutoUpdate = mau
-
-	export let name: string = undefined
 
 	$: if (mesh && name) mesh.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
@@ -612,7 +554,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && mesh && !mesh.userData.box) add_box_helper()
-	$: if (!box && mesh.userData.box) remove_box_helper()
+	$: if (!box && mesh?.userData.box) remove_box_helper()
 
 	function add_box_helper() {
 		if (boxParams) {
@@ -653,7 +595,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function update_box(): void {
-		mesh.userData.box.update()
+		// `mesh` may have been nullified by `clear()`
+		if (mesh) mesh.userData.box.update()
 	}
 
 	function remove_box_helper(): void {
@@ -662,7 +605,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			remove_update_box_on_render_event = null
 		}
 
-		if (mesh.userData.box?.parent) {
+		// `mesh` may have been nullified by `clear()`
+		if (mesh?.userData.box?.parent) {
 			mesh.userData.box.parent.remove(mesh.userData.box)
 			mesh.userData.box = null
 		}
@@ -680,6 +624,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export let block: boolean = false
 
+	const interaction_on_clear = {
+		interact: undefined,
+		block: undefined
+	}
+
+	$: if (mesh) restore_interaction_props()
+	async function restore_interaction_props(): Promise<void> {
+		//console.warn(`comp '${name}' restore_interaction_props!`, { mesh, mesh_uuid, interact: mesh.userData.interact })
+		if (typeof interaction_on_clear.interact === "boolean") {
+			await tick()
+
+			//console.warn(`comp '${name}' restoring 'interact' prop!`, interaction_on_clear.interact)
+			interact = interaction_on_clear.interact
+			interaction_on_clear.interact = null
+
+			if (interaction_on_clear.block !== undefined && interaction_on_clear.block !== null) {
+				//console.warn(`comp '${name}' restoring 'block' prop!`, interaction_on_clear.block)
+				block = interaction_on_clear.block
+				interaction_on_clear.block = null
+			}
+		}
+	}
+
 	let interactive: boolean = undefined
 	const canvas_interactivity: Writable<{ enabled: boolean }> = getContext("canvas_interactivity")
 
@@ -691,7 +658,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
-	// reactively enable raycasting to the created three.js instance
+	// Reactively ENABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
+	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
 	$: if (interactionEnabled && raycast && !block) {
 		if (!raycast.includes(mesh)) {
 			mesh.userData.block = false
@@ -701,7 +669,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively enable raycasting to the created three.js instance if it's an 'interaction occluder / blocker'
+	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
+	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
+	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && block) {
 		if (!raycast.includes(mesh)) {
 			mesh.userData.block = true
@@ -711,7 +681,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively disable raycasting to the created three.js instance
+	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
+	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && !block) {
 		if (raycast.includes(mesh)) {
 			raycast.splice(mesh.userData.index_in_raycast, 1)
@@ -871,9 +842,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (mesh.parent) mesh.parent.remove(mesh)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(mesh, "mesh")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -896,6 +868,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		interaction_on_clear.interact = interact
+		interaction_on_clear.block = block
+		interact = null
+
+		mesh = null
+
+		geometry = null
+		material = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `mesh_uuid` if a cleared component recevies a mesh
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		mesh_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -1013,7 +1008,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!mesh.matrixAutoUpdate) mesh.updateMatrix()
+					if (mesh && !mesh.matrixAutoUpdate) mesh.updateMatrix()
 
 					if (verbose && !mesh.matrixAutoUpdate && log_mau) {
 						console.debug(

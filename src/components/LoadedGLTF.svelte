@@ -18,7 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-
+	import { if$_instance_change } from "../logic/if$"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 
@@ -105,84 +106,70 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * If the `add` attribute is set to `false`, the `container` instance will be `undefined`
 	 * and you'll have to manage adding loaded GLTF assets to your scene graph by yourself. */
 	export let container: Object3D = undefined
+	let container_uuid: string = undefined
+
+	/** Sets the `name` property of the created / injected three.js instance. */
+	export let name: string = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_container: boolean = true
 
-	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'LoadedGLTF'!
-
 	$: if (!container) {
 		container = new Object3D()
 
-		container.userData.initScale = container.scale.x
-		container.userData.svelthreeComponent = self
+		set_initial_userdata(container, self)
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${container.type} created!`, { container }))
 	}
-	// GENERATOR REMARK: 'reactive_re_creation_logic_2' not implemented for 'LoadedGLTF'!
+
+	// ---  AFTER  INITIALIZATION  --- //
+
+	// set container_uuid the first time
+	$: if (container && container_uuid === undefined) set_uuid()
+
+	function set_uuid(): void {
+		container_uuid = container.uuid
+	}
+
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'LoadedGLTF'!
 
 	// Determining 'parent' if 'container' instance has to be created first / was not provided on initialization ('create' is true).
 	$: if (container && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
+
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", container)
 	}
 
-	$: if (container && !our_parent_shadow_dom_el) set_parent_shadow_dom_el()
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
 
-	function set_parent_shadow_dom_el() {
+	$: if (container && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
+	}
 
-		// share our own shadow_dom_el as parent_shadow_dom_el
-		if (shadow_dom_el) {
-			// recreate shadow_dom_el
-			remove_shadow_dom_el()
-			create_shadow_dom_el()
-		} else {
-			create_shadow_dom_el()
-		}
+	//  IMPORTANT  TODO
+	// - see https://github.com/vatro/svelthree/issues/114
+	// - see https://github.com/vatro/svelthree/issues/103
+
+	$: if (our_parent_shadow_dom_el !== undefined) {
+		// SVELTEKIT  SSR /
+		if (browser) create_shadow_dom()
+	}
+
+	function create_shadow_dom(): void {
+		// create / recreate and share our own shadow_dom_el as parent_shadow_dom_el
+		shadow_dom_el = recreate_shadow_dom_el(shadow_dom_el, our_parent_shadow_dom_el, button, link, c_name)
 
 		if (shadow_dom_el) {
 			setContext("parent_shadow_dom_el", shadow_dom_el)
 		} else {
-			console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' not available!`, shadow_dom_el)
-		}
-	}
-
-	function remove_shadow_dom_el() {
-		shadow_dom_el.parentNode.removeChild(shadow_dom_el)
-	}
-
-	function create_shadow_dom_el(): void {
-		if (button) {
-			shadow_dom_el = document.createElement("button")
-
-			for (const key in button) {
-				shadow_dom_el[key] = button[key]
-			}
-		} else if (link) {
-			shadow_dom_el = document.createElement("a")
-
-			for (const key in link) {
-				shadow_dom_el[key] = link[key]
-			}
-		} else {
-			shadow_dom_el = document.createElement("div")
-		}
-
-		shadow_dom_el.dataset.kind = `${c_name}`
-
-		if (our_parent_shadow_dom_el) {
-			our_parent_shadow_dom_el.appendChild(shadow_dom_el)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > create_shadow_dom_el > could'nt append shadow dom, no 'our_parent_shadow_dom_el'!`,
-				our_parent_shadow_dom_el
-			)
+			if (!shadow_dom_el) console.error(`SVELTHREE > ${c_name} : 'shadow_dom_el' was not created!`, shadow_dom_el)
 		}
 	}
 
@@ -321,8 +308,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (container) container.matrixAutoUpdate = scene.matrixAutoUpdate
 	$: if (container && mau !== undefined) container.matrixAutoUpdate = mau
 
-	export let name: string = undefined
-
 	$: if (container && name) container.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
 
@@ -426,7 +411,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let remove_update_box_on_render_event: () => void = undefined
 
 	$: if (box && container && !container.userData.box) add_box_helper()
-	$: if (!box && container.userData.box) remove_box_helper()
+	$: if (!box && container?.userData.box) remove_box_helper()
 
 	function add_box_helper() {
 		if (boxParams) {
@@ -467,7 +452,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function update_box(): void {
-		container.userData.box.update()
+		// `container` may have been nullified by `clear()`
+		if (container) container.userData.box.update()
 	}
 
 	function remove_box_helper(): void {
@@ -476,7 +462,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			remove_update_box_on_render_event = null
 		}
 
-		if (container.userData.box?.parent) {
+		// `container` may have been nullified by `clear()`
+		if (container?.userData.box?.parent) {
 			container.userData.box.parent.remove(container.userData.box)
 			container.userData.box = null
 		}
@@ -494,6 +481,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export let block: boolean = false
 
+	const interaction_on_clear = {
+		interact: undefined,
+		block: undefined
+	}
+
+	$: if (container) restore_interaction_props()
+	async function restore_interaction_props(): Promise<void> {
+		//console.warn(`comp '${name}' restore_interaction_props!`, { container, container_uuid, interact: container.userData.interact })
+		if (typeof interaction_on_clear.interact === "boolean") {
+			await tick()
+
+			//console.warn(`comp '${name}' restoring 'interact' prop!`, interaction_on_clear.interact)
+			interact = interaction_on_clear.interact
+			interaction_on_clear.interact = null
+
+			if (interaction_on_clear.block !== undefined && interaction_on_clear.block !== null) {
+				//console.warn(`comp '${name}' restoring 'block' prop!`, interaction_on_clear.block)
+				block = interaction_on_clear.block
+				interaction_on_clear.block = null
+			}
+		}
+	}
+
 	let interactive: boolean = undefined
 	const canvas_interactivity: Writable<{ enabled: boolean }> = getContext("canvas_interactivity")
 
@@ -505,7 +515,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
-	// reactively enable raycasting to the created three.js instance
+	// Reactively ENABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
+	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
 	$: if (interactionEnabled && raycast && !block) {
 		if (!raycast.includes(container)) {
 			container.userData.block = false
@@ -515,7 +526,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively enable raycasting to the created three.js instance if it's an 'interaction occluder / blocker'
+	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
+	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
+	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && block) {
 		if (!raycast.includes(container)) {
 			container.userData.block = true
@@ -525,7 +538,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// reactively disable raycasting to the created three.js instance
+	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
+	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
 	$: if (!interactionEnabled && raycast && !block) {
 		if (raycast.includes(container)) {
 			raycast.splice(container.userData.index_in_raycast, 1)
@@ -685,9 +699,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
-	/** Removes the (three) instance of the object created by the component from it's parent. */
-	export const remove_instance_from_parent = (): void => {
-		if (container.parent) container.parent.remove(container)
+	/** Removes the (three) instance created by / provided to the component from it's parent. */
+	export const remove_instance_from_parent = async (): Promise<boolean> => {
+		const removed: boolean = await remove_instance(container, "container")
+		return removed
 	}
 	/**
 	 * Same as `remove_instance_from_parent()` just shorter syntax.
@@ -720,6 +735,26 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Sets `focus()` on the component / it's shadow dom element. */
 	export const focused = (): void => shadow_dom_el.focus()
+
+	/**
+	 * Primarily for internal usage. Clears all references to the currently managed three.js instance.
+	 * Called by `remove_instance(...)` / `clear_old_component()` if the instance has been
+	 * assigned to some other component (_before_).
+	 */
+	export const clear = () => {
+		//console.warn(`CLEAR! -> ${name}`)
+
+		interaction_on_clear.interact = interact
+		interaction_on_clear.block = block
+		interact = null
+
+		container = null
+
+		// IMPORTANT //
+		// has to be set to `null`, `undefined` would set `container_uuid` if a cleared component recevies a container
+		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
+		container_uuid = null
+	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
@@ -837,7 +872,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (!container.matrixAutoUpdate) container.updateMatrix()
+					if (container && !container.matrixAutoUpdate) container.updateMatrix()
 
 					if (verbose && !container.matrixAutoUpdate && log_mau) {
 						console.debug(

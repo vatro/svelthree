@@ -15,6 +15,18 @@
 			"types": "./utils/index.d.ts",
 			"import": "./utils/index.js"
 		},
+		"./logic/if$": {
+			"types": "./logic/if$/index.d.ts",
+			"import": "./logic/if$/index.js"
+		},
+		"./logic/shared": {
+			"types": "./logic/shared/index.d.ts",
+			"import": "./logic/shared/index.js"
+		},
+		"./logic/special": {
+			"types": "./logic/special/index.d.ts",
+			"import": "./logic/special/index.js"
+		},
 		"./stores": {
 			"types": "./stores.d.ts",
 			"import": "./stores.js"
