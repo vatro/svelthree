@@ -604,7 +604,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						)
 					}
 
-					if (helper && light.userData.helper) light.userData.helper.update()
+					if (helper && light.userData.helper) light.userData.helper.updateMatrixWorld()
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						// prevent an additional component update by not accessing the `root_scene` prop directly.
