@@ -39,6 +39,16 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
 	/**
+	 *  SVELTEKIT  SSR /
+	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
+	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 */
+	import { browser } from "$app/env"
+
+	/**
 	 * svelthreeStore index (`sti`) spread via context.  \
 	 * _will be `undefined` if the `WebGlRenderer` is placed **outside** of a `Canvas` component._
 	 */
@@ -806,9 +816,13 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	onDestroy(async () => {
 		if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
-		stop_rendering()
-		renderer.dispose()
-		renderer.forceContextLoss()
+
+		// SVELTEKIT  SSR /
+		if (browser) {
+			stop_rendering()
+			renderer.dispose()
+			renderer.forceContextLoss()
+		}
 	})
 
 	beforeUpdate(async () => {
