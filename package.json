@@ -34,7 +34,7 @@
 	],
 	"scripts": {
 		"svelte-check": "svelte-check",
-		"prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts}",
+		"prettier-all": "prettier --config ./.prettierrc --end-of-line crlf --write src/**/*.{svelte,ts,js}",
 		"reinstall-packages": "rimraf node_modules && rimraf package-lock.json && npm i",
 		"pack-to-mynpm": "npm pack --pack-destination ../__my_npm/",
 		"test": "echo 'No test specified' && exit 1"
