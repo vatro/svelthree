@@ -570,6 +570,10 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	async function render_standard(): Promise<void> {
 		if (enabled) {
+			// if the `current_cam` instance is not being managed by a component (anymore),
+			// it means a new (premade) camera instance was injected via `camera` attribute,
+			// so the `current_cam` reference needs to be updated.
+			if (!current_cam.userData.svelthreeComponent) set_current_cam()
 
 			if (log_once) do_log_once(mode)
 

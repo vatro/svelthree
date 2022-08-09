@@ -116,6 +116,18 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (camera.type === "PerspectiveCamera") {
+			camera.userData.id = id
+
+			camera_is_active = false
+			camera.userData.isActive = camera_is_active
+
+			$svelthreeStores[sti].cameras.push({
+				camera: camera,
+				id: id,
+				isActive: camera_is_active
+			})
+
+			index_in_cameras = camera.userData.index_in_cameras
 		} else {
 			throw new Error(
 				`SVELTHREE > ${c_name} provided 'camera' instance has wrong type '${camera.type}', should be '${c_name}'!`
@@ -250,7 +262,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			const uuid_to_remove: string = camera_uuid || camera.uuid
 			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
+			camera_is_active = old_instance.userData.isActive
+
 			remove_instance(old_instance, "camera", camera, self)
+
+			old_instance.userData.index_in_cameras = null
+			old_instance.userData.isActive = null
+			old_instance.userData.id = null
 
 			if (props) sProps = new SvelthreeProps(camera)
 		}
@@ -259,6 +277,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		our_parent.add(camera)
 		camera_uuid = camera.uuid
+
+		$svelthreeStores[sti].cameras[index_in_cameras].camera = camera
+		$svelthreeStores[sti].cameras[index_in_cameras].id = id
+		$svelthreeStores[sti].cameras[index_in_cameras].isActive = camera_is_active
+
+		camera.userData.index_in_cameras = index_in_cameras
+		camera.userData.id = id
+		camera.userData.isActive = camera_is_active
 
 		if (verbose && log_dev) {
 			console.debug(
