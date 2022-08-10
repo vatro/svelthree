@@ -1,7 +1,7 @@
 {
 	"name": "svelthree",
 	"version": "1.0.0-next.0.87",
-	"description": "Svelte powered three.js development",
+	"description": "Create three.js content with Svelte components.",
 	"module": "index.js",
 	"main": "index",
 	"type": "module",

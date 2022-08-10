@@ -2,7 +2,7 @@
 
 # svelthree
 
-#### Svelte powered three.js development
+#### Create three.js content with Svelte components.
 
 ---
 
