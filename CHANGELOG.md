@@ -1,5 +1,10 @@
 # svelthree changelog
 
+## 1.0.0-next.0.86
+
+- `Scene`: fixed premade instance injection. ([#131](https://github.com/vatro/svelthree/issues/131))
+
+
 ## 1.0.0-next.0.85
 
 Changes and fixes due to [**Clean up, do TODO, fix TOFIX - #70**](https://github.com/vatro/svelthree/issues/70) **sprint** toward `1.0.0-next.1`
