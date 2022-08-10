@@ -1,5 +1,10 @@
 # svelthree changelog
 
+## 1.0.0-next.0.87
+
+- `Scene`: fixed reopened [#131](https://github.com/vatro/svelthree/issues/131) -> update `scene_obj.value` on instance change. 
+
+
 ## 1.0.0-next.0.86
 
 - `Scene`: fixed premade instance injection. ([#131](https://github.com/vatro/svelthree/issues/131))
