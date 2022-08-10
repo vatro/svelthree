@@ -527,6 +527,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			root_scene_obj.value = root_scene
 			scene_obj.value = scene
 		} else {
+			root_scene_obj.value = root_scene
 			scene.userData.root_scene = root_scene
 			scene_obj.value = scene
 		}
@@ -1001,10 +1002,12 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
 						if (root_scene) {
-							// prevent an additional component update by not accessing the `scene` prop directly.
+							// we're not the root scene (root_scene is not `null`)
+							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							root_scene_obj.value.userData.dirty = true
 							$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 						} else {
+							// we're are the root scene (root_scene is `null`)
 							// prevent an additional component update by not accessing the `scene` prop directly.
 							scene_obj.value.userData.dirty = true
 							$svelthreeStores[sti].rendererComponent.schedule_render_auto(scene)
