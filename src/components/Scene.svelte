@@ -309,6 +309,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		our_parent.add(scene)
 		scene_uuid = scene.uuid
+		scene_obj.value = scene
 
 		if (verbose && log_dev) {
 			console.debug(
