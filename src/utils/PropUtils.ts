@@ -5,7 +5,7 @@
 import type { Light, Material, Object3D, Scene } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types-extra"
-import type { default as Empty } from "../components/Empty.svelte"
+import type { Targetable, TargetableSvelthreeComponent } from "../types-extra"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
@@ -519,9 +519,9 @@ export default class PropUtils {
 	}
 
 	/**
-	 * ☝️ Expects the value (`target`) to be an instance of Empty (Object3D)!
+	 * TODO : test / polish this!
 	 */
-	public static setLightTarget(obj: Object3D, val: Object3D | Empty) {
+	public static setLightTarget(obj: Object3D, val: Targetable) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val })
 		if (!val) {
 			console.warn(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
@@ -531,11 +531,9 @@ export default class PropUtils {
 
 			if (val["isObject3D"]) {
 				obj["target"] = val
-				//PropUtils.updateMatrixAndWorldMatrix(val as Object3D)
-			} else if (val["isEmpty"]) {
-				let obj3d: Object3D = (val as Empty).get_instance()
+			} else if (val["is_svelthree_component"]) {
+				let obj3d: Object3D = (val as TargetableSvelthreeComponent).get_instance()
 				obj["target"] = obj3d
-				//PropUtils.updateMatrixAndWorldMatrix(obj3d)
 			} else {
 				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
 			}

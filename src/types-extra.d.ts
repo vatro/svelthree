@@ -129,17 +129,29 @@ export type ComplexValueType =
 	| "Matrix4ParamsArray"
 	| "Color"
 
-import type { Mesh, Empty, PointLight, SpotLight, OrthographicCamera, Scene, DirectionalLight } from "./components"
-export type Targetable =
+import type {
+	Mesh,
+	Object3D,
+	Group,
+	PointLight,
+	SpotLight,
+	OrthographicCamera,
+	Scene,
+	DirectionalLight
+} from "./components"
+
+export type TargetableSvelthreeComponent =
 	| Mesh<any>
-	| Empty
-	| THREE.Object3D
+	| Object3D
+	| Group
 	| PointLight
 	| SpotLight
 	| OrthographicCamera
 	| Scene
 	| DirectionalLight
-export type CubeCameraBoundable = Mesh<any> | Empty | THREE.Object3D
+
+export type Targetable = THREE.Object3D | TargetableSvelthreeComponent
+export type CubeCameraBoundable = THREE.Object3D | Mesh<any> | Object3D
 
 import type {
 	MeshToonMaterialParameters,
@@ -192,8 +204,8 @@ type AllLights = THREE.SpotLight &
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
-export type GLTFSupportedSvelthreeComponents = Mesh<any> & Empty
-export type RaycastableSvelthreeComponents = Mesh<any> & Empty
+export type GLTFSupportedSvelthreeComponents = Mesh<any> & Group & Object3D
+export type RaycastableSvelthreeComponents = Mesh<any> & Group & Object3D
 
 export interface PointerState {
 	pos: THREE.Vector2

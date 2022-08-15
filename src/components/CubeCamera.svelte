@@ -45,7 +45,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	} from "three"
 	import type { RemoveLast, OnlyWritableNonFunctionProps } from "../types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
-	import type { default as EmptySvelthreeComponent } from "./Empty.svelte"
+	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 	import type { Writable } from "svelte/store"
 
 	/**
@@ -89,7 +89,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 
 	/** Bind `CubeCamera`'s position to the specified component / object (three) instance
 	 * ☝️ The `pos` shorthand attribute will override `bind_pos`! _Alternatively (standard)_:
-	 * add the `CubeCamera` component as a child to either a `Mesh` or an `Empty` component,
+	 * add the `CubeCamera` component as a child to either a `Mesh` or an `Object3D`/`Group` component,
 	 * in this case `CubeCamera`'s position will be bound to it's parent / object (three) instance. */
 	export let bind_pos: MeshSvelthreeComponent<any> | EmptySvelthreeComponent | Object3D = undefined
 	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()

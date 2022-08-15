@@ -6,7 +6,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 <!--
 @component
-**svelthree** _Empty_ Component.
+**svelthree** _Group_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
@@ -21,7 +21,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
-	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
+	import type { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -32,8 +32,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
 
-	import { Object3D } from "three"
-	import type { EmptyProps } from "../types-comp-props"
+	import { Group } from "three"
+	import type { GroupProps } from "../types-comp-props"
 	import type { RemoveFirst } from "../types-extra"
 	import type { ButtonProp, LinkProp } from "../types-comp-props"
 
@@ -58,7 +58,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 	export let log_mau: boolean = log_all
 
-	export const isEmpty: boolean = true
+	export const isGroup: boolean = true
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 
@@ -87,19 +87,19 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
 	export let link: LinkProp = undefined
 
-	/** Returns the `empty` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Empty` instances. */
-	export let empty: Object3D = undefined
-	let empty_uuid: string = undefined
+	/** Returns the `group` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Group` instances. */
+	export let group: Group = undefined
+	let group_uuid: string = undefined
 
 	/** Sets the `name` property of the created / injected three.js instance. */
 	export let name: string = undefined
 
 	export const is_svelthree_component: boolean = true
-	export const is_svelthree_empty: boolean = true
+	export const is_svelthree_group: boolean = true
 
 	//  ONCE  ON  INITIALIZATION  //
 
-	if (empty) {
+	if (group) {
 		create = false
 		on_instance_provided()
 	} else {
@@ -110,10 +110,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (empty.type === "Object3D") {
+		if (group.type === "Group") {
 		} else {
 			throw new Error(
-				`SVELTHREE > ${c_name} provided 'empty' instance has wrong type '${empty.type}', should be 'Object3D'!`
+				`SVELTHREE > ${c_name} provided 'group' instance has wrong type '${group.type}', should be '${c_name}'!`
 			)
 		}
 	}
@@ -129,33 +129,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 
 		// share created object (three) instance to all children (slots) as 'parent'.
-		setContext("parent", empty)
+		setContext("parent", group)
 
 		// SVELTEKIT  SSR /
 		if (browser) create_shadow_dom()
 	}
 
-	$: if (!empty && create) {
-		empty = new Object3D()
+	$: if (!group && create) {
+		group = new Group()
 
-		set_initial_userdata(empty, self)
+		set_initial_userdata(group, self)
 
-		if (verbose && log_dev) console.debug(...c_dev(c_name, `${empty.type} created!`, { empty }))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, `${group.type} created!`, { group }))
 	}
 
 	// ---  AFTER  INITIALIZATION  --- //
 
-	// set empty_uuid the first time
-	$: if (empty && empty_uuid === undefined) set_uuid()
+	// set group_uuid the first time
+	$: if (group && group_uuid === undefined) set_uuid()
 
 	function set_uuid(): void {
-		empty_uuid = empty.uuid
+		group_uuid = group.uuid
 	}
 
-	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'Empty'!
+	// GENERATOR REMARK: 'reactive_re_creation_logic' not implemented for 'Group'!
 
-	// Determining 'parent' if 'empty' instance has to be created first / was not provided on initialization ('create' is true).
-	$: if (empty && create && scene && !our_parent) set_parent()
+	// Determining 'parent' if 'group' instance has to be created first / was not provided on initialization ('create' is true).
+	$: if (group && create && scene && !our_parent) set_parent()
 
 	function set_parent() {
 		// get the instance that was shared to us as our 'parent' or use fallback.
@@ -163,14 +163,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		our_parent = getContext("parent") || scene
 
 		// share created object (three) instance to all children (slots) as 'parent'.
-		setContext("parent", empty)
+		setContext("parent", group)
 	}
 
 	//  IMPORTANT  TODO
 	// - see https://github.com/vatro/svelthree/issues/114
 	// - see https://github.com/vatro/svelthree/issues/103
 
-	$: if (empty && create && our_parent_shadow_dom_el === undefined) {
+	$: if (group && create && our_parent_shadow_dom_el === undefined) {
 		our_parent_shadow_dom_el = getContext("parent_shadow_dom_el") || scene_shadow_dom_el
 	}
 
@@ -218,29 +218,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	// this reactive statement willl be triggered on any 'empty' instance change (also e.g. `empty.foo = value`)
-	$: if (empty) if$_instance_change(empty, our_parent, empty_uuid, create, "empty", name, handle_instance_change)
+	// this reactive statement willl be triggered on any 'group' instance change (also e.g. `group.foo = value`)
+	$: if (group) if$_instance_change(group, our_parent, group_uuid, create, "group", name, handle_instance_change)
 
 	/** Called from by the `if$_instance_change` logic if needed. */
 	function handle_instance_change(): void {
-		if ((empty_uuid && empty.uuid !== empty_uuid) || !empty_uuid) {
-			const uuid_to_remove: string = empty_uuid || empty.uuid
+		if ((group_uuid && group.uuid !== group_uuid) || !group_uuid) {
+			const uuid_to_remove: string = group_uuid || group.uuid
 			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
-			remove_instance(old_instance, "empty", empty, self)
+			remove_instance(old_instance, "group", group, self)
 
-			if (props) sProps = new SvelthreeProps(empty)
+			if (props) sProps = new SvelthreeProps(group)
 		}
 
-		set_initial_userdata(empty, self)
+		set_initial_userdata(group, self)
 
-		our_parent.add(empty)
-		empty_uuid = empty.uuid
+		our_parent.add(group)
+		group_uuid = group.uuid
 
 		if (verbose && log_dev) {
 			console.debug(
-				...c_dev(c_name, `${empty.type} was added to ${our_parent.type}!`, {
-					empty,
+				...c_dev(c_name, `${group.type} was added to ${our_parent.type}!`, {
+					group,
 					scene,
 					total: scene.children.length
 				})
@@ -250,10 +250,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Override object's `.matrixAutoUpdate` set (*on initialzation*) by scene's `.matrixAutoUpdate` (*default is `true`*). Also: `mau` can be changed on-the-fly.*/
 	export let mau: boolean = undefined
-	$: if (empty) empty.matrixAutoUpdate = scene.matrixAutoUpdate
-	$: if (empty && mau !== undefined) empty.matrixAutoUpdate = mau
+	$: if (group) group.matrixAutoUpdate = scene.matrixAutoUpdate
+	$: if (group && mau !== undefined) group.matrixAutoUpdate = mau
 
-	$: if (empty && name) empty.name = name
+	$: if (group && name) group.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
 
 	/** ☝️ `matrix` **shorthand** attribute overrides ( *are ignored* ) `pos`, `rot`, `quat`, `scale` and `lookAt` 'shorthand' attributes! */
@@ -265,9 +265,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof EmptyProps]: EmptyProps[P] } = undefined
+	export let props: { [P in keyof GroupProps]: GroupProps[P] } = undefined
 
-	$: if (!sProps && empty && props) sProps = new SvelthreeProps(empty)
+	$: if (!sProps && group && props) sProps = new SvelthreeProps(group)
 	$: if (props && sProps) update_props()
 	function update_props() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
@@ -278,10 +278,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **shorthand** attribute for setting the `position` property. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
-	$: !matrix && empty && pos ? set_pos() : pos && empty ? console.warn(w_sh.pos) : null
+	$: !matrix && group && pos ? set_pos() : pos && group ? console.warn(w_sh.pos) : null
 	function set_pos() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "pos", pos))
-		PropUtils.setPositionFromValue(empty, pos)
+		PropUtils.setPositionFromValue(group, pos)
 	}
 
 	/** **shorthand** attribute for setting the `rotation` property. */
@@ -292,40 +292,40 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		| Parameters<Quaternion["set"]>
 		| Vector3
 		| Parameters<Vector3["set"]> = undefined
-	$: !matrix && !quat && empty && rot ? set_rot() : rot && empty ? console.warn(w_sh.rot) : null
+	$: !matrix && !quat && group && rot ? set_rot() : rot && group ? console.warn(w_sh.rot) : null
 	function set_rot() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "rot", rot))
-		PropUtils.setRotationFromValue(empty, rot)
+		PropUtils.setRotationFromValue(group, rot)
 	}
 
 	/** **shorthand** attribute for setting the `quaternion` property. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
-	$: !matrix && empty && quat ? set_quat() : quat && empty ? console.warn(w_sh.quat) : null
+	$: !matrix && group && quat ? set_quat() : quat && group ? console.warn(w_sh.quat) : null
 	function set_quat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "quat", quat))
-		PropUtils.setQuaternionFromValue(empty, quat)
+		PropUtils.setQuaternionFromValue(group, quat)
 	}
 
 	export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
-	$: !matrix && empty && scale ? set_scale() : scale && empty ? console.warn(w_sh.scale) : null
+	$: !matrix && group && scale ? set_scale() : scale && group ? console.warn(w_sh.scale) : null
 	function set_scale() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
-		PropUtils.setScaleFromValue(empty, scale)
+		PropUtils.setScaleFromValue(group, scale)
 	}
 
 	/** */
 	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D = undefined
-	$: !matrix && empty && lookAt ? set_lookat() : lookAt && empty ? console.warn(w_sh.lookAt) : null
+	$: !matrix && group && lookAt ? set_lookat() : lookAt && group ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
-		PropUtils.setLookAtFromValue(empty, lookAt)
+		PropUtils.setLookAtFromValue(group, lookAt)
 	}
 
 	// IMPORTANT  `matrix` 'shorthand' attribute will override all other transforms ('shorthand' attributes)!
-	$: if (matrix && empty) set_matrix()
+	$: if (matrix && group) set_matrix()
 	function set_matrix(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "matrix", matrix))
-		PropUtils.setMatrixFromValue(empty, matrix)
+		PropUtils.setMatrixFromValue(group, matrix)
 	}
 
 	/** The root scene -> `scene.parent = null`. */
@@ -337,8 +337,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		root_scene_obj.value = root_scene
 	}
 
-	$: if (empty && root_scene) {
-		empty.userData.root_scene = root_scene
+	$: if (group && root_scene) {
+		group.userData.root_scene = root_scene
 	}
 
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
@@ -349,37 +349,37 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Removes `WebGLRenderer` `"update_helpers"` event listener. */
 	let remove_update_box_on_render_event: () => void = undefined
 
-	$: if (box && empty && !empty.userData.box) add_box_helper()
-	$: if (!box && empty?.userData.box) remove_box_helper()
+	$: if (box && group && !group.userData.box) add_box_helper()
+	$: if (!box && group?.userData.box) remove_box_helper()
 
 	function add_box_helper() {
 		if (boxParams) {
-			empty.userData.box = new BoxHelper(empty, ...boxParams)
+			group.userData.box = new BoxHelper(group, ...boxParams)
 		} else {
-			empty.userData.box = new BoxHelper(empty)
+			group.userData.box = new BoxHelper(group)
 		}
 
-		empty.userData.box.visible = false
+		group.userData.box.visible = false
 	}
 
 	// update and show box on next frame
-	$: if (box && empty && empty.userData.box && $svelthreeStores[sti].rendererComponent && root_scene) {
+	$: if (box && group && group.userData.box && $svelthreeStores[sti].rendererComponent && root_scene) {
 		apply_box()
 	}
 
 	function apply_box(): void {
-		if (!empty.userData.box.parent) {
+		if (!group.userData.box.parent) {
 			// add all boxes to the root scene!
 			if (root_scene) {
-				root_scene.add(empty.userData.box)
+				root_scene.add(group.userData.box)
 			} else {
 				console.error(`SVELTHREE > ${c_name} > Cannot add box to 'root_scene'!`, root_scene)
 			}
 		}
 
 		// update box and make it visible
-		empty.userData.box.update()
-		empty.userData.box.visible = true
+		group.userData.box.update()
+		group.userData.box.visible = true
 
 		// start updating
 		if (!remove_update_box_on_render_event) {
@@ -391,8 +391,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	function update_box(): void {
-		// `empty` may have been nullified by `clear()`
-		if (empty) empty.userData.box.update()
+		// `group` may have been nullified by `clear()`
+		if (group) group.userData.box.update()
 	}
 
 	function remove_box_helper(): void {
@@ -401,10 +401,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			remove_update_box_on_render_event = null
 		}
 
-		// `empty` may have been nullified by `clear()`
-		if (empty?.userData.box?.parent) {
-			empty.userData.box.parent.remove(empty.userData.box)
-			empty.userData.box = null
+		// `group` may have been nullified by `clear()`
+		if (group?.userData.box?.parent) {
+			group.userData.box.parent.remove(group.userData.box)
+			group.userData.box = null
 		}
 	}
 
@@ -418,7 +418,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let aniauto: boolean = undefined
 
 	let ani: SvelthreeAnimation
-	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, empty, animation, aniauto)
+	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, group, animation, aniauto)
 
 	let currentSceneActive = undefined
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
@@ -426,7 +426,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
-		const removed: boolean = await remove_instance(empty, "empty")
+		const removed: boolean = await remove_instance(group, "group")
 		return removed
 	}
 	/**
@@ -436,7 +436,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const remove = remove_instance_from_parent
 
 	/** Returns the (three) instance of the object created by the component. */
-	export const get_instance = (): Object3D => empty
+	export const get_instance = (): Group => group
 
 	/** Returns the `animation` object. */
 	export const get_animation = (): any => ani.getAnimation()
@@ -459,12 +459,12 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const clear = () => {
 		//console.warn(`CLEAR! -> ${name}`)
 
-		empty = null
+		group = null
 
 		// IMPORTANT //
-		// has to be set to `null`, `undefined` would set `empty_uuid` if a cleared component recevies a empty
+		// has to be set to `null`, `undefined` would set `group_uuid` if a cleared component recevies a group
 		// we don't want that, beacuse then the `handle_instance_change` wouldn't be triggered!
-		empty_uuid = null
+		group_uuid = null
 	}
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
@@ -481,9 +481,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if (verbose && log_mau) {
 						console.debug(
-							...c_mau(c_name, "onMount : empty.", {
-								matrixAutoUpdate: empty.matrixAutoUpdate,
-								matrixWorldNeedsUpdate: empty.matrixWorldNeedsUpdate
+							...c_mau(c_name, "onMount : group.", {
+								matrixAutoUpdate: group.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: group.matrixWorldNeedsUpdate
 							})
 						)
 					}
@@ -512,9 +512,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if (verbose && log_mau) {
 						console.debug(
-							...c_mau(c_name, "onDestroy : empty.", {
-								matrixAutoUpdate: empty.matrixAutoUpdate,
-								matrixWorldNeedsUpdate: empty.matrixWorldNeedsUpdate
+							...c_mau(c_name, "onDestroy : group.", {
+								matrixAutoUpdate: group.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: group.matrixWorldNeedsUpdate
 							})
 						)
 					}
@@ -542,9 +542,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if (verbose && log_mau) {
 						console.debug(
-							...c_mau(c_name, "beforeUpdate : empty.", {
-								matrixAutoUpdate: empty.matrixAutoUpdate,
-								matrixWorldNeedsUpdate: empty.matrixWorldNeedsUpdate
+							...c_mau(c_name, "beforeUpdate : group.", {
+								matrixAutoUpdate: group.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: group.matrixWorldNeedsUpdate
 							})
 						)
 					}
@@ -573,9 +573,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					if (verbose && log_mau) {
 						console.debug(
-							...c_mau(c_name, "afterUpdate : empty.", {
-								matrixAutoUpdate: empty.matrixAutoUpdate,
-								matrixWorldNeedsUpdate: empty.matrixWorldNeedsUpdate
+							...c_mau(c_name, "afterUpdate : group.", {
+								matrixAutoUpdate: group.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: group.matrixWorldNeedsUpdate
 							})
 						)
 					}
@@ -583,13 +583,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					if (afterUpdate_inject_before) afterUpdate_inject_before()
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
-					if (empty && !empty.matrixAutoUpdate) empty.updateMatrix()
+					if (group && !group.matrixAutoUpdate) group.updateMatrix()
 
-					if (verbose && !empty.matrixAutoUpdate && log_mau) {
+					if (verbose && !group.matrixAutoUpdate && log_mau) {
 						console.debug(
-							...c_mau(c_name, "afterUpdate : empty.", {
-								matrixAutoUpdate: empty.matrixAutoUpdate,
-								matrixWorldNeedsUpdate: empty.matrixWorldNeedsUpdate
+							...c_mau(c_name, "afterUpdate : group.", {
+								matrixAutoUpdate: group.matrixAutoUpdate,
+								matrixWorldNeedsUpdate: group.matrixWorldNeedsUpdate
 							})
 						)
 					}

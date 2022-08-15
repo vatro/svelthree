@@ -1,15 +1,15 @@
-import type { BufferGeometry, Material, Object3D } from "three"
+import type { BufferGeometry, Material } from "three"
 import { Euler, Vector3 } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 
 // import currently supported components only
 import { Mesh } from "../components"
-import { Empty } from "../components"
+import { Group, Object3D } from "../components"
 
 import type { GLTFSupportedSvelthreeComponents } from "../types-extra"
 
 interface ITreeMember {
-	obj: Object3D
+	obj: THREE.Object3D
 	parent_uuid?: string
 	name?: string
 	obj_type?: string
@@ -39,13 +39,13 @@ export default class SvelthreeGLTF {
 		return this.tree
 	}
 
-	async build_tree(scene: Object3D): Promise<void> {
+	async build_tree(scene: THREE.Object3D): Promise<void> {
 		//console.log("SvelthreeGLTF parsing started!")
 
 		const fns: (() => Promise<void>)[] = []
 
 		const make_three_member =
-			(obj: Object3D, parent: Object3D | undefined, tree_map: Map<string, ITreeMember>) =>
+			(obj: THREE.Object3D, parent: THREE.Object3D | undefined, tree_map: Map<string, ITreeMember>) =>
 			async (): Promise<void> => {
 				tree_map.set(obj.uuid, {
 					obj: obj,
@@ -60,7 +60,7 @@ export default class SvelthreeGLTF {
 				})
 			}
 
-		function traverse(child: Object3D, tree_map: Map<string, ITreeMember>, parent?: Object3D) {
+		function traverse(child: THREE.Object3D, tree_map: Map<string, ITreeMember>, parent?: THREE.Object3D) {
 			fns.push(make_three_member(child, parent, tree_map))
 
 			const children = child.children
@@ -111,8 +111,10 @@ export default class SvelthreeGLTF {
 						})
 						break
 					case "Object3D":
+						item.svelthree_comp = new Object3D({ target: dom_target, props: { name: item.name }, context })
+						break
 					case "Group":
-						item.svelthree_comp = new Empty({ target: dom_target, props: { name: item.name }, context })
+						item.svelthree_comp = new Group({ target: dom_target, props: { name: item.name }, context })
 						break
 					default:
 						console.error(

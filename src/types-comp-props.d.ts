@@ -41,7 +41,7 @@ export type Object3DProps = OnlyWritableNonFunctionPropsOverwritten<
 // intellisense test
 //const obj3d_props: Object3DProps = {}
 
-export type EmptyProps = Object3DProps
+export type GroupProps = Object3DProps
 export type LoadedGLTFProps = Object3DProps
 
 // -- SCENE --

@@ -32,7 +32,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { SvelthreeLightWithShadow } from "../components-internal"
 	import type { LightShadowCamProps, LightShadowProps } from "../types-extra"
 
-	//import type { Empty, Mesh } from "."
 	import type { Targetable } from "../types-extra"
 	import { LightTarget } from "../utils"
 	import { Object3D } from "three"
@@ -255,7 +254,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Defaults to `true` which means that components / objects with targets (_`DirectionalLight`, `SpotLight`, `OrthographicCamera` and `PerspectiveCamera`_)
 	 * will add the built-in 'blank' target-Object3D to component's / object's parent on initialization. `target` can be either set to `false` ( TODO ) (_which will remove the target from parent only if it's
-	 * not the built-in 'blank' `Object3D`_) or some other object in the scene (_any `Object3D`, an `Empty` component or a `Mesh` component_) */
+	 * not the built-in 'blank' `Object3D`_) or some other object in the scene (_any `Object3D` instance or a supported svelthree component reference._) */
 	export let target: Targetable | boolean = undefined
 	$: if (target === undefined) target = true
 
