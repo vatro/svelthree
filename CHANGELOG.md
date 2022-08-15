@@ -1,5 +1,11 @@
 # svelthree changelog
 
+## 1.0.0-next.0.89
+
+- (breaking) `Empty` has been replaced with new `Object3D` and `Group` components. ([#132](https://github.com/vatro/svelthree/issues/132))
+  - Partially tackling [#136](https://github.com/vatro/svelthree/issues/136) -> refactored `Targetable` type, added new `TargetableSvelthreeComponent` type, see `src\utils\PropUtils.ts`.`setLightTarget(...)` and `src\types-extra.d.ts` etc.
+
+
 ## 1.0.0-next.0.87
 
 - `Scene`: fixed reopened [#131](https://github.com/vatro/svelthree/issues/131) -> update `scene_obj.value` on instance change. 
