@@ -26,7 +26,6 @@ export * from "three"
  */
 export { Mesh as _Mesh } from "three"
 export { Points as _Points } from "three"
-export { Light as _Light } from "three"
 export { Object3D as _Object3D } from "three"
 export { Group as _Group } from "three"
 export { AmbientLight as _AmbientLight } from "three"
