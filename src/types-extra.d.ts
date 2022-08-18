@@ -137,7 +137,8 @@ import type {
 	SpotLight,
 	OrthographicCamera,
 	Scene,
-	DirectionalLight
+	DirectionalLight,
+	PerspectiveCamera
 } from "./components"
 
 export type TargetableSvelthreeComponent =
@@ -147,6 +148,7 @@ export type TargetableSvelthreeComponent =
 	| PointLight
 	| SpotLight
 	| OrthographicCamera
+	| PerspectiveCamera
 	| Scene
 	| DirectionalLight
 
