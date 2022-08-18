@@ -19,7 +19,7 @@ This is a **svelthree** _Canvas_ Component.
 	import type { Object3D } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
-	import type { PointerState, StoreBody, WebGLRendererMode } from "../types-extra"
+	import type { PointerState, StoreBody } from "../types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import { RaycastArray } from "../utils/RaycastArray"
@@ -62,7 +62,8 @@ This is a **svelthree** _Canvas_ Component.
 
 	// #region --- Optional Attributes
 
-	export let name: string = undefined
+	/** RECONSIDER  `name` attribute is currently unused, but could be somehow useful in future. */
+	// export let name: string = undefined
 
 	export let style: string = undefined
 	let clazz: string = undefined
@@ -334,9 +335,6 @@ This is a **svelthree** _Canvas_ Component.
 	// reactive create raycaster
 	$: interactive && !raycaster && c && $svelthreeStores[sti].renderer ? createRaycaster() : null
 
-	let render_mode: WebGLRendererMode
-	$: render_mode = $svelthreeStores[sti].rendererComponent?.mode
-
 	function createRaycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > interactive", interactive))
 
@@ -391,7 +389,7 @@ This is a **svelthree** _Canvas_ Component.
 		remove_interaction_1_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_1", on_interaction_1)
 	}
 
-	function on_interaction_1(e: CustomEvent): void {
+	function on_interaction_1(): void {
 		update_all_intersections_and_cursor()
 		update_canvas_listeners()
 	}

@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types-extra"
 
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
@@ -426,7 +426,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
-		const removed: boolean = await remove_instance(group, "group")
+		const removed: boolean = remove_instance(group, "group")
 		return removed
 	}
 	/**
