@@ -1635,7 +1635,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// ---- Lifecycle ----
 
 	onMount(async () => {
-		if (verbose && log_lc ) console.info(...c_lc_int(c_name, "onMount"))
+		if (verbose && log_lc) console.info(...c_lc_int(c_name, "onMount"))
 	})
 
 	onDestroy(async () => {
