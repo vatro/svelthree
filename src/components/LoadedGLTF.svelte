@@ -258,7 +258,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		loader.loadAsync(url, onProgress).then((loadedGLTF: GLTF) => {
 			content = loadedGLTF
-			if (afterLoaded?.length) process_afterLoaded(0)
+			if (afterLoaded?.length) process_afterLoaded()
 			dispatch("loaded")
 		})
 	}
@@ -268,7 +268,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * See `GLTF_afterLoaded` class for some premade common tasks.*/
 	export let afterLoaded: ((dummy: GLTF, ...args: any[]) => Promise<void>)[] | undefined = undefined
 
-	async function process_afterLoaded(fn_index: number) {
+	async function process_afterLoaded() {
 		dispatch("afterLoaded_start")
 		//console.log("processAfterLoaded started!")
 
