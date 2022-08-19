@@ -25,12 +25,13 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { AmbientLight } from "three"
 	import type { AmbientLightProps } from "../types-comp-props"
 	import type { Color, Vector3, Object3D } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
+	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -249,6 +250,8 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	$: if (light && name) light.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
 
+	const w_sh = PropUtils.getShortHandAttrWarnings(`SVELTHREE > ${c_name} >`)
+
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
@@ -308,7 +311,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
-		const removed: boolean = remove_instance(light, "light")
+		const removed: boolean = await remove_instance(light, "light")
 		return removed
 	}
 	/**

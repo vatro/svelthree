@@ -27,7 +27,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { CubeCamera, WebGLCubeRenderTarget } from "three"
 	import type { CubeCameraProps, WebGLCubeRenderTargetProps } from "../types-comp-props"
@@ -43,9 +43,10 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		MeshBasicMaterial,
 		MeshLambertMaterial
 	} from "three"
-	import type { RemoveLast } from "../types-extra"
+	import type { RemoveLast, OnlyWritableNonFunctionProps } from "../types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
+	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -613,7 +614,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
 		// SVELTEKIT  SSR
 		if (browser) {
-			const removed: boolean = remove_instance(camera, "camera")
+			const removed: boolean = await remove_instance(camera, "camera")
 			return removed
 		}
 		return false

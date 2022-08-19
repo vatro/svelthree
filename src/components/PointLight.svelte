@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
 
 	import { SvelthreeLightWithShadow } from "../components-internal"
 	import type { LightShadowCamProps, LightShadowProps } from "../types-extra"
@@ -38,6 +38,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
+	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -415,7 +416,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
-		const removed: boolean = remove_instance(light, "light")
+		const removed: boolean = await remove_instance(light, "light")
 		return removed
 	}
 	/**
