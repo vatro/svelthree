@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types-extra"
 
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"

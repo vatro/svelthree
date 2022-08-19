@@ -32,7 +32,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types-extra"
 
 	import { OrthographicCamera, CameraHelper } from "three"
 	import type { OrthographicCameraProps } from "../types-comp-props"

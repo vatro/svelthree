@@ -25,7 +25,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimationFunctionReturn } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types-extra"
 
 	import { AmbientLight } from "three"
 	import type { AmbientLightProps } from "../types-comp-props"
