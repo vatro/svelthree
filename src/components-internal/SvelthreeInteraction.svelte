@@ -1258,12 +1258,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function prevent_default(e) {
-		if (verbose && log_dev) console.warn("-> SvelthreeInteraction > prevent_default! ->", e)
+		if (verbose && log_dev) console.info(...c_dev(c_name, "prevent_default!"))
 		e.preventDefault()
 	}
 
 	function stop_propagation(e) {
-		if (verbose && log_dev) console.warn("-> SvelthreeInteraction > stop_propagation! ->", e)
+		if (verbose && log_dev) console.info(...c_dev(c_name, "stop_propagation!"))
 		e.stopPropagation()
 	}
 
@@ -1635,19 +1635,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// ---- Lifecycle ----
 
 	onMount(async () => {
-		//if (verbose && log_lc ) console.info(...c_lc_int(c_name, "onMount"))
+		if (verbose && log_lc ) console.info(...c_lc_int(c_name, "onMount"))
 	})
 
 	onDestroy(async () => {
-		//if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onDestroy"))
+		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc_int(c_name, "onDestroy"))
 		remove_all_listeners()
 	})
 
 	beforeUpdate(async () => {
-		//if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
+		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc_int(c_name, "beforeUpdate"))
 	})
 
 	afterUpdate(async () => {
-		//if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
+		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc_int(c_name, "afterUpdate"))
 	})
 </script>
