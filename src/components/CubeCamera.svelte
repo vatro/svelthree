@@ -613,7 +613,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 	export const remove_instance_from_parent = async (): Promise<boolean> => {
 		// SVELTEKIT  SSR
 		if (browser) {
-			const removed: boolean = await remove_instance(camera, "camera")
+			const removed: boolean = remove_instance(camera, "camera")
 			return removed
 		}
 		return false
