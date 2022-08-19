@@ -58,8 +58,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let sti: number = getContext("store_index")
 	export let obj: Object3D
 
-	// still not sure if we even need this / want to handle this like svelte
-	const passive_events = new Set([])
+	// TODO  still not sure if we even need this / want to handle this like svelte
+	//const passive_events = new Set([])
 
 	export let modifiers: SvelthreeModifiersProp = undefined
 	const user_modifiers_prop = new Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeSupportedModifier>>()
