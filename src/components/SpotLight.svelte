@@ -21,7 +21,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
-	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
+	import type { Matrix4, Vector3 } from "three"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
