@@ -14,8 +14,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
 	import { svelthreeStores } from "svelthree/stores"
-	//import { c_dev, c_lc_int } from "../utils/SvelthreeLogger"
-	import { verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
+	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { PointerState, SvelthreeShadowDOMElement } from "../types-extra"
 	import type { Writable } from "svelte/store"
@@ -46,12 +45,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 */
 	import { browser } from "$app/env"
 
-	//const c_name = get_comp_name_int(get_current_component())
+	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
 	//export let log_rs: boolean = false
-	//export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
 
 	export let interactionEnabled: boolean
 	export let parent: SvelteComponentDev
