@@ -1266,12 +1266,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function prevent_default(e) {
+	function prevent_default(e: PointerEvent | FocusEvent | KeyboardEvent) {
 		if (verbose && log_dev) console.info(...c_dev(c_name, "prevent_default!"))
 		e.preventDefault()
 	}
 
-	function stop_propagation(e) {
+	function stop_propagation(e: PointerEvent | FocusEvent | KeyboardEvent) {
 		if (verbose && log_dev) console.info(...c_dev(c_name, "stop_propagation!"))
 		e.stopPropagation()
 	}
