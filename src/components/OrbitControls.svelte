@@ -62,7 +62,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Display a console warning if the `OrbitControls` component's `cam` attribute was assigned a currently _inactive_ camera (also adss a `CameraHelper` to the assigned Camera). Default is `true`. Set `warn={false}` to hide the warning (_also: no `CameraHelper` be added_). */
 	export let warn: boolean = true
 
+	// TODO  clarify why / when we would need this.
 	let index_in_orbitcontrols: number = undefined
+
+	/** Get `OrbitControls` three.js instance's index in the `orbitcontrols`-array (svelthreeStore).
+	 * Can also be obtained via created `orbitcontrols` instance directly: `orbitcontrols_comp_ref.orbitcontrols.userData.index_in_orbitcontrols`
+	 */
+	export function get_index_in_orbitcontrols(): number {
+		return index_in_orbitcontrols
+	}
 
 	export let cam: PerspCamSvelthreeComponent | OrthoCamSvelthreeComponent | PerspectiveCamera | OrthographicCamera =
 		undefined
