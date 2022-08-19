@@ -389,7 +389,7 @@ This is a **svelthree** _Canvas_ Component.
 		remove_interaction_1_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_1", on_interaction_1)
 	}
 
-	function on_interaction_1(e: CustomEvent): void {
+	function on_interaction_1(): void {
 		update_all_intersections_and_cursor()
 		update_canvas_listeners()
 	}
