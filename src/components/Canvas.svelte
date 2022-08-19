@@ -62,7 +62,8 @@ This is a **svelthree** _Canvas_ Component.
 
 	// #region --- Optional Attributes
 
-	export let name: string = undefined
+	/** RECONSIDER  `name` attribute is currently unused, but could be somehow useful in future. */
+	// export let name: string = undefined
 
 	export let style: string = undefined
 	let clazz: string = undefined
