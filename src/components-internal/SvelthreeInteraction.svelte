@@ -76,15 +76,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/** Filter out / use only supported modifiers. */
-	function get_valid_modifiers_only(modifiers_arr: SvelthreeSupportedModifier[]): Set<SvelthreeSupportedModifier> {
+	function get_valid_modifiers_only(modifiers_arr: string[]): Set<SvelthreeSupportedModifier> {
 		const valid_modifiers: SvelthreeSupportedModifier[] = []
 
 		for (let i = 0; i < modifiers_arr.length; i++) {
-			const modifier_name: SvelthreeSupportedModifier = modifiers_arr[i]
-			if (!SUPPORTED_MODIFIERS_SET.has(modifier_name)) {
+			const modifier_name: string = modifiers_arr[i]
+			if (!SUPPORTED_MODIFIERS_SET.has(modifier_name as SvelthreeSupportedModifier)) {
 				console.error(`SvelthreeInteraction > ERROR: modifier '${modifier_name}'`)
-			} else if (!valid_modifiers.includes(modifier_name)) {
-				valid_modifiers.push(modifier_name)
+			} else if (!valid_modifiers.includes(modifier_name as SvelthreeSupportedModifier)) {
+				valid_modifiers.push(modifier_name as SvelthreeSupportedModifier)
 			}
 		}
 
@@ -357,7 +357,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function get_listener_options_from_modifiers_arr(
 		event_name: SvelthreeSupportedInteractionEvent,
-		modifiers_arr
+		modifiers_arr: string[]
 	): { [key in SupportedAddEventListenerOption]?: boolean } {
 		if (user_modifiers_prop.has(event_name) || user_modifiers_prop.has("all")) {
 			const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
@@ -396,7 +396,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function update_prop_action_modifiers(event_name: SvelthreeSupportedInteractionEvent, modifiers_arr): void {
+	function update_prop_action_modifiers(
+		event_name: SvelthreeSupportedInteractionEvent,
+		modifiers_arr: string[]
+	): void {
 		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
 		const user = modifiers_arr ? get_valid_modifiers_only(modifiers_arr) : null
