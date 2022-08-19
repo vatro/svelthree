@@ -992,7 +992,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				set_keyboard_listener(event_name, listener_options, "on_directive")
 
-				register_event(event_name, used_keyboard_events_directive, "on_directive")
+				register_event(event_name, used_keyboard_events_directive)
 			} else {
 				//console.warn(`'${event_name}' already registered as directive event!`)
 			}
@@ -1019,7 +1019,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					)
 				}
 
-				register_event(event_name, used_keyboard_events_action, "prop_action")
+				register_event(event_name, used_keyboard_events_action)
 			} else {
 				//console.warn(`'${event_name}' already registered as internal action event!`)
 			}
@@ -1405,21 +1405,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function register_event(
-		event_name: SvelthreeSupportedInteractionEvent,
-		target_set: Set<string>,
-		set_by: HandlerSetBy = null
-	) {
+	function register_event(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
 		if (!target_set.has(event_name)) {
 			target_set.add(event_name)
-
-			let modifiers_map: UserModifiersMap
-
-			if (set_by === "prop_action") {
-				modifiers_map = user_modifiers_action
-			} else if (set_by === "on_directive") {
-				modifiers_map = user_modifiers_prop
-			}
 
 			// register specific events on the <canvas> element (some pointer and all keyboard events)
 			switch (event_name) {
@@ -1431,9 +1419,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				case "keydown":
 				case "keyup":
 				case "keypress":
-					//if (modifiers_map && !modifiers_map.get(event_name)?.has("self")) {
 					canvas_component.register_canvas_listener(event_name)
-					//}
 					break
 				default:
 					break
