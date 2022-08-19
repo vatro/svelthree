@@ -655,9 +655,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_pointeroverout_listener: () => void
 	function add_canvas_pointeroverout_listener(): void {
-		remove_canvas_pointeroverout_listener = canvas_component.$on("canvas_pointermove", (e) =>
-			// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom listener / handler
-			check_pointer_overout(e.detail.event)
+		remove_canvas_pointeroverout_listener = canvas_component.$on(
+			"canvas_pointermove",
+			(e: { detail: { event: PointerEvent } }) =>
+				// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom listener / handler
+				check_pointer_overout(e.detail.event)
 		)
 	}
 
@@ -694,8 +696,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_pointerdown_listener: () => void
 	function add_canvas_pointerdown_listener(): void {
-		remove_canvas_pointerdown_listener = canvas_component.$on("canvas_pointerdown", (e) =>
-			check_pointer_pointerdown(e.detail.event)
+		remove_canvas_pointerdown_listener = canvas_component.$on(
+			"canvas_pointerdown",
+			(e: { detail: { event: PointerEvent } }) => check_pointer_pointerdown(e.detail.event)
 		)
 	}
 
@@ -709,8 +712,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_pointerup_listener: () => void
 	function add_canvas_pointerup_listener(): void {
-		remove_canvas_pointerup_listener = canvas_component.$on("canvas_pointerup", (e) =>
-			check_pointer_pointerup(e.detail.event)
+		remove_canvas_pointerup_listener = canvas_component.$on(
+			"canvas_pointerup",
+			(e: { detail: { event: PointerEvent } }) => check_pointer_pointerup(e.detail.event)
 		)
 	}
 
@@ -724,7 +728,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_click_listener: () => void
 	function add_canvas_click_listener(): void {
-		remove_canvas_click_listener = canvas_component.$on("canvas_click", (e) => check_pointer_click(e.detail.event))
+		remove_canvas_click_listener = canvas_component.$on("canvas_click", (e: { detail: { event: PointerEvent } }) =>
+			check_pointer_click(e.detail.event)
+		)
 	}
 
 	/**
