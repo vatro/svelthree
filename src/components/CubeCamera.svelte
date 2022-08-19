@@ -43,7 +43,7 @@ Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` p
 		MeshBasicMaterial,
 		MeshLambertMaterial
 	} from "three"
-	import type { RemoveLast, OnlyWritableNonFunctionProps } from "../types-extra"
+	import type { RemoveLast } from "../types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 
