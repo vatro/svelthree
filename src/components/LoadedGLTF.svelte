@@ -18,8 +18,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import type { SvelthreeShadowDOMElement } from "../types-extra"
-	import { if$_instance_change } from "../logic/if$"
-	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
+
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 
