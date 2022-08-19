@@ -249,8 +249,6 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	$: if (light && name) light.name = name
 	$: if (shadow_dom_el && name) shadow_dom_el.dataset.name = name
 
-	const w_sh = PropUtils.getShortHandAttrWarnings(`SVELTHREE > ${c_name} >`)
-
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
