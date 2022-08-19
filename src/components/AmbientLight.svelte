@@ -31,7 +31,6 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import type { AmbientLightProps } from "../types-comp-props"
 	import type { Color, Vector3, Object3D } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
-	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR /

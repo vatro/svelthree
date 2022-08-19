@@ -36,7 +36,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js"
 	import type { RemoveFirst } from "../types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
-	import type { Writable } from "svelte/store"
 
 	/**
 	 *  SVELTEKIT  SSR /
