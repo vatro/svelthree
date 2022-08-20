@@ -318,7 +318,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " GLOBAL Keyboard Event -> CANVAS Component Keyboard Event ",
@@ -327,7 +327,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " NATIVE DOM / SHADOW DOM Event ",
@@ -336,7 +336,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER ",
@@ -345,7 +345,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " POINTER Event ",
@@ -354,7 +354,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffffff",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " FOCUS Event ",
@@ -363,7 +363,7 @@
 			"color": "#000000",
 			"backgroundColor": "#e879f9",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " KEYBOARD Event ",
@@ -372,7 +372,7 @@
 			"color": "#000000",
 			"backgroundColor": "#22d3ee",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " WHEEL Event ",
@@ -381,7 +381,7 @@
 			"color": "#000000",
 			"backgroundColor": "#d1d5db",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " SHADOW DOM Event HANDLER -> ",
@@ -390,7 +390,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " DISPATCH Component Event IMMEDIATELY / QUEUE ",
@@ -399,7 +399,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " RENDER EVENT interaction_2 ",
@@ -408,7 +408,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " LISTENER MANAGEMENT ",
@@ -417,7 +417,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " LISTENER OPTIONS AND MODIFIERS ",
@@ -426,7 +426,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " CANCEL OR STOP PROPAGATION ",
@@ -435,7 +435,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " REMOVING AND UNREGISTERING ",
@@ -444,7 +444,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " ADDING AND REGISTERING ",
@@ -453,14 +453,14 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " ALWAYS ",
 			"fontWeight": "bold",
 			"color": "#000000",
 			"backgroundColor": "#a3e635",
-			"overviewRulerColor": "grey",
+			"overviewRulerColor": "grey"
 		},
 		{
 			"text": " AUTO ",
@@ -468,7 +468,7 @@
 			"fontWeight": "bold",
 			"color": "#a3e635",
 			"backgroundColor": "none",
-			"overviewRulerColor": "grey",
+			"overviewRulerColor": "grey"
 		},
 		{
 			"text": " CREATION ",
@@ -477,7 +477,7 @@
 			"color": "#ffffff",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " INJECTION ",
@@ -486,7 +486,7 @@
 			"color": "fuchsia",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " INITIALIZATION ",
@@ -495,7 +495,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " ON ",
@@ -504,7 +504,7 @@
 			"color": "#ffff00",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " ONCE ",
@@ -513,7 +513,7 @@
 			"color": "#000000",
 			"backgroundColor": "#ffff00",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " AFTER ",
@@ -522,7 +522,7 @@
 			"color": "#ffff00",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " GEOMETRY ",
@@ -531,7 +531,7 @@
 			"color": "#ffff00",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
+			"borderRadius": "6px"
 		},
 		{
 			"text": " MATERIAL ",
@@ -540,7 +540,8 @@
 			"color": "#ffff00",
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
-			"borderRadius": "6px",
-		},
-	]
+			"borderRadius": "6px"
+		}
+	],
+	"cSpell.enabled": false
 }
