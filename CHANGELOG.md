@@ -1,5 +1,14 @@
 # svelthree changelog
 
+## 1.0.0-next.0.91
+
+(*most important*) Various changes in order to get `svelte-check found 0 errors, 0 warnings, and 0 hints`, see #([#143](https://github.com/vatro/svelthree/issues/143))
+
+Also:
+- Don't re-export `Light` from `three` (unclear why this was done at all)
+- `PerspectiveCamera` component's type added to Union Type `TargetableSvelthreeComponent`
+
+
 ## 1.0.0-next.0.89
 
 - (breaking) `Empty` has been replaced with new `Object3D` and `Group` components. ([#132](https://github.com/vatro/svelthree/issues/132))
