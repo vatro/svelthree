@@ -9,15 +9,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 This is an internal _SvelthreeLightWithShadow_ Component.
 -->
 <script lang="ts">
-	import { get_current_component } from "svelte/internal"
-
 	import type { LightWithShadow } from "../types-extra"
 	import { PropUtils, SvelthreeProps } from "../utils"
-	import { verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogDEV } from "../utils/SvelthreeLogger"
-
-	const c_name = get_comp_name_int(get_current_component())
-	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
 
