@@ -7,7 +7,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 <!--
 @component
 **svelthree** _CubeCamera_ Component.
-Renders a CubeMap for usage with **non-PBR** materials which have an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236).     
+Renders a `CubeMap` which can be used with **non-PBR** materials having an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236)).     
 [ tbd ]  Link to Docs. -->
 <script lang="ts">
 	import type { Scene } from "three"
