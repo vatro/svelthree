@@ -152,7 +152,7 @@ export type TargetableSvelthreeComponent =
 	| OrthographicCamera
 	| PerspectiveCamera
 
-export type Targetable = THREE.Object3D | TargetableSvelthreeComponent
+export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
 import type {
 	MeshToonMaterialParameters,
