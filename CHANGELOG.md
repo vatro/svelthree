@@ -1,5 +1,12 @@
 # svelthree changelog
 
+## 1.0.0-next.0.92
+
+Resolved ([#141](https://github.com/vatro/svelthree/issues/141)):
+  - Renaming of `Object3D` component not necessary (won't fix [#142](https://github.com/vatro/svelthree/issues/142))
+	- Won't fix [#144](https://github.com/vatro/svelthree/issues/144))
+
+
 ## 1.0.0-next.0.91
 
 (*most important*) Various changes in order to get `svelte-check found 0 errors, 0 warnings, and 0 hints`, see ([#143](https://github.com/vatro/svelthree/issues/143))
