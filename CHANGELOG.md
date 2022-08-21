@@ -2,7 +2,7 @@
 
 ## 1.0.0-next.0.91
 
-(*most important*) Various changes in order to get `svelte-check found 0 errors, 0 warnings, and 0 hints`, see #([#143](https://github.com/vatro/svelthree/issues/143))
+(*most important*) Various changes in order to get `svelte-check found 0 errors, 0 warnings, and 0 hints`, see ([#143](https://github.com/vatro/svelthree/issues/143))
 
 Also:
 - Don't re-export `Light` from `three` (unclear why this was done at all)
