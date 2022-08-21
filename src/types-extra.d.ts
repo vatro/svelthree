@@ -142,15 +142,15 @@ import type {
 } from "./components"
 
 export type TargetableSvelthreeComponent =
-	| Mesh<any>
+	| Scene
 	| Object3D
 	| Group
+	| Mesh<any>
 	| PointLight
 	| SpotLight
+	| DirectionalLight
 	| OrthographicCamera
 	| PerspectiveCamera
-	| Scene
-	| DirectionalLight
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent
 
