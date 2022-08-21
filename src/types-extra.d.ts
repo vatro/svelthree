@@ -153,7 +153,6 @@ export type TargetableSvelthreeComponent =
 	| DirectionalLight
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent
-export type CubeCameraBoundable = THREE.Object3D | Mesh<any> | Object3D
 
 import type {
 	MeshToonMaterialParameters,
