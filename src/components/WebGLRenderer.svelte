@@ -601,18 +601,20 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		// inserting await tick() here enables cross-referencing:
 		await tick()
 
-		// filter interactive objects in currently active (rendered) scene
-		await dispatch_render_event("interaction_0")
+		if ($svelthreeStores[sti].canvas.interactive) {
+			// filter interactive objects in currently active (rendered) scene
+			await dispatch_render_event("interaction_0")
 
-		// update raycaster intersections and cursor appearance (_if `canvas_comp.change_cursor = true`_)
-		await dispatch_render_event("interaction_1")
+			// update raycaster intersections and cursor appearance (_if `canvas_comp.change_cursor = true`_)
+			await dispatch_render_event("interaction_1")
 
-		if (mode === "always") {
-			// fire any queued pointer interactivity
-			await dispatch_render_event("interaction_2")
+			if (mode === "always") {
+				// fire any queued pointer interactivity
+				await dispatch_render_event("interaction_2")
 
-			// fire any queued focus / keyboard interactivity
-			await dispatch_render_event("interaction_3")
+				// fire any queued focus / keyboard interactivity
+				await dispatch_render_event("interaction_3")
+			}
 		}
 
 		// will currently update box-helpers only
