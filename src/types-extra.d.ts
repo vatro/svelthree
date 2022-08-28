@@ -138,7 +138,9 @@ import type {
 	OrthographicCamera,
 	Scene,
 	DirectionalLight,
-	PerspectiveCamera
+	PerspectiveCamera,
+	Points,
+	LoadedGLTF
 } from "./components"
 
 export type TargetableSvelthreeComponent =
@@ -146,11 +148,13 @@ export type TargetableSvelthreeComponent =
 	| Object3D
 	| Group
 	| Mesh<any>
+	| Points<any>
 	| PointLight
 	| SpotLight
 	| DirectionalLight
 	| OrthographicCamera
 	| PerspectiveCamera
+	| LoadedGLTF
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
