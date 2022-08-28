@@ -33,7 +33,7 @@ export default class LightUtils {
 	public static tryColorUpdate(light: Light, color: any): void {
 		if (verbose_mode()) console.debug("color", color)
 		try {
-			if (PropUtils.isArray(color)) {
+			if (Array.isArray(color)) {
 				if (PropUtils.isArray3Nums(color)) {
 					light.color = new Color(color[0], color[1], color[2])
 				} else {
