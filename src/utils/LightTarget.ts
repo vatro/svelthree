@@ -41,7 +41,7 @@ export default class LightTarget {
 	}
 
 	// targetable component instances
-	private targetable_instance_names = ["object3d", "group", "mesh", "light", "camera"]
+	private targetable_instance_names = ["scene", "object3d", "group", "mesh", "light", "camera", "container", "points"]
 
 	private has_targetable_instance(target_to_check: any): string | boolean {
 		for (let i = 0; i < this.targetable_instance_names.length; i++) {
