@@ -213,6 +213,20 @@ export type GLTFSupportedSvelthreeComponents = Mesh<any> | Group | Object3D | Sc
 /** currently unused -> check possible usage or delete */
 //export type RaycastableSvelthreeComponents = Mesh<any> | Group | Object3D
 
+export interface ISvelthreeGLTFTreeMapMember {
+	obj: THREE.Object3D
+	parent_uuid?: string | null
+	name?: string | null
+	obj_type?: string
+	mesh?: {
+		geometry: THREE.BufferGeometry
+		material: THREE.Material | THREE.Material[]
+	} | null
+	svelthree_comp?: GLTFSupportedSvelthreeComponents
+}
+
+export type SvelthreeGLTFTreeMap = Map<string, ISvelthreeGLTFTreeMapMember>
+
 export interface PointerState {
 	pos: THREE.Vector2
 	event: PointerEvent
