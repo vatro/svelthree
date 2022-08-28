@@ -26,16 +26,18 @@ export default class LightTarget {
 
 			const targetable_instance_name: string | boolean = this.has_targetable_instance(this.target)
 
-			if (targetable_instance_name) {
-				// light_comp_ref.target = comp_ref -> use any targetable component as target (already added to the scene)
-				this.light["target"] = this.target[targetable_instance_name as string]
-			} else if ((this.target as Object3D).isObject3D) {
-				// light_comp_ref.target = obj3d_ref -> use any 'Object3D' as target (already added to the scene)
-				this.light["target"] = this.target
-			} else if (typeof this.target === "boolean") {
-				// light_comp_ref.target = true -> use the built-in 'Object3D' as target (add it to the scene)
-				this.light["target"].userData.is_builtin_target = true
-				this.scene.add(this.light["target"])
+			if (this.target) {
+				if (targetable_instance_name) {
+					// light_comp_ref.target = comp_ref -> use any targetable component as target (already added to the scene)
+					this.light["target"] = this.target[targetable_instance_name as string]
+				} else if ((this.target as Object3D).isObject3D) {
+					// light_comp_ref.target = obj3d_ref -> use any 'Object3D' as target (already added to the scene)
+					this.light["target"] = this.target
+				} else if (typeof this.target === "boolean") {
+					// light_comp_ref.target = true -> use the built-in 'Object3D' as target (add it to the scene)
+					this.light["target"].userData.is_builtin_target = true
+					this.scene.add(this.light["target"])
+				}
 			}
 		}
 	}
