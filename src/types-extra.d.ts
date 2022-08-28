@@ -209,8 +209,9 @@ type AllLights = THREE.SpotLight &
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
-export type RaycastableSvelthreeComponents = Mesh<any> & Group & Object3D
 export type GLTFSupportedSvelthreeComponents = Mesh<any> | Group | Object3D | Scene
+/** currently unused -> check possible usage or delete */
+//export type RaycastableSvelthreeComponents = Mesh<any> | Group | Object3D
 
 export interface PointerState {
 	pos: THREE.Vector2
