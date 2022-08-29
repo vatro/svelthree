@@ -1,5 +1,18 @@
 # svelthree changelog
 
+## 1.0.0-next.0.93
+
+Changes due to check / polish of setting the `target` shorthand attribute on `SpotLight` and `DirectionalLight` components ([#136](https://github.com/vatro/svelthree/issues/136)), including:
+- Improved dx / refactored `SvelthreeGLTF.ts` ([#136](https://github.com/vatro/svelthree/issues/136) 2. Task):
+  - `GLTF` is now passed via constructor, e.g. `const foo: SvelthreeGLTF = new SvelthreeGLTF(loaded_gltf_file: GLTF)`
+  - `apply(...)` now uses a `Canvas` component reference instead of a `Canvas` DOM Element.
+
+Also:
+- `WebGLRenderer` now emits interaction events only if canvas is set to be `interactive` (better performance)
+- Various TypeScript related changes
+- Minor code fixes
+
+
 ## 1.0.0-next.0.92
 
 Resolved ([#141](https://github.com/vatro/svelthree/issues/141)):
