@@ -292,6 +292,11 @@ This is a **svelthree** _Canvas_ Component.
 	const shadow_root: Writable<{ element: ShadowRoot }> = writable({ element: null })
 	setContext("shadow_root", shadow_root)
 
+	/** Returns the shadow DOM root element. */
+	export function get_shadow_root_el(): ShadowRoot {
+		return $shadow_root.element
+	}
+
 	$: if (sh_root) {
 		$shadow_root.element = sh_root.attachShadow({ mode: "open", delegatesFocus: false })
 	}
