@@ -850,7 +850,42 @@ This is a **svelthree** _Canvas_ Component.
 		// any newly added canvas will create a new store at the next highest index
 		// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
 		$svelthreeStores[sti] = null
+
+		// if all stores are `null` we can safely reset the `svelthreeStores` array, e.g. when switching pages / routes.
+		if (all_stores_are_null()) {
+			$svelthreeStores = []
+		} else {
+			// trim `svelthreeStores` array's tail
+			trim_stores_array()
+		}
 	})
+
+	function all_stores_are_null(): boolean {
+		for (let i = 0; i < $svelthreeStores.length; i++) {
+			if ($svelthreeStores[i] !== null) {
+				return false
+			}
+		}
+		return true
+	}
+
+	function trim_stores_array(): void {
+		let start_index: number
+
+		for (let i = $svelthreeStores.length - 1; i > 0; i--) {
+			if ($svelthreeStores[i] === null && $svelthreeStores[i - 1] !== null) {
+				start_index = i
+				break
+			} else if ($svelthreeStores[i] !== null) {
+				break
+			}
+		}
+
+		if (start_index) {
+			const trim_length: number = $svelthreeStores.length - start_index
+			$svelthreeStores.splice(start_index, trim_length)
+		}
+	}
 
 	beforeUpdate(async () => {
 		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
