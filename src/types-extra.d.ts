@@ -159,20 +159,6 @@ export type TargetableSvelthreeComponent =
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
 import type {
-	MeshToonMaterialParameters,
-	MeshBasicMaterialParameters,
-	MeshDepthMaterialParameters,
-	MaterialParameters,
-	MeshPhongMaterialParameters,
-	MeshMatcapMaterialParameters,
-	MeshNormalMaterialParameters,
-	MeshLambertMaterialParameters,
-	MeshStandardMaterialParameters,
-	MeshDistanceMaterialParameters,
-	MeshPhysicalMaterialParameters
-} from "three"
-
-import type {
 	MeshToonMaterial,
 	MeshBasicMaterial,
 	MeshDepthMaterial,
