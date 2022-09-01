@@ -130,17 +130,24 @@ export type ComplexValueType =
 	| "Color"
 
 import type {
+	AmbientLight,
+	Canvas,
+	CubeCamera,
+	DirectionalLight,
+	Group,
+	HemisphereLight,
+	LoadedGLTF,
 	Mesh,
 	Object3D,
-	Group,
-	PointLight,
-	SpotLight,
+	OrbitControls,
 	OrthographicCamera,
-	Scene,
-	DirectionalLight,
 	PerspectiveCamera,
+	PointLight,
 	Points,
-	LoadedGLTF
+	RectAreaLight,
+	Scene,
+	SpotLight,
+	WebGLRenderer
 } from "./components"
 
 export type TargetableSvelthreeComponent =
