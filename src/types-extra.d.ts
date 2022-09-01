@@ -150,6 +150,26 @@ import type {
 	WebGLRenderer
 } from "./components"
 
+export type AnySvelthreeComponent =
+	| AmbientLight
+	| Canvas
+	| CubeCamera
+	| DirectionalLight
+	| Group
+	| HemisphereLight
+	| LoadedGLTF
+	| Mesh<any>
+	| Object3D
+	| OrbitControls
+	| OrthographicCamera
+	| PerspectiveCamera
+	| PointLight
+	| Points<any>
+	| RectAreaLight
+	| Scene
+	| SpotLight
+	| WebGLRenderer
+
 export type TargetableSvelthreeComponent =
 	| Scene
 	| Object3D
