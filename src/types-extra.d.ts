@@ -158,31 +158,17 @@ export type TargetableSvelthreeComponent =
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
-import type {
-	MeshToonMaterial,
-	MeshBasicMaterial,
-	MeshDepthMaterial,
-	Material,
-	MeshPhongMaterial,
-	MeshMatcapMaterial,
-	MeshNormalMaterial,
-	MeshLambertMaterial,
-	MeshStandardMaterial,
-	MeshDistanceMaterial,
-	MeshPhysicalMaterial
-} from "three"
-
-type AllMeshMaterials = MeshToonMaterial &
-	MeshBasicMaterial &
-	MeshDepthMaterial &
-	Material &
-	MeshPhongMaterial &
-	MeshMatcapMaterial &
-	MeshNormalMaterial &
-	MeshLambertMaterial &
-	MeshStandardMaterial &
-	MeshDistanceMaterial &
-	MeshPhysicalMaterial
+type AllMeshMaterials = THREE.MeshToonMaterial &
+	THREE.MeshBasicMaterial &
+	THREE.MeshDepthMaterial &
+	THREE.Material &
+	THREE.MeshPhongMaterial &
+	THREE.MeshMatcapMaterial &
+	THREE.MeshNormalMaterial &
+	THREE.MeshLambertMaterial &
+	THREE.MeshStandardMaterial &
+	THREE.MeshDistanceMaterial &
+	THREE.MeshPhysicalMaterial
 
 export type AnyMeshMaterialProps = OnlyWritableNonFunctionProps<Omit<AllMeshMaterials, PropBlackList>>
 
