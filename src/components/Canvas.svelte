@@ -904,9 +904,8 @@ This is a **svelthree** _Canvas_ Component.
 	})
 </script>
 
-<canvas data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz}>
-	<slot />
-</canvas>
-<!-- IMPORTANT  if we put 'svelthree_shadow_dom_root' inside canvas tabbing / focus will not work! -->
+<canvas data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />
 <!-- IMPORTANT  any objects with 'tabindex' specified will receive focus -->
-<div bind:this={sh_root} data-kind="svelthree_shadow_dom_root" style="height: 0; width: 0; overflow: hidden;" />
+<div bind:this={sh_root} data-kind="svelthree_shadow_dom_root" style="height: 0; width: 0; overflow: hidden;">
+	<slot />
+</div>
