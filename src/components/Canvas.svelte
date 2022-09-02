@@ -73,6 +73,9 @@ This is a **svelthree** _Canvas_ Component.
 	export let change_cursor: boolean = true
 
 	export let interactive: boolean = undefined
+	$: if (interactive !== undefined) {
+		$svelthreeStores[sti].canvas.interactive = interactive
+	}
 
 	/**
 	 * Set listener options for all pointer listeners ( _internally_ ) bound directly to:
