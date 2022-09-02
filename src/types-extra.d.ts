@@ -170,6 +170,12 @@ export type AnySvelthreeComponent =
 	| SpotLight
 	| WebGLRenderer
 
+export type SvelthreeComponentShadowDOMRoot = Canvas
+export type SvelthreeComponentShadowDOMChild = Exclude<
+	AnySvelthreeComponent,
+	SvelthreeComponentShadowDOMRoot | OrbitControls | WebGLRenderer
+>
+
 export type TargetableSvelthreeComponent =
 	| Scene
 	| Object3D
