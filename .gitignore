@@ -1,6 +1,14 @@
+.DS_Store
 node_modules
-dist
-generator
-src/components-check
-src/components-internal-check
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+
+# components generator files and folders
+/generator
+/src/lib/components-check
+/src/lib/components-internal-check
 generate_svelthree_components.js
