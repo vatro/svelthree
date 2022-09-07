@@ -171,10 +171,26 @@ export type AnySvelthreeComponent =
 	| WebGLRenderer
 
 export type SvelthreeComponentShadowDOMRoot = Canvas
-export type SvelthreeComponentShadowDOMChild = Exclude<
-	AnySvelthreeComponent,
-	SvelthreeComponentShadowDOMRoot | OrbitControls | WebGLRenderer
->
+
+export type SvelthreeComponentShadowDOMChild =
+	| AmbientLight
+	//| Canvas
+	| CubeCamera
+	| DirectionalLight
+	| Group
+	| HemisphereLight
+	| LoadedGLTF
+	| Mesh<any>
+	| Object3D
+	//| OrbitControls
+	| OrthographicCamera
+	| PerspectiveCamera
+	| PointLight
+	| Points<any>
+	| RectAreaLight
+	| Scene
+	| SpotLight
+	//| WebGLRenderer
 
 export type TargetableSvelthreeComponent =
 	| Scene
@@ -214,20 +230,19 @@ type AllLights = THREE.SpotLight &
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
+export type RaycastableSvelthreeComponents = Mesh<any> | Group | Object3D
 export type GLTFSupportedSvelthreeComponents = Mesh<any> | Group | Object3D | Scene
-/** currently unused -> check possible usage or delete */
-//export type RaycastableSvelthreeComponents = Mesh<any> | Group | Object3D
 
 export interface ISvelthreeGLTFTreeMapMember {
 	obj: THREE.Object3D
 	parent_uuid?: string | null
-	name?: string | null
+	name?: string
 	obj_type?: string
 	mesh?: {
 		geometry: THREE.BufferGeometry
 		material: THREE.Material | THREE.Material[]
 	} | null
-	svelthree_comp?: GLTFSupportedSvelthreeComponents
+	svelthree_comp?: SvelthreeComponentShadowDOMChild
 }
 
 export type SvelthreeGLTFTreeMap = Map<string, ISvelthreeGLTFTreeMapMember>
@@ -240,7 +255,7 @@ export interface PointerState {
 
 export interface StoreCanvas {
 	dom: HTMLCanvasElement
-	svelthreeComponent: any
+	svelthreeComponent: Canvas
 	dim: {
 		w: number
 		h: number
