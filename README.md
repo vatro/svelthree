@@ -3,7 +3,7 @@ There's an **impressive (_pretty new_) three.js component library for Svelte: [t
 
 Although the completeness of `threlte` could demotivate me concerning further `svelthree` development, I'm going to continue working on `svelthree` because it's my baby and I love it 🥰. Also: the API / DX / capability is / will be different to `threlte` in quite a few ways and I think it's always good to have alternatives.
 
-Thanks for dropping by & stay tuned! 🚀 + feel free to leave a star! 😁👋
+Thanks for dropping by & stay tuned! 🚀 + feel free to try `svelthree` & leave a star! 😁👋
 
 ---
 
