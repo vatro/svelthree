@@ -1,0 +1,19 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+
+# Ignore files for PNPM, NPM and YARN
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Ignore component generator files and folders
+/generator
+/src/lib/components-check
+/src/lib/components-internal-check
+generate_svelthree_components.js
