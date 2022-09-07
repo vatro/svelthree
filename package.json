@@ -1,0 +1,60 @@
+{
+	"name": "svelthree",
+	"description": "Create three.js content with Svelte components.",
+	"version": "1.0.0-next.0.95",
+	"author": "Vatroslav Vrbanic <hello@svelthree.dev> (https://svelthree.dev)",
+	"license": "MIT",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "svelte-kit sync && svelte-package",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/kit": "next",
+		"@sveltejs/package": "next",
+		"@typescript-eslint/eslint-plugin": "^5.27.0",
+		"@typescript-eslint/parser": "^5.27.0",
+		"eslint": "^8.16.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-svelte3": "^4.0.0",
+		"prettier": "^2.6.2",
+		"prettier-plugin-svelte": "^2.7.0",
+		"svelte": "^3.44.0",
+		"svelte-check": "^2.7.1",
+		"svelte-preprocess": "^4.10.6",
+		"tslib": "^2.3.1",
+		"typescript": "^4.7.4",
+		"vite": "^3.1.0-beta.1",
+		"fs-extra": "^10.1.0",
+		"three": "0.141.x"
+	},
+	"peerDependencies": {
+		"svelte": "3.44.2 - 3.49.0",
+		"svelte-accmod-patch": "^1.0.0",
+		"three": "0.125.x - 0.141.x"
+	},
+	"optionalDependencies": {
+		"@types/three": "0.141.x"
+	},
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vatro/svelthree"
+	},
+	"homepage": "https://svelthree.dev",
+	"bugs": {
+		"url": "https://github.com/vatro/svelthree/issues"
+	},
+	"keywords": [
+		"svelte",
+		"svelte.js",
+		"three",
+		"three.js",
+		"svelthree",
+		"svelte-accmod"
+	]
+}
