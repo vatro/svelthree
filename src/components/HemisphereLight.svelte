@@ -399,6 +399,47 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		light_uuid = null
 	}
 
+	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	const generated_children: SvelthreeComponentShadowDOMChild[] = []
+	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
+
+	/** Pushes a user-created (_e.g. via `new Mesh({...})`_) or an internally generated / created (e.g. via `SvelthreeGLTF.apply(...)`) `svelthree`-component
+	 * to a corresponding Array containing all user-created / internally generated (_registered_) child components, in order for them to be destroyed at the same time
+	 * the parent component gets destroyed (_`onDestroy`_). See also `comp_ref.get_user_created_children()` and `comp_ref.get_generated_children()`. */
+	export function register_child_component(
+		component: SvelthreeComponentShadowDOMChild,
+		generated?: boolean
+	): SvelthreeComponentShadowDOMChild[] {
+		if (generated) {
+			if (!generated_children.includes(component)) {
+				generated_children.push(component)
+			}
+
+			return generated_children
+		} else {
+			if (!user_created_children.includes(component)) {
+				user_created_children.push(component)
+			}
+
+			return user_created_children
+		}
+	}
+
+	function destroy_registered_child_components(arr: SvelthreeComponentShadowDOMChild[]) {
+		if (arr.length) {
+			for (let i = 0; i < arr.length; i++) {
+				const child_comp: SvelthreeComponentShadowDOMChild = arr[i]
+				if (child_comp) child_comp.$destroy()
+				arr[i] = null
+			}
+
+			arr.length = 0
+		}
+	}
+
+	export const get_user_created_children = (): SvelthreeComponentShadowDOMChild[] => user_created_children
+	export const get_generated_children = (): SvelthreeComponentShadowDOMChild[] => generated_children
+
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
 	export let onMount_replace: (args?: any) => any = undefined
@@ -455,6 +496,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					remove_helper()
 					if (ani) ani.destroyAnimation()
+
+					destroy_registered_child_components(generated_children)
+					destroy_registered_child_components(user_created_children)
+
 					remove_instance_from_parent()
 
 					if (onDestroy_inject_after) onDestroy_inject_after()

@@ -2,14 +2,13 @@ import { Euler, Vector3 } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 
 // import currently supported components only
-import { Mesh } from "../components"
-import { Group, Object3D } from "../components"
-import type { Canvas } from "../components"
+import { Mesh, Group, Object3D } from "../components"
 
 import type {
-	GLTFSupportedSvelthreeComponents,
 	SvelthreeGLTFTreeMap,
-	ISvelthreeGLTFTreeMapMember
+	ISvelthreeGLTFTreeMapMember,
+	SvelthreeShadowDOMElement,
+	SvelthreeComponentShadowDOMChild
 } from "../types-extra"
 
 export default class SvelthreeGLTF {
@@ -41,7 +40,7 @@ export default class SvelthreeGLTF {
 				tree_map.set(obj.uuid, {
 					obj: obj,
 					parent_uuid: parent ? parent.uuid : null,
-					name: obj.name ? obj.name : null,
+					name: obj.name ? obj.name : "",
 					obj_type: obj.type,
 					mesh:
 						obj.type === "Mesh"
@@ -69,7 +68,7 @@ export default class SvelthreeGLTF {
 		//console.log("SvelthreeGLTF parsing FINISHED!")
 	}
 
-	async get_parent_component(parent_uuid: string): Promise<GLTFSupportedSvelthreeComponents | undefined> {
+	async get_parent_component(parent_uuid: string): Promise<SvelthreeComponentShadowDOMChild | undefined> {
 		const tree_member: ISvelthreeGLTFTreeMapMember | undefined = this.tree.get(parent_uuid)
 
 		if (tree_member?.svelthree_comp) {
@@ -79,11 +78,16 @@ export default class SvelthreeGLTF {
 		}
 	}
 
-	async get_parent_context(parent_component: GLTFSupportedSvelthreeComponents): Promise<Map<any, any>> {
+	async get_parent_context(parent_component: SvelthreeComponentShadowDOMChild): Promise<Map<any, any>> {
 		return parent_component["$$"].context
 	}
 
-	public async apply(canvas_component: Canvas, root_component: GLTFSupportedSvelthreeComponents): Promise<void> {
+	/** Generates `svelthree`-components due to the parsed (_see `SvelthreeGLTF.parse()`_) hierarchy-tree-map and
+	 * adds the constructed `svelthree`-components-tree to the specified `svelthree`-target-component.
+	 */
+	public async apply(
+		target_component: SvelthreeComponentShadowDOMChild
+	): Promise<void> {
 		//console.log("SvelthreeGLTF apply started!")
 
 		const fns: (() => Promise<void>)[] = []
@@ -91,15 +95,18 @@ export default class SvelthreeGLTF {
 		const create_component =
 			(
 				item: ISvelthreeGLTFTreeMapMember,
-				canvas_component: Canvas,
-				root_component: GLTFSupportedSvelthreeComponents
+				target_component: SvelthreeComponentShadowDOMChild
 			) =>
 			async (): Promise<void> => {
-				let context: Map<any, any>
+				let context: Map<any, any> | undefined
+				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined
+				let parent_component: SvelthreeComponentShadowDOMChild | undefined
+
 				if (item.parent_uuid) {
-					const parent_component = await this.get_parent_component(item.parent_uuid)
+					parent_component = await this.get_parent_component(item.parent_uuid)
 					if (parent_component) {
 						context = await this.get_parent_context(parent_component)
+						dom_target = parent_component.get_shadow_dom_el()
 					} else {
 						console.error(
 							`SVELTHREE > utils > SvelthreeGLTF > create_component : invalid 'parent_component' value!`,
@@ -107,44 +114,69 @@ export default class SvelthreeGLTF {
 						)
 					}
 				} else {
-					context = root_component["$$"].context
+					// the object has no parent, means it's the root object
+					parent_component = target_component
+					dom_target = parent_component.get_shadow_dom_el()
+					context = parent_component["$$"].context
 				}
 
-				switch (item.obj_type) {
-					case "Mesh":
-						item.svelthree_comp = new Mesh({
-							target: canvas_component.getDomElement(),
-							props: { geometry: item.mesh.geometry, material: item.mesh.material, name: item.name },
-							context
-						})
-						break
-					case "Object3D":
-						item.svelthree_comp = new Object3D({
-							target: canvas_component.getDomElement(),
-							props: { name: item.name },
-							context
-						})
-						break
-					case "Group":
-						item.svelthree_comp = new Group({
-							target: canvas_component.getDomElement(),
-							props: { name: item.name },
-							context
-						})
-						break
-					default:
+				if (dom_target && item && context && parent_component) {
+					switch (item.obj_type) {
+						// TODO  Add all components we have atm.
+						case "Mesh":
+							if (item.mesh && item.name) {
+								item.svelthree_comp = new Mesh({
+									target: dom_target,
+									props: {
+										geometry: item.mesh.geometry,
+										material: item.mesh.material,
+										name: item.name
+									},
+									context
+								})
+							}
+							break
+						case "Object3D":
+							item.svelthree_comp = new Object3D({
+								target: dom_target,
+								props: { name: item.name },
+								context
+							})
+							break
+						case "Group":
+							item.svelthree_comp = new Group({
+								target: dom_target,
+								props: { name: item.name },
+								context
+							})
+							break
+						default:
+							console.error(
+								`SVELTHREE > utils > SvelthreeGLTF : converting '${item.obj.type}' to a svelthree component is not supported (yet?).`,
+								{ item }
+							)
+							break
+					}
+
+					if (item.svelthree_comp) {
+						parent_component.register_child_component(item.svelthree_comp, true)
+					} else {
 						console.error(
-							`SVELTHREE > utils > SvelthreeGLTF : sorry, converting ${item.obj.type} to a svlethree component is not supported (yet?).`,
+							`SVELTHREE > utils > SvelthreeGLTF : registering '${item.obj.type}' as a generated child component not possible because no svelthree component was generated -> probably this type of object is not supported (yet?).`,
 							{ item }
 						)
-						break
+					}
+				} else {
+					console.error(
+						`SVELTHREE > utils > SvelthreeGLTF > create_component : cannot generate component -> missing at least one of the required:`,
+						{ parent_component, dom_target, item, context }
+					)
 				}
 			}
 
-		// const [uuid, item] -> uuid not needed -> [,item]
 		for (const [, item] of this.tree.entries()) {
 			if (item) {
-				fns.push(create_component(item, canvas_component, root_component))
+				fns.push(create_component(item, target_component))
 			} else {
 				console.error(`SVELTHREE > utils > SvelthreeGLTF > create_component : invalid 'item' value!`, item)
 			}
@@ -155,7 +187,6 @@ export default class SvelthreeGLTF {
 		}
 
 		//postprocess matrix etc.
-		// const [uuid, item] -> uuid not needed -> [,item]
 		for (const [, item] of this.tree.entries()) {
 			const comp = item.svelthree_comp
 
