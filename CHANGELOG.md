@@ -1,5 +1,22 @@
 # svelthree changelog
 
+## 1.0.0-next.0.94
+
+- `Canvas`: 
+	- reset or trim `svelthreeStores` array on destruction ([#155](https://github.com/vatro/svelthree/issues/155))
+	- move slot to shadow DOM `<div />` ([#158](https://github.com/vatro/svelthree/issues/158))
+	- update `interactive` in `svelthreeStores` ([#157](https://github.com/vatro/svelthree/issues/157))
+
+- Add components' shadow DOM element getters ([#156](https://github.com/vatro/svelthree/issues/156))
+- Refactor due to ([#100](https://github.com/vatro/svelthree/issues/100)):
+	- Add ability to iterate over manually user-created / svelthree-generated children and `$destroy()` them
+	- Refactor `SvelthreeGLTF.ts` accordingly (see `**` below)
+- Sveral `types-extra.d.ts` changes / checks (incl. [#154](https://github.com/vatro/svelthree/issues/154))
+- Add hint to `threlte` in `README.md` file.
+
+`**` Due to onging project setup issues, especially conerning TypeScript, I've decided to migrate to new `SvelteKit`-library project setup ([#161](https://github.com/vatro/svelthree/issues/161)), which will allow me to massively increase code quality and development speed in future. All possible issues related to recently made changes (_see above_) will be targeted in next versions after the project setup change.
+
+
 ## 1.0.0-next.0.93
 
 Changes due to check / polish of setting the `target` shorthand attribute on `SpotLight` and `DirectionalLight` components ([#136](https://github.com/vatro/svelthree/issues/136)), including:

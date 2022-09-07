@@ -31,7 +31,7 @@ Thanks for dropping by & stay tuned! 🚀 + feel free to try `svelthree` & leave
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.93.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.94.tgz",
       ...
   }
   ```
