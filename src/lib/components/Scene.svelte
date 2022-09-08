@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { SvelthreeAnimation } from "../ani"
 	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
-	import { SvelthreeInteraction } from "../components-internal"
+	import SvelthreeInteraction from "../components-internal/SvelthreeInteraction.svelte"
 	import type { RaycastArray } from "../utils/RaycastArray"
 	import { createEventDispatcher } from "svelte"
 	import type { Writable } from "svelte/store"

@@ -29,7 +29,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { SvelthreeAnimation } from "../ani"
 	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
-	import { SvelthreeLightWithShadow } from "../components-internal"
+	import SvelthreeLightWithShadow from "../components-internal/SvelthreeLightWithShadow.svelte"
 	import type { LightShadowCamProps, LightShadowProps } from "../types/types-extra"
 
 	import { PointLight, PointLightHelper } from "three"
