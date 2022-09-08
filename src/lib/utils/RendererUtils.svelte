@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-	import type { WebGLRenderer } from "../components"
+	import type { default as WebGLRenderer } from "../components/WebGLRenderer.svelte"
 
 	/** Execute a callback on a specific `WebGLRenderer` component's render function event only **once**.
 	 * Has the ability to skip (`skip_frames: number`) a specific amout of render calls. */
