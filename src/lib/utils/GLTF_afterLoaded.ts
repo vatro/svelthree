@@ -146,32 +146,36 @@ export default class GLTF_afterLoaded {
 		//if (scene) { console.log(scene) }
 	}
 
-	private static async apply_to_meshes(scene: Group, props: { [P in keyof MeshProps]: MeshProps[P] }): Promise<void> {
+	private static async apply_to_meshes(
+		scene: Group,
+		props: { [P in keyof MeshProperties]: MeshProperties[P] }
+	): Promise<void> {
 		//console.log("apply_to_meshes started!")
 
 		if (scene) {
 			const fns: (() => Promise<void>)[] = []
 
-			const check_obj = (obj: Object3D, props: { [P in keyof MeshProps]: MeshProps[P] }) => async () => {
-				if (obj) {
-					if (obj["isMesh"]) {
-						for (let prop in props) {
-							try {
-								obj[prop] = props[prop]
-							} catch (e) {
-								console.error(e)
+			const check_obj =
+				(obj: Object3D, props: { [P in keyof MeshProperties]: MeshProperties[P] }) => async () => {
+					if (obj) {
+						if (obj["isMesh"]) {
+							for (let prop in props) {
+								try {
+									obj[prop] = props[prop]
+								} catch (e) {
+									console.error(e)
+								}
 							}
 						}
+					} else {
+						console.error(
+							"SVELTHREE > GLTF_afterLoaded > async 'apply_to_meshes(scene, ...)' -> async check_obj(obj, ...) -> 'obj' not available!",
+							{ obj }
+						)
 					}
-				} else {
-					console.error(
-						"SVELTHREE > GLTF_afterLoaded > async 'apply_to_meshes(scene, ...)' -> async check_obj(obj, ...) -> 'obj' not available!",
-						{ obj }
-					)
 				}
-			}
 
-			function traverse(child: Object3D, props: { [P in keyof MeshProps]: MeshProps[P] }) {
+			function traverse(child: Object3D, props: { [P in keyof MeshProperties]: MeshProperties[P] }) {
 				fns.push(check_obj(child, props))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
@@ -265,22 +269,23 @@ export default class GLTF_afterLoaded {
 			}
 		}
 
-	public static for_all_meshes = (props: { [P in keyof MeshProps]: MeshProps[P] }) => async (content: GLTF) => {
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.apply_to_meshes(content.scenes[i], props)
+	public static for_all_meshes =
+		(props: { [P in keyof MeshProperties]: MeshProperties[P] }) => async (content: GLTF) => {
+			if (content) {
+				if (content.scenes?.length > 1) {
+					for (let i = 0; i < content.scenes.length; i++) {
+						await GLTF_afterLoaded.apply_to_meshes(content.scenes[i], props)
+					}
+				} else {
+					await GLTF_afterLoaded.apply_to_meshes(content.scene, props)
 				}
 			} else {
-				await GLTF_afterLoaded.apply_to_meshes(content.scene, props)
+				console.error(
+					"SVELTHREE > GLTF_afterLoaded > async 'for_all_meshes(props)(content)' -> 'content' not available!",
+					{ content }
+				)
 			}
-		} else {
-			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'for_all_meshes(props)(content)' -> 'content' not available!",
-				{ content }
-			)
 		}
-	}
 
 	public static for_all_lights =
 		(props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => async (content: GLTF) => {
