@@ -21,10 +21,12 @@ export type ReadonlyKeys<T> = {
 	[P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, never, P>
 }[keyof T]
 
-// this returns  only NON function keys
+/** this returns only NON function keys */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type OnlyNonFunctionKeys<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T]
 
-// this returns  only function keys
+/** this returns  only function keys */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type OnlyFunctionKeys<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]
 
 // this returns as expected only function props
@@ -50,8 +52,8 @@ export type OnlyWritableNonFunctionProps<T> = Partial<Pick<T, OnlyWritableNonFun
 export type OnlyWritableNonFunctionPropsPlus<T, U> = Partial<Pick<T, OnlyWritableNonFunctionKeys<T>> & U>
 export type OnlyWritableNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<OnlyWritableNonFunctionProps<T>, U>>
 
-export type RemoveFirst<T extends unknown[]> = T extends [infer H, ...infer R] ? R : T
-export type RemoveLast<T extends unknown[]> = T extends [...infer H, infer R] ? H : T
+export type RemoveFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : T
+export type RemoveLast<T extends unknown[]> = T extends [...infer H, unknown] ? H : T
 
 // Animation
 
@@ -97,6 +99,7 @@ export interface SvelthreeAnimationFunctionReturn {
  * ```
  *
  */
+/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 export interface SvelthreeAnimationFunction {
 	(obj: any, ...args: any[]): SvelthreeAnimationFunctionReturn
 }
@@ -129,26 +132,24 @@ export type ComplexValueType =
 	| "Matrix4ParamsArray"
 	| "Color"
 
-import type {
-	AmbientLight,
-	Canvas,
-	CubeCamera,
-	DirectionalLight,
-	Group,
-	HemisphereLight,
-	LoadedGLTF,
-	Mesh,
-	Object3D,
-	OrbitControls,
-	OrthographicCamera,
-	PerspectiveCamera,
-	PointLight,
-	Points,
-	RectAreaLight,
-	Scene,
-	SpotLight,
-	WebGLRenderer
-} from "./components"
+import type { default as AmbientLight } from "../components/AmbientLight.svelte"
+import type { default as Canvas } from "../components/Canvas.svelte"
+import type { default as CubeCamera } from "../components/CubeCamera.svelte"
+import type { default as DirectionalLight } from "../components/DirectionalLight.svelte"
+import type { default as Group } from "../components/Group.svelte"
+import type { default as HemisphereLight } from "../components/HemisphereLight.svelte"
+import type { default as LoadedGLTF } from "../components/LoadedGLTF.svelte"
+import type { default as Mesh } from "../components/Mesh.svelte"
+import type { default as Object3D } from "../components/Object3D.svelte"
+import type { default as OrbitControls } from "../components/OrbitControls.svelte"
+import type { default as OrthographicCamera } from "../components/OrthographicCamera.svelte"
+import type { default as PerspectiveCamera } from "../components/PerspectiveCamera.svelte"
+import type { default as PointLight } from "../components/PointLight.svelte"
+import type { default as Points } from "../components/Points.svelte"
+import type { default as RectAreaLight } from "../components/RectAreaLight.svelte"
+import type { default as Scene } from "../components/Scene.svelte"
+import type { default as SpotLight } from "../components/SpotLight.svelte"
+import type { default as WebGLRenderer } from "../components/WebGLRenderer.svelte"
 
 export type AnySvelthreeComponent =
 	| AmbientLight
@@ -158,13 +159,13 @@ export type AnySvelthreeComponent =
 	| Group
 	| HemisphereLight
 	| LoadedGLTF
-	| Mesh<any>
+	| Mesh<THREE.Material | THREE.Material[]>
 	| Object3D
 	| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
-	| Points<any>
+	| Points<THREE.Material | THREE.Material[]>
 	| RectAreaLight
 	| Scene
 	| SpotLight
@@ -180,24 +181,24 @@ export type SvelthreeComponentShadowDOMChild =
 	| Group
 	| HemisphereLight
 	| LoadedGLTF
-	| Mesh<any>
+	| Mesh<THREE.Material | THREE.Material[]>
 	| Object3D
 	//| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
-	| Points<any>
+	| Points<THREE.Material | THREE.Material[]>
 	| RectAreaLight
 	| Scene
 	| SpotLight
-	//| WebGLRenderer
+//| WebGLRenderer
 
 export type TargetableSvelthreeComponent =
 	| Scene
 	| Object3D
 	| Group
-	| Mesh<any>
-	| Points<any>
+	| Mesh<THREE.Material | THREE.Material[]>
+	| Points<THREE.Material | THREE.Material[]>
 	| PointLight
 	| SpotLight
 	| DirectionalLight
@@ -230,8 +231,8 @@ type AllLights = THREE.SpotLight &
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
-export type RaycastableSvelthreeComponents = Mesh<any> | Group | Object3D
-export type GLTFSupportedSvelthreeComponents = Mesh<any> | Group | Object3D | Scene
+export type RaycastableSvelthreeComponents = Mesh<THREE.Material | THREE.Material[]> | Group | Object3D
+export type GLTFSupportedSvelthreeComponents = Mesh<THREE.Material | THREE.Material[]> | Group | Object3D | Scene
 
 export interface ISvelthreeGLTFTreeMapMember {
 	obj: THREE.Object3D
@@ -265,8 +266,7 @@ export interface StoreCanvas {
 
 // $svelthreeStores body
 
-import type { SvelthreeStoreArray } from "./utils/SvelthreeStoreArray"
-import type { WebGLRenderer as WebGLRendererComponent } from "./components"
+import type { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 
 export type StoreBody = {
 	id: number
@@ -284,7 +284,7 @@ export type StoreBody = {
 	activeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera
 	activeScene: THREE.Scene
 	renderer: THREE.WebGLRenderer
-	rendererComponent: WebGLRendererComponent
+	rendererComponent: WebGLRenderer
 	raycaster: THREE.Raycaster
 	orbitcontrols: SvelthreeStoreArray
 	useBVH: boolean
