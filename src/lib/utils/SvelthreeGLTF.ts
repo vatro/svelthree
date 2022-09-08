@@ -2,7 +2,9 @@ import { Euler, Vector3 } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 
 // import currently supported components only
-import { Mesh, Group, Object3D } from "../components"
+import { default as Mesh } from "../components/Mesh.svelte"
+import { default as Object3D } from "../components/Object3D.svelte"
+import { default as Group } from "../components/Group.svelte"
 
 import type {
 	SvelthreeGLTFTreeMap,
