@@ -496,7 +496,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** Get the `pointer_state` object which is being internally shared via context / used for various interaction functionality. */
-	export const get_pointer_state = (): { clientX: number, clientY: number } => {
+	export const get_pointer_state = (): { clientX: number; clientY: number } => {
 		if (pointer_state.event) {
 			return { clientX: pointer_state.event.clientX, clientY: pointer_state.event.clientY }
 		}

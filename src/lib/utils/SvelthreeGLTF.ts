@@ -87,18 +87,13 @@ export default class SvelthreeGLTF {
 	/** Generates `svelthree`-components due to the parsed (_see `SvelthreeGLTF.parse()`_) hierarchy-tree-map and
 	 * adds the constructed `svelthree`-components-tree to the specified `svelthree`-target-component.
 	 */
-	public async apply(
-		target_component: SvelthreeComponentShadowDOMChild
-	): Promise<void> {
+	public async apply(target_component: SvelthreeComponentShadowDOMChild): Promise<void> {
 		//console.log("SvelthreeGLTF apply started!")
 
 		const fns: (() => Promise<void>)[] = []
 
 		const create_component =
-			(
-				item: ISvelthreeGLTFTreeMapMember,
-				target_component: SvelthreeComponentShadowDOMChild
-			) =>
+			(item: ISvelthreeGLTFTreeMapMember, target_component: SvelthreeComponentShadowDOMChild) =>
 			async (): Promise<void> => {
 				let context: Map<any, any> | undefined
 				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined
