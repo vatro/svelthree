@@ -1,27 +1,5 @@
 {
-	"typescript.tsdk": "./node_modules/typescript/lib",
-	// language preferences
-	"javascript.preferences.importModuleSpecifier": "relative",
-	// formatters
-	"[svelte]": {
-		"editor.defaultFormatter": "svelte.svelte-vscode"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[javascript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[json]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"[jsonc]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	// --- svelte compiler warnings ---
-	"svelte.plugin.svelte.compilerWarnings": {
-		//"unused-export-let": "ignore"
-	},
+	"cSpell.enabled": false,
 	"editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?",
 	"todohighlight.keywords": [
 		{
@@ -542,6 +520,5 @@
 			"overviewRulerColor": "grey",
 			"borderRadius": "6px"
 		}
-	],
-	"cSpell.enabled": false
+	]
 }
