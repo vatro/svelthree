@@ -9,6 +9,11 @@ export const if$_instance_change = (
 	comp_name: string,
 	handler: () => void
 ): void => {
+	if (create || inst_name) {
+		// TODO  Remove `create` and `inst_name`
+		console.warn("TODO `create` and `inst_name` should be removed -> unused!")
+	}
+
 	// console.warn(`comp ${comp_name} > Something happened with the ${inst_name} instance!`)
 
 	if (our_parent) {
