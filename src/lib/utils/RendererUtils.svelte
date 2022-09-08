@@ -3,12 +3,12 @@
 
 	/** Execute a callback on a specific `WebGLRenderer` component's render function event only **once**.
 	 * Has the ability to skip (`skip_frames: number`) a specific amout of render calls. */
-	export function once_on_render_event(
+	export const once_on_render_event = (
 		renderer_component: WebGLRenderer,
 		event_name: string,
 		callback: () => void,
 		skip_frames: number = 0
-	) {
+	) => {
 		let skip = 0
 		let remove_on_render_event: () => void = undefined
 
