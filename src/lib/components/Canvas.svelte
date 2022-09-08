@@ -687,7 +687,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/**
-	 * Decreases the usage counter of a `click` **related** ( **!** ) event listener.
+	 * Decreases the usage counter of a certain event listener type.
 	 * Called internally by `SvelthreeInteraction.unregister_pointer_event(...)`.
 	 */
 	export const unregister_canvas_listener = (event_name: SvelthreeSupportedInteractionEvent) => {
@@ -703,7 +703,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/**
-	 * Remove a `click` **related** ( **!** ) event listener if safe -> is not being used (_anymore_) by any of the interactive components.
+	 * Remove an event listener if safe -> is not being used (_anymore_) by any of the interactive components.
 	 * - Called after a `click` **related** ( **!** ) event was unregistered by one of the interactive components.
 	 * - Called on every render, see `Canvas.on_interaction_1(...)`.
 	 */
