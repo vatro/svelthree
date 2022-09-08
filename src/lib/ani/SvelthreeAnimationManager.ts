@@ -54,7 +54,8 @@ export default class SvelthreeAnimationManager {
 		}
 	}
 
-	initiateAnimation(): void {
+	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
+	initiateAnimation(...args: any[]): void {
 		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
 		// if animation is a function it has not been initiated / started yet (otherwise object)
 
@@ -72,7 +73,7 @@ export default class SvelthreeAnimationManager {
 			}
 		}
 
-		this.animation = this.animation.initiate(this.obj, ...arguments)
+		this.animation = this.animation.initiate(this.obj, args)
 
 		if (verbose_mode())
 			console.debug(
@@ -123,7 +124,7 @@ export default class SvelthreeAnimationManager {
 	}
 
 	destroyAnimation(): void {
-		if (this.animation.hasOwnProperty("onDestroy")) {
+		if (this.animation.prototype.hasOwnProperty.call(this.animation, "onDestroy")) {
 			this.animation.onDestroy()
 		} else {
 			console.warn(
