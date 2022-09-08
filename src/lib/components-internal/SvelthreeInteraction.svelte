@@ -1446,7 +1446,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/* reactively removes all listeners if interactionEnabled (interactive && interact) is false */
 	$: if (r_remove) remove_all_listeners()
 
-	export function remove_all_listeners(): void {
+	export const remove_all_listeners = (): void => {
 		// prevent `r_remove` reaction
 		listeners = false
 

@@ -296,9 +296,7 @@ This is a **svelthree** _Canvas_ Component.
 	setContext("shadow_root", shadow_root)
 
 	/** Returns the shadow DOM root element. */
-	export function get_shadow_root_el(): ShadowRoot {
-		return $shadow_root.element
-	}
+	export const get_shadow_root_el = (): ShadowRoot => $shadow_root.element
 
 	$: if (sh_root) {
 		$shadow_root.element = sh_root.attachShadow({ mode: "open", delegatesFocus: false })
@@ -498,7 +496,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** Get the `pointer_state` object which is being internally shared via context / used for various interaction functionality. */
-	export function get_pointer_state() {
+	export const get_pointer_state = (): { clientX: number, clientY: number } => {
 		if (pointer_state.event) {
 			return { clientX: pointer_state.event.clientX, clientY: pointer_state.event.clientY }
 		}
@@ -628,7 +626,7 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 * to the `<canvas>` element if not already present.
 	 */
-	export function register_canvas_listener(event_name: SvelthreeSupportedInteractionEvent) {
+	export const register_canvas_listener = (event_name: SvelthreeSupportedInteractionEvent) => {
 		//console.log("register_canvas_listener!")
 		if (!canvas_listeners.has(event_name)) {
 			switch (event_name) {
@@ -692,7 +690,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * Decreases the usage counter of a `click` **related** ( **!** ) event listener.
 	 * Called internally by `SvelthreeInteraction.unregister_pointer_event(...)`.
 	 */
-	export function unregister_canvas_listener(event_name: SvelthreeSupportedPointerEvent) {
+	export const unregister_canvas_listener = (event_name: SvelthreeSupportedInteractionEvent) => {
 		if (canvas_listeners.has(event_name)) {
 			// update pointer event usage count
 			// if the event is not being used (total = 0), the corresponding listener will be removed.
@@ -748,33 +746,31 @@ This is a **svelthree** _Canvas_ Component.
 	// --- Public methods ---
 
 	/** Get all interactive **three.js object instances** from the currently active (_rendered_) Scene. */
-	export function get_interactive(): Object3D[] {
+	export const get_interactive = (): Object3D[] => {
 		return filtered_raycast.objects
 	}
 
 	/** Get all interactive **svelthree components** from the currently active (_rendered_) Scene. */
-	export function get_interactive_components(): any[] {
+	export const get_interactive_components = (): any[] => {
 		return filtered_raycast.objects.map((item: Object3D) => {
 			return item.userData.svelthreeComponent
 		})
 	}
 
 	/** Get all interactive **three.js object instances** from all Scenes inside the Canvas. */
-	export function get_interactive_all(): Object3D[] {
+	export const get_interactive_all = (): Object3D[] => {
 		return [...raycast]
 	}
 
 	/** Get all interactive **svelthree components** from all Scenes inside the Canvas. */
-	export function get_interactive_components_all(): Object3D[] {
+	export const get_interactive_components_all = (): Object3D[] => {
 		return raycast.map((item: Object3D) => {
 			return item.userData.svelthreeComponent
 		})
 	}
 
 	/** Get all interactive **three.js object instances** intersected by the ray (pointer). */
-	export function get_interactive_intersections_all(): any[] {
-		return all_intersections.result
-	}
+	export const get_interactive_intersections_all = (): any[] => all_intersections.result
 
 	export const getDomElement = (): HTMLCanvasElement => c
 	export const getDomElementDimensions = (): { w: number; h: number } => {

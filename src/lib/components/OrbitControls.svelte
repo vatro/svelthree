@@ -60,9 +60,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Get `OrbitControls` three.js instance's index in the `orbitcontrols`-array (svelthreeStore).
 	 * Can also be obtained via created `orbitcontrols` instance directly: `orbitcontrols_comp_ref.orbitcontrols.userData.index_in_orbitcontrols`
 	 */
-	export function get_index_in_orbitcontrols(): number {
-		return index_in_orbitcontrols
-	}
+	export const get_index_in_orbitcontrols = (): number => index_in_orbitcontrols
 
 	export let cam: PerspCamSvelthreeComponent | OrthoCamSvelthreeComponent | PerspectiveCamera | OrthographicCamera =
 		undefined

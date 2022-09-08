@@ -249,7 +249,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 		// 'context.drawImage( renderer.domElement, 0, 0 )' approach:
 		// we're not linking the canvas_dom_element directly to the renderer.
-		renderer = new WebGLRenderer({ ...params })
+		renderer = new THREE_WebGLRenderer({ ...params })
 		renderer.setPixelRatio(window.devicePixelRatio)
 
 		if (inputs_queue.length) {
@@ -726,7 +726,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * Schedules a render if the current scene has been marked as `dirty`. \
 	 * _Primarly called internally by components if `WebGLRenderer` component's `mode` is set to `"auto"`_.
 	 */
-	export function schedule_render_auto(scene: Scene = null): void {
+	export const schedule_render_auto = (scene: Scene = null): void => {
 		if (enabled && render_scheduled.status === false) {
 			const scene_to_check: Scene = scene ? scene : current_scene
 			if (scene_to_check) {
@@ -760,7 +760,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// TODO  this has to be tested / used / optimized (_isn't used in any of the test scenes up to date_)
 	/** Cancel any scheduled `requestAnimationFrame` and disable further rendering. */
-	export function stop_rendering(): void {
+	export const stop_rendering = (): void => {
 		enabled = false
 		cancelAnimationFrame(rAF.id)
 		render_scheduled.status = false
@@ -768,7 +768,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// TODO  this has to be tested / used / optimized (_isn't used in any of the test scenes up to date_)
 	/** Cancel any scheduled `requestAnimationFrame` and disable further rendering. */
-	export function start_rendering(): void {
+	export const start_rendering = (): void => {
 		enabled = true
 		start_renderer()
 	}
@@ -778,7 +778,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * Schedules a render once on next AnimationFrame. Current scene doesn't have to be marked as `dirty`. \
 	 * _For scheduling a render **manually** in an e.g. animation function_.
 	 */
-	export function schedule_render(): void {
+	export const schedule_render = (): void => {
 		if (enabled) {
 			if (rAF.id) cancelAnimationFrame(rAF.id)
 			rAF.id = requestAnimationFrame(render_standard)
@@ -786,23 +786,23 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/** Returns the **three.js instance** of the renderer. */
-	export function get_renderer(): WebGLRenderer {
+	export const get_renderer = (): THREE_WebGLRenderer => {
 		return renderer
 	}
 
 	/** Returns the **three.js instance** of `Camera` currently used by the renderer. */
-	export function get_current_camera(): Camera {
+	export const get_current_camera = (): Camera => {
 		return current_cam
 	}
 
 	/** Get the total number of currently rendered frames. */
-	export function get_current_frame(): number {
+	export const get_current_frame = (): number => {
 		return frames.total
 	}
 
 	// TODO  different?
 
-	export function set_render(parameters = { sceneId: "", camId: "" }): void {
+	export const set_render = (parameters = { sceneId: "", camId: "" }): void => {
 		scene_to_render_id = parameters.sceneId
 		cam_to_render_id = parameters.camId
 	}
