@@ -249,7 +249,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 		// 'context.drawImage( renderer.domElement, 0, 0 )' approach:
 		// we're not linking the canvas_dom_element directly to the renderer.
-		renderer = new THREE_WebGLRenderer({ ...params })
+		renderer = new WebGLRenderer({ ...params })
 		renderer.setPixelRatio(window.devicePixelRatio)
 
 		if (inputs_queue.length) {
@@ -786,7 +786,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/** Returns the **three.js instance** of the renderer. */
-	export const get_renderer = (): THREE_WebGLRenderer => {
+	export const get_renderer = (): WebGLRenderer => {
 		return renderer
 	}
 
