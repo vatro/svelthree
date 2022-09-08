@@ -17,7 +17,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata } from "../logic/shared"
 
@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { SvelthreeInteraction } from "../components-internal"
 	import type { RaycastArray } from "../utils/RaycastArray"
@@ -49,10 +49,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { AnimationClip, Group, Camera, Mesh, Light } from "three"
-	import type { LoadedGLTFProps } from "../types-comp-props"
+	import type { LoadedGLTFProperties } from "../types/types-comp-props"
 	import { Object3D, LoadingManager } from "three"
-	import type { RemoveFirst } from "../types-extra"
-	import type { ButtonProp, LinkProp } from "../types-comp-props"
+	import type { RemoveFirst } from "../types/types-extra"
+	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils"
 
 	/**
@@ -100,10 +100,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProp = undefined
+	export let button: ButtonProperties = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProp = undefined
+	export let link: LinkProperties = undefined
 
 	/** Returns the `container` instance created by the component.
 	 * If the `add` attribute is set to `true` (_default_) the contents of the loaded GLTF will be added to the `container`,
@@ -325,7 +325,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof LoadedGLTFProps]: LoadedGLTFProps[P] } = undefined
+	export let props: { [P in keyof LoadedGLTFProperties]: LoadedGLTFProperties[P] } = undefined
 
 	$: if (!sProps && container && props) sProps = new SvelthreeProps(container)
 	$: if (props && sProps) update_props()
@@ -761,7 +761,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		container_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

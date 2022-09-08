@@ -17,7 +17,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
@@ -27,7 +27,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { SvelthreeInteraction } from "../components-internal"
 	import type { RaycastArray } from "../utils/RaycastArray"
@@ -48,9 +48,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { BufferGeometry } from "three"
 
 	import { Mesh } from "three"
-	import type { MeshProps } from "../types-comp-props"
-	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst, PropBlackList } from "../types-extra"
-	import type { ButtonProp, LinkProp } from "../types-comp-props"
+	import type { MeshProperties } from "../types/types-comp-props"
+	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst, PropBlackList } from "../types/types-extra"
+	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
 	import type { Material, Color } from "three"
 
 	/**
@@ -104,10 +104,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProp = undefined
+	export let button: ButtonProperties = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProp = undefined
+	export let link: LinkProperties = undefined
 
 	/** Returns the `mesh` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Mesh` instances. */
 	export let mesh: Mesh = undefined
@@ -468,7 +468,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof MeshProps]: MeshProps[P] } = undefined
+	export let props: { [P in keyof MeshProperties]: MeshProperties[P] } = undefined
 
 	$: if (!sProps && mesh && props) sProps = new SvelthreeProps(mesh)
 	$: if (props && sProps) update_props()
@@ -897,7 +897,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		mesh_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

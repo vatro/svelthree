@@ -17,7 +17,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
@@ -25,10 +25,10 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { AmbientLight } from "three"
-	import type { AmbientLightProps } from "../types-comp-props"
+	import type { AmbientLightProperties } from "../types/types-comp-props"
 	import type { Color, Vector3, Object3D } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
 
@@ -258,7 +258,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof AmbientLightProps]: AmbientLightProps[P] } = undefined
+	export let props: { [P in keyof AmbientLightProperties]: AmbientLightProperties[P] } = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
 	$: if (props && sProps) update_props()
@@ -354,7 +354,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 		light_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

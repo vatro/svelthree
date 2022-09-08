@@ -22,7 +22,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
@@ -32,10 +32,10 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { OrthographicCamera, CameraHelper } from "three"
-	import type { OrthographicCameraProps } from "../types-comp-props"
+	import type { OrthographicCameraProperties } from "../types/types-comp-props"
 	import { CameraUtils } from "../utils"
 	import { CameraValues } from "../constants"
 	import { get_root_scene } from "../utils/SceneUtils"
@@ -357,7 +357,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof OrthographicCameraProps]: OrthographicCameraProps[P] } = undefined
+	export let props: { [P in keyof OrthographicCameraProperties]: OrthographicCameraProperties[P] } = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()
@@ -579,7 +579,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		camera_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

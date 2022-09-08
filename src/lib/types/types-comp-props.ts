@@ -19,8 +19,8 @@ import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js
 
 // --- EMPTY ---
 
-//export type Object3DProps = OnlyWritableNonFunctionPropsPlus<
-export type Object3DProps = OnlyWritableNonFunctionPropsOverwritten<
+//export type Object3DProperties = OnlyWritableNonFunctionPropsPlus<
+export type Object3DProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<Object3D, PropBlackList>,
 	{
 		position: Vector3 | Parameters<Vector3["set"]>
@@ -39,167 +39,167 @@ export type Object3DProps = OnlyWritableNonFunctionPropsOverwritten<
 >
 
 // intellisense test
-//const obj3d_props: Object3DProps = {}
+//const obj3d_props: Object3DProperties = {}
 
-export type GroupProps = Object3DProps
-export type LoadedGLTFProps = Object3DProps
+export type GroupProperties = Object3DProperties
+export type LoadedGLTFProperties = Object3DProperties
 
 // -- SCENE --
 
-export type SceneProps = OnlyWritableNonFunctionPropsOverwritten<
+export type SceneProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<Scene, PropBlackList>,
 	{
 		background?: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3
-	} & { [P in keyof Object3DProps]: Object3DProps[P] }
+	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const scene_props: SceneProps = {}
+//const scene_props: SceneProperties = {}
 
 // TODO  check / polish
-export type WebGLRendererProps = OnlyWritableNonFunctionProps<Omit<WebGLRenderer, PropBlackList>>
+export type WebGLRendererProperties = OnlyWritableNonFunctionProps<Omit<WebGLRenderer, PropBlackList>>
 
 // --- MESH ---
 
-export type MeshProps = OnlyWritableNonFunctionPropsOverwritten<
+export type MeshProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<Mesh, PropBlackList>,
-	{ [P in keyof Object3DProps]: Object3DProps[P] }
+	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const mesh_props: MeshProps = {}
+//const mesh_props: MeshProperties = {}
 
 // --- POINTS ---
 
-export type PointsProps = OnlyWritableNonFunctionPropsOverwritten<
+export type PointsProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<Points, PropBlackList>,
-	{ [P in keyof Object3DProps]: Object3DProps[P] }
+	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const points_props: PointsProps = {}
+//const points_props: PointsProperties = {}
 
 // --- CAMERAS ---
 
-export type CubeCameraProps = OnlyWritableNonFunctionPropsOverwritten<
+export type CubeCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<CubeCamera, PropBlackList>,
-	{ [P in keyof Object3DProps]: Object3DProps[P] }
+	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const cubecam_props: CubeCameraProps = {}
+//const cubecam_props: CubeCameraProperties = {}
 
-export type WebGLCubeRenderTargetProps = OnlyWritableNonFunctionProps<Omit<WebGLCubeRenderTarget, PropBlackList>>
+export type WebGLCubeRenderTargetProperties = OnlyWritableNonFunctionProps<Omit<WebGLCubeRenderTarget, PropBlackList>>
 
 // intellisense test
-//const cubecam_rendertarget_props: WebGLCubeRenderTargetProps = {}
+//const cubecam_rendertarget_props: WebGLCubeRenderTargetProperties = {}
 
-export type OrthographicCameraProps = OnlyWritableNonFunctionPropsOverwritten<
+export type OrthographicCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<OrthographicCamera, PropBlackList>,
-	{ [P in keyof Object3DProps]: Object3DProps[P] }
+	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const orthocam_props: OrthographicCameraProps = {}
+//const orthocam_props: OrthographicCameraProperties = {}
 
-export type PerspectiveCameraProps = OnlyWritableNonFunctionPropsOverwritten<
+export type PerspectiveCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<PerspectiveCamera, PropBlackList>,
 	{
 		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof Object3DProps]: Object3DProps[P] }
+	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const perspcam_props: PerspectiveCameraProps = {}
+//const perspcam_props: PerspectiveCameraProperties = {}
 
 // --- LIGHTS ---
 
-export type HemisphereLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type HemisphereLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<HemisphereLight, PropBlackList>,
 	{
 		color: Color | string | number | [r: number, g: number, b: number] | Vector3
 		groundColor: Color | string | number | [r: number, g: number, b: number] | Vector3
-	} & { [P in keyof Object3DProps]: Object3DProps[P] }
+	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const hemisphere_light_props: HemisphereLightProps = {}
+//const hemisphere_light_props: HemisphereLightProperties = {}
 
-export type AmbientLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type AmbientLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<AmbientLight, PropBlackList>,
 	{
 		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-	} & { [P in keyof Object3DProps]: Object3DProps[P] }
+	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const ambient_light_props: AmbientLightProps = {}
+//const ambient_light_props: AmbientLightProperties = {}
 
 // EXCLUDED  THREE :Lights with `target` property use the target for rotation calculation!
-type LightWithTargetObject3DProps = Omit<Object3DProps, "rotation" | "quaternion">
+type LightWithTargetObject3DProperties = Omit<Object3DProperties, "rotation" | "quaternion">
 
 // TODO  Nail down manipulating matrix.
-export type DirectionalLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type DirectionalLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<DirectionalLight, PropBlackList>,
 	{
 		color: Color | string | number | [r: number, g: number, b: number] | Vector3
 		// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
 		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProps]: LightWithTargetObject3DProps[P] }
+	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
 >
 
 // intellisense test
-//const directional_light_props: DirectionalLightProps = {}
+//const directional_light_props: DirectionalLightProperties = {}
 
-export type PointLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type PointLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<PointLight, PropBlackList>,
-	{ [P in keyof Object3DProps]: Object3DProps[P] }
+	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
 >
 
 // intellisense test
-//const point_light_props: PointLightProps = {}
+//const point_light_props: PointLightProperties = {}
 
 // TODO  Nail down manipulating matrix.
 // TODO  Nail down lookAt usage!
-export type RectAreaLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type RectAreaLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<RectAreaLight, PropBlackList>,
 	{
 		color: Color | string | number | [r: number, g: number, b: number] | Vector3
 		// CUSTOM  actually no `lookAt` on RectAreaLight, we're using custom solution!
 		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProps]: LightWithTargetObject3DProps[P] }
+	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
 >
 
 // intellisense test
-//const rectarea_light_props: RectAreaLightProps = {}
+//const rectarea_light_props: RectAreaLightProperties = {}
 
 // TODO  Nail down manipulating matrix.
-export type SpotLightProps = OnlyWritableNonFunctionPropsOverwritten<
+export type SpotLightProperties = OnlyWritableNonFunctionPropsOverwritten<
 	Omit<SpotLight, PropBlackList>,
 	{
 		color: Color | string | number | [r: number, g: number, b: number] | Vector3
 		// CUSTOM  actually no `lookAt` on SpotLight, we're using custom solution!
 		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProps]: LightWithTargetObject3DProps[P] }
+	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
 >
 
 // intellisense test
-//const spot_light_props: SpotLightProps = {}
+//const spot_light_props: SpotLightProperties = {}
 
 // TODO  extensively test `OrbitControls` `props` atrribute usage.
-export type OrbitControlsProps = OnlyWritableNonFunctionProps<Omit<OrbitControls, PropBlackList>>
+export type OrbitControlsProperties = OnlyWritableNonFunctionProps<Omit<OrbitControls, PropBlackList>>
 
 // intellisense test
-//const orbitcontrols_props: OrbitControlsProps = {}
+//const orbitcontrols_props: OrbitControlsProperties = {}
 
-export type ButtonProp = {
+export type ButtonProperties = {
 	[P in keyof OnlyWritableNonFunctionProps<HTMLButtonElement>]: OnlyWritableNonFunctionProps<HTMLButtonElement>[P]
 }
 
 // intellisense test
-//const button_prop: ButtonProp = {}
+//const button_prop: ButtonProperties = {}
 
-export type LinkProp = {
+export type LinkProperties = {
 	[P in keyof OnlyWritableNonFunctionProps<HTMLAnchorElement>]: OnlyWritableNonFunctionProps<HTMLAnchorElement>[P]
 }
 

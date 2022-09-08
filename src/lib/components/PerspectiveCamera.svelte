@@ -17,7 +17,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
@@ -27,10 +27,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { PerspectiveCamera, CameraHelper } from "three"
-	import type { PerspectiveCameraProps } from "../types-comp-props"
+	import type { PerspectiveCameraProperties } from "../types/types-comp-props"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { CAM_PROPS_PMU } from "../constants/Cameras"
 	import type { Writable } from "svelte/store"
@@ -322,7 +322,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof PerspectiveCameraProps]: PerspectiveCameraProps[P] } = undefined
+	export let props: { [P in keyof PerspectiveCameraProperties]: PerspectiveCameraProperties[P] } = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()
@@ -613,7 +613,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		camera_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

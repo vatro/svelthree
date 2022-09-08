@@ -25,7 +25,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
 	import type { WebGLRendererMode } from "../types-extra"
-	import type { WebGLRendererProps } from "../types-comp-props"
+	import type { WebGLRendererProperties } from "../types-comp-props"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -271,7 +271,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof WebGLRendererProps]: WebGLRendererProps[P] } = undefined
+	export let props: { [P in keyof WebGLRendererProperties]: WebGLRendererProperties[P] } = undefined
 
 	$: if (!sProps && renderer && props) sProps = new SvelthreeProps(renderer)
 	$: if (props && sProps) update_props()

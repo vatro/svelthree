@@ -17,7 +17,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeShadowDOMElement } from "../types-extra"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
@@ -27,10 +27,10 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { PropUtils, SvelthreeProps } from "../utils"
 
 	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types-extra"
+	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { CubeCamera, WebGLCubeRenderTarget } from "three"
-	import type { CubeCameraProps, WebGLCubeRenderTargetProps } from "../types-comp-props"
+	import type { CubeCameraProperties, WebGLCubeRenderTargetProperties } from "../types/types-comp-props"
 	// custom CubeCameraHelper
 	import { CubeCameraHelper } from "../utils"
 	import { get_root_scene } from "../utils/SceneUtils"
@@ -43,7 +43,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		MeshBasicMaterial,
 		MeshLambertMaterial
 	} from "three"
-	import type { RemoveLast } from "../types-extra"
+	import type { RemoveLast } from "../types/types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 
@@ -505,7 +505,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let renderTargetProps: { [P in keyof WebGLCubeRenderTargetProps]: WebGLCubeRenderTargetProps[P] } = undefined
+	export let renderTargetProps: { [P in keyof WebGLCubeRenderTargetProperties]: WebGLCubeRenderTargetProperties[P] } =
+		undefined
 
 	$: if (!sPropsTarget && renderTargetProps && renderTargetProps) sPropsTarget = new SvelthreeProps(renderTargetProps)
 	$: if (renderTargetProps && sPropsTarget) update_render_target_props()
@@ -516,7 +517,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof CubeCameraProps]: CubeCameraProps[P] } = undefined
+	export let props: { [P in keyof CubeCameraProperties]: CubeCameraProperties[P] } = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()
@@ -661,7 +662,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		camera_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

@@ -24,7 +24,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Writable } from "svelte/store"
 
 	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-	import type { OrbitControlsProps } from "../types-comp-props"
+	import type { OrbitControlsProperties } from "../types/types-comp-props"
 	import { CameraHelper } from "three"
 	import type { Vector3, PerspectiveCamera, OrthographicCamera } from "three"
 	import type { default as PerspCamSvelthreeComponent } from "./PerspectiveCamera.svelte"
@@ -158,7 +158,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof OrbitControlsProps]: OrbitControlsProps[P] } = undefined
+	export let props: { [P in keyof OrbitControlsProperties]: OrbitControlsProperties[P] } = undefined
 
 	$: if (!sProps && orbitcontrols && props) sProps = new SvelthreeProps(orbitcontrols)
 	$: if (props && sProps) update_props()
