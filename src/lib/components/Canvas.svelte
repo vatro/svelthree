@@ -19,7 +19,7 @@ This is a **svelthree** _Canvas_ Component.
 	import type { Object3D } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
-	import type { PointerState, StoreBody } from "../types-extra"
+	import type { PointerState, StoreBody } from "../types/types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import { RaycastArray } from "../utils/RaycastArray"

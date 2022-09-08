@@ -4,7 +4,7 @@
 
 import type { WebGLCubeRenderTarget } from "three"
 import PropUtils from "./PropUtils"
-import type { ComplexValueType } from "../types-extra"
+import type { ComplexValueType } from "../types/types-extra"
 
 /** ⚙️ `Propeller`'s `update` method redirects some `props` object properties to specific `PropUtils` update
  * methods and also allows special handling if needed when updating a specific `props` object's property.

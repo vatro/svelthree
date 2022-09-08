@@ -9,7 +9,7 @@ import type {
 	ISvelthreeGLTFTreeMapMember,
 	SvelthreeShadowDOMElement,
 	SvelthreeComponentShadowDOMChild
-} from "../types-extra"
+} from "../types/types-extra"
 
 export default class SvelthreeGLTF {
 	public tree: SvelthreeGLTFTreeMap = new Map<string, ISvelthreeGLTFTreeMapMember>()

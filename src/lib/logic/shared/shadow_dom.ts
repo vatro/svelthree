@@ -1,5 +1,5 @@
-import type { SvelthreeShadowDOMElement } from "../../types-extra"
-import type { ButtonProperties, LinkProperties } from "../../types-comp-props"
+import type { SvelthreeShadowDOMElement } from "../../types/types-extra"
+import type { ButtonProperties, LinkProperties } from "../../types/types-comp-props"
 
 const recreate_shadow_dom_el = (
 	shadow_dom_el: SvelthreeShadowDOMElement | undefined,

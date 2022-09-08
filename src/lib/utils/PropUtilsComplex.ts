@@ -1,4 +1,4 @@
-import type { ComplexValueType } from "../types-extra"
+import type { ComplexValueType } from "../types/types-extra"
 
 export default class PropUtilsComplex {
 	public static check(complex: ComplexValueType) {

@@ -1,5 +1,5 @@
 import type { Object3D } from "three"
-import type { RaycastableSvelthreeComponents } from "../types-extra"
+import type { RaycastableSvelthreeComponents } from "../types/types-extra"
 
 class RaycastArray_Base extends Array {
 	public head_path?: string[] | undefined = undefined

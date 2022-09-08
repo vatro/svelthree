@@ -12,7 +12,7 @@ import {
 import { safe_not_equal, has_prop } from "svelte/internal"
 import Propeller from "./Propeller"
 import PropUtils from "./PropUtils"
-import type { ComplexValueType } from "../types-extra"
+import type { ComplexValueType } from "../types/types-extra"
 
 export type PropOrigin = "own" | "inherited"
 

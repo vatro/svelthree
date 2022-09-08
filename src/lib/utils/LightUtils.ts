@@ -5,7 +5,7 @@
 import { has_prop } from "svelte/internal"
 import type { Light, Scene } from "three"
 import { Color, Object3D } from "three"
-import type { LightWithShadow } from "../types-extra"
+import type { LightWithShadow } from "../types/types-extra"
 import PropUtils from "./PropUtils"
 import { verbose_mode } from "../utils/SvelthreeLogger"
 

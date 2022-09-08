@@ -1,5 +1,5 @@
 import { not_equal } from "svelte/internal"
-import type { Array3 } from "../../types-extra"
+import type { Array3 } from "../../types/types-extra"
 import { Propeller } from "./utils"
 
 export default class PropArray3X {

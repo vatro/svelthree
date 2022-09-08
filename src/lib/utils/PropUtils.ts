@@ -4,8 +4,8 @@
 
 import type { Light, Material, Object3D, Scene } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
-import type { ComplexValueType, LightWithShadow } from "../types-extra"
-import type { Targetable, TargetableSvelthreeComponent } from "../types-extra"
+import type { ComplexValueType, LightWithShadow } from "../types/types-extra"
+import type { Targetable, TargetableSvelthreeComponent } from "../types/types-extra"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**

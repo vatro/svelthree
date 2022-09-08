@@ -24,8 +24,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
-	import type { WebGLRendererMode } from "../types-extra"
-	import type { WebGLRendererProperties } from "../types-comp-props"
+	import type { WebGLRendererMode } from "../types/types-extra"
+	import type { WebGLRendererProperties } from "../types/types-comp-props"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)

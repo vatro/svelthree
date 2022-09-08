@@ -9,7 +9,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 This is an internal _SvelthreeLightWithShadow_ Component.
 -->
 <script lang="ts">
-	import type { LightWithShadow } from "../types-extra"
+	import type { LightWithShadow } from "../types/types-extra"
 	import { PropUtils, SvelthreeProps } from "../utils"
 	import type { LogDEV } from "../utils/SvelthreeLogger"
 

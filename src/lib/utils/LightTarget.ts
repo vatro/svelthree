@@ -1,4 +1,4 @@
-import type { Targetable } from "../types-extra"
+import type { Targetable } from "../types/types-extra"
 import type { Light, Object3D, Scene } from "three"
 import { LightUtils } from "../utils"
 

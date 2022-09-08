@@ -16,7 +16,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { PointerState, SvelthreeShadowDOMElement } from "../types-extra"
+	import type { PointerState, SvelthreeShadowDOMElement } from "../types/types-extra"
 	import type { Writable } from "svelte/store"
 	import {
 		KEYBOARD_EVENTS,
