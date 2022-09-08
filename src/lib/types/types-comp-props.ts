@@ -1,6 +1,5 @@
 import type {
 	OnlyWritableNonFunctionProps,
-	OnlyWritableNonFunctionPropsPlus,
 	OnlyWritableNonFunctionPropsOverwritten,
 	PropBlackList
 } from "./types-extra"
@@ -10,7 +9,7 @@ import type { WebGLRenderer } from "three"
 import type { Scene, Texture } from "three"
 import type { Mesh, Points } from "three"
 import type { AmbientLight, DirectionalLight, HemisphereLight, PointLight, RectAreaLight, SpotLight } from "three"
-import type { CubeCamera, WebGLCubeRenderTarget, WebGLRenderTargetOptions } from "three"
+import type { CubeCamera, WebGLCubeRenderTarget } from "three"
 import type { OrthographicCamera, PerspectiveCamera } from "three"
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
@@ -204,4 +203,4 @@ export type LinkProperties = {
 }
 
 // intellisense test
-const link_prop: ButtonProp = {}
+//const link_prop: ButtonProperties = {}
