@@ -446,7 +446,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// COOL!  This works now! 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
 	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
 	/** **shorthand** attribute for setting properties of a `Material` using key-value pairs in an `Object`. */
-	export let mat: { [P in keyof AnyMaterialProps]: AnyMaterialProps[P] } = undefined
+	export let mat: AnyMaterialProps = undefined
 
 	$: if (mat && sMat) {
 		const updated_keys: string[] = sMat.update(mat)
