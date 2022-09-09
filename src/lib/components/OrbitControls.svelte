@@ -10,7 +10,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import type { Scene } from "three"
+	import type { Scene as THREE_Scene } from "three"
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -23,7 +23,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import type { Writable } from "svelte/store"
 
-	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 	import type { OrbitControlsProperties } from "../types/types-comp-props"
 	import { CameraHelper } from "three"
 	import type { Vector3, PerspectiveCamera, OrthographicCamera } from "three"
@@ -42,11 +42,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
-	let scene: Scene = getContext("scene")
+	let scene: THREE_Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
-	export let orbitcontrols: OrbitControls = undefined
+	export let orbitcontrols: THREE_OrbitControls = undefined
 
 	export const is_svelthree_component: boolean = true
 	export const is_svelthree_orbitcontrols: boolean = true
@@ -81,7 +81,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		const oc_dom: HTMLElement = get_oc_dom()
 
 		try {
-			orbitcontrols = new OrbitControls(oc_cam, oc_dom)
+			orbitcontrols = new THREE_OrbitControls(oc_cam, oc_dom)
 			if (!orbitcontrols["userData"]) orbitcontrols["userData"] = {}
 			$svelthreeStores[sti].orbitcontrols.push(orbitcontrols)
 			index_in_orbitcontrols = orbitcontrols["userData"].index_in_orbitcontrols
@@ -263,7 +263,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** Returns the (three) instance of the object created by the component. */
-	export const get_instance = (): OrbitControls => orbitcontrols
+	export const get_instance = (): THREE_OrbitControls => orbitcontrols
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
