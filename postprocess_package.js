@@ -138,7 +138,7 @@ const get_process_comments_fn = (file_path) => {
 			//always -> insert comments to accessors
 			const comments_map = new Map()
 
-			const regex_comments = /(\/\*\ *.*?\*\/)( [A-Za-z].*?\:)/gs // should be correct
+			const regex_comments = /(\/\*\*.*?\*\/)( [A-Za-z].*?:)/gs // should be correct
 			let matches = new_content.match(regex_comments)
 			//console.log("matches.length", matches.length)
 
