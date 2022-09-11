@@ -41,3 +41,34 @@ export { CubeCamera as _CubeCamera } from "three"
 export { Scene as _Scene } from "three"
 export { OrbitControls as _OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 export { WebGLRenderer as _WebGLRenderer } from "three"
+
+/*
+//types
+export type {
+  WritableMaterialProperties
+} from "./types/types-extra"
+
+//types
+export type {
+  Object3DProperties,
+  GroupProperties,
+  LoadedGLTFProperties,
+  SceneProperties,
+  WebGLRendererProperties,
+  MeshProperties,
+  PointsProperties,
+  CubeCameraProperties,
+  WebGLCubeRenderTargetProperties,
+  OrthographicCameraProperties,
+  PerspectiveCameraProperties,
+  HemisphereLightProperties,
+  AmbientLightProperties,
+  DirectionalLightProperties,
+  PointLightProperties,
+  RectAreaLightProperties,
+  SpotLightProperties,
+  OrbitControlsProperties,
+  ButtonProperties,
+  LinkProperties
+} from "./types/types-comp-props"
+*/
