@@ -299,15 +299,15 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/**
-     see [WebGLRenderer Constants](https://threejs.org/docs/#api/en/constants/Renderer)  \
-     see [LightShadow](https://threejs.org/docs/#api/en/lights/shadows/LightShadow)  \
-     see [DirectionalLightShadow](https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow)
-     
-     - BasicShadowMap
-     - PCFShadowMap
-     - PCFSoftShadowMap
-     - VSMShadowMap
-  */
+	 * see [WebGLRenderer Constants](https://threejs.org/docs/#api/en/constants/Renderer)  \
+	 * see [LightShadow](https://threejs.org/docs/#api/en/lights/shadows/LightShadow)  \
+	 * see [DirectionalLightShadow](https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow)
+	 * ---
+	 * - BasicShadowMap
+	 * - PCFShadowMap
+	 * - PCFSoftShadowMap
+	 * - VSMShadowMap
+	 */
 	export let shadowmap_type: ShadowMapType = PCFSoftShadowMap
 	$: if (renderer && renderer.shadowMap.enabled && shadowmap_type) set_ShadowMap_type()
 
