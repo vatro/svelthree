@@ -475,9 +475,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 
-	/** Pushes a user-created (_e.g. via `new Mesh({...})`_) or an internally generated / created (e.g. via `SvelthreeGLTF.apply(...)`) `svelthree`-component
+	/**
+	 * Pushes a user-created (_e.g. via `new Mesh({...})`_) or an internally generated / created (e.g. via `SvelthreeGLTF.apply(...)`) `svelthree`-component
 	 * to a corresponding Array containing all user-created / internally generated (_registered_) child components, in order for them to be destroyed at the same time
-	 * the parent component gets destroyed (_`onDestroy`_). See also `comp_ref.get_user_created_children()` and `comp_ref.get_generated_children()`. */
+	 * the parent component gets destroyed (_`onDestroy`_). See also `comp_ref.get_user_created_children()` and `comp_ref.get_generated_children()`.
+	 */
 	export const register_child_component = (
 		component: SvelthreeComponentShadowDOMChild,
 		generated?: boolean

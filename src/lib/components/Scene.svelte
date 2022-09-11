@@ -604,13 +604,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Make component's three.js object interactive -> enable raycasting, `on:<event_name>` directives and `on_<event_name>` internal actions. */
 	export let interact: boolean = undefined
 
-	/** Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
-	 * This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
-	 *
-	 * Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.
-	 * In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
-	 * the object will automatically become an _interaction occluder / blocker_.
-	 */
+	/**
+	Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
+	* This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
+	* 
+	* Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.  
+	* In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
+	* the object will automatically become an _interaction occluder / blocker_.
+   */
 	export let block: boolean = false
 
 	const interaction_on_clear = {
@@ -882,9 +883,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 
-	/** Pushes a user-created (_e.g. via `new Mesh({...})`_) or an internally generated / created (e.g. via `SvelthreeGLTF.apply(...)`) `svelthree`-component
+	/**
+	 * Pushes a user-created (_e.g. via `new Mesh({...})`_) or an internally generated / created (e.g. via `SvelthreeGLTF.apply(...)`) `svelthree`-component
 	 * to a corresponding Array containing all user-created / internally generated (_registered_) child components, in order for them to be destroyed at the same time
-	 * the parent component gets destroyed (_`onDestroy`_). See also `comp_ref.get_user_created_children()` and `comp_ref.get_generated_children()`. */
+	 * the parent component gets destroyed (_`onDestroy`_). See also `comp_ref.get_user_created_children()` and `comp_ref.get_generated_children()`.
+	 */
 	export const register_child_component = (
 		component: SvelthreeComponentShadowDOMChild,
 		generated?: boolean
