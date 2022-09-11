@@ -55,6 +55,20 @@ export type OnlyWritableNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<On
 export type RemoveFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : T
 export type RemoveLast<T extends unknown[]> = T extends [...infer H, unknown] ? H : T
 
+
+// Get props of a generic `Material` 
+
+type AnyMaterialProps<T> = OnlyWritableNonFunctionPropsOverwritten<
+Omit<T, PropBlackList>,
+{ color: THREE.Color | string | number | [r: number, g: number, b: number] | number[] | THREE.Vector3 }
+>
+
+export type WritableMaterialProperties<T> = { [P in keyof AnyMaterialProps<T>]: AnyMaterialProps<T>[P] }
+export type Mat<T> = WritableMaterialProperties<T>
+
+export type MeshAssignableMaterial = THREE.Material | THREE.Material[]
+export type PointsAssignableMaterial = THREE.Material | THREE.Material[] | THREE.PointsMaterial
+
 // Animation
 
 export interface SvelthreeAnimationFunctionReturn {
@@ -159,13 +173,13 @@ export type AnySvelthreeComponent =
 	| Group
 	| HemisphereLight
 	| LoadedGLTF
-	| Mesh<THREE.Material | THREE.Material[]>
+	| Mesh<MeshAssignableMaterial>
 	| Object3D
 	| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
-	| Points<THREE.Material | THREE.Material[]>
+	| Points<PointsAssignableMaterial>
 	| RectAreaLight
 	| Scene
 	| SpotLight
@@ -181,13 +195,13 @@ export type SvelthreeComponentShadowDOMChild =
 	| Group
 	| HemisphereLight
 	| LoadedGLTF
-	| Mesh<THREE.Material | THREE.Material[]>
+	| Mesh<MeshAssignableMaterial>
 	| Object3D
 	//| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
-	| Points<THREE.Material | THREE.Material[]>
+	| Points<PointsAssignableMaterial>
 	| RectAreaLight
 	| Scene
 	| SpotLight
@@ -197,8 +211,8 @@ export type TargetableSvelthreeComponent =
 	| Scene
 	| Object3D
 	| Group
-	| Mesh<THREE.Material | THREE.Material[]>
-	| Points<THREE.Material | THREE.Material[]>
+	| Mesh<MeshAssignableMaterial>
+	| Points<PointsAssignableMaterial>
 	| PointLight
 	| SpotLight
 	| DirectionalLight

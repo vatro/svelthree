@@ -50,9 +50,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { Points as THREE_Points } from "three"
 	import type { PointsProperties } from "../types/types-comp-props"
-	import type { OnlyWritableNonFunctionPropsOverwritten, RemoveFirst, PropBlackList } from "../types/types-extra"
+	import type { RemoveFirst, Mat, PointsAssignableMaterial } from "../types/types-extra"
 	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
-	import type { Material, PointsMaterial, Color } from "three"
+	import type { Material } from "three"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -115,19 +115,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Sets the `name` property of the created / injected three.js instance. */
 	export let name: string = undefined
 
-	// Generic Material type and props
+	// Generic Material type
 	// COOL!  This is possible now! see https://github.com/sveltejs/language-tools/issues/442#issuecomment-977803507
 	// 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
-	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
-	type AnyMaterial = $$Generic<Material | Material[] | PointsMaterial>
-	type AnyMaterialProps = OnlyWritableNonFunctionPropsOverwritten<
-		Omit<AnyMaterial, PropBlackList>,
-		{ color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 }
-	>
+	//  TODO : Implement handling of multiple `Material`s, atm only single `Material` is supported.
+	type AssignedMaterial = $$Generic<PointsAssignableMaterial>
 
-	let extracted_material: AnyMaterial = undefined
-	export let material: AnyMaterial = undefined
-	let material_ref: AnyMaterial = undefined
+	let extracted_material: PointsAssignableMaterial = undefined
+	export let material: PointsAssignableMaterial = undefined
+	let material_ref: PointsAssignableMaterial = undefined
 
 	let extracted_geometry: BufferGeometry = undefined
 	export let geometry: BufferGeometry = undefined
@@ -248,7 +244,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function extract() {
 		extracted_geometry = points.geometry as BufferGeometry
-		extracted_material = points.material as AnyMaterial
+		extracted_material = points.material as PointsAssignableMaterial
 	}
 
 	$: if (geometry) on_geometry()
@@ -437,9 +433,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// Generic Material props
 	// COOL!  This works now! 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
-	// TODO  MULTIPLE MATERIALS: this works only with single Material atm, multiple Materials are not implemented yet.
-	/** **shorthand** attribute for setting properties of a `Material` using key-value pairs in an `Object`. */
-	export let mat: AnyMaterialProps = undefined
+	// TODO : Implement handling of multiple `Material`s, atm only single `Material` is supported.
+	/** **shorthand** attribute (`Object`) for setting writable properties of the assigned `Material`. */
+	export let mat: Mat<AssignedMaterial> = undefined
 
 	$: if (mat && sMat) {
 		const updated_keys: string[] = sMat.update(mat)
