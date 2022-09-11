@@ -45,7 +45,7 @@ export { WebGLRenderer as _WebGLRenderer } from "three"
 /*
 //types
 export type {
-  WritableMaterialProperties
+  Mat
 } from "./types/types-extra"
 
 //types
