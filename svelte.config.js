@@ -23,12 +23,8 @@ const config = {
 		emitTypes: true,
 		// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 		exports: (filepath) => {
-			//console.log(filepath)
 			if (filepath.startsWith(`index.ts`)) return true
 			if (filepath.startsWith(`utils/index`)) return true
-			//if (filepath.startsWith(`logic/if$/index`)) return true
-			//if (filepath.startsWith(`logic/shared/index`)) return true
-			//if (filepath.startsWith(`logic/special/index`)) return true
 			if (filepath.startsWith(`stores/index`)) return true
 		}
 	}
