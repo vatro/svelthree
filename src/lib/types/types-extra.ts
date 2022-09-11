@@ -55,12 +55,11 @@ export type OnlyWritableNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<On
 export type RemoveFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : T
 export type RemoveLast<T extends unknown[]> = T extends [...infer H, unknown] ? H : T
 
-
-// Get props of a generic `Material` 
+// Get props of a generic `Material`
 
 type AnyMaterialProps<T> = OnlyWritableNonFunctionPropsOverwritten<
-Omit<T, PropBlackList>,
-{ color: THREE.Color | string | number | [r: number, g: number, b: number] | number[] | THREE.Vector3 }
+	Omit<T, PropBlackList>,
+	{ color: THREE.Color | string | number | [r: number, g: number, b: number] | number[] | THREE.Vector3 }
 >
 
 export type WritableMaterialProperties<T> = { [P in keyof AnyMaterialProps<T>]: AnyMaterialProps<T>[P] }
