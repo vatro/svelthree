@@ -803,21 +803,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(e)
 
 				switch (e.type) {
-					case "pointermove":
+					case "pointermove": {
 						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(e)
 						queued_pointer_move_events[0] = queued_pointermove_event
 						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(e)
 						break
-					case "pointermoveover":
+					}
+					case "pointermoveover": {
 						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(e)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
 						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(e)
 						break
-					default:
+					}
+					default: {
 						const queued_pointer_event = () => dispatch_pointerevent_intersection_dep(e)
 						pointer_events_queue.push(queued_pointer_event)
 						//pointer_events_queue.push(() => dispatch_pointerevent_intersection_dep(e))
 						break
+					}
 				}
 
 				break
@@ -957,11 +960,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		cancel_or_stop_propagation_fn(e)
 
 		switch (render_mode) {
-			case "always":
+			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
 				const queued_focus_event = () => dispatch_focusevent_intersection_indep(e)
 				focus_events_queue.push(queued_focus_event)
 				break
+			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 				dispatch_focusevent_intersection_indep(e)
@@ -1180,11 +1184,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		switch (render_mode) {
-			case "always":
+			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
 				const queued_keyboard_event = () => dispatch_keyboardevent_intersection_indep(e)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
+			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 				dispatch_keyboardevent_intersection_indep(e)
