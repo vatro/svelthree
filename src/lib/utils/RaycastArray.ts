@@ -4,7 +4,7 @@ import type { RaycastableSvelthreeComponents } from "../types/types-extra"
 class RaycastArray_Base extends Array {
 	public head_path?: string[] | undefined = undefined
 	public index_prop: string | undefined = undefined
-	public dirty: boolean = false
+	public dirty = false
 
 	constructor(...args: any[]) {
 		super(...args)

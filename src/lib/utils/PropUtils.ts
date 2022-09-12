@@ -16,7 +16,7 @@ import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
  */
 export default class PropUtils {
 	public static getShortHandAttrWarnings(prefix: string): { [key: string]: any } {
-		let warnings = {
+		const warnings = {
 			rot: `${prefix} 'rot' attribute ignored! : overridden by either 'matrix' or 'quat' attribute!`,
 			pos: `${prefix} 'pos' attribute ignored! : overridden by 'matrix' attribute!`,
 			quat: `${prefix} 'quat' attribute ignored! : overridden by 'matrix' attribute!`,
@@ -329,7 +329,7 @@ export default class PropUtils {
 			// limit using manipulating `target` via `lookAt` to lights only
 			if (obj["isLight"]) {
 				// THREE  IMPORTANT  Only DirectionalLight and SpotLight have own `target` properties. Object3D does not.
-				if (obj.hasOwnProperty("target")) {
+				if (Object.prototype.hasOwnProperty.call(obj, "target")) {
 					if (obj["target"].isObject3D) {
 						if (obj.matrixAutoUpdate === false) {
 							obj["target"].matrixAutoUpdate = false
@@ -532,7 +532,7 @@ export default class PropUtils {
 			if (val["isObject3D"]) {
 				obj["target"] = val
 			} else if (val["is_svelthree_component"]) {
-				let obj3d: Object3D = (val as TargetableSvelthreeComponent).get_instance()
+				const obj3d: Object3D = (val as TargetableSvelthreeComponent).get_instance()
 				obj["target"] = obj3d
 			} else {
 				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })

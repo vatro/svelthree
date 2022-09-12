@@ -20,7 +20,7 @@ export default class PropColorX {
 
 			case value:
 				// same object, perform deep check
-				for (let k in this.prevValues) {
+				for (const k in this.prevValues) {
 					if (not_equal(this.prevValues[k], value[k])) {
 						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Color")
 						this.setPrevValues(value)

@@ -18,7 +18,7 @@ export default class LightTarget {
 	public on_light_target_change() {
 		this.change = false
 
-		if (this.light.hasOwnProperty("target")) {
+		if (Object.prototype.hasOwnProperty.call(this.light, "target")) {
 			// remove current target from parent if it's a built-in target
 			if (this.light["target"]?.userData.is_builtin_target && this.light["target"].parent) {
 				this.light["target"].parent.remove(this.light["target"])

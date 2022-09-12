@@ -9,10 +9,10 @@ export default class CubeCameraHelper {
 	}
 
 	private createHelpers(camera: CubeCamera): CameraHelper[] {
-		let all: CameraHelper[] = []
+		const all: CameraHelper[] = []
 		for (let i = 0; i < camera.children.length; i++) {
-			let pc: PerspectiveCamera = (camera.children as PerspectiveCamera[])[i]
-			let helper = new CameraHelper(pc)
+			const pc: PerspectiveCamera = (camera.children as PerspectiveCamera[])[i]
+			const helper = new CameraHelper(pc)
 			all.push(helper)
 		}
 		return all

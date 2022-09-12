@@ -125,7 +125,7 @@ export default class SvelthreeProps {
 		this.updatedKeys = []
 
 		// analyze and sort `props` object's properties
-		for (let k in props) {
+		for (const k in props) {
 			const complexType: ComplexValueType | undefined = PropUtils.checkIfComplexValueType(props[k])
 			const is_own_prop: any = has_prop(this.obj, k)
 			const is_inherited_prop: boolean = is_own_prop ? false : this.obj[k] ? true : false

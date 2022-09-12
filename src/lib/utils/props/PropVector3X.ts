@@ -20,7 +20,7 @@ export default class PropVector3X {
 
 			case value:
 				// same object, perform deep check
-				for (let k in value) {
+				for (const k in value) {
 					if (not_equal(this.prevValues[k], value[k])) {
 						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector3")
 						this.setPrevValues(value)

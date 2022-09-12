@@ -63,7 +63,7 @@ export default class Propeller {
 				default:
 					// update `CubeCamera`'s `renderTargetProps` prop (`CubeTexture`)
 					if (obj_type === "WebGLCubeRenderTarget") {
-						let cubeRenderTarget = obj as WebGLCubeRenderTarget
+						const cubeRenderTarget = obj as WebGLCubeRenderTarget
 						PropUtils.applyValueToProp(cubeRenderTarget.texture, value, key)
 					} else {
 						// no wildcard updating of **inherited** properties  via `Proppeller` -> show error in the console.

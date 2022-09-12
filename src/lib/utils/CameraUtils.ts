@@ -41,10 +41,10 @@ export default class CameraUtils {
 			// abilty to have (blank)
 			//const _frustumSize = frustumSize || CameraValues.CAM_ORTHO_FRUSTUM_SIZE
 
-			let left = (frustumSize * aspect) / -2
-			let right = (frustumSize * aspect) / 2
-			let top = frustumSize / 2
-			let bottom = frustumSize / -2
+			const left = (frustumSize * aspect) / -2
+			const right = (frustumSize * aspect) / 2
+			const top = frustumSize / 2
+			const bottom = frustumSize / -2
 
 			cam.left = left
 			cam.right = right
