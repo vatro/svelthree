@@ -13,6 +13,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { onMount, beforeUpdate, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
+	import type { Intersection, Camera, Ray } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
@@ -102,13 +103,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	interface RaycasterData {
 		/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
-		intersection: { [P in keyof THREE.Intersection]: THREE.Intersection[P] }
+		intersection: { [P in keyof Intersection]: Intersection[P] }
 		/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
-		ray: THREE.Ray
+		ray: Ray
 		/** The `Camera` used for raycasting. */
-		camera: THREE.Camera
+		camera: Camera
 		/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
-		unprojected_point: THREE.Vector3
+		unprojected_point: Vector3
 	}
 
 	let raycaster_data: RaycasterData
