@@ -54,7 +54,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
@@ -104,8 +104,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let camera_is_active: boolean = undefined
 	let index_in_cameras: number = undefined
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_camera: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_camera = true
 
 	//  ONCE  ON  INITIALIZATION  //
 
@@ -393,7 +393,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	const canvas_dim: Writable<{ w: number; h: number }> = getContext("canvas_dim")
 
-	let aspect_updated_on_init: boolean = false
+	let aspect_updated_on_init = false
 
 	/** Camera frustum aspect ratio, usually the `canvas width / canvas height`.
 	 * **svelthree** always sets the aspect of the camera automatically _once_ on initialization to match canvas dimensions.
@@ -544,7 +544,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 
-	let animationEnabled: boolean = false
+	let animationEnabled = false
 	$: if (animation) animationEnabled = true
 
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */

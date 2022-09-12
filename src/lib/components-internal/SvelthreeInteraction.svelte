@@ -49,7 +49,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
-	//export let log_rs: boolean = false
+	//export let log_rs = false
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
 
 	export let interactionEnabled: boolean
@@ -145,7 +145,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	export let shadow_dom_el: SvelthreeShadowDOMElement = undefined
 
-	let listeners: boolean = false
+	let listeners = false
 
 	// --- Reactively add listeners ---
 
@@ -156,7 +156,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// --- Pointer over / out of `<canvas>` element state ---
 
-	let out_of_canvas_triggered: boolean = false
+	let out_of_canvas_triggered = false
 
 	// pointer is out of / exited the `<canvas>` element.
 	$: if (obj.userData.interact && pointer.event && $pointer_over_canvas.status === false) {
@@ -840,7 +840,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection dependent -> has raycaster_data! */
 	function dispatch_pointerevent_intersection_dep(e: PointerEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -855,7 +855,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection independent -> no raycaster_data! */
 	function dispatch_pointerevent_intersection_indep(e: PointerEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -972,7 +972,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function dispatch_focusevent_intersection_indep(e: FocusEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -1204,7 +1204,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function dispatch_keyboardevent_intersection_indep(e: KeyboardEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			code: e.code,

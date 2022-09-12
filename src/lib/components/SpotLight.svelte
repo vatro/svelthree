@@ -61,7 +61,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
@@ -97,8 +97,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Sets the `name` property of the created / injected three.js instance. */
 	export let name: string = undefined
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_light: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_light = true
 
 	//  ONCE  ON  INITIALIZATION  //
 
@@ -469,7 +469,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 
-	let animationEnabled: boolean = false
+	let animationEnabled = false
 	$: if (animation) animationEnabled = true
 
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */

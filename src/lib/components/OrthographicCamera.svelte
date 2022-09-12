@@ -61,7 +61,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
@@ -111,8 +111,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	let camera_is_active: boolean = undefined
 	let index_in_cameras: number = undefined
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_camera: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_camera = true
 
 	//  ONCE  ON  INITIALIZATION  //
 
@@ -428,7 +428,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	const canvas_dim: Writable<{ w: number; h: number }> = getContext("canvas_dim")
 
-	let camera_updated_on_init: boolean = false
+	let camera_updated_on_init = false
 
 	// update frustum planes / aspect on initialization only (`frustumSize` not set -> svelthree default value in order prevent 'stretching')
 	$: if (!frustumSize && !camera_updated_on_init && camera && $canvas_dom.element && $canvas_dim.w && $canvas_dim.h) {
@@ -510,7 +510,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 
-	let animationEnabled: boolean = false
+	let animationEnabled = false
 	$: if (animation) animationEnabled = true
 
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */

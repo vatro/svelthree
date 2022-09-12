@@ -43,15 +43,15 @@ This is a **svelthree** _Canvas_ Component.
 
 	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
 	// #endregion
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_canvas: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_canvas = true
 
 	// #region --- Required Attributes
 
@@ -70,7 +70,7 @@ This is a **svelthree** _Canvas_ Component.
 	export { clazz as class }
 
 	/** If `true` (_default_) the cursor will change automatically (_e.g. over/out canvas DOM element, **interactive** objects or when using the `OrbitControls` component_). */
-	export let change_cursor: boolean = true
+	export let change_cursor = true
 
 	export let interactive: boolean = undefined
 	$: if (interactive !== undefined) {
@@ -570,7 +570,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * will also check all descendants of interactive objects.
 	 * - If set to `false` the interaction Raycaster will only check intersection with interactive objects.
 	 */
-	export let recursive: boolean = true
+	export let recursive = true
 
 	/** Updates the `all_intersections.result` array and changes the pointer appearance if the `change_cursor` prop is set to `true`.*/
 	function update_all_intersections_and_cursor(): void {
