@@ -6,8 +6,6 @@ export type Constructor<T = object> = {
 export type Array3 = [number, number, number]
 export type Array4 = [number, number, number, string]
 
-export type Params<T> = T extends new (...params: any) => any ? ConstructorParameters<T> : T
-
 // see https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir
 export type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
 	? A
