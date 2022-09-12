@@ -732,6 +732,7 @@ This is a **svelthree** _Canvas_ Component.
 	// --- Accessabilty ---
 
 	export let tabindex: number = undefined
+	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> = undefined
 
 	$: if (c && browser) {

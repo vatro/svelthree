@@ -351,6 +351,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// accessability -> shadow dom wai-aria
+	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> = undefined
 
 	$: if (shadow_dom_el && aria !== undefined) {
