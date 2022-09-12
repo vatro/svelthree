@@ -18,11 +18,18 @@ Thanks for dropping by & stay tuned! 🚀 + feel free to try `svelthree` & leave
 
 - **clone the svelthree repo**
 
-  e.g. using [degit](https://github.com/Rich-Harris/degit): `npx degit vatro/svelthree `
+  e.g. using [degit](https://github.com/Rich-Harris/degit): `npx degit vatro/svelthree`
 
 - **create a svelthree-tarball and save it somewhere** *(see [npm pack](https://docs.npmjs.com/cli/v7/commands/npm-pack))*
 
-  e.g. run `npm pack --pack-destination ../some_directory/` 
+  open a new terminal from `svelthree` root folder and:
+
+  `npm i`
+  `npm run build`
+  `cd package`
+
+  open a new terminal from `package` folder and:
+  `npm pack --pack-destination ../some_directory/` 
 
 - **install the created svelthree-tarball**
 
@@ -31,7 +38,7 @@ Thanks for dropping by & stay tuned! 🚀 + feel free to try `svelthree` & leave
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.94.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.95.tgz",
       ...
   }
   ```

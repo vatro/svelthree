@@ -1,5 +1,25 @@
 # svelthree changelog
 
+## 1.0.0-next.0.95
+
+[_**major refactor**_] Changed project structure / setup using `npm create svelte@latest` + library option as a starting point, including custom post-processing of the generated package (TypeScript / DX related). So far so good, tested. 🚀 ([#161](https://github.com/vatro/svelthree/issues/161))
+
+Most important TypeScript related changes:
+- (_internal_) All functions (_sync/async_) exposed (_accessors_) via `export function foo(...)` have been rewritten to:
+
+  `export const foo = () => {...}` or `export const foo = async () => {...}` ([see #161 comment](https://github.com/vatro/svelthree/issues/161#issuecomment-1238319446)).
+
+- (_internal_) Different handling of generic / assigned Material in `Mesh` and `Points` components (_new types + post-processing of generated `*.d.ts` files_)
+
+- (_internal_) Don't import `Foo` from 'three' into component `Foo`, import `Foo as THREE_Foo` from 'three' instead ([see #161 comment](https://github.com/vatro/svelthree/issues/161#issuecomment-1238319446)). _REMARK: currently `Scene` and `Object3D` three.js classes and types are always imported `as THREE_Foo`, but this is actually not always neccessary -> may change before `1.0.0-next.1`_)
+
+- (_currently internal_) Types `<component name>Props` changed to `<component name>Properties` due to conflict in generated `d.ts` ([see #161 comment](https://github.com/vatro/svelthree/issues/161#issuecomment-1238319446)). This is currently an internal change, but will be relevant in next version (_Property-Types will be exported_), also those types may be renamed again.
+
+Also: several JSDoc changes etc.
+
+**REMARK (NEXT)**: Atm there are a lot of ESLint errors and warnings which need to be fixed (_TODO: next version_).
+
+
 ## 1.0.0-next.0.94
 
 - `Canvas`: 
