@@ -81,6 +81,7 @@ export interface SvelthreeAnimationFunctionReturn {
 	 * _Usually used for continuing the animation in a multiple top-level Scenes scenario._
 	 */
 	onSceneReactivated?: () => void
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	[anything: string]: any
 }
 
@@ -112,6 +113,7 @@ export interface SvelthreeAnimationFunctionReturn {
  */
 /*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 export interface SvelthreeAnimationFunction {
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	(obj: any, ...args: any[]): SvelthreeAnimationFunctionReturn
 }
 
