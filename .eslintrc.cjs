@@ -7,25 +7,25 @@ module.exports = {
 	plugins: ["svelte3", "@typescript-eslint"],
 
 	//(default) check *.svelte and *.ts files
-	// ignorePatterns: ["*.cjs"],
+	ignorePatterns: ["*.cjs"],
 
 	// check only *.svelte files
-	ignorePatterns: ["*.cjs", "*.ts"],
+	//ignorePatterns: ["*.cjs", "*.ts"],
 
 	overrides: [
 		{
 			files: ["*.svelte"],
-			processor: "svelte3/svelte3",
+			processor: "svelte3/svelte3"
 
 			// checking specific rules (set to "off" / "error")
 			// errors only
-			rules: {
+			/* rules: {
 				"no-inferrable-types": "error",
 				"no-undef": "error",
 				"no-empty": "error",
 				"no-case-declarations": "error",
 				"no-prototype-builtins": "error"
-			}
+			} */
 		}
 	],
 	settings: {
