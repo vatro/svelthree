@@ -404,7 +404,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		if (!bind_tex) {
 			let op: Mesh = bound_pos as Mesh
 			let op_mat: MaterialWithEnvMap = op.material as MaterialWithEnvMap
-			if (op_mat?.hasOwnProperty("envMap")) {
+			if (op_mat && Object.prototype.hasOwnProperty.call(op_mat, "envMap")) {
 				op_mat.envMap = camera.renderTarget.texture
 			}
 		}
