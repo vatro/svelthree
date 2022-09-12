@@ -2,8 +2,6 @@ import { Vector3 } from "three"
 import type { PerspectiveCamera, OrthographicCamera } from "three"
 
 export default class Calc {
-	constructor() {}
-
 	public static get_unproject_pointer(
 		c: HTMLCanvasElement,
 		e: PointerEvent,
