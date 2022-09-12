@@ -114,6 +114,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (object3d.type === "Object3D") {
+			//nothing
 		} else {
 			throw new Error(
 				`SVELTHREE > ${c_name} provided 'object3d' instance has wrong type '${object3d.type}', should be '${c_name}'!`

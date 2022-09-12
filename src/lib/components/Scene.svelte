@@ -137,6 +137,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
 		if (scene.type === "Scene") {
+			//nothing
 		} else {
 			throw new Error(
 				`SVELTHREE > ${c_name} provided 'scene' instance has wrong type '${scene.type}', should be '${c_name}'!`
