@@ -96,7 +96,7 @@ export default class GLTF_utils {
 				}
 			}
 
-			function traverse(child: Object3D) {
+			const traverse = (child: Object3D) => {
 				fns.push(check_obj(child, check, found))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
