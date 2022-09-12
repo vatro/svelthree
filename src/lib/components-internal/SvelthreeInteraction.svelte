@@ -13,6 +13,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { onMount, beforeUpdate, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component, SvelteComponentDev } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
+	import type { Intersection, Camera, Ray } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
@@ -49,7 +50,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
-	//export let log_rs: boolean = false
+	//export let log_rs = false
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
 
 	export let interactionEnabled: boolean
@@ -102,13 +103,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	interface RaycasterData {
 		/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
-		intersection: { [P in keyof THREE.Intersection]: THREE.Intersection[P] }
+		intersection: { [P in keyof Intersection]: Intersection[P] }
 		/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
-		ray: THREE.Ray
+		ray: Ray
 		/** The `Camera` used for raycasting. */
-		camera: THREE.Camera
+		camera: Camera
 		/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
-		unprojected_point: THREE.Vector3
+		unprojected_point: Vector3
 	}
 
 	let raycaster_data: RaycasterData
@@ -145,7 +146,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	export let shadow_dom_el: SvelthreeShadowDOMElement = undefined
 
-	let listeners: boolean = false
+	let listeners = false
 
 	// --- Reactively add listeners ---
 
@@ -156,7 +157,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// --- Pointer over / out of `<canvas>` element state ---
 
-	let out_of_canvas_triggered: boolean = false
+	let out_of_canvas_triggered = false
 
 	// pointer is out of / exited the `<canvas>` element.
 	$: if (obj.userData.interact && pointer.event && $pointer_over_canvas.status === false) {
@@ -802,21 +803,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(e)
 
 				switch (e.type) {
-					case "pointermove":
+					case "pointermove": {
 						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(e)
 						queued_pointer_move_events[0] = queued_pointermove_event
 						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(e)
 						break
-					case "pointermoveover":
+					}
+					case "pointermoveover": {
 						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(e)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
 						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(e)
 						break
-					default:
+					}
+					default: {
 						const queued_pointer_event = () => dispatch_pointerevent_intersection_dep(e)
 						pointer_events_queue.push(queued_pointer_event)
 						//pointer_events_queue.push(() => dispatch_pointerevent_intersection_dep(e))
 						break
+					}
 				}
 
 				break
@@ -840,7 +844,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection dependent -> has raycaster_data! */
 	function dispatch_pointerevent_intersection_dep(e: PointerEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -855,7 +859,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection independent -> no raycaster_data! */
 	function dispatch_pointerevent_intersection_indep(e: PointerEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -956,11 +960,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		cancel_or_stop_propagation_fn(e)
 
 		switch (render_mode) {
-			case "always":
+			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
 				const queued_focus_event = () => dispatch_focusevent_intersection_indep(e)
 				focus_events_queue.push(queued_focus_event)
 				break
+			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 				dispatch_focusevent_intersection_indep(e)
@@ -972,7 +977,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function dispatch_focusevent_intersection_indep(e: FocusEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			e,
@@ -1179,11 +1184,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		switch (render_mode) {
-			case "always":
+			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
 				const queued_keyboard_event = () => dispatch_keyboardevent_intersection_indep(e)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
+			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 				dispatch_keyboardevent_intersection_indep(e)
@@ -1204,7 +1210,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function dispatch_keyboardevent_intersection_indep(e: KeyboardEvent) {
-		const action_name: string = `on_${e.type}`
+		const action_name = `on_${e.type}`
 
 		const detail = {
 			code: e.code,

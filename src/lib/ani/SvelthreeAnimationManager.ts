@@ -3,11 +3,13 @@ import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
 import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class SvelthreeAnimationManager {
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	animation: SvelthreeAnimationProp | any
 	aniauto: boolean
 	obj: Object3D
 	scene: Scene
 
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	constructor(animation: SvelthreeAnimationProp | any, aniauto: boolean, obj: Object3D, scene: Scene | null) {
 		this.animation = animation
 		this.aniauto = aniauto
@@ -165,6 +167,7 @@ export default class SvelthreeAnimationManager {
 		return false
 	}
 
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	getAnimation(): any {
 		if (this.animationInitiated()) {
 			return this.animation

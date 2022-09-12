@@ -66,7 +66,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
@@ -76,9 +76,9 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	 * - `false` (default) -> `update_cubecam()` will be called **once on initialization**, further updates have to be done **manually** by calling `[CubeCamera component reference].update_cubecam()`.
 	 * - `true` -> WebGLRenderer component will update the CubeCamera (_renderTarget.texture_) on **every frame**.
 	 */
-	export let dynamic: boolean = false
+	export let dynamic = false
 
-	let camera_updated: boolean = false
+	let camera_updated = false
 
 	/** `CubeCamera` instances are always added to the `root_scene`
 	 * no matter which component the `CubeCamera` component was added to. */
@@ -119,7 +119,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	$: texture = browser ? camera.renderTarget.texture : undefined
 
 	/** Set to `true` for correct **floor reflections** (_default: `false`_). */
-	export let is_floor: boolean = false
+	export let is_floor = false
 
 	let scene: THREE_Scene = getContext("scene")
 	const sti: number = getContext("store_index")
@@ -156,8 +156,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	export let name: string = undefined
 	let index_in_cubecameras: number = undefined
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_camera: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_camera = true
 
 	//  ONCE  ON  INITIALIZATION  //
 
@@ -306,6 +306,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	// accessability -> shadow dom wai-aria
+	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> = undefined
 
 	$: if (shadow_dom_el && aria !== undefined) {
@@ -403,7 +404,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		if (!bind_tex) {
 			let op: Mesh = bound_pos as Mesh
 			let op_mat: MaterialWithEnvMap = op.material as MaterialWithEnvMap
-			if (op_mat?.hasOwnProperty("envMap")) {
+			if (op_mat && Object.prototype.hasOwnProperty.call(op_mat, "envMap")) {
 				op_mat.envMap = camera.renderTarget.texture
 			}
 		}
@@ -602,7 +603,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction = undefined
 
-	let animationEnabled: boolean = false
+	let animationEnabled = false
 	$: if (animation) animationEnabled = true
 
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */

@@ -7,7 +7,7 @@
 		renderer_component: WebGLRenderer,
 		event_name: string,
 		callback: () => void,
-		skip_frames: number = 0
+		skip_frames = 0
 	) => {
 		let skip = 0
 		let remove_on_render_event: () => void = undefined

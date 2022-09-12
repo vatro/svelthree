@@ -6,8 +6,6 @@ export type Constructor<T = object> = {
 export type Array3 = [number, number, number]
 export type Array4 = [number, number, number, string]
 
-export type Params<T> = T extends new (...params: any) => any ? ConstructorParameters<T> : T
-
 // see https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir
 export type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
 	? A
@@ -83,6 +81,7 @@ export interface SvelthreeAnimationFunctionReturn {
 	 * _Usually used for continuing the animation in a multiple top-level Scenes scenario._
 	 */
 	onSceneReactivated?: () => void
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	[anything: string]: any
 }
 
@@ -114,6 +113,7 @@ export interface SvelthreeAnimationFunctionReturn {
  */
 /*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 export interface SvelthreeAnimationFunction {
+	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
 	(obj: any, ...args: any[]): SvelthreeAnimationFunctionReturn
 }
 

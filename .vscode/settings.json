@@ -1,4 +1,5 @@
 {
+	"eslint.validate": ["javascript", "svelte"],
 	"cSpell.enabled": false,
 	"editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?",
 	"todohighlight.keywords": [

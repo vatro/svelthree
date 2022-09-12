@@ -38,7 +38,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
@@ -48,11 +48,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
 	export let orbitcontrols: THREE_OrbitControls = undefined
 
-	export const is_svelthree_component: boolean = true
-	export const is_svelthree_orbitcontrols: boolean = true
+	export const is_svelthree_component = true
+	export const is_svelthree_orbitcontrols = true
 
 	/** Display a console warning if the `OrbitControls` component's `cam` attribute was assigned a currently _inactive_ camera (also adss a `CameraHelper` to the assigned Camera). Default is `true`. Set `warn={false}` to hide the warning (_also: no `CameraHelper` be added_). */
-	export let warn: boolean = true
+	export let warn = true
 
 	// TODO  clarify why / when we would need this.
 	let index_in_orbitcontrols: number = undefined
@@ -167,7 +167,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** When set to false, the controls will not respond to user input. Default is `true`.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.enabled) */
-	export let enabled: boolean = true
+	export let enabled = true
 	$: if (orbitcontrols && (enabled === true || !enabled)) set_enabled()
 
 	function set_enabled(): void {
@@ -187,7 +187,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Enable or disable horizontal and vertical rotation of the camera. Default `true`.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.enableRotate) */
-	export let rotate: boolean = true
+	export let rotate = true
 	$: if (orbitcontrols && (rotate === true || !rotate)) set_rotate()
 
 	function set_rotate(): void {
@@ -201,7 +201,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 *     - `false`: will schedule a render on `OrbitControls`'s event `"change"`.
 	 *
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.autoRotate) */
-	export let auto: boolean = false
+	export let auto = false
 	$: if (orbitcontrols && auto !== undefined) set_auto()
 
 	function set_auto(): void {
@@ -234,7 +234,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Set to true to enable damping (inertia), which can be used to give a sense of weight to the controls. Default is `false`.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.enableDamping) */
-	export let damping: boolean = false
+	export let damping = false
 	$: if (orbitcontrols && (damping === true || !damping)) set_damping()
 
 	function set_damping(): void {
@@ -244,7 +244,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Enable or disable camera panning. Default is `true`.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.enablePan) */
-	export let pan: boolean = true
+	export let pan = true
 	$: if (orbitcontrols && (pan === true || !pan)) set_pan()
 
 	function set_pan(): void {
@@ -254,7 +254,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Enable or disable zooming (dollying) of the camera. Default `false`.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.enableZoom) */
-	export let zoom: boolean = false
+	export let zoom = false
 	$: if (orbitcontrols && (zoom === true || !zoom)) set_zoom()
 
 	function set_zoom(): void {

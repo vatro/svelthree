@@ -33,7 +33,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	export const type: string = c_name
 	const verbose: boolean = verbose_mode()
 
-	export let log_all: boolean = false
+	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
@@ -76,7 +76,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * An array of configuration objects specifying `Canvas` components incl. `Scene` and `Camera` components' `id`s that should be rendered.
 	 */
 	export let inputs: WebGLRendererInput[] = undefined
-	let inputs_processed: boolean = false
+	let inputs_processed = false
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 
 	// inside -> wait for canvas...
@@ -146,7 +146,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	/** An array of `Canvas` components or `<canvas>` DOM elements to rendered to. */
 	export let outputs: WebGLRendererOutput[] = undefined
-	let outputs_processed: boolean = false
+	let outputs_processed = false
 	let first_outputs_canvas: HTMLCanvasElement | HTMLElement = undefined
 	$: if (outputs?.length && outputs[0].canvas) first_outputs_canvas = outputs[0].canvas
 	$: if (inside === false && first_outputs_canvas && inputs_processed) process_canvas_outputs()
@@ -534,7 +534,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	const rAF = { id: undefined }
 	const frames = { total: 0 }
 
-	export let enabled: boolean = true
+	export let enabled = true
 
 	function start_renderer(): void {
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "start_renderer!"))

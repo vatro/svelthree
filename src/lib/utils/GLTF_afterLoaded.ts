@@ -57,7 +57,7 @@ export default class GLTF_afterLoaded {
 					if (obj[typ]) {
 						// see https://github.com/mrdoob/three.js/blob/1a241ef10048770d56e06d6cd6a64c76cc720f95/src/core/Object3D.js#L342-L369
 						if (parent) {
-							let index_to_remove: number = parent.children.indexOf(obj)
+							const index_to_remove: number = parent.children.indexOf(obj)
 							//console.log(`removing -> [${index_to_remove}] ${obj.type}`, obj.uuid)
 							parent.children.splice(index_to_remove, 1)
 						}
@@ -70,7 +70,7 @@ export default class GLTF_afterLoaded {
 				}
 			}
 
-			function traverse(child: Object3D, parent?: Object3D) {
+			const traverse = (child: Object3D, parent?: Object3D) => {
 				fns.push(check_obj(child, parent, typ))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
@@ -106,7 +106,7 @@ export default class GLTF_afterLoaded {
 				(obj: Object3D, props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }) => async () => {
 					if (obj) {
 						if (obj["isMesh"] && obj["material"]) {
-							for (let prop in props) {
+							for (const prop in props) {
 								try {
 									obj["material"][prop] = props[prop]
 								} catch (e) {
@@ -122,7 +122,10 @@ export default class GLTF_afterLoaded {
 					}
 				}
 
-			function traverse(child: Object3D, props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }) {
+			const traverse = (
+				child: Object3D,
+				props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }
+			) => {
 				fns.push(check_obj(child, props))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
@@ -159,7 +162,7 @@ export default class GLTF_afterLoaded {
 				(obj: Object3D, props: { [P in keyof MeshProperties]: MeshProperties[P] }) => async () => {
 					if (obj) {
 						if (obj["isMesh"]) {
-							for (let prop in props) {
+							for (const prop in props) {
 								try {
 									obj[prop] = props[prop]
 								} catch (e) {
@@ -175,7 +178,7 @@ export default class GLTF_afterLoaded {
 					}
 				}
 
-			function traverse(child: Object3D, props: { [P in keyof MeshProperties]: MeshProperties[P] }) {
+			const traverse = (child: Object3D, props: { [P in keyof MeshProperties]: MeshProperties[P] }) => {
 				fns.push(check_obj(child, props))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
@@ -211,7 +214,7 @@ export default class GLTF_afterLoaded {
 			const check_obj = (obj: Object3D, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => async () => {
 				if (obj) {
 					if (obj["isLight"]) {
-						for (let prop in props) {
+						for (const prop in props) {
 							try {
 								obj[prop] = props[prop]
 							} catch (e) {
@@ -227,7 +230,7 @@ export default class GLTF_afterLoaded {
 				}
 			}
 
-			function traverse(child: Object3D, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) {
+			const traverse = (child: Object3D, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => {
 				fns.push(check_obj(child, props))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
