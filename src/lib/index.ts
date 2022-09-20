@@ -21,6 +21,7 @@ export { default as CubeCamera } from "./components/CubeCamera.svelte"
 // export all THREE modules
 export * from "three"
 
+// TODO  export as `THREE_*`?
 /** export all THREE modules 'Foo' overridden by Svelte components as '_Foo'
  * so users can for example import _Mesh from 'svelthree' and create a native THREE Mesh instance
  */
@@ -42,33 +43,45 @@ export { Scene as _Scene } from "three"
 export { OrbitControls as _OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 export { WebGLRenderer as _WebGLRenderer } from "three"
 
-/*
-//types
-export type {
-  Mat
-} from "./types/types-extra"
+// generic type utilities
+export type { prop } from "./types/types-extra"
+export type { PropMat } from "./types/types-comp-props"
 
-//types
+// `props` Object Literal types
 export type {
-  Object3DProperties,
-  GroupProperties,
-  LoadedGLTFProperties,
-  SceneProperties,
-  WebGLRendererProperties,
-  MeshProperties,
-  PointsProperties,
-  CubeCameraProperties,
-  WebGLCubeRenderTargetProperties,
-  OrthographicCameraProperties,
-  PerspectiveCameraProperties,
-  HemisphereLightProperties,
-  AmbientLightProperties,
-  DirectionalLightProperties,
-  PointLightProperties,
-  RectAreaLightProperties,
-  SpotLightProperties,
-  OrbitControlsProperties,
-  ButtonProperties,
-  LinkProperties
+	PropsObject3D,
+	PropsGroup,
+	PropsLoadedGLTF,
+	PropsScene,
+	PropsWebGLRenderer,
+	PropsMesh,
+	PropsPoints,
+	PropsCubeCamera,
+	PropsWebGLCubeRenderTarget,
+	PropsOrthographicCamera,
+	PropsPerspectiveCamera,
+	PropsHemisphereLight,
+	PropsAmbientLight,
+	PropsDirectionalLight,
+	PropsPointLight,
+	PropsRectAreaLight,
+	PropsSpotLight,
+	PropsOrbitControls
 } from "./types/types-comp-props"
-*/
+
+// `foo` Object Literal types
+export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types/types-comp-props"
+
+// TODO  params
+
+// TODO  config
+
+// misc
+export type { TargetableSvelthreeComponent } from "./types/types-extra"
+
+// GLTF related
+export type {
+	SvelthreeGLTFTreeMap,
+	ISvelthreeGLTFTreeMapMember,
+	GLTFSupportedSvelthreeComponents
+} from "./types/types-extra"

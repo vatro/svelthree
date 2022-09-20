@@ -1,206 +1,283 @@
 import type {
-	OnlyWritableNonFunctionProps,
-	OnlyWritableNonFunctionPropsOverwritten,
-	PropBlackList
+	MeshAssignableMaterial,
+	PointsAssignableMaterial,
+	get_props_overwritten,
+	get_props,
+	lookAt_value,
+	color_value,
+	background_value,
+	pos_value,
+	scale_value,
+	rot_value,
+	quat_value,
+	matrix_value,
+	up_value
 } from "./types-extra"
 
-import type { Object3D, Color, Quaternion, Vector3, Euler, Matrix4 } from "three"
-import type { WebGLRenderer } from "three"
-import type { Scene, Texture } from "three"
-import type { Mesh, Points } from "three"
-import type { AmbientLight, DirectionalLight, HemisphereLight, PointLight, RectAreaLight, SpotLight } from "three"
-import type { CubeCamera, WebGLCubeRenderTarget } from "three"
-import type { OrthographicCamera, PerspectiveCamera } from "three"
+import type {
+	Object3D,
+	Mesh,
+	Points,
+	WebGLRenderer,
+	Scene,
+	AmbientLight,
+	DirectionalLight,
+	HemisphereLight,
+	PointLight,
+	RectAreaLight,
+	SpotLight,
+	OrthographicCamera,
+	PerspectiveCamera,
+	CubeCamera,
+	WebGLCubeRenderTarget,
+	WebGLRenderTargetOptions
+} from "three"
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
-// TODO  GENERAL check / polish / fix usage of `OnlyWritableNonFunctionPropsPlus` vs. `OnlyWritableNonFunctionPropsOverwritten`
 // TODO  At some point we sould type the `userData` interface! -> see https://github.com/vatro/svelthree/issues/95
 
-// --- EMPTY ---
+type MeshLikeOnlyKeys = "customDepthMaterial" | "customDistanceMaterial"
 
-//export type Object3DProperties = OnlyWritableNonFunctionPropsPlus<
-export type Object3DProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<Object3D, PropBlackList>,
+// --- Object3D ---
+
+type WritableObject3DProperties = get_props_overwritten<
+	Object3D,
 	{
-		position: Vector3 | Parameters<Vector3["set"]>
-		scale: Vector3 | Parameters<Vector3["set"]>
-		rotation:
-			| Euler
-			| Parameters<Euler["set"]>
-			| Quaternion
-			| Parameters<Quaternion["set"]>
-			| Vector3
-			| Parameters<Vector3["set"]>
-		quaternion: Quaternion | Parameters<Quaternion["set"]>
-		matrix: Matrix4 | Parameters<Matrix4["set"]>
-		up: Vector3 | Parameters<Vector3["set"]>
+		position: pos_value
+		scale: scale_value
+		rotation: rot_value
+		quaternion: quat_value
+		matrix: matrix_value
+		up: up_value
 	}
 >
 
-// intellisense test
-//const obj3d_props: Object3DProperties = {}
+export type PropsObject3D = { [P in keyof WritableObject3DProperties]: WritableObject3DProperties[P] }
 
-export type GroupProperties = Object3DProperties
-export type LoadedGLTFProperties = Object3DProperties
+// intellisense test
+//const obj3d_props: PropsObject3D = {}
+
+export type PropsGroup = PropsObject3D
+export type PropsLoadedGLTF = PropsObject3D
 
 // -- SCENE --
 
-export type SceneProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<Scene, PropBlackList>,
+type WritableSceneProperties = get_props_overwritten<
+	Scene,
 	{
-		background?: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3
-	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
+		background?: background_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+export type PropsScene = { [P in keyof WritableSceneProperties]: WritableSceneProperties[P] }
 
 // intellisense test
-//const scene_props: SceneProperties = {}
+//const scene_props: PropsScene = {}
 
 // TODO  check / polish
-export type WebGLRendererProperties = OnlyWritableNonFunctionProps<Omit<WebGLRenderer, PropBlackList>>
+type WritableWebGLRendererProperties = get_props<WebGLRenderer>
+export type PropsWebGLRenderer = { [P in keyof WritableWebGLRendererProperties]: WritableWebGLRendererProperties[P] }
+
+// intellisense test
+//const weggl_renderer_props: PropsWebGLRenderer = {}
 
 // --- MESH ---
 
-export type MeshProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<Mesh, PropBlackList>,
-	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
->
+type WritableMeshProperties = get_props_overwritten<Mesh, { [P in keyof PropsObject3D]: PropsObject3D[P] }>
+export type PropsMesh = { [P in keyof WritableMeshProperties]: WritableMeshProperties[P] }
 
 // intellisense test
-//const mesh_props: MeshProperties = {}
+//const mesh_props: PropsMesh = {}
 
 // --- POINTS ---
 
-export type PointsProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<Points, PropBlackList>,
-	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
->
+type WritablePointsProperties = get_props_overwritten<Points, { [P in keyof PropsObject3D]: PropsObject3D[P] }>
+export type PropsPoints = { [P in keyof WritablePointsProperties]: WritablePointsProperties[P] }
 
 // intellisense test
-//const points_props: PointsProperties = {}
+//const points_props: PropsPoints = {}
 
 // --- CAMERAS ---
 
-export type CubeCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<CubeCamera, PropBlackList>,
-	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
->
+type WritableCubeCameraProperties = get_props_overwritten<CubeCamera, { [P in keyof PropsObject3D]: PropsObject3D[P] }>
+export type PropsCubeCamera = { [P in keyof WritableCubeCameraProperties]: WritableCubeCameraProperties[P] }
 
 // intellisense test
-//const cubecam_props: CubeCameraProperties = {}
+//const cubecam_props: PropsCubeCamera = {}
 
-export type WebGLCubeRenderTargetProperties = OnlyWritableNonFunctionProps<Omit<WebGLCubeRenderTarget, PropBlackList>>
-
-// intellisense test
-//const cubecam_rendertarget_props: WebGLCubeRenderTargetProperties = {}
-
-export type OrthographicCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<OrthographicCamera, PropBlackList>,
-	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
->
+type WritableWebGLCubeRenderTargetProperties = get_props<WebGLCubeRenderTarget>
+export type PropsWebGLCubeRenderTarget = {
+	[P in keyof WritableWebGLCubeRenderTargetProperties]: WritableWebGLCubeRenderTargetProperties[P]
+}
 
 // intellisense test
-//const orthocam_props: OrthographicCameraProperties = {}
+//const cubecam_rendertarget_props: PropsWebGLCubeRenderTarget = {}
 
-export type PerspectiveCameraProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<PerspectiveCamera, PropBlackList>,
+type WritableOrthographicCameraProperties = get_props_overwritten<OrthographicCamera, { [P in keyof PropsObject3D]: PropsObject3D[P] }>
+export type PropsOrthographicCamera = {
+	[P in keyof WritableOrthographicCameraProperties]: WritableOrthographicCameraProperties[P]
+}
+
+// intellisense test
+//const orthocam_props: PropsOrthographicCamera = {}
+
+type WritablePerspectiveCameraProperties = get_props_overwritten<
+	PerspectiveCamera,
 	{
-		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
+		lookAt: lookAt_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+export type PropsPerspectiveCamera = {
+	[P in keyof WritablePerspectiveCameraProperties]: WritablePerspectiveCameraProperties[P]
+}
 
 // intellisense test
-//const perspcam_props: PerspectiveCameraProperties = {}
+//const perspcam_props: PropsPerspectiveCamera = {}
 
 // --- LIGHTS ---
 
-export type HemisphereLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<HemisphereLight, PropBlackList>,
-	{
-		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-		groundColor: Color | string | number | [r: number, g: number, b: number] | Vector3
-	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
->
-
-// intellisense test
-//const hemisphere_light_props: HemisphereLightProperties = {}
-
-export type AmbientLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<AmbientLight, PropBlackList>,
-	{
-		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-	} & { [P in keyof Object3DProperties]: Object3DProperties[P] }
->
-
-// intellisense test
-//const ambient_light_props: AmbientLightProperties = {}
-
+type ObsoleteLightHasNoShadowKeys = MeshLikeOnlyKeys | "castShadow" | "receiveShadow" | "shadow"
+type ObsoleteLightHasShadowKeys = MeshLikeOnlyKeys | "receiveShadow"
 // EXCLUDED  THREE :Lights with `target` property use the target for rotation calculation!
-type LightWithTargetObject3DProperties = Omit<Object3DProperties, "rotation" | "quaternion">
+type ObsoleteLightHasShadowAndTargetKeys = ObsoleteLightHasShadowKeys | "rotation" | "quaternion"
+
+type WritableHemisphereLightProperties = get_props_overwritten<
+	HemisphereLight,
+	{
+		color: color_value
+		groundColor: color_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
+>
+type PropsHemisphereLightClean = Omit<WritableHemisphereLightProperties, ObsoleteLightHasNoShadowKeys>
+export type PropsHemisphereLight = { [P in keyof PropsHemisphereLightClean]: PropsHemisphereLightClean[P] }
+
+// intellisense test
+//const hemisphere_light_props: PropsHemisphereLight = {}
+
+type WritableAmbientLightProperties = get_props_overwritten<
+	AmbientLight,
+	{
+		color: color_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
+>
+type PropsAmbientLightClean = Omit<WritableAmbientLightProperties, ObsoleteLightHasNoShadowKeys>
+export type PropsAmbientLight = { [P in keyof PropsAmbientLightClean]: PropsAmbientLightClean[P] }
+
+// intellisense test
+//const ambient_light_props: PropsAmbientLight = {}
 
 // TODO  Nail down manipulating matrix.
-export type DirectionalLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<DirectionalLight, PropBlackList>,
+type WritableDirectionalLightProperties = get_props_overwritten<
+	DirectionalLight,
 	{
-		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-		// CUSTOM  actually no `lookAt` on DirectionalLight, we're using custom solution!
-		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
+		color: color_value
+		/** CUSTOM  there's actually no `lookAt` property on THREE.DirectionalLight, `svelthree` is using a custom solution! */
+		lookAt: lookAt_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+type PropsDirectionalLightClean = Omit<WritableDirectionalLightProperties, ObsoleteLightHasShadowAndTargetKeys>
+export type PropsDirectionalLight = { [P in keyof PropsDirectionalLightClean]: PropsDirectionalLightClean[P] }
 
 // intellisense test
-//const directional_light_props: DirectionalLightProperties = {}
+//const directional_light_props: PropsDirectionalLight = {}
 
-export type PointLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<PointLight, PropBlackList>,
-	{ [P in keyof Object3DProperties]: Object3DProperties[P] }
+type WritablePointLightProperties = get_props_overwritten<
+	PointLight,
+	{
+		color: color_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+type PropsPointLightClean = Omit<WritablePointLightProperties, ObsoleteLightHasShadowKeys>
+export type PropsPointLight = { [P in keyof PropsPointLightClean]: PropsPointLightClean[P] }
 
 // intellisense test
-//const point_light_props: PointLightProperties = {}
+//const point_light_props: PropsPointLight = {}
 
 // TODO  Nail down manipulating matrix.
 // TODO  Nail down lookAt usage!
-export type RectAreaLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<RectAreaLight, PropBlackList>,
+type WritableRectAreaLightProperties = get_props_overwritten<
+	RectAreaLight,
 	{
-		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-		// CUSTOM  actually no `lookAt` on RectAreaLight, we're using custom solution!
-		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
+		color: color_value
+		/** CUSTOM  there's actually no `lookAt` property on THREE.RectAreaLight, `svelthree` isexport let props using a custom solution! */
+		lookAt: lookAt_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+/**
+ * Important Notes:
+ * - There is no shadow support.
+ * - Only `MeshStandardMaterial` and `MeshPhysicalMaterial` are supported.
+ */
+type PropsRectAreaLightClean = Omit<WritableRectAreaLightProperties, ObsoleteLightHasNoShadowKeys>
+export type PropsRectAreaLight = { [P in keyof PropsRectAreaLightClean]: PropsRectAreaLightClean[P] }
 
 // intellisense test
-//const rectarea_light_props: RectAreaLightProperties = {}
+//const rectarea_light_props: PropsRectAreaLight = {}
 
 // TODO  Nail down manipulating matrix.
-export type SpotLightProperties = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<SpotLight, PropBlackList>,
+type WritableSpotLightProperties = get_props_overwritten<
+	SpotLight,
 	{
-		color: Color | string | number | [r: number, g: number, b: number] | Vector3
-		// CUSTOM  actually no `lookAt` on SpotLight, we're using custom solution!
-		lookAt: Vector3 | Parameters<Vector3["set"]> | Object3D
-	} & { [P in keyof LightWithTargetObject3DProperties]: LightWithTargetObject3DProperties[P] }
+		color: color_value
+		/** CUSTOM  there's actually no `lookAt` property on THREE.SpotLight, `svelthree` is using a custom solution! */
+		lookAt: lookAt_value
+	} & { [P in keyof PropsObject3D]: PropsObject3D[P] }
 >
+type PropsSpotLightClean = Omit<WritableSpotLightProperties, ObsoleteLightHasShadowAndTargetKeys>
+export type PropsSpotLight = { [P in keyof PropsSpotLightClean]: PropsSpotLightClean[P] }
 
 // intellisense test
-//const spot_light_props: SpotLightProperties = {}
+//const spot_light_props: PropsSpotLight = {}
 
 // TODO  extensively test `OrbitControls` `props` atrribute usage.
-export type OrbitControlsProperties = OnlyWritableNonFunctionProps<Omit<OrbitControls, PropBlackList>>
+type WritableOrbitControlsProperties = get_props<OrbitControls>
+type OrbitControlsClean = Omit<WritableOrbitControlsProperties, MeshLikeOnlyKeys>
+export type PropsOrbitControls = { [P in keyof OrbitControlsClean]: OrbitControlsClean[P] }
 
 // intellisense test
-//const orbitcontrols_props: OrbitControlsProperties = {}
+//const orbitcontrols_props: PropsOrbitControls = {}
 
-export type ButtonProperties = {
-	[P in keyof OnlyWritableNonFunctionProps<HTMLButtonElement>]: OnlyWritableNonFunctionProps<HTMLButtonElement>[P]
-}
+type WritableMaterialProps<T> = T extends void ? never : get_props_overwritten<T, { color: color_value }>
+export type PropMat<T extends MeshAssignableMaterial | PointsAssignableMaterial> = { [P in keyof WritableMaterialProps<T>]: WritableMaterialProps<T>[P] }
 
-// intellisense test
-//const button_prop: ButtonProperties = {}
-
-export type LinkProperties = {
-	[P in keyof OnlyWritableNonFunctionProps<HTMLAnchorElement>]: OnlyWritableNonFunctionProps<HTMLAnchorElement>[P]
-}
+type WritableButtonProperties = get_props<HTMLButtonElement>
+export type PropButton = { [P in keyof WritableButtonProperties]: WritableButtonProperties[P] }
 
 // intellisense test
-//const link_prop: ButtonProperties = {}
+//const button_prop: PropButton = {}
+
+type WritableLinkProperties = get_props<HTMLAnchorElement>
+export type PropLink = { [P in keyof WritableLinkProperties]: WritableLinkProperties[P] }
+
+// intellisense test
+//const link_prop: PropLink = {}
+
+type WritableWebGLRenderTargetOptions = get_props<WebGLRenderTargetOptions>
+export type PropWebGLRenderTargetOptions = { [P in keyof WritableWebGLRenderTargetOptions]: WritableWebGLRenderTargetOptions[P] }
+
+// intellisense test
+//const webglrendertarget_opt: PropWebGLRenderTargetOptions = {}
+
+type PropsSvelthree =
+	| PropButton
+	| PropLink
+	| PropWebGLRenderTargetOptions
+	| PropsAmbientLight
+	| PropsCubeCamera
+	| PropsDirectionalLight
+	| PropsGroup
+	| PropsHemisphereLight
+	| PropsLoadedGLTF
+	| PropsMesh
+	| PropsObject3D
+	| PropsOrbitControls
+	| PropsOrthographicCamera
+	| PropsPerspectiveCamera
+	| PropsPointLight
+	| PropsPoints
+	| PropsRectAreaLight
+	| PropsScene
+	| PropsSpotLight
+	| PropsWebGLCubeRenderTarget
+	| PropsWebGLRenderer
+
+export type SvelthreePropsObjectLiteral = PropsSvelthree | PropMat<MeshAssignableMaterial> | PropMat<PointsAssignableMaterial>

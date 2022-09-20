@@ -1,6 +1,7 @@
 import type { Quaternion } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
+import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropQuaternionX {
 	// previous value reference
@@ -9,7 +10,7 @@ export default class PropQuaternionX {
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
-	public update(obj: any, value: Quaternion): boolean {
+	public update(obj: SvelthreePropsOwner, value: Quaternion): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value

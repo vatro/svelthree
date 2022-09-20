@@ -1,6 +1,7 @@
 import type { Euler } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
+import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropEulerX {
 	// previous value reference
@@ -9,7 +10,7 @@ export default class PropEulerX {
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
-	public update(obj: any, value: Euler): boolean {
+	public update(obj: SvelthreePropsOwner, value: Euler): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value

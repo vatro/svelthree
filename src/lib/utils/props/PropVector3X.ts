@@ -1,6 +1,7 @@
 import type { Vector3 } from "three"
 import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
+import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropVector3X {
 	// previous value reference
@@ -9,7 +10,7 @@ export default class PropVector3X {
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
-	public update(obj: any, value: Vector3): boolean {
+	public update(obj: SvelthreePropsOwner, value: Vector3): boolean {
 		switch (this.prev) {
 			case undefined:
 				this.prev = value

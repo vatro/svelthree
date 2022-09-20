@@ -1,67 +1,52 @@
-export type Constructor<T = object> = {
-	new (...args: any[]): T
-	prototype: T
-}
-
-export type Array3 = [number, number, number]
-export type Array4 = [number, number, number, string]
-
-// see https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir
-export type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-	? A
-	: B
-
-export type WritableKeys<T> = {
-	[P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>
-}[keyof T]
-
-export type ReadonlyKeys<T> = {
-	[P in keyof T]-?: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, never, P>
-}[keyof T]
-
-/** this returns only NON function keys */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type OnlyNonFunctionKeys<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T]
-
-/** this returns  only function keys */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type OnlyFunctionKeys<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]
-
-// this returns as expected only function props
-export type OnlyFunctionProps<T> = Omit<T, OnlyNonFunctionKeys<T>>
-
-// this returns as expected only NON function props
-export type OnlyNonFunctionProps<T> = Omit<T, OnlyFunctionKeys<T>>
-
-export type Overwrite<T, U> = Pick<OnlyNonFunctionProps<T>, Exclude<keyof OnlyNonFunctionProps<T>, keyof U>> & U
-export type Overwrite2<T, U> = Pick<OnlyNonFunctionProps<T>, Exclude<keyof OnlyNonFunctionProps<T>, keyof U>> & U
-
-export type ExposedProps<T, E extends keyof OnlyNonFunctionProps<T>> = Pick<OnlyNonFunctionProps<T>, E>
-
-export type OnlyExposedPropsOverwritten<T, U extends keyof OnlyNonFunctionProps<T>, V> = Partial<
-	Overwrite<ExposedProps<T, U>, V>
+type OnlyWritableNonFunctionPropsOverwritten<T, V> = Partial<
+	Omit<
+		Pick<
+			T,
+			{
+				[P in keyof T]-?: (<U>() => U extends { [Q in P]: T[P] } ? 1 : 2) extends <U>() => U extends {
+					-readonly [Q in P]: T[P]
+				}
+					? 1
+					: 2
+					? // eslint-disable-next-line @typescript-eslint/ban-types
+					  T[P] extends Function
+						? never
+						: P
+					: never
+			}[keyof T]
+		>,
+		PropBlackList | keyof V
+	> &
+		V & { readonly $T?: T }
 >
-export type OnlyExposedProps<T, E extends keyof OnlyNonFunctionProps<T>> = Partial<Pick<OnlyNonFunctionProps<T>, E>>
 
-export type OnlyNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<OnlyNonFunctionProps<T>, U>>
+export type get_props_overwritten<T, V> = OnlyWritableNonFunctionPropsOverwritten<T, V>
 
-export type OnlyWritableNonFunctionKeys<T> = WritableKeys<OnlyNonFunctionProps<T>>
-export type OnlyWritableNonFunctionProps<T> = Partial<Pick<T, OnlyWritableNonFunctionKeys<T>>>
-export type OnlyWritableNonFunctionPropsPlus<T, U> = Partial<Pick<T, OnlyWritableNonFunctionKeys<T>> & U>
-export type OnlyWritableNonFunctionPropsOverwritten<T, U> = Partial<Overwrite<OnlyWritableNonFunctionProps<T>, U>>
+type OnlyWritableNonFunctionProps<T> = Partial<
+	Omit<
+		Pick<
+			T,
+			{
+				[P in keyof T]-?: (<U>() => U extends { [Q in P]: T[P] } ? 1 : 2) extends <U>() => U extends {
+					-readonly [Q in P]: T[P]
+				}
+					? 1
+					: 2
+					? // eslint-disable-next-line @typescript-eslint/ban-types
+					  T[P] extends Function
+						? never
+						: P
+					: never
+			}[keyof T]
+		>,
+		PropBlackList
+	> & { readonly $T?: T }
+>
+
+export type get_props<T> = OnlyWritableNonFunctionProps<T>
 
 export type RemoveFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : T
 export type RemoveLast<T extends unknown[]> = T extends [...infer H, unknown] ? H : T
-
-// Get props of a generic `Material`
-
-type AnyMaterialProps<T> = OnlyWritableNonFunctionPropsOverwritten<
-	Omit<T, PropBlackList>,
-	{ color: THREE.Color | string | number | [r: number, g: number, b: number] | number[] | THREE.Vector3 }
->
-
-export type WritableMaterialProperties<T> = { [P in keyof AnyMaterialProps<T>]: AnyMaterialProps<T>[P] }
-export type Mat<T> = WritableMaterialProperties<T>
 
 export type MeshAssignableMaterial = THREE.Material | THREE.Material[]
 export type PointsAssignableMaterial = THREE.Material | THREE.Material[] | THREE.PointsMaterial
@@ -118,6 +103,7 @@ export interface SvelthreeAnimationFunction {
 }
 
 export type LightWithShadow = THREE.DirectionalLight | THREE.SpotLight | THREE.PointLight
+export type LightWithTarget = THREE.DirectionalLight | THREE.SpotLight
 export type LightShadowProps<T> = OnlyWritableNonFunctionProps<Omit<T, PropBlackList>>
 export type LightShadowCamProps<T> = OnlyWritableNonFunctionProps<Omit<T, PropBlackList>>
 
@@ -164,6 +150,8 @@ import type { default as Scene } from "../components/Scene.svelte"
 import type { default as SpotLight } from "../components/SpotLight.svelte"
 import type { default as WebGLRenderer } from "../components/WebGLRenderer.svelte"
 
+import type { PropMat } from "./types-comp-props"
+
 export type AnySvelthreeComponent =
 	| AmbientLight
 	| Canvas
@@ -196,7 +184,7 @@ export type SvelthreeComponentShadowDOMChild =
 	| LoadedGLTF
 	| Mesh<MeshAssignableMaterial>
 	| Object3D
-	//| OrbitControls
+	| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
@@ -235,17 +223,17 @@ type AllMeshMaterials = THREE.MeshToonMaterial &
 
 export type AnyMeshMaterialProps = OnlyWritableNonFunctionProps<Omit<AllMeshMaterials, PropBlackList>>
 
-type AllLights = THREE.SpotLight &
-	THREE.PointLight &
-	THREE.AmbientLight &
-	THREE.RectAreaLight &
-	THREE.HemisphereLight &
-	THREE.DirectionalLight
+type AllLights = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
 
 export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
 
-export type RaycastableSvelthreeComponents = Mesh<THREE.Material | THREE.Material[]> | Group | Object3D
-export type GLTFSupportedSvelthreeComponents = Mesh<THREE.Material | THREE.Material[]> | Group | Object3D | Scene
+export type RaycastableSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D
+export type GLTFSupportedSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D | Scene
+
+/*
+export type RaycastableSvelthreeComponents = Mesh | Group | Object3D
+export type GLTFSupportedSvelthreeComponents = Mesh | Group | Object3D | Scene
+*/
 
 export interface ISvelthreeGLTFTreeMapMember {
 	obj: THREE.Object3D
@@ -306,3 +294,105 @@ export type StoreBody = {
 export type WebGLRendererMode = "auto" | "always"
 
 export type SvelthreeShadowDOMElement = HTMLDivElement | HTMLButtonElement | HTMLAnchorElement
+
+import type { PropsWebGLCubeRenderTarget, PropsOrbitControls } from "./types-comp-props"
+export type SvelthreePropsOwner =
+	| THREE.Object3D
+	| THREE.Material
+	| THREE.Material[]
+	| THREE.WebGLRenderer
+	| THREE.LightShadow
+	| PropsOrbitControls
+	| PropsWebGLCubeRenderTarget
+
+// shorthand attribute values / also s
+
+/** (_for internal usage_) Types of **shorthand properties**. */
+interface SHTypes {
+	aria: Partial<ARIAMixin>
+	background: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3
+	cam: PerspectiveCamera | OrthographicCamera | THREE.PerspectiveCamera | THREE.OrthographicCamera // OrbitControls
+	camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera
+	color: THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3
+	geometry: THREE.BufferGeometry
+	lookAt: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | Targetable
+	material: THREE.Material | THREE.Material[]
+	matrix: THREE.Matrix4 | Parameters<THREE.Matrix4["set"]>
+	pos: THREE.Vector3 | Parameters<THREE.Vector3["set"]>
+	quat: THREE.Quaternion | Parameters<THREE.Quaternion["set"]>
+	rot:
+		| THREE.Euler
+		| Parameters<THREE.Euler["set"]>
+		| THREE.Quaternion
+		| Parameters<THREE.Quaternion["set"]>
+		| THREE.Vector3
+		| Parameters<THREE.Vector3["set"]>
+	scale: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | number
+}
+
+/** (_for internal usage_) generally overriden property-types (_**not** used as **shorthand properties**_). */
+interface GTypes {
+	up: THREE.Vector3 | Parameters<THREE.Vector3["set"]>
+}
+
+// for internal usage see SvelthreeProps -> ... -> PropUtils pipeline
+export type aria_value = SHTypes["aria"]
+export type background_value = SHTypes["background"]
+export type color_value = SHTypes["color"]
+export type geometry_value = SHTypes["geometry"]
+export type lookAt_value = SHTypes["lookAt"]
+export type material_value = SHTypes["material"]
+export type matrix_value = SHTypes["matrix"]
+export type pos_value = SHTypes["pos"]
+export type quat_value = SHTypes["quat"]
+export type rot_value = SHTypes["rot"]
+export type scale_value = SHTypes["scale"]
+
+// general (not used as shorthand prop)
+export type up_value = GTypes["up"]
+
+/** for internal usage see SvelthreeProps -> ... -> PropUtils pipeline */
+export type any_propeller_value =
+	| background_value
+	| color_value
+	| lookAt_value
+	| matrix_value
+	| pos_value
+	| rot_value
+	| scale_value
+	| up_value
+	| [number, number, number]
+
+/** for internal usage see SvelthreeProps -> ... -> PropUtils pipeline */
+export type any_proputils_value = any_propeller_value
+
+/** (_`svelthree` internal generic interface_)
+ *
+ * Defines types of all shorthand properties (keys) across all components.
+ * Type of `props` requires type parameter `S`.
+ */
+interface SvelthreeShorthandProperties<S> {
+	// get types from internal interface (if S is NOT provided) or from components (if S is provided)
+	aria: S extends void ? SHTypes["aria"] : S extends AnySvelthreeComponent ? (S extends { aria: unknown } ? S["aria"] : undefined) : never
+	cam: S extends void ? SHTypes["cam"] : S extends AnySvelthreeComponent ? (S extends { cam: unknown } ? S["cam"] : undefined) : never // OrbitControls only
+	camera: S extends void ? SHTypes["camera"] : S extends AnySvelthreeComponent ? (S extends { camera: unknown } ? S["camera"] : undefined) : never
+	color: S extends void ? SHTypes["color"] : S extends AnySvelthreeComponent ? (S extends { color: unknown } ? S["color"] : undefined) : never
+	geometry: S extends void ? SHTypes["geometry"] : S extends AnySvelthreeComponent ? (S extends { geometry: unknown } ? S["geometry"] : undefined) : never
+	lookAt: S extends void ? SHTypes["lookAt"] : S extends AnySvelthreeComponent ? (S extends { lookAt: unknown } ? S["lookAt"] : undefined) : never
+	material: S extends void ? SHTypes["material"] : S extends AnySvelthreeComponent ? (S extends { material: unknown } ? S["material"] : undefined) : never
+	matrix: S extends void ? SHTypes["matrix"] : S extends AnySvelthreeComponent ? (S extends { matrix: unknown } ? S["matrix"] : undefined) : never
+	pos: S extends void ? SHTypes["pos"] : S extends AnySvelthreeComponent ? (S extends { pos: unknown } ? S["pos"] : undefined) : never
+	quat: S extends void ? SHTypes["quat"] : S extends AnySvelthreeComponent ? (S extends { quat: unknown } ? S["quat"] : undefined) : never
+	rot: S extends void ? SHTypes["rot"] : S extends AnySvelthreeComponent ? (S extends { rot: unknown } ? S["rot"] : undefined) : never
+	scale: S extends void ? SHTypes["scale"] : S extends AnySvelthreeComponent ? (S extends { scale: unknown } ? S["scale"] : undefined) : never
+
+	// get types from components only (S needs to be provided)
+	config: S extends AnySvelthreeComponent ? (S extends { config: unknown } ? S["config"] : undefined) : never
+	params: S extends AnySvelthreeComponent ? (S extends { params: unknown } ? S["params"] : undefined) : never
+	props: S extends AnySvelthreeComponent ? (S extends { props: unknown } ? S["props"] : undefined) : never
+
+	// mat (special)
+	mat: S extends MeshAssignableMaterial | PointsAssignableMaterial ? PropMat<S> : never
+}
+
+export type prop<K extends keyof SvelthreeShorthandProperties<void>, S = void> = SvelthreeShorthandProperties<S>[K]

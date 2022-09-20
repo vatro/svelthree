@@ -1,18 +1,29 @@
-import type { WebGLCubeRenderTarget } from "three"
+import type { WebGLCubeRenderTarget, Object3D, Material, Light, Scene } from "three"
+import type {
+	matrix_value,
+	pos_value,
+	rot_value,
+	scale_value,
+	lookAt_value,
+	quat_value,
+	color_value,
+	//background_value,
+	any_propeller_value
+} from "../types/types-extra"
 import PropUtils from "./PropUtils"
-import type { ComplexValueType } from "../types/types-extra"
+import type { ComplexValueType, SvelthreePropsOwner, Targetable, LightWithTarget } from "../types/types-extra"
 
 /** ⚙️ `Propeller`'s `update` method redirects some `props` object properties to specific `PropUtils` update
  * methods and also allows special handling if needed when updating a specific `props` object's property.
- * It's used internally by `SvelthreeProps` (+`valuators`). */
+ * It's used **only** internally by `SvelthreeProps` (+`valuators`) **only**. */
 export default class Propeller {
 	/** Used internally by `SvelthreeProps` (+`valuators`) -> redirects some `props` object properties to specific `PropUtils` update methods and also
 	 * allows special handling if needed when updating a specific `props` object's property. */
 	public static update(
-		obj: any,
+		obj: SvelthreePropsOwner,
 		obj_type: string,
 		key: string,
-		value: any,
+		value: any_propeller_value,
 		origin: string | null,
 		complex?: ComplexValueType
 	): void {
@@ -20,28 +31,35 @@ export default class Propeller {
 		if (origin === "own") {
 			switch (key) {
 				case "position":
-					PropUtils.setPositionFromValue(obj, value, complex)
+					PropUtils.setPositionFromValue(obj as Object3D, value as pos_value, complex)
 					break
 				case "rotation":
-					PropUtils.setRotationFromValue(obj, value, complex)
+					PropUtils.setRotationFromValue(obj as Object3D, value as rot_value, complex)
 					break
 				case "scale":
-					PropUtils.setScaleFromValue(obj, value, complex)
+					PropUtils.setScaleFromValue(obj as Object3D, value as scale_value, complex)
 					break
 				case "quaternion":
-					PropUtils.setQuaternionFromValue(obj, value, complex)
+					PropUtils.setQuaternionFromValue(obj as Object3D, value as quat_value, complex)
 					break
 				case "matrix":
-					PropUtils.setMatrixFromValue(obj, value)
+					PropUtils.setMatrixFromValue(obj as Object3D, value as matrix_value)
 					break
 				case "color":
 				case "groundColor":
+					PropUtils.setColorFromValueKey(obj as Material | Light, value as color_value, key, complex)
+					break
 				case "background":
-					PropUtils.setColorFromValueKey(obj, value, key, complex)
+					if (!(value as THREE.Texture).isTexture) {
+						PropUtils.setColorFromValueKey(obj as Scene, value as color_value, key, complex)
+					} else {
+						// TODO  handle background as `Texture`
+						//PropUtils.setBackgroundAsTextureFromValueKey(obj as Scene, value as Texture, key, complex)
+					}
 					break
 				case "target":
 					if (obj_type === "DirectionalLight" || obj_type === "SpotLight") {
-						PropUtils.setLightTarget(obj, value)
+						PropUtils.setLightTarget(obj as LightWithTarget, value as Targetable)
 					}
 					break
 
@@ -54,7 +72,7 @@ export default class Propeller {
 		} else if (origin === "inherited") {
 			switch (key) {
 				case "lookAt":
-					PropUtils.setLookAtFromValue(obj, value, complex)
+					PropUtils.setLookAtFromValue(obj as Object3D | LightWithTarget, value as lookAt_value, complex)
 					break
 				default:
 					// update `CubeCamera`'s `renderTargetProps` prop (`CubeTexture`)

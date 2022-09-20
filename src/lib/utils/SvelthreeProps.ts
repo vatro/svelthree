@@ -12,23 +12,44 @@ import {
 import { safe_not_equal, has_prop } from "svelte/internal"
 import Propeller from "./Propeller"
 import PropUtils from "./PropUtils"
-import type { ComplexValueType } from "../types/types-extra"
+import type { ComplexValueType, SvelthreePropsOwner } from "../types/types-extra"
+import type { SvelthreePropsObjectLiteral } from "../types/types-comp-props"
 
 export type PropOrigin = "own" | "inherited"
 
+type ComplexValuator =
+	| typeof PropArray3X
+	| typeof PropColorX
+	| typeof PropEulerX
+	| typeof PropMatrix4X
+	| typeof PropVector3X
+	| typeof PropEulerArrayX
+	| typeof PropQuaternionX
+	| typeof PropMatrix4ArrayX
+	| typeof PropQuaternionArrayX
+
+type ComplexValuatorInstance =
+	| PropArray3X
+	| PropColorX
+	| PropEulerX
+	| PropMatrix4X
+	| PropVector3X
+	| PropEulerArrayX
+	| PropQuaternionX
+	| PropMatrix4ArrayX
+	| PropQuaternionArrayX
+
 type ComplexValueItem = {
 	key: string
-	value: any
+	value: ComplexValuatorInstance
 	complex: ComplexValueType
 }
 
 type SimpleValueItem = {
 	key: string
-	value: any
+	value: unknown
 	origin: PropOrigin | null
 }
-
-type ComplexValuator = typeof PropArray3X
 
 /**
  * Analyzes the type `props` object's properties, and updates corresponding `three` instance's properties via `Propeller`:
@@ -49,15 +70,15 @@ type ComplexValuator = typeof PropArray3X
  * allows special handling if needed when updating a specific `props` object's property.
  */
 export default class SvelthreeProps {
-	obj: any
+	obj: SvelthreePropsOwner
 	obj_type: string | null
-	propsPrev: { [key: string]: any }
+	propsPrev: SvelthreePropsObjectLiteral
 	simpleValues: SimpleValueItem[]
 
 	updatedKeys: string[]
 	complexValues: ComplexValueItem[]
 
-	complexValuators: { [key in ComplexValueType]: any } = {
+	complexValuators: { [key in ComplexValueType]: ComplexValuator } = {
 		Vector3: PropVector3X,
 		Array3Nums: PropArray3X,
 		Euler: PropEulerX,
@@ -69,7 +90,7 @@ export default class SvelthreeProps {
 		Color: PropColorX
 	}
 
-	constructor(obj: any | null) {
+	constructor(obj: SvelthreePropsOwner | null) {
 		this.obj = obj
 		this.obj_type = this.get_obj_type()
 	}
@@ -89,7 +110,7 @@ export default class SvelthreeProps {
 	 * as their `valuator` will be assigned only once the unique `props` object was assigned,
 	 * not at each (reactive) properties change._
 	 */
-	public update(props: { [key: string]: any }): string[] {
+	public update(props: SvelthreePropsObjectLiteral): string[] {
 		if (this.obj) {
 			// UPDATE -> `props` has already been processed at least once -> `this.propsPrev` available
 			if (this.propsPrev) {
@@ -119,7 +140,7 @@ export default class SvelthreeProps {
 	}
 
 	// `props` object is a new one (changed)
-	resetAndMap(props: { [key: string]: any }) {
+	resetAndMap(props: SvelthreePropsObjectLiteral) {
 		this.simpleValues = []
 		this.complexValues = []
 		this.updatedKeys = []
@@ -127,6 +148,7 @@ export default class SvelthreeProps {
 		// analyze and sort `props` object's properties
 		for (const k in props) {
 			const complexType: ComplexValueType | undefined = PropUtils.checkIfComplexValueType(props[k])
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const is_own_prop: any = has_prop(this.obj, k)
 			const is_inherited_prop: boolean = is_own_prop ? false : this.obj[k] ? true : false
 			const origin: PropOrigin | null = is_own_prop ? "own" : is_inherited_prop ? "inherited" : null
@@ -162,18 +184,18 @@ export default class SvelthreeProps {
 	}
 
 	// `props` object is the same one
-	checkProps(props: { [key: string]: any }) {
+	checkProps(props: SvelthreePropsObjectLiteral) {
 		// check complex props
 		// reassign / update only if the 'complex' value object itself or any of its parts have changed.
 		for (let i = 0; i < this.complexValues.length; i++) {
-			const k = this.complexValues[i].key
+			const k: string = this.complexValues[i].key
 			const updated: boolean = this.complexValues[i].value.update(this.obj, props[k])
 			if (updated) this.updatedKeys.push(k)
 		}
 
 		// check 'simple' props (nummeric, strings, boolean... + objects and functions)
 		for (let j = 0; j < this.simpleValues.length; j++) {
-			const k = this.simpleValues[j].key
+			const k: string = this.simpleValues[j].key
 			const prop_value = this.simpleValues[j].value
 			const prop_origin = this.simpleValues[j].origin
 
