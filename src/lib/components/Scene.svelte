@@ -459,7 +459,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (bg.constructor?.name === "Texture") {
 			scene.background = bg as Texture
 		} else {
-			PropUtils.setColorFromValueKey(scene, bg, "background")
+			PropUtils.setColorFromValueKey(
+				scene,
+				bg as Color | string | number | [r: number, g: number, b: number] | Vector3,
+				"background"
+			)
 		}
 	}
 
