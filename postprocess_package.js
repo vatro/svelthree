@@ -164,7 +164,7 @@ const get_process_comments_fn = (file_path) => {
 
 			for (let [prop_name, comment] of comments_map) {
 				const str_setter = `set ${prop_name}`
-				const regex_setter = new RegExp("\\b" + str_setter + "\\b")
+				const regex_setter = new RegExp(str_setter)
 				const test_setter = content.match(regex_setter)
 				const acc_comment = comment.replace(
 					`/**`,
@@ -172,7 +172,7 @@ const get_process_comments_fn = (file_path) => {
 				)
 
 				if (test_setter) {
-					new_content = new_content.replace(`set ${prop_name}`, `${acc_comment}\n\tset ${prop_name}`)
+					new_content = new_content.replace(`set ${prop_name}(_`, `${acc_comment}\n\tset ${prop_name}(_`)
 				} else {
 					const str_getter = `get ${prop_name}`
 					const regex_getter = new RegExp("\\b" + str_getter + "\\b")
