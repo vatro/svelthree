@@ -8,5 +8,18 @@
 	"endOfLine": "crlf",
 	"pluginSearchDirs": ["."],
 	"bracketSameLine": false,
-	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		},
+		{
+			"files": "src/lib/types/*.ts",
+			"options": {
+				"printWidth": 160
+			}
+		}
+	]
 }
