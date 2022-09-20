@@ -201,6 +201,8 @@ const get_process_comments_fn = (file_path) => {
 
 // --- ENTRY POINT ---
 
+const schedule_code_replacement_tasks = true
+
 /**
  * - Fix generic `mat` shorthand property type when using accessors:
  * 	- Replace `mat` accessors type definitions (accessor getter and setter) -> only `Mesh` and `Points`,
@@ -217,10 +219,12 @@ const do_postprocess = async () => {
 	console.log("🤖 SVELTHREE > post-processing package: started...")
 
 	// schedule code replacement tasks
-	console.log("🤖 SVELTHREE > post-processing package: scheduling replacement tasks...")
-	for (let i = 0; i < replace_tasks.length; i++) {
-		const task = replace_tasks[i]
-		fns.push(exec_replace_task(task))
+	if (schedule_code_replacement_tasks) {
+		console.log("🤖 SVELTHREE > post-processing package: scheduling replacement tasks...")
+		for (let i = 0; i < replace_tasks.length; i++) {
+			const task = replace_tasks[i]
+			fns.push(exec_replace_task(task))
+		}
 	}
 
 	// schedule accessors-comments optimization in `d.ts` files
