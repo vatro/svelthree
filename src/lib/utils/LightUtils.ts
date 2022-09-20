@@ -1,7 +1,3 @@
-/**
- * @author Vatroslav Vrbanic @see https://github.com/vatro
- */
-
 import { has_prop } from "svelte/internal"
 import type { Light, Scene } from "three"
 import { Color, Object3D } from "three"

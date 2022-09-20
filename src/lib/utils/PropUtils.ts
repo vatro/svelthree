@@ -1,7 +1,3 @@
-/**
- * @author Vatroslav Vrbanic @see https://github.com/vatro
- */
-
 import type { Light, Material, Object3D, Scene } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow } from "../types/types-extra"

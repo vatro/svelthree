@@ -1,7 +1,3 @@
-/**
- * @author Vatroslav Vrbanic @see https://github.com/vatro
- */
-
 import type { WebGLCubeRenderTarget } from "three"
 import PropUtils from "./PropUtils"
 import type { ComplexValueType } from "../types/types-extra"
