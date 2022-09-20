@@ -268,7 +268,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 		sProps.update(props)
 	}
 
-	export let color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 = undefined
+	export let color: Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
 	$: if (light && color) set_color()
 	function set_color(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "color", color))

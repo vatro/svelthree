@@ -450,8 +450,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (receiveShadow !== undefined && scene) scene.receiveShadow = receiveShadow
 
 	/** Scene `.background`. */
-	export let bg: Texture | Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 =
-		undefined
+	export let bg: Texture | Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
 	$: if (bg) set_bg()
 
 	function set_bg(): void {
