@@ -332,7 +332,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsSpotLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
@@ -344,7 +344,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: !matrix && light && pos ? set_pos() : pos && light ? console.warn(w_sh.pos) : null
 	function set_pos() {
@@ -435,11 +435,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export let castShadow: boolean = undefined
 
-	/** **shorthand** attribute for setting properties of `light.shadow` using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of `light.shadow` via an `Object Literal`. */
 	export let shadowProps: { [P in keyof LightShadowProps<SpotLightShadow>]: LightShadowProps<SpotLightShadow>[P] } =
 		undefined
 
-	/** **shorthand** attribute for setting properties of `light.shadow.camera` using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of `light.shadow.camera` via an `Object Literal`. */
 	export let shadowCameraProps: {
 		[P in keyof LightShadowCamProps<typeof light.shadow.camera>]: LightShadowCamProps<typeof light.shadow.camera>[P]
 	} = undefined

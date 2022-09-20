@@ -357,7 +357,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	let update_projection_matrix = { status: false }
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsOrthographicCamera = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
@@ -380,7 +380,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: !matrix && camera && pos ? set_pos() : pos && camera ? console.warn(w_sh.pos) : null
 	function set_pos() {
@@ -388,7 +388,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		PropUtils.setPositionFromValue(camera, pos)
 	}
 
-	/** **shorthand** attribute for setting the `rotation` property. */
+	/** **shorthand** attribute for setting the `rotation` property of the created / injected three.js instance. */
 	export let rot:
 		| Euler
 		| Parameters<Euler["set"]>
@@ -402,7 +402,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		PropUtils.setRotationFromValue(camera, rot)
 	}
 
-	/** **shorthand** attribute for setting the `quaternion` property. */
+	/** **shorthand** attribute for setting the `quaternion` property of the created / injected three.js instance. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
 	$: !matrix && camera && quat ? set_quat() : quat && camera ? console.warn(w_sh.quat) : null
 	function set_quat() {

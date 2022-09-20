@@ -155,7 +155,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsOrbitControls = undefined
 
 	$: if (!sProps && orbitcontrols && props) sProps = new SvelthreeProps(orbitcontrols)

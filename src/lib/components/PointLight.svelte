@@ -271,7 +271,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsPointLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
@@ -283,7 +283,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: !matrix && light && pos ? set_pos() : pos && light ? console.warn(w_sh.pos) : null
 	function set_pos() {
@@ -291,7 +291,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setPositionFromValue(light, pos)
 	}
 
-	/** **shorthand** attribute for setting the `rotation` property. */
+	/** **shorthand** attribute for setting the `rotation` property of the created / injected three.js instance. */
 	export let rot:
 		| Euler
 		| Parameters<Euler["set"]>
@@ -305,7 +305,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setRotationFromValue(light, rot)
 	}
 
-	/** **shorthand** attribute for setting the `quaternion` property. */
+	/** **shorthand** attribute for setting the `quaternion` property of the created / injected three.js instance. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
 	$: !matrix && light && quat ? set_quat() : quat && light ? console.warn(w_sh.quat) : null
 	function set_quat() {
@@ -356,11 +356,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export let castShadow: boolean = undefined
 
-	/** **shorthand** attribute for setting properties of `light.shadow` using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of `light.shadow` via an `Object Literal`. */
 	export let shadowProps: { [P in keyof LightShadowProps<PointLightShadow>]: LightShadowProps<PointLightShadow>[P] } =
 		undefined
 
-	/** **shorthand** attribute for setting properties of `light.shadow.camera` using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of `light.shadow.camera` via an `Object Literal`. */
 	export let shadowCameraProps: {
 		[P in keyof LightShadowCamProps<typeof light.shadow.camera>]: LightShadowCamProps<typeof light.shadow.camera>[P]
 	} = undefined

@@ -261,7 +261,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsHemisphereLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
@@ -295,7 +295,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: light && pos ? set_pos() : pos && light ? console.warn(w_sh.pos) : null
 	function set_pos() {

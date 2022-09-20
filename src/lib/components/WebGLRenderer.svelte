@@ -270,7 +270,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let props: { [P in keyof PropsWebGLRenderer]: PropsWebGLRenderer[P] } = undefined
 
 	$: if (!sProps && renderer && props) sProps = new SvelthreeProps(renderer)

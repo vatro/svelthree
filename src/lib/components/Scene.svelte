@@ -379,7 +379,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
 	export let props: PropsScene = undefined
 
 	$: if (!sProps && scene && props) sProps = new SvelthreeProps(scene)
@@ -391,7 +391,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: !matrix && scene && pos ? set_pos() : pos && scene ? console.warn(w_sh.pos) : null
 	function set_pos() {
@@ -399,7 +399,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setPositionFromValue(scene, pos)
 	}
 
-	/** **shorthand** attribute for setting the `rotation` property. */
+	/** **shorthand** attribute for setting the `rotation` property of the created / injected three.js instance. */
 	export let rot:
 		| Euler
 		| Parameters<Euler["set"]>
@@ -413,7 +413,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setRotationFromValue(scene, rot)
 	}
 
-	/** **shorthand** attribute for setting the `quaternion` property. */
+	/** **shorthand** attribute for setting the `quaternion` property of the created / injected three.js instance. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
 	$: !matrix && scene && quat ? set_quat() : quat && scene ? console.warn(w_sh.quat) : null
 	function set_quat() {
