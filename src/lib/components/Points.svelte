@@ -49,9 +49,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { BufferGeometry } from "three"
 
 	import { Points as THREE_Points } from "three"
-	import type { PointsProperties } from "../types/types-comp-props"
-	import type { RemoveFirst, Mat, PointsAssignableMaterial } from "../types/types-extra"
-	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
+	import type { PropsPoints, PropMat } from "../types/types-comp-props"
+	import type { RemoveFirst, PointsAssignableMaterial } from "../types/types-extra"
+	import type { PropButton, PropLink } from "../types/types-comp-props"
 	import type { Material } from "three"
 
 	/**
@@ -103,10 +103,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_shadow_dom_el = (): SvelthreeShadowDOMElement => shadow_dom_el
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProperties = undefined
+	export let button: PropButton = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProperties = undefined
+	export let link: PropLink = undefined
 
 	/** Returns the `points` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Points` instances. */
 	export let points: THREE_Points = undefined
@@ -443,7 +443,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// COOL!  This works now! 'mat' shorthand attribute will give us proper intellisense (props list) for the assigned 'material'!
 	// TODO : Implement handling of multiple `Material`s, atm only single `Material` is supported.
 	/** **shorthand** attribute (`Object`) for setting writable properties of the assigned `Material`. */
-	export let mat: Mat<AssignedMaterial> = undefined
+	export let mat: PropMat<AssignedMaterial> = undefined
 
 	$: if (mat && sMat) {
 		const updated_keys: string[] = sMat.update(mat)
@@ -464,7 +464,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof PointsProperties]: PointsProperties[P] } = undefined
+	export let props: PropsPoints = undefined
 
 	$: if (!sProps && points && props) sProps = new SvelthreeProps(points)
 	$: if (props && sProps) update_props()

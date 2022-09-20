@@ -38,7 +38,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { DirectionalLight as THREE_DirectionalLight } from "three"
 	import { DirectionalLightHelper } from "three"
-	import type { DirectionalLightProperties } from "../types/types-comp-props"
+	import type { PropsDirectionalLight } from "../types/types-comp-props"
 	import type { DirectionalLightShadow } from "three"
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types/types-extra"
@@ -333,7 +333,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof DirectionalLightProperties]: DirectionalLightProperties[P] } = undefined
+	export let props: PropsDirectionalLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
 	$: if (props && sProps) update_props()
@@ -369,7 +369,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setMatrixFromValue(light, matrix)
 	}
 
-	export let color: Color | string | number | [r: number, g: number, b: number] | number[] | Vector3 = undefined
+	export let color: Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
 	$: if (light && color) set_color()
 	function set_color(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "color", color))

@@ -32,7 +32,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { PerspectiveCamera as THREE_PerspectiveCamera } from "three"
 	import { CameraHelper } from "three"
-	import type { PerspectiveCameraProperties } from "../types/types-comp-props"
+	import type { PropsPerspectiveCamera } from "../types/types-comp-props"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { CAM_PROPS_PMU } from "../constants/Cameras"
 	import type { Writable } from "svelte/store"
@@ -323,7 +323,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof PerspectiveCameraProperties]: PerspectiveCameraProperties[P] } = undefined
+	export let props: PropsPerspectiveCamera = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()

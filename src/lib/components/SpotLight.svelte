@@ -38,7 +38,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { SpotLight as THREE_SpotLight } from "three"
 	import { SpotLightHelper } from "three"
-	import type { SpotLightProperties } from "../types/types-comp-props"
+	import type { PropsSpotLight } from "../types/types-comp-props"
 	import type { SpotLightShadow } from "three"
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types/types-extra"
@@ -333,7 +333,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof SpotLightProperties]: SpotLightProperties[P] } = undefined
+	export let props: PropsSpotLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
 	$: if (props && sProps) update_props()

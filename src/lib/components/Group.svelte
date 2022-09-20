@@ -34,9 +34,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { get_root_scene } from "../utils/SceneUtils"
 
 	import { Group as THREE_Group } from "three"
-	import type { GroupProperties } from "../types/types-comp-props"
+	import type { PropsGroup } from "../types/types-comp-props"
 	import type { RemoveFirst } from "../types/types-extra"
-	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
+	import type { PropButton, PropLink } from "../types/types-comp-props"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -86,10 +86,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_shadow_dom_el = (): SvelthreeShadowDOMElement => shadow_dom_el
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProperties = undefined
+	export let button: PropButton = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProperties = undefined
+	export let link: PropLink = undefined
 
 	/** Returns the `group` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Group` instances. */
 	export let group: THREE_Group = undefined
@@ -271,7 +271,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof GroupProperties]: GroupProperties[P] } = undefined
+	export let props: PropsGroup = undefined
 
 	$: if (!sProps && group && props) sProps = new SvelthreeProps(group)
 	$: if (props && sProps) update_props()

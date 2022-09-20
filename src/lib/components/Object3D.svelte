@@ -33,9 +33,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { get_root_scene } from "../utils/SceneUtils"
 
 	import { Object3D as THREE_Object3D } from "three"
-	import type { Object3DProperties } from "../types/types-comp-props"
+	import type { PropsObject3D } from "../types/types-comp-props"
 	import type { RemoveFirst } from "../types/types-extra"
-	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
+	import type { PropButton, PropLink } from "../types/types-comp-props"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -85,10 +85,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_shadow_dom_el = (): SvelthreeShadowDOMElement => shadow_dom_el
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProperties = undefined
+	export let button: PropButton = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProperties = undefined
+	export let link: PropLink = undefined
 
 	/** Returns the `object3d` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.Object3D` instances. */
 	export let object3d: THREE_Object3D = undefined
@@ -271,7 +271,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof Object3DProperties]: Object3DProperties[P] } = undefined
+	export let props: PropsObject3D = undefined
 
 	$: if (!sProps && object3d && props) sProps = new SvelthreeProps(object3d)
 	$: if (props && sProps) update_props()

@@ -32,12 +32,16 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	import { CubeCamera as THREE_CubeCamera } from "three"
 	import { WebGLCubeRenderTarget } from "three"
-	import type { CubeCameraProperties, WebGLCubeRenderTargetProperties } from "../types/types-comp-props"
+	import type {
+		PropsCubeCamera,
+		PropsWebGLCubeRenderTarget,
+		PropWebGLRenderTargetOptions
+	} from "../types/types-comp-props"
 	// custom CubeCameraHelper
 	import { CubeCameraHelper } from "../utils"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { Vector3 } from "three"
-	import type { CubeTexture, WebGLRenderer, WebGLRenderTargetOptions, Camera, Mesh } from "three"
+	import type { CubeTexture, WebGLRenderer, Camera, Mesh } from "three"
 	import type {
 		Material,
 		MeshBasicMaterialParameters,
@@ -467,7 +471,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	let sPropsTarget: SvelthreeProps
 
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let renderTargetOptions: { [P in keyof WebGLRenderTargetOptions]: WebGLRenderTargetOptions[P] } = undefined
+	export let renderTargetOptions: PropWebGLRenderTargetOptions = undefined
 	$: if (renderTargetOptions && camera_updated) recreate_render_target()
 
 	function recreate_render_target() {
@@ -506,8 +510,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let renderTargetProps: { [P in keyof WebGLCubeRenderTargetProperties]: WebGLCubeRenderTargetProperties[P] } =
-		undefined
+	export let renderTargetProps: PropsWebGLCubeRenderTarget = undefined
 
 	$: if (!sPropsTarget && renderTargetProps && renderTargetProps) sPropsTarget = new SvelthreeProps(renderTargetProps)
 	$: if (renderTargetProps && sPropsTarget) update_render_target_props()
@@ -518,7 +521,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof CubeCameraProperties]: CubeCameraProperties[P] } = undefined
+	export let props: PropsCubeCamera = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()

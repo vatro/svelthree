@@ -31,7 +31,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction } from "../types/types-extra"
 
 	import { RectAreaLight as THREE_RectAreaLight } from "three"
-	import type { RectAreaLightProperties } from "../types/types-comp-props"
+	import type { PropsRectAreaLight } from "../types/types-comp-props"
 	import type { Color } from "three"
 	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
 	import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js"
@@ -275,7 +275,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof RectAreaLightProperties]: RectAreaLightProperties[P] } = undefined
+	export let props: PropsRectAreaLight = undefined
 
 	$: if (!sProps && light && props) sProps = new SvelthreeProps(light)
 	$: if (props && sProps) update_props()

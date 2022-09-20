@@ -49,11 +49,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { AnimationClip, Group, Camera, Mesh, Light } from "three"
-	import type { LoadedGLTFProperties } from "../types/types-comp-props"
+	import type { PropsLoadedGLTF } from "../types/types-comp-props"
 	import type { LoadingManager } from "three"
 	import { Object3D as THREE_Object3D } from "three"
 	import type { RemoveFirst } from "../types/types-extra"
-	import type { ButtonProperties, LinkProperties } from "../types/types-comp-props"
+	import type { PropButton, PropLink } from "../types/types-comp-props"
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils"
 
 	/**
@@ -99,10 +99,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_shadow_dom_el = (): SvelthreeShadowDOMElement => shadow_dom_el
 
 	/** Specify the component / three.js object instance to act as an HTML `<button>` element. */
-	export let button: ButtonProperties = undefined
+	export let button: PropButton = undefined
 
 	/** Specify the component / three.js object instance to act as an HTML `<a>` element. */
-	export let link: LinkProperties = undefined
+	export let link: PropLink = undefined
 
 	/** Returns the `container` instance created by the component.
 	 * If the `add` attribute is set to `true` (_default_) the contents of the loaded GLTF will be added to the `container`,
@@ -325,7 +325,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof LoadedGLTFProperties]: LoadedGLTFProperties[P] } = undefined
+	export let props: PropsLoadedGLTF = undefined
 
 	$: if (!sProps && container && props) sProps = new SvelthreeProps(container)
 	$: if (props && sProps) update_props()
@@ -358,7 +358,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setRotationFromValue(container, rot)
 	}
 
-	/** **shorthand** attribute for setting the `quaternion` property. */
+	/** **shorthand** attribute for setting the `quaternion` property of the created / injected three.js instance. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
 	$: !matrix && container && quat ? set_quat() : quat && container ? console.warn(w_sh.quat) : null
 	function set_quat() {

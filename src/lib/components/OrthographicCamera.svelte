@@ -37,7 +37,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	import { OrthographicCamera as THREE_OrthographicCamera } from "three"
 	import { CameraHelper } from "three"
-	import type { OrthographicCameraProperties } from "../types/types-comp-props"
+	import type { PropsOrthographicCamera } from "../types/types-comp-props"
 	import { CameraUtils } from "../utils"
 	import { CameraValues } from "../constants"
 	import { get_root_scene } from "../utils/SceneUtils"
@@ -358,7 +358,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof OrthographicCameraProperties]: OrthographicCameraProperties[P] } = undefined
+	export let props: PropsOrthographicCamera = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()
