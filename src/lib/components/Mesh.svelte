@@ -122,7 +122,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	type AssignedMaterial = $$Generic<MeshAssignableMaterial>
 
 	let extracted_material: MeshAssignableMaterial = undefined
-	export let material: MeshAssignableMaterial = undefined
+	export let material: AssignedMaterial = undefined
 	let material_ref: MeshAssignableMaterial = undefined
 
 	let extracted_geometry: BufferGeometry = undefined
@@ -190,7 +190,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				)
 
 			// letting threejs throw errors if anything's wrong with 'geometry' or 'material'
-			mesh = new THREE_Mesh(geometry, material)
+			mesh = new THREE_Mesh(geometry, material as Material | Material[])
 
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
 			if (verbose && log_dev) console.debug(...c_dev(c_name, "saved 'geometry' (created):", geometry))
@@ -223,7 +223,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			} else {
 				// no 'geometry', no 'material' and no 'params'
 				// will create a blank 'BufferGeometry' or a blank Material or both.
-				mesh = new THREE_Mesh(geometry, material)
+				mesh = new THREE_Mesh(geometry, material as Material | Material[])
 			}
 
 			if (verbose && log_dev) console.debug(...c_dev(c_name, `${geometry.type} created!`, { mesh }))
@@ -290,7 +290,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (material_changed) {
 			// apply material
 			if (mesh && mesh.material !== material) {
-				mesh.material = material
+				mesh.material = material as Material | Material[]
 				material_ref = material
 				refresh_material()
 			}
@@ -305,7 +305,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Recreates `sMat` with the current `material_ref` reference and applies the `mat` prop object to it. */
 	function refresh_material(): void {
-		sMat = new SvelthreeProps(material_ref)
+		sMat = new SvelthreeProps(material_ref as Material | Material[])
 		if (sMat && mat) sMat.update(mat)
 		// TODO  Check using `material_needs_update()` here.
 	}
