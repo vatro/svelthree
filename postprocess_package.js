@@ -14,12 +14,14 @@ const replace_tasks = [
 				//regex: /get mat\(\).*}>>;/s,
 				//regex: /get mat\(\).*?};/s,
 				regex: /get mat\(\).*?>;/s, //opt2
-				replacement: `get mat(): MeshProps<AssignedMaterial>['mat'];`
+				//replacement: `get mat(): MeshProps<AssignedMaterial>['mat'];`
+				replacement: `get mat(): PropMat<AssignedMaterial>;`
 			},
 			{
 				//regex: /set mat\(.*}>>\);/s,
 				regex: /set mat\(.*?\);/s, // opt2
-				replacement: `set mat(_: MeshProps<AssignedMaterial>['mat']);`
+				//replacement: `set mat(_: MeshProps<AssignedMaterial>['mat']);`
+				replacement: `set mat(_: PropMat<AssignedMaterial>);`
 			}
 		]
 	},
@@ -30,12 +32,14 @@ const replace_tasks = [
 				//regex: /get mat\(\).*}>>;/s,
 				//regex: /get mat\(\).*?};/s,
 				regex: /get mat\(\).*?>;/s, //opt2
-				replacement: `get mat(): PointsProps<AssignedMaterial>['mat'];`
+				//replacement: `get mat(): PointsProps<AssignedMaterial>['mat'];`
+				replacement: `get mat(): PropMat<AssignedMaterial>;`
 			},
 			{
 				//regex: /set mat\(.*}>>\);/s,
 				regex: /set mat\(.*?\);/s, // opt2
-				replacement: `set mat(_: PointsProps<AssignedMaterial>['mat']);`
+				//replacement: `set mat(_: PointsProps<AssignedMaterial>['mat']);`
+				replacement: `set mat(_: PropMat<AssignedMaterial>);`
 			}
 		]
 	}
