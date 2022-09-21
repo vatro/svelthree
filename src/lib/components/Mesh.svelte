@@ -939,6 +939,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onMount_replace: (args?: any) => any = undefined
 
 	onMount(
@@ -962,14 +963,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Inject** functionality **before** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_before: (args?: any) => any = undefined
 
 	/** **Inject** functionality **after** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_after: (args?: any) => any = undefined
 
 	/** **Completely replace** `onDestroy` -> any `onDestroy_inject_before` & `onDestroy_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_replace: (args?: any) => any = undefined
 
 	onDestroy(
@@ -1003,6 +1007,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Completely replace** `beforeUpdate` -> any `beforeUpdate_inject_before` & `beforeUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let beforeUpdate_replace: (args?: any) => any = undefined
 
 	beforeUpdate(
@@ -1026,14 +1031,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Inject** functionality **before** component's existing `afterUpdate` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_inject_before: (args?: any) => any = undefined
 
 	/** **Inject** functionality **after** component's existing `afterUpdate` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_inject_after: (args?: any) => any = undefined
 
 	/** **Completely replace** `afterUpdate` -> any `afterUpdate_inject_before` & `afterUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_replace: (args?: any) => any = undefined
 
 	afterUpdate(
