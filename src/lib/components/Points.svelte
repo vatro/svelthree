@@ -702,6 +702,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const on = async (type: any, callback: any): Promise<void> => {
 		if (interact) {
 			if (!interaction_comp || !shadow_dom_el) await tick()
@@ -722,6 +723,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const onx = async (type: any, callback: any): Promise<void> => {
 		if (interact) {
 			if (!interaction_comp || !shadow_dom_el) await tick()
