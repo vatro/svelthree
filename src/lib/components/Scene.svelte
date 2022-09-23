@@ -208,7 +208,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		// every scene spreads it's onw instance to children overwriting the 'root scene' instance
 		// so if we need a reference to the topmost 'root scene' from an object inside some nested
 		// scene, we have to search for it, see e.g. the `CubeCamera` component
-		// TODO / TOFIX  this could cause problems with the `SvelthreeAnimation` component which is checking `currentSceneActive`
 		setContext("scene", scene)
 
 		if (verbose && log_dev) console.debug(...c_dev(c_name, `${scene.type} created!`, { scene }))
