@@ -27,8 +27,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
-	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
 	import { CubeCamera as THREE_CubeCamera } from "three"
 	import { WebGLCubeRenderTarget } from "three"
@@ -612,8 +612,9 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */
 	export let aniauto: boolean = undefined
 
-	let ani: SvelthreeAnimation
-	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, camera, animation, aniauto)
+	/** (_internal_) reference to the `SvelthreeAni` instance */
+	let ani: SvelthreeAni
+	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, aniauto)
 
 	let currentSceneActive = undefined
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
@@ -638,12 +639,12 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	export const get_instance = (): THREE_CubeCamera => camera
 
 	/** Returns the `animation` object. */
-	export const get_animation = (): any => ani.getAnimation()
+	export const get_animation = (): SvelthreeAnimation => ani.getAnimation()
 	/** Same as `get_animation()` just shorter syntax. Returns the `animation` object. */
 	export const get_ani = get_animation
 
 	/** Starts the `animation` object. */
-	export const start_animation = (): void => ani.startAni()
+	export const start_animation = (): void => ani.startAnimation()
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
 

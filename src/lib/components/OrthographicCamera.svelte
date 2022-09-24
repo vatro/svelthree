@@ -32,8 +32,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
-	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
 	import { OrthographicCamera as THREE_OrthographicCamera } from "three"
 	import { CameraHelper } from "three"
@@ -517,8 +517,9 @@ If you use this approach you'll see a warning in the console if you define left,
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */
 	export let aniauto: boolean = undefined
 
-	let ani: SvelthreeAnimation
-	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, camera, animation, aniauto)
+	/** (_internal_) reference to the `SvelthreeAni` instance */
+	let ani: SvelthreeAni
+	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, aniauto)
 
 	let currentSceneActive = undefined
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
@@ -552,12 +553,12 @@ If you use this approach you'll see a warning in the console if you define left,
 	export const get_instance = (): THREE_OrthographicCamera => camera
 
 	/** Returns the `animation` object. */
-	export const get_animation = (): any => ani.getAnimation()
+	export const get_animation = (): SvelthreeAnimation => ani.getAnimation()
 	/** Same as `get_animation()` just shorter syntax. Returns the `animation` object. */
 	export const get_ani = get_animation
 
 	/** Starts the `animation` object. */
-	export const start_animation = (): void => ani.startAni()
+	export const start_animation = (): void => ani.startAnimation()
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
 
