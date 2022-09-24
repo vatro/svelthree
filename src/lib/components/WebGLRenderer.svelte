@@ -43,12 +43,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	/**
 	 *  SVELTEKIT  SSR /
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
-	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
+	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/env"
+	import { browser } from "$app/environment"
 
 	/**
 	 * svelthreeStore index (`sti`) spread via context.  \
