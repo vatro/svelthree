@@ -13,5 +13,5 @@ node_modules
 /src/lib/components-internal-check
 generate_svelthree_components.js
 
-# Error tests
-src/routes/error_tests
+# any routes
+src/routes/
