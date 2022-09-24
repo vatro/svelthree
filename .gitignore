@@ -15,3 +15,6 @@ generate_svelthree_components.js
 
 # any routes
 src/routes/
+
+# app.html
+src/app.html
