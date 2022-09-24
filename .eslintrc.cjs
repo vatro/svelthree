@@ -26,6 +26,13 @@ module.exports = {
 				"no-case-declarations": "error",
 				"no-prototype-builtins": "error"
 			} */
+		},
+		// see: https://typescript-eslint.io/docs/linting/troubleshooting/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
+		{
+			files: ["*.ts", "*.mts", "*.cts", "*.tsx", "*.svelte"],
+			rules: {
+				"no-undef": "off"
+			}
 		}
 	],
 	settings: {
