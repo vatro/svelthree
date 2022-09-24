@@ -132,9 +132,6 @@ export default class SvelthreeAnimationManager {
 			  )
 	}
 
-
-
-
 	public getAnimation(): SvelthreeAnimation {
 		return this.ani_obj
 	}
