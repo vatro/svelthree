@@ -14,4 +14,4 @@ node_modules
 generate_svelthree_components.js
 
 # Error tests
-src/routes/tests
+src/routes/error_tests

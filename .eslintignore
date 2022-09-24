@@ -17,3 +17,6 @@ yarn.lock
 /src/lib/components-check
 /src/lib/components-internal-check
 generate_svelthree_components.js
+
+# Ignore Error tests
+/src/routes/error_tests
