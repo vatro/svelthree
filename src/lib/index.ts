@@ -79,6 +79,9 @@ export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types
 // misc
 export type { TargetableSvelthreeComponent } from "./types/types-extra"
 
+// Animation related
+export type { SvelthreeAnimationFunction, SvelthreeAnimation } from "./types/types-extra"
+
 // GLTF related
 export type {
 	SvelthreeGLTFTreeMap,
