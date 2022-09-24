@@ -1,3 +1,3 @@
-export { default as SvelthreeAnimationProp } from "./SvelthreeAnimationProp"
+export { default as SvelthreeAnimationObjectFactory } from "./SvelthreeAnimationObjectFactory"
 export { default as SvelthreeAnimationManager } from "./SvelthreeAnimationManager"
-export { default as SvelthreeAnimation } from "./SvelthreeAnimation"
+export { default as SvelthreeAni } from "./SvelthreeAni"

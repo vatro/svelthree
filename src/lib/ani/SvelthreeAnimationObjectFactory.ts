@@ -1,29 +1,26 @@
 import type { Object3D } from "three"
-import type { SvelthreeAnimationFunction } from "../types/types-extra"
+import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
-export default class SvelthreeAnimationProp {
-	fn: SvelthreeAnimationFunction
+export default class SvelthreeAnimationObjectFactory {
+	constructor(private ani_fn: SvelthreeAnimationFunction) {}
 
-	constructor(fn: SvelthreeAnimationFunction) {
-		this.fn = fn
-	}
-
-	initiate(obj: Object3D, ...args: any[]): any {
-		let initiatedFn: any
+	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
+	public create(foo: Object3D, ...args: any[]): SvelthreeAnimation {
+		let ani_obj: SvelthreeAnimation
 
 		try {
-			initiatedFn = this.fn(obj, args)
+			ani_obj = this.ani_fn(foo, args)
 
-			if (!Object.prototype.hasOwnProperty.call(initiatedFn, "onStart")) {
+			if (!Object.prototype.hasOwnProperty.call(ani_obj, "onStart")) {
 				console.error("SVELTHREE > Provided animation is missing 'onStart' function!", {
-					animation: initiatedFn
+					animation: ani_obj
 				})
 				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
 
-			if (!Object.prototype.hasOwnProperty.call(initiatedFn, "onDestroy")) {
+			if (!Object.prototype.hasOwnProperty.call(ani_obj, "onDestroy")) {
 				console.error("SVELTHREE > Provided animation has no 'onDestroy' function!", {
-					animation: initiatedFn
+					animation: ani_obj
 				})
 				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
@@ -31,6 +28,6 @@ export default class SvelthreeAnimationProp {
 			throw new Error("SVELTHREE Exception, " + error)
 		}
 
-		return initiatedFn
+		return ani_obj
 	}
 }

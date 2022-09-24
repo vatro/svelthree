@@ -53,7 +53,8 @@ export type PointsAssignableMaterial = THREE.Material | THREE.Material[] | THREE
 
 // Animation
 
-export interface SvelthreeAnimationFunctionReturn {
+/** Generated animation-`Object Literal`. */
+export interface SvelthreeAnimation {
 	/** Usually used to define the intial state of the animation and start the animation (_set inital prop values and call a function which starts the animation_). */
 	onStart: () => void
 	/** Usually used to destroy (_stop / kill / nullify_) any processes which would otherwise remain in memory. */
@@ -66,14 +67,14 @@ export interface SvelthreeAnimationFunctionReturn {
 	 * _Usually used for continuing the animation in a multiple top-level Scenes scenario._
 	 */
 	onSceneReactivated?: () => void
-	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
-	[anything: string]: any
+	/** Any other method or property that should be callable / accessible via e.g. `component_ref.get_ani().foo()` or `component_ref.get_ani().foo`. */
+	[foo: string | number | symbol]: (() => void) | undefined
 }
 
 /**
- * Animation function (closure) which is being processed internally by the component.
+ * Function (_Closure_) containing some animation logic. `SvelthreeAnimationFunction` is being processed internally by the component, the resulting `SvelthreeAnimation` (_`Object Literal`_) can be obtained via `component_ref.get_ani()`.
  * ```
- * (obj: any, ...args: any[]) => {
+ * (foo: THREE.Object3D, ...args: any[]) => {
  *      onStart: () => void
  *      onDestroy: () => void
  *      onSceneDeactivated?: () => void
@@ -81,26 +82,13 @@ export interface SvelthreeAnimationFunctionReturn {
  *      [anything: string]: any
  * }
  * ```
- * - ☝️ `obj` is basically just a named / declared argument (no initial value).
- * - ☝️ `obj` will be internally replaced by the **real** THREE.Object3D reference (the reference to the object the animation has been applied to).
- *
- * Simple example:
- * ```
- * const ani = (obj) => {
- *      return {
- *          onStart: () => {
- *              obj.position.y = 1
- *          }
- *      }
- * }
- * ```
+ * ☝️ `foo` is basically just a named / declared argument, it will be internally replaced by the
+ * `THREE.Object3D`-based instance-reference created by the component the animation function
+ * has been applied to via the `animation` attribute, e.g. `animation={my_animation_function}`.
  *
  */
 /*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
-export interface SvelthreeAnimationFunction {
-	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
-	(obj: any, ...args: any[]): SvelthreeAnimationFunctionReturn
-}
+export type SvelthreeAnimationFunction = (foo?: THREE.Object3D, ...args: any[]) => SvelthreeAnimation
 
 export type LightWithShadow = THREE.DirectionalLight | THREE.SpotLight | THREE.PointLight
 export type LightWithTarget = THREE.DirectionalLight | THREE.SpotLight
