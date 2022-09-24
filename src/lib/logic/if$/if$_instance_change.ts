@@ -4,16 +4,13 @@ export const if$_instance_change = (
 	inst: Object3D,
 	our_parent: any,
 	inst_uuid: string,
+	// TODO  Remove `create`
 	create: boolean,
+	// TODO  Remove `inst_name`
 	inst_name: string,
 	comp_name: string,
 	handler: () => void
 ): void => {
-	if (create || inst_name) {
-		// TODO  Remove `create` and `inst_name`
-		console.warn("TODO `create` and `inst_name` should be removed -> unused!")
-	}
-
 	// console.warn(`comp ${comp_name} > Something happened with the ${inst_name} instance!`)
 
 	if (our_parent) {
