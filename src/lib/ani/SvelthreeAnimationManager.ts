@@ -1,7 +1,6 @@
 import type SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory"
 import type { Object3D, Scene } from "three"
 import type { SvelthreeAnimation } from "../types/types-extra"
-import { verbose_mode } from "../utils/SvelthreeLogger"
 
 export default class SvelthreeAnimationManager {
 	/** Generated animation-`Object Literal` (_interface `SvelthreeAnimation`_): result of `this.ani_obj_factory.create(...)`. */
@@ -16,34 +15,24 @@ export default class SvelthreeAnimationManager {
 
 	public handleCurrentSceneStatus(currentSceneActive: boolean): void {
 		if (currentSceneActive) {
-			if (verbose_mode()) {
-				console.debug(
-					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
-				)
-			}
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
+			)
 			if (this.aniauto) {
-				if (verbose_mode()) {
-					console.debug(
-						"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!"
-					)
-				}
+				console.debug("SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!")
 				this.handle_scene_active()
 			}
 		} else {
-			if (verbose_mode()) {
-				console.debug(
-					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
-				)
-			}
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
+			)
 			this.handle_scene_inactive()
 		}
 	}
 
 	// active / reactivated
 	private handle_scene_active(): void {
-		if (verbose_mode()) {
-			console.debug("SVELTHREE > SvelthreeAnimationManager > handle_scene_active!")
-		}
+		console.debug("SVELTHREE > SvelthreeAnimationManager > handle_scene_active!")
 		// check if animation has been initiated, if so try to execute 'onSceneReactivated'...
 		if (this.ani_obj) {
 			this.try_on_scene_reactivated()
@@ -55,7 +44,7 @@ export default class SvelthreeAnimationManager {
 
 	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 	private initiate_animation(...args: any[]): void {
-		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiate_animation!")
+		console.debug("SVELTHREE > SvelthreeAnimationManager > initiate_animation!")
 		// if animation is a function it has not been initiated / started yet (otherwise object)
 
 		if (this.scene) {
@@ -101,7 +90,9 @@ export default class SvelthreeAnimationManager {
 		// if it has been initated, try to execute 'onSceneDeactivated'
 		this.ani_obj
 			? this.try_on_scene_deactivated()
-			: console.error("SVELTHREE > SvelthreeAnimationManager > 'SvelthreeAnimation'-Object not available!")
+			: console.debug(
+					"SVELTHREE > SvelthreeAnimationManager > handle_scene_inactive : 'SvelthreeAnimation'-Object not available!"
+			  )
 	}
 
 	private try_on_scene_deactivated(): void {
