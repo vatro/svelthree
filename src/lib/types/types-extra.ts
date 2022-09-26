@@ -172,7 +172,7 @@ export type SvelthreeComponentShadowDOMChild =
 	| LoadedGLTF
 	| Mesh<MeshAssignableMaterial>
 	| Object3D
-	| OrbitControls
+	//| OrbitControls
 	| OrthographicCamera
 	| PerspectiveCamera
 	| PointLight
