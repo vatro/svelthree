@@ -10,7 +10,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import type { Scene as THREE_Scene } from "three"
+	import type { Scene } from "three"
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -22,7 +22,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
-
+	import { Object3D as THREE_Object3D } from "three"
 	import type { Targetable } from "../types/types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
@@ -34,7 +34,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"
 
-	import { Object3D as THREE_Object3D } from "three"
 	import type { PropsObject3D } from "../types/types-comp-props"
 	import type { RemoveFirst } from "../types/types-extra"
 	import type { PropButton, PropLink } from "../types/types-comp-props"
@@ -63,7 +62,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_mau: boolean = log_all
 
 	export const isObject3D = true
-	let scene: THREE_Scene = getContext("scene")
+	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
@@ -337,7 +336,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** The root scene -> `scene.parent = null`. */
-	let root_scene: THREE_Scene | null = undefined
+	let root_scene: Scene | null = undefined
 	let root_scene_obj = { value: undefined }
 
 	$: if (root_scene === undefined) {

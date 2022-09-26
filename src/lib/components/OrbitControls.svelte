@@ -10,7 +10,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import type { Scene as THREE_Scene } from "three"
+	import type { Scene } from "three"
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -46,7 +46,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
-	let scene: THREE_Scene = getContext("scene")
+	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
