@@ -22,6 +22,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
+	import type { Targetable } from "../types/types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -33,7 +34,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { RaycastArray } from "../utils/RaycastArray"
 	import { createEventDispatcher } from "svelte"
 	import type { Writable } from "svelte/store"
-
 	import type { SvelthreeModifiersProp } from "../constants/Interaction"
 	import type {
 		SvelthreePointerEventHandler,
@@ -366,7 +366,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setQuaternionFromValue(container, quat)
 	}
 
-	export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let scale: Vector3 | Parameters<Vector3["set"]> | number = undefined
 	$: !matrix && container && scale ? set_scale() : scale && container ? console.warn(w_sh.scale) : null
 	function set_scale() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
@@ -374,7 +374,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | THREE_Object3D = undefined
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable = undefined
 	$: !matrix && container && lookAt ? set_lookat() : lookAt && container ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))

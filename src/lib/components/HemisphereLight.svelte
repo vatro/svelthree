@@ -278,7 +278,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		PropUtils.setColorFromValueKey(light, color, "color")
 	}
 
-	export let groundColor: Color | string | [r: number, g: number, b: number] | Vector3 = undefined
+	export let groundColor: Color | string | number | [r: number, g: number, b: number] | Vector3 = undefined
 	$: if (light && groundColor) set_ground_color()
 	function set_ground_color(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "groundColor", groundColor))

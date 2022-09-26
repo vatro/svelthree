@@ -28,6 +28,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 	import type { Object3D as THREE_Object3D } from "three"
+	import type { Targetable } from "../types/types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -410,7 +411,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		PropUtils.setQuaternionFromValue(camera, quat)
 	}
 
-	export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let scale: Vector3 | Parameters<Vector3["set"]> | number = undefined
 	$: !matrix && camera && scale ? set_scale() : scale && camera ? console.warn(w_sh.scale) : null
 	function set_scale() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
@@ -418,7 +419,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	}
 
 	/** */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | THREE_Object3D = undefined
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable = undefined
 	$: !matrix && camera && lookAt ? set_lookat() : lookAt && camera ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))

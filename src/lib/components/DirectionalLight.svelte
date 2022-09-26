@@ -22,6 +22,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Matrix4, Vector3 } from "three"
+	import type { Targetable } from "../types/types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
@@ -32,7 +33,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import SvelthreeLightWithShadow from "../components-internal/SvelthreeLightWithShadow.svelte"
 	import type { LightShadowCamProps, LightShadowProps } from "../types/types-extra"
 
-	import type { Targetable } from "../types/types-extra"
 	import { LightTarget } from "../utils"
 	import { Object3D as THREE_Object3D } from "three"
 
@@ -355,7 +355,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** With components / objects having a `target` property like `DirectionalLight`, `lookAt` is used to specify a **point (coordinates) in world space** and cannot be set to an `Object3D`!
 	 * By setting `LookAt` to some value, you're basically moving the built-in 'blank' `Object3D` used as a point in space to look at.
 	 * ☝️ _In order to update the `DirectionalLightHelper` correctly, the `target: boolean` attribute needs to be set / set to `true` (**default**)!_ */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | THREE_Object3D = undefined
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable = undefined
 	$: !matrix && light && lookAt ? set_lookat() : lookAt && light ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
