@@ -5,9 +5,9 @@ export const if$_instance_change = (
 	our_parent: any,
 	inst_uuid: string,
 	// TODO  Remove `create`
-	create: boolean,
+	_create: boolean,
 	// TODO  Remove `inst_name`
-	inst_name: string,
+	_inst_name: string,
 	comp_name: string,
 	handler: () => void
 ): void => {
