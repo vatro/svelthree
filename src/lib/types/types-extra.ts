@@ -300,7 +300,7 @@ export type SvelthreePropsOwner =
 /** (_for internal usage_) Types of **shorthand properties**. */
 interface SHTypes {
 	aria: Partial<ARIAMixin>
-	background: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3
+	bg: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3 // Scene
 	cam: PerspectiveCamera | OrthographicCamera | THREE.PerspectiveCamera | THREE.OrthographicCamera // OrbitControls
 	camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera
 	color: THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3
@@ -328,7 +328,7 @@ interface GTypes {
 
 // for internal usage see SvelthreeProps -> ... -> PropUtils pipeline
 export type aria_value = SHTypes["aria"]
-export type background_value = SHTypes["background"]
+export type background_value = SHTypes["bg"]
 export type color_value = SHTypes["color"]
 export type geometry_value = SHTypes["geometry"]
 export type lookAt_value = SHTypes["lookAt"]
@@ -367,6 +367,7 @@ export type any_proputils_value = any_propeller_value
 interface SvelthreeShorthandProperties<S> {
 	// get types from internal interface (if S is NOT provided) or from components (if S is provided)
 	aria: S extends void ? SHTypes["aria"] : S extends AnySvelthreeComponent ? (S extends { aria: unknown } ? S["aria"] : undefined) : never
+	bg: S extends void ? SHTypes["bg"] : S extends AnySvelthreeComponent ? (S extends { bg: unknown } ? S["bg"] : undefined) : never
 	cam: S extends void ? SHTypes["cam"] : S extends AnySvelthreeComponent ? (S extends { cam: unknown } ? S["cam"] : undefined) : never // OrbitControls only
 	camera: S extends void ? SHTypes["camera"] : S extends AnySvelthreeComponent ? (S extends { camera: unknown } ? S["camera"] : undefined) : never
 	color: S extends void ? SHTypes["color"] : S extends AnySvelthreeComponent ? (S extends { color: unknown } ? S["color"] : undefined) : never
