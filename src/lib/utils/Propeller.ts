@@ -1,4 +1,4 @@
-import type { WebGLCubeRenderTarget, Object3D, Material, Light, Scene } from "three"
+import type { WebGLCubeRenderTarget, Object3D, Material, Light, Scene, LightShadow } from "three"
 import type {
 	matrix_value,
 	pos_value,
@@ -7,6 +7,7 @@ import type {
 	lookAt_value,
 	quat_value,
 	color_value,
+	mapsize_value,
 	//background_value,
 	any_propeller_value
 } from "../types/types-extra"
@@ -44,6 +45,9 @@ export default class Propeller {
 					break
 				case "matrix":
 					PropUtils.setMatrixFromValue(obj as Object3D, value as matrix_value)
+					break
+				case "mapSize":
+					PropUtils.setShadowMapSizeFromValue(obj as LightShadow, value as mapsize_value)
 					break
 				case "color":
 				case "groundColor":

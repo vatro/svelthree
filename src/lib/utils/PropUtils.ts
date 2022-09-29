@@ -1,5 +1,5 @@
-import type { Light, Material, Object3D, Scene } from "three"
-import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
+import type { Light, Material, Object3D, Scene, LightShadow } from "three"
+import { Color, Euler, Matrix4, Quaternion, Vector2, Vector3 } from "three"
 import type { ComplexValueType, LightWithShadow, LightWithTarget } from "../types/types-extra"
 import type {
 	matrix_value,
@@ -9,6 +9,7 @@ import type {
 	lookAt_value,
 	quat_value,
 	color_value,
+	mapsize_value,
 	//background_value,
 	any_proputils_value
 } from "../types/types-extra"
@@ -36,6 +37,15 @@ export default class PropUtils {
 
 	public static warn(message: string) {
 		console.warn(message)
+	}
+
+	/** Check if an Array contains exactly 2 numbers. */
+	public static is2Nums(p: number[]): boolean {
+		return p.length === 2 && p.every((el: number) => !isNaN(el))
+	}
+
+	public static isArray2Nums(p: number[]): boolean {
+		return Array.isArray(p) && PropUtils.is2Nums(p)
 	}
 
 	public static isArray3Nums(p: number[]): boolean {
@@ -89,11 +99,13 @@ export default class PropUtils {
 
 	public static checkIfComplexValueType(val: any_proputils_value): ComplexValueType | undefined {
 		if (Array.isArray(val)) {
+			if (PropUtils.is2Nums(val as number[])) return "Array2Nums"
 			if (PropUtils.is3Nums(val as number[])) return "Array3Nums"
 			if (PropUtils.isEulerParams(val as (number | string)[])) return "EulerParamsArray"
 			if (PropUtils.isQuaternionParams(val as number[])) return "QuaternionParamsArray"
 			if (PropUtils.isMatrix4Params(val as number[])) return "Matrix4ParamsArray"
 		} else if (val) {
+			if ((val as Vector2).isVector2) return "Vector2"
 			if ((val as Vector3).isVector3) return "Vector3"
 			if ((val as Color).isColor) return "Color"
 			if ((val as Euler).isEuler) return "Euler"
@@ -510,6 +522,54 @@ export default class PropUtils {
 	public static setIntensity(light: Light, val: number) {
 		if (verbose_mode() && log_prop_utils(light)) console.debug("[ PropUtils ] -> setIntensity : ", { light, val })
 		light.intensity = val
+	}
+
+	public static setShadowMapSizeFromValue(obj: LightShadow, val: mapsize_value, complex?: ComplexValueType): void {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setPositionFromValue : ", { obj, val, complex })
+		}
+		switch (complex) {
+			case undefined:
+				PropUtils.isArray2Nums(val as number[])
+					? PropUtils.setMapSizeFromArray2(obj, val as Parameters<Vector2["set"]>)
+					: val?.["isVector2"]
+					? PropUtils.setMapSizeFromVector2(obj, val as Vector2)
+					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
+							obj: obj,
+							value: val
+					  })
+				break
+			case "Array2Nums":
+				PropUtils.setMapSizeFromArray2(obj, val as Parameters<Vector2["set"]>)
+				break
+			case "Vector2":
+				PropUtils.setMapSizeFromVector2(obj, val as Vector2)
+				break
+			default:
+				console.error(
+					"[ PropUtils ] -> setShadowMapSizeFromValue : invalid 'mapSize' value! No such 'ComplexValueType'!",
+					{
+						obj: obj,
+						value: val,
+						complex: complex
+					}
+				)
+				break
+		}
+	}
+
+	public static setMapSizeFromVector2(obj: LightShadow, val: Vector2) {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setMapSizeFromVector2 : ", { obj, val })
+		}
+		obj.mapSize.copy(val)
+	}
+
+	public static setMapSizeFromArray2(obj: LightShadow, val: Parameters<Vector2["set"]>) {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setMapSizeFromArray3 : ", { obj, val })
+		}
+		obj.mapSize.set(val[0], val[1])
 	}
 
 	public static setShadowMapSize(light: LightWithShadow, shadowMapSize: number) {

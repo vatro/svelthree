@@ -323,6 +323,7 @@ interface SHTypes {
 /** (_for internal usage_) generally overriden property-types (_**not** used as **shorthand properties**_). */
 interface GTypes {
 	up: THREE.Vector3 | Parameters<THREE.Vector3["set"]>
+	mapSize: THREE.Vector2 | Parameters<THREE.Vector2["set"]>
 }
 
 // for internal usage see SvelthreeProps -> ... -> PropUtils pipeline
@@ -340,6 +341,7 @@ export type scale_value = SHTypes["scale"]
 
 // general (not used as shorthand prop)
 export type up_value = GTypes["up"]
+export type mapsize_value = GTypes["mapSize"]
 
 /** for internal usage see SvelthreeProps -> ... -> PropUtils pipeline */
 export type any_propeller_value =
@@ -351,6 +353,7 @@ export type any_propeller_value =
 	| rot_value
 	| scale_value
 	| up_value
+	| mapsize_value
 	| [number, number, number]
 
 /** for internal usage see SvelthreeProps -> ... -> PropUtils pipeline */
