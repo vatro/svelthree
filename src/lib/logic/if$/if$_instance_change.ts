@@ -2,7 +2,7 @@ import type { Object3D } from "three"
 
 export const if$_instance_change = (
 	inst: Object3D,
-	our_parent: any,
+	our_parent: Object3D,
 	inst_uuid: string,
 	// TODO  Remove `create`
 	_create: boolean,
