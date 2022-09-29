@@ -11,7 +11,8 @@ import type {
 	rot_value,
 	quat_value,
 	matrix_value,
-	up_value
+	up_value,
+	mapsize_value
 } from "./types-extra"
 
 import type {
@@ -257,6 +258,18 @@ export type PropWebGLRenderTargetOptions = { [P in keyof WritableWebGLRenderTarg
 // intellisense test
 //const webglrendertarget_opt: PropWebGLRenderTargetOptions = {}
 
+type WritableShadowProperties<T> = get_props_overwritten<T, { mapSize: mapsize_value }>
+type PropsShadow<T> = { [P in keyof WritableShadowProperties<T>]: WritableShadowProperties<T>[P] }
+
+export type PropsDirectionalLightShadow = PropsShadow<THREE.DirectionalLightShadow>
+export type PropsPointLightShadow = PropsShadow<THREE.PointLightShadow>
+export type PropsSpotLightShadow = PropsShadow<THREE.SpotLightShadow>
+
+// intellisense test
+//const shadow_direct_props: PropsDirectionalLightShadow = {}
+//const shadow_point_props: PropsPointLightShadow = {}
+//const shadow_spot_props: PropsSpotLightShadow = {}
+
 type PropsSvelthree =
 	| PropButton
 	| PropLink
@@ -264,6 +277,7 @@ type PropsSvelthree =
 	| PropsAmbientLight
 	| PropsCubeCamera
 	| PropsDirectionalLight
+	| PropsDirectionalLightShadow
 	| PropsGroup
 	| PropsHemisphereLight
 	| PropsLoadedGLTF
@@ -273,10 +287,12 @@ type PropsSvelthree =
 	| PropsOrthographicCamera
 	| PropsPerspectiveCamera
 	| PropsPointLight
+	| PropsPointLightShadow
 	| PropsPoints
 	| PropsRectAreaLight
 	| PropsScene
 	| PropsSpotLight
+	| PropsSpotLightShadow
 	| PropsWebGLCubeRenderTarget
 	| PropsWebGLRenderer
 
