@@ -53,6 +53,3 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 	$: shadowBias ? PropUtils.setShadowBias(light, shadowBias) : null
 	$: castShadow ? PropUtils.setCastShadow(light, castShadow) : null
 </script>
-
-<!-- <SvelthreeProps props={shadowCameraProps} obj={light.shadow.camera} /> -->
-<!-- <SvelthreeProps props={shadowProps} obj={light.shadow} /> -->
