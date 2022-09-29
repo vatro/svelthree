@@ -109,6 +109,8 @@ export type PropBlackList =
 	| "version"
 
 export type ComplexValueType =
+	| "Vector2"
+	| "Array2Nums"
 	| "Vector3"
 	| "Array3Nums"
 	| "Euler"

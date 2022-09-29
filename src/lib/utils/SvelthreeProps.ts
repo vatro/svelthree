@@ -1,4 +1,5 @@
 import {
+	PropArray2X,
 	PropArray3X,
 	PropColorX,
 	PropEulerX,
@@ -8,6 +9,7 @@ import {
 	PropQuaternionX,
 	PropMatrix4ArrayX,
 	PropQuaternionArrayX
+	PropVector2X,
 } from "./props"
 import { safe_not_equal, has_prop } from "svelte/internal"
 import Propeller from "./Propeller"
@@ -18,6 +20,7 @@ import type { SvelthreePropsObjectLiteral } from "../types/types-comp-props"
 export type PropOrigin = "own" | "inherited"
 
 type ComplexValuator =
+	| typeof PropArray2X
 	| typeof PropArray3X
 	| typeof PropColorX
 	| typeof PropEulerX
@@ -27,8 +30,10 @@ type ComplexValuator =
 	| typeof PropQuaternionX
 	| typeof PropMatrix4ArrayX
 	| typeof PropQuaternionArrayX
+	| typeof PropVector2X
 
 type ComplexValuatorInstance =
+	| PropArray2X
 	| PropArray3X
 	| PropColorX
 	| PropEulerX
@@ -38,6 +43,7 @@ type ComplexValuatorInstance =
 	| PropQuaternionX
 	| PropMatrix4ArrayX
 	| PropQuaternionArrayX
+	| PropVector2X
 
 type ComplexValueItem = {
 	key: string
@@ -80,6 +86,7 @@ export default class SvelthreeProps {
 
 	complexValuators: { [key in ComplexValueType]: ComplexValuator } = {
 		Vector3: PropVector3X,
+		Array2Nums: PropArray2X,
 		Array3Nums: PropArray3X,
 		Euler: PropEulerX,
 		EulerParamsArray: PropEulerArrayX,
@@ -88,6 +95,7 @@ export default class SvelthreeProps {
 		Matrix4: PropMatrix4X,
 		Matrix4ParamsArray: PropMatrix4ArrayX,
 		Color: PropColorX
+		Vector2: PropVector2X,
 	}
 
 	constructor(obj: SvelthreePropsOwner | null) {
