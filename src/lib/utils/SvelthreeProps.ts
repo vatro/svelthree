@@ -2,14 +2,14 @@ import {
 	PropArray2X,
 	PropArray3X,
 	PropColorX,
-	PropEulerX,
-	PropMatrix4X,
-	PropVector3X,
 	PropEulerArrayX,
-	PropQuaternionX,
+	PropEulerX,
 	PropMatrix4ArrayX,
-	PropQuaternionArrayX
+	PropMatrix4X,
+	PropQuaternionArrayX,
+	PropQuaternionX,
 	PropVector2X,
+	PropVector3X
 } from "./props"
 import { safe_not_equal, has_prop } from "svelte/internal"
 import Propeller from "./Propeller"
@@ -23,27 +23,27 @@ type ComplexValuator =
 	| typeof PropArray2X
 	| typeof PropArray3X
 	| typeof PropColorX
-	| typeof PropEulerX
-	| typeof PropMatrix4X
-	| typeof PropVector3X
 	| typeof PropEulerArrayX
-	| typeof PropQuaternionX
+	| typeof PropEulerX
 	| typeof PropMatrix4ArrayX
+	| typeof PropMatrix4X
 	| typeof PropQuaternionArrayX
+	| typeof PropQuaternionX
 	| typeof PropVector2X
+	| typeof PropVector3X
 
 type ComplexValuatorInstance =
 	| PropArray2X
 	| PropArray3X
 	| PropColorX
-	| PropEulerX
-	| PropMatrix4X
-	| PropVector3X
 	| PropEulerArrayX
-	| PropQuaternionX
+	| PropEulerX
 	| PropMatrix4ArrayX
+	| PropMatrix4X
 	| PropQuaternionArrayX
+	| PropQuaternionX
 	| PropVector2X
+	| PropVector3X
 
 type ComplexValueItem = {
 	key: string
@@ -85,17 +85,17 @@ export default class SvelthreeProps {
 	complexValues: ComplexValueItem[]
 
 	complexValuators: { [key in ComplexValueType]: ComplexValuator } = {
-		Vector3: PropVector3X,
 		Array2Nums: PropArray2X,
 		Array3Nums: PropArray3X,
+		Color: PropColorX,
 		Euler: PropEulerX,
 		EulerParamsArray: PropEulerArrayX,
-		Quaternion: PropQuaternionX,
-		QuaternionParamsArray: PropQuaternionArrayX,
 		Matrix4: PropMatrix4X,
 		Matrix4ParamsArray: PropMatrix4ArrayX,
-		Color: PropColorX
+		Quaternion: PropQuaternionX,
+		QuaternionParamsArray: PropQuaternionArrayX,
 		Vector2: PropVector2X,
+		Vector3: PropVector3X
 	}
 
 	constructor(obj: SvelthreePropsOwner | null) {
