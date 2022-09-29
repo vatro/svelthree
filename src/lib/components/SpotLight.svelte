@@ -31,15 +31,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
 	import SvelthreeLightWithShadow from "../components-internal/SvelthreeLightWithShadow.svelte"
-	import type { LightShadowCamProps, LightShadowProps } from "../types/types-extra"
 
 	import { LightTarget } from "../utils"
 	import { Object3D } from "three"
 
 	import { SpotLight as THREE_SpotLight } from "three"
 	import { SpotLightHelper } from "three"
-	import type { PropsSpotLight } from "../types/types-comp-props"
-	import type { SpotLightShadow } from "three"
+	import type { PropsSpotLight, PropsSpotLightShadow, PropsPerspectiveCamera } from "../types/types-comp-props"
 	import type { Color } from "three"
 	import type { RemoveFirst } from "../types/types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
@@ -436,13 +434,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let castShadow: boolean = undefined
 
 	/** **shorthand** attribute for setting properties of `light.shadow` via an `Object Literal`. */
-	export let shadowProps: { [P in keyof LightShadowProps<SpotLightShadow>]: LightShadowProps<SpotLightShadow>[P] } =
-		undefined
+	export let shadowProps: PropsSpotLightShadow = undefined
 
 	/** **shorthand** attribute for setting properties of `light.shadow.camera` via an `Object Literal`. */
-	export let shadowCameraProps: {
-		[P in keyof LightShadowCamProps<typeof light.shadow.camera>]: LightShadowCamProps<typeof light.shadow.camera>[P]
-	} = undefined
+	export let shadowCameraProps: PropsPerspectiveCamera = undefined
 
 	type HelperParams = ConstructorParameters<typeof SpotLightHelper>
 	export let helperParams: RemoveFirst<HelperParams> = undefined
