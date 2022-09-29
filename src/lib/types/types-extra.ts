@@ -301,10 +301,15 @@ export type SvelthreePropsOwner =
 interface SHTypes {
 	aria: Partial<ARIAMixin>
 	bg: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3 // Scene
+	bg_tex: { url: string; mapping?: THREE.Mapping } // Scene -> TODO  different: type PropBgTex = PropEnvTex
 	cam: PerspectiveCamera | OrthographicCamera | THREE.PerspectiveCamera | THREE.OrthographicCamera // OrbitControls
 	camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera
 	color: THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3
+	env: THREE.Texture
+	env_tex: { url: string; mapping?: THREE.Mapping } // Scene -> TODO  different: type PropEnvTex = get_props<THREE.FogBase>
+	fog: THREE.FogBase // Scene -> TODO  different: type PropFog = get_props<THREE.FogBase>
 	geometry: THREE.BufferGeometry
+	groundColor: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3 //HemisphereLight
 	lookAt: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | Targetable
 	material: THREE.Material | THREE.Material[]
 	matrix: THREE.Matrix4 | Parameters<THREE.Matrix4["set"]>
@@ -368,10 +373,21 @@ interface SvelthreeShorthandProperties<S> {
 	// get types from internal interface (if S is NOT provided) or from components (if S is provided)
 	aria: S extends void ? SHTypes["aria"] : S extends AnySvelthreeComponent ? (S extends { aria: unknown } ? S["aria"] : undefined) : never
 	bg: S extends void ? SHTypes["bg"] : S extends AnySvelthreeComponent ? (S extends { bg: unknown } ? S["bg"] : undefined) : never
+	bg_tex: S extends void ? SHTypes["bg_tex"] : S extends AnySvelthreeComponent ? (S extends { bg_tex: unknown } ? S["bg_tex"] : undefined) : never
 	cam: S extends void ? SHTypes["cam"] : S extends AnySvelthreeComponent ? (S extends { cam: unknown } ? S["cam"] : undefined) : never // OrbitControls only
 	camera: S extends void ? SHTypes["camera"] : S extends AnySvelthreeComponent ? (S extends { camera: unknown } ? S["camera"] : undefined) : never
 	color: S extends void ? SHTypes["color"] : S extends AnySvelthreeComponent ? (S extends { color: unknown } ? S["color"] : undefined) : never
+	env: S extends void ? SHTypes["env"] : S extends AnySvelthreeComponent ? (S extends { env: unknown } ? S["env"] : undefined) : never
+	env_tex: S extends void ? SHTypes["env_tex"] : S extends AnySvelthreeComponent ? (S extends { env_tex: unknown } ? S["env_tex"] : undefined) : never
+	fog: S extends void ? SHTypes["fog"] : S extends AnySvelthreeComponent ? (S extends { fog: unknown } ? S["fog"] : undefined) : never
 	geometry: S extends void ? SHTypes["geometry"] : S extends AnySvelthreeComponent ? (S extends { geometry: unknown } ? S["geometry"] : undefined) : never
+	groundColor: S extends void
+		? SHTypes["groundColor"]
+		: S extends AnySvelthreeComponent
+		? S extends { groundColor: unknown }
+			? S["groundColor"]
+			: undefined
+		: never
 	lookAt: S extends void ? SHTypes["lookAt"] : S extends AnySvelthreeComponent ? (S extends { lookAt: unknown } ? S["lookAt"] : undefined) : never
 	material: S extends void ? SHTypes["material"] : S extends AnySvelthreeComponent ? (S extends { material: unknown } ? S["material"] : undefined) : never
 	matrix: S extends void ? SHTypes["matrix"] : S extends AnySvelthreeComponent ? (S extends { matrix: unknown } ? S["matrix"] : undefined) : never
