@@ -271,6 +271,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** An Array of functions to perform with the loaded GLTF content.
 	 * The first (`dummy`) argument will be internally replaced by the 'real' `content`-refrence.
 	 * See `GLTF_afterLoaded` class for some premade common tasks.*/
+	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 	export let afterLoaded: ((dummy: GLTF, ...args: any[]) => Promise<void>)[] | undefined = undefined
 
 	async function process_afterLoaded() {
@@ -726,7 +727,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_scene = (): Group => content.scene
 	export const get_scenes = (): Group[] => content.scenes
 	export const get_cameras = (): Camera[] => content.cameras
-	export const get_asset = (): { [key: string]: any } => content.asset
+	export const get_asset = (): GLTF["asset"] => content.asset
 	export const get_scene_meshes = async (): Promise<Mesh[]> => await GLTF_utils.get_all_scene_meshes(content.scene)
 	export const get_all_meshes = async (): Promise<Mesh[]> => await GLTF_utils.get_all_meshes(content)
 	export const get_scene_lights = async (): Promise<Light[]> => await GLTF_utils.get_all_scene_lights(content.scene)
