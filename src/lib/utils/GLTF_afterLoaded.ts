@@ -10,38 +10,38 @@ export default class GLTF_afterLoaded {
 	// TODO  RECONSIDER  static for_all_textures ?
 	// TODO  RECONSIDER  static remove_all_textures ?
 
-	public static remove_all_lights: (content_gltf: GLTF) => Promise<void> = async (content: GLTF) => {
+	public static remove_all_lights = async (gltf_content: GLTF): Promise<void> => {
 		//console.log("remove_all_lights!")
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.remove_all(content.scenes[i], "isLight")
+		if (gltf_content) {
+			if (gltf_content.scenes?.length > 1) {
+				for (let i = 0; i < gltf_content.scenes.length; i++) {
+					await GLTF_afterLoaded.remove_all(gltf_content.scenes[i], "isLight")
 				}
 			} else {
-				await GLTF_afterLoaded.remove_all(content.scene, "isLight")
+				await GLTF_afterLoaded.remove_all(gltf_content.scene, "isLight")
 			}
 		} else {
 			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'remove_all_lights(content)' -> 'content' not available!",
-				{ content }
+				"SVELTHREE > GLTF_afterLoaded > async 'remove_all_lights(gltf_content)' -> 'gltf_content' not available!",
+				{ gltf_content }
 			)
 		}
 	}
 
-	public static remove_all_cameras: (content_gltf: GLTF) => Promise<void> = async (content: GLTF) => {
+	public static remove_all_cameras = async (gltf_content: GLTF): Promise<void> => {
 		//console.log("remove_all_cameras!")
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.remove_all(content.scenes[i], "isCamera")
+		if (gltf_content) {
+			if (gltf_content.scenes?.length > 1) {
+				for (let i = 0; i < gltf_content.scenes.length; i++) {
+					await GLTF_afterLoaded.remove_all(gltf_content.scenes[i], "isCamera")
 				}
 			} else {
-				await GLTF_afterLoaded.remove_all(content.scene, "isCamera")
+				await GLTF_afterLoaded.remove_all(gltf_content.scene, "isCamera")
 			}
 		} else {
 			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'remove_all_cameras(content)' -> 'content' not available!",
-				{ content }
+				"SVELTHREE > GLTF_afterLoaded > async 'remove_all_cameras(gltf_content)' -> 'gltf_content' not available!",
+				{ gltf_content }
 			)
 		}
 	}
@@ -240,53 +240,53 @@ export default class GLTF_afterLoaded {
 		//if (scene) { console.log(scene) }
 	}
 
-	public static for_all_materials = (props: PropsAnyTHREEMeshMaterial) => async (content: GLTF) => {
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.apply_to_materials(content.scenes[i], props)
+	public static for_all_materials = (props: PropsAnyTHREEMeshMaterial) => async (gltf_content: GLTF) => {
+		if (gltf_content) {
+			if (gltf_content.scenes?.length > 1) {
+				for (let i = 0; i < gltf_content.scenes.length; i++) {
+					await GLTF_afterLoaded.apply_to_materials(gltf_content.scenes[i], props)
 				}
 			} else {
-				await GLTF_afterLoaded.apply_to_materials(content.scene, props)
+				await GLTF_afterLoaded.apply_to_materials(gltf_content.scene, props)
 			}
 		} else {
 			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'for_all_materials(props)(content)' -> 'content' not available!",
-				{ content }
+				"SVELTHREE > GLTF_afterLoaded > async 'for_all_materials(props)(gltf_content)' -> 'gltf_content' not available!",
+				{ gltf_content }
 			)
 		}
 	}
 
-	public static for_all_meshes = (props: PropsMesh) => async (content: GLTF) => {
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.apply_to_meshes(content.scenes[i], props)
+	public static for_all_meshes = (props: PropsMesh) => async (gltf_content: GLTF) => {
+		if (gltf_content) {
+			if (gltf_content.scenes?.length > 1) {
+				for (let i = 0; i < gltf_content.scenes.length; i++) {
+					await GLTF_afterLoaded.apply_to_meshes(gltf_content.scenes[i], props)
 				}
 			} else {
-				await GLTF_afterLoaded.apply_to_meshes(content.scene, props)
+				await GLTF_afterLoaded.apply_to_meshes(gltf_content.scene, props)
 			}
 		} else {
 			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'for_all_meshes(props)(content)' -> 'content' not available!",
-				{ content }
+				"SVELTHREE > GLTF_afterLoaded > async 'for_all_meshes(props)(gltf_content)' -> 'gltf_content' not available!",
+				{ gltf_content }
 			)
 		}
 	}
 
-	public static for_all_lights = (props: PropsAnyTHREELight) => async (content: GLTF) => {
-		if (content) {
-			if (content.scenes?.length > 1) {
-				for (let i = 0; i < content.scenes.length; i++) {
-					await GLTF_afterLoaded.apply_to_lights(content.scenes[i], props)
+	public static for_all_lights = (props: PropsAnyTHREELight) => async (gltf_content: GLTF) => {
+		if (gltf_content) {
+			if (gltf_content.scenes?.length > 1) {
+				for (let i = 0; i < gltf_content.scenes.length; i++) {
+					await GLTF_afterLoaded.apply_to_lights(gltf_content.scenes[i], props)
 				}
 			} else {
-				await GLTF_afterLoaded.apply_to_lights(content.scene, props)
+				await GLTF_afterLoaded.apply_to_lights(gltf_content.scene, props)
 			}
 		} else {
 			console.error(
-				"SVELTHREE > GLTF_afterLoaded > async 'for_all_lights(props)(content)' -> 'content' not available!",
-				{ content }
+				"SVELTHREE > GLTF_afterLoaded > async 'for_all_lights(props)(gltf_content)' -> 'gltf_content' not available!",
+				{ gltf_content }
 			)
 		}
 	}
