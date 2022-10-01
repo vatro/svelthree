@@ -10,7 +10,7 @@ export default class GLTF_afterLoaded {
 	// TODO  RECONSIDER  static for_all_textures ?
 	// TODO  RECONSIDER  static remove_all_textures ?
 
-	public static remove_all_lights: (dummy: any, ...args: any[]) => Promise<void> = async (content: GLTF) => {
+	public static remove_all_lights: (content_gltf: GLTF) => Promise<void> = async (content: GLTF) => {
 		//console.log("remove_all_lights!")
 		if (content) {
 			if (content.scenes?.length > 1) {
@@ -28,7 +28,7 @@ export default class GLTF_afterLoaded {
 		}
 	}
 
-	public static remove_all_cameras: (content: any, ...args: any[]) => Promise<void> = async (content: GLTF) => {
+	public static remove_all_cameras: (content_gltf: GLTF) => Promise<void> = async (content: GLTF) => {
 		//console.log("remove_all_cameras!")
 		if (content) {
 			if (content.scenes?.length > 1) {
