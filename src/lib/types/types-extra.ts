@@ -199,7 +199,7 @@ export type TargetableSvelthreeComponent =
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
-type AllMeshMaterials = THREE.MeshToonMaterial &
+type AnyTHREEMeshMaterial = THREE.MeshToonMaterial &
 	THREE.MeshBasicMaterial &
 	THREE.MeshDepthMaterial &
 	THREE.Material &
@@ -211,11 +211,11 @@ type AllMeshMaterials = THREE.MeshToonMaterial &
 	THREE.MeshDistanceMaterial &
 	THREE.MeshPhysicalMaterial
 
-export type AnyMeshMaterialProps = OnlyWritableNonFunctionProps<Omit<AllMeshMaterials, PropBlackList>>
+export type PropsAnyTHREEMeshMaterial = get_props<AnyTHREEMeshMaterial>
 
-type AllLights = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
+type AnyTHREELight = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
 
-export type AnyLightProps = OnlyWritableNonFunctionProps<Omit<AllLights, PropBlackList>>
+export type PropsAnyTHREELight = get_props<AnyTHREELight>
 
 export type RaycastableSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D
 export type GLTFSupportedSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D | Scene
