@@ -52,7 +52,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { PropsLoadedGLTF } from "../types/types-comp-props"
 	import type { LoadingManager } from "three"
 	import { Object3D } from "three"
-	import type { RemoveFirst } from "../types/types-extra"
+	import type { RemoveFirst, GLTFAfterLoadedTask } from "../types/types-extra"
 	import type { PropButton, PropLink } from "../types/types-comp-props"
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils"
 
@@ -268,11 +268,23 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		})
 	}
 
-	/** An Array of functions to perform with the loaded GLTF content.
-	 * The first (`dummy`) argument will be internally replaced by the 'real' `content`-refrence.
-	 * See `GLTF_afterLoaded` class for some premade common tasks.*/
+	/** An Array of tasks to perform with the loaded GLTF content, these can be any of the `GLTF_afterLoaded`-utility methods / tasks (_static_) or your own method.
+	 *
+	 * _Example:_
+	 * ```
+	 * const my_after_loaded_task = (gltf_content: GLTF) => {...}
+	 *
+	 * <LoadedGLTF afterLoaded = {[
+	 * 		GLTF_afterLoaded.remove_all_lights,
+	 * 		GLTF_afterLoaded.for_all_meshes({...}),
+	 * 		my_after_loaded_task
+	 * ]}
+	 * />
+	 * ```
+	 * */
 	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
-	export let afterLoaded: ((dummy: GLTF, ...args: any[]) => Promise<void>)[] | undefined = undefined
+	//export let afterLoaded: ((content_gltf: GLTF, ...args: any[]) => Promise<void>)[] | undefined = undefined
+	export let afterLoaded: GLTFAfterLoadedTask[] | undefined = undefined
 
 	async function process_afterLoaded() {
 		dispatch("afterLoaded_start")
