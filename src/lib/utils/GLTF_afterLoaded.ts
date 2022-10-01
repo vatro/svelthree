@@ -1,7 +1,7 @@
 import type { Object3D, Group } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 import type { PropsMesh } from "../types/types-comp-props"
-import type { AnyMeshMaterialProps, AnyLightProps } from "../types/types-extra"
+import type { PropsAnyTHREEMeshMaterial, PropsAnyTHREELight } from "../types/types-extra"
 
 export default class GLTF_afterLoaded {
 	// TODO  RECONSIDER  static for_all_cameras ?
@@ -95,7 +95,7 @@ export default class GLTF_afterLoaded {
 
 	private static async apply_to_materials(
 		scene: Group,
-		props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }
+		props: PropsAnyTHREEMeshMaterial
 	): Promise<void> {
 		//console.log("apply_to_materials started!")
 
@@ -103,7 +103,7 @@ export default class GLTF_afterLoaded {
 			const fns: (() => Promise<void>)[] = []
 
 			const check_obj =
-				(obj: Object3D, props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }) => async () => {
+				(obj: Object3D, props: PropsAnyTHREEMeshMaterial) => async () => {
 					if (obj) {
 						if (obj["isMesh"] && obj["material"]) {
 							for (const prop in props) {
@@ -124,7 +124,7 @@ export default class GLTF_afterLoaded {
 
 			const traverse = (
 				child: Object3D,
-				props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }
+				props: PropsAnyTHREEMeshMaterial
 			) => {
 				fns.push(check_obj(child, props))
 				const children = child.children
@@ -149,13 +149,13 @@ export default class GLTF_afterLoaded {
 		//if (scene) { console.log(scene) }
 	}
 
-	private static async apply_to_meshes(scene: Group, props: { [P in keyof PropsMesh]: PropsMesh[P] }): Promise<void> {
+	private static async apply_to_meshes(scene: Group, props: PropsMesh): Promise<void> {
 		//console.log("apply_to_meshes started!")
 
 		if (scene) {
 			const fns: (() => Promise<void>)[] = []
 
-			const check_obj = (obj: Object3D, props: { [P in keyof PropsMesh]: PropsMesh[P] }) => async () => {
+			const check_obj = (obj: Object3D, props: PropsMesh) => async () => {
 				if (obj) {
 					if (obj["isMesh"]) {
 						for (const prop in props) {
@@ -174,7 +174,7 @@ export default class GLTF_afterLoaded {
 				}
 			}
 
-			const traverse = (child: Object3D, props: { [P in keyof PropsMesh]: PropsMesh[P] }) => {
+			const traverse = (child: Object3D, props: PropsMesh) => {
 				fns.push(check_obj(child, props))
 				const children = child.children
 				for (let i = 0, l = children.length; i < l; i++) {
@@ -200,14 +200,14 @@ export default class GLTF_afterLoaded {
 
 	private static async apply_to_lights(
 		scene: Group,
-		props: { [P in keyof AnyLightProps]: AnyLightProps[P] }
+		props: PropsAnyTHREELight
 	): Promise<void> {
 		//console.log("apply_to_lights started!")
 
 		if (scene) {
 			const fns: (() => Promise<void>)[] = []
 
-			const check_obj = (obj: Object3D, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => async () => {
+			const check_obj = (obj: Object3D, props: PropsAnyTHREELight) => async () => {
 				if (obj) {
 					if (obj["isLight"]) {
 						for (const prop in props) {
@@ -226,9 +226,9 @@ export default class GLTF_afterLoaded {
 				}
 			}
 
-			const traverse = (child: Object3D, props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => {
-				fns.push(check_obj(child, props))
-				const children = child.children
+			const traverse = (obj: Object3D, props: PropsAnyTHREELight) => {
+				fns.push(check_obj(obj, props))
+				const children = obj.children
 				for (let i = 0, l = children.length; i < l; i++) {
 					traverse(children[i], props)
 				}
@@ -251,7 +251,7 @@ export default class GLTF_afterLoaded {
 	}
 
 	public static for_all_materials =
-		(props: { [P in keyof AnyMeshMaterialProps]: AnyMeshMaterialProps[P] }) => async (content: GLTF) => {
+		(props: PropsAnyTHREEMeshMaterial) => async (content: GLTF) => {
 			if (content) {
 				if (content.scenes?.length > 1) {
 					for (let i = 0; i < content.scenes.length; i++) {
@@ -268,7 +268,7 @@ export default class GLTF_afterLoaded {
 			}
 		}
 
-	public static for_all_meshes = (props: { [P in keyof PropsMesh]: PropsMesh[P] }) => async (content: GLTF) => {
+	public static for_all_meshes = (props: PropsMesh) => async (content: GLTF) => {
 		if (content) {
 			if (content.scenes?.length > 1) {
 				for (let i = 0; i < content.scenes.length; i++) {
@@ -286,7 +286,7 @@ export default class GLTF_afterLoaded {
 	}
 
 	public static for_all_lights =
-		(props: { [P in keyof AnyLightProps]: AnyLightProps[P] }) => async (content: GLTF) => {
+		(props: PropsAnyTHREELight) => async (content: GLTF) => {
 			if (content) {
 				if (content.scenes?.length > 1) {
 					for (let i = 0; i < content.scenes.length; i++) {
