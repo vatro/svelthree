@@ -211,11 +211,21 @@ type AnyTHREEMeshMaterial = THREE.MeshToonMaterial &
 	THREE.MeshDistanceMaterial &
 	THREE.MeshPhysicalMaterial
 
-export type PropsAnyTHREEMeshMaterial = get_props<AnyTHREEMeshMaterial>
+type AnyTHREEMeshMaterialProperties = get_props<AnyTHREEMeshMaterial>
+export type PropsAnyTHREEMeshMaterial = { [P in keyof AnyTHREEMeshMaterialProperties]: AnyTHREEMeshMaterialProperties[P] }
 
 type AnyTHREELight = THREE.SpotLight & THREE.PointLight & THREE.AmbientLight & THREE.RectAreaLight & THREE.HemisphereLight & THREE.DirectionalLight
 
-export type PropsAnyTHREELight = get_props<AnyTHREELight>
+type AnyTHREELightProperties = get_props<AnyTHREELight>
+export type PropsAnyTHREELight = { [P in keyof AnyTHREELightProperties]: AnyTHREELightProperties[P] }
+
+import type { GLTF as THREE_GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
+import type { default as GLTF_afterLoaded } from "../utils/GLTF_afterLoaded.js"
+
+type GLTF_afterLoaded_Method = Exclude<keyof typeof GLTF_afterLoaded, "prototype">
+type GLTF_afterLoaded_Task = typeof GLTF_afterLoaded[GLTF_afterLoaded_Method]
+/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
+export type GLTFAfterLoadedTask = GLTF_afterLoaded_Task | ((content_gltf: THREE_GLTF, ...args: any[]) => unknown)
 
 export type RaycastableSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D
 export type GLTFSupportedSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D | Scene
