@@ -230,11 +230,6 @@ export type GLTFAfterLoadedTask = GLTF_afterLoaded_Task | ((content_gltf: THREE_
 export type RaycastableSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D
 export type GLTFSupportedSvelthreeComponents = Mesh<MeshAssignableMaterial> | Group | Object3D | Scene
 
-/*
-export type RaycastableSvelthreeComponents = Mesh | Group | Object3D
-export type GLTFSupportedSvelthreeComponents = Mesh | Group | Object3D | Scene
-*/
-
 export interface ISvelthreeGLTFTreeMapMember {
 	obj: THREE.Object3D
 	parent_uuid?: string | null
