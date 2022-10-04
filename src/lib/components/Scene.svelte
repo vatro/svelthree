@@ -31,7 +31,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import SvelthreeInteraction from "../components-internal/SvelthreeInteraction.svelte"
 	import type { RaycastArray } from "../utils/RaycastArray"
+
 	import { createEventDispatcher } from "svelte"
+	import type { InteractionEventDispatcher } from "../types/types-extra"
+
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../constants/Interaction"
 	import type {
@@ -78,7 +81,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 	export let log_mau: boolean = log_all
 
-	const dispatch = createEventDispatcher()
+	const dispatch_interaction = createEventDispatcher<InteractionEventDispatcher>()
 
 	/** `id` is used to identify / assign a Scene to a 'WebGLRenderer' component.
 	 * `id` is **not needed if** a Scene component is a child of any Object3D (e.g. another Scene) in this case
@@ -1093,7 +1096,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		bind:this={interaction_comp}
 		{shadow_dom_el}
 		{modifiers}
-		{dispatch}
+		{dispatch_interaction}
 		obj={scene}
 		parent={self}
 		{interactionEnabled}

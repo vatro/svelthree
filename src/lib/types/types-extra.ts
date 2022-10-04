@@ -411,6 +411,68 @@ interface SvelthreeShorthandProperties<S> {
 }
 
 export type prop<K extends keyof SvelthreeShorthandProperties<void>, S = void> = SvelthreeShorthandProperties<S>[K]
+
+export type SvelthreeInteractableComponent = Mesh<MeshAssignableMaterial> | Points<PointsAssignableMaterial> | Scene | LoadedGLTF
+
+export type WebGLRendererEventDetail = {
+	frame: number
+}
+
+export type WebGLRendererComponentEventDispatcher = {
+	[key: string]: WebGLRendererEventDetail
+}
+
+type CanvasEventDetail = {
+	event: PointerEvent | KeyboardEvent | FocusEvent
+}
+
+export type CanvasComponentEventDispatcher = {
+	[key: string]: CanvasEventDetail
+}
+
+export type CanvasComponentEvent = {
+	type: string
+	detail: CanvasEventDetail
+}
+
+export type AllIntersectionsResult = ReturnType<THREE.Raycaster["intersectObjects"]>
+
+export type AllIntersections = {
+	result: AllIntersectionsResult
+}
+
+export type RaycasterData = {
+	/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
+	intersection: { [P in keyof THREE.Intersection]: THREE.Intersection[P] }
+	/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
+	ray: THREE.Ray
+	/** The `Camera` used for raycasting. */
+	camera: THREE.Camera
+	/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
+	unprojected_point: THREE.Vector3
+}
+
+export type SvelthreeInteractionEventDetail = {
+	code?: KeyboardEvent["code"]
+	e: PointerEvent | KeyboardEvent | FocusEvent
+	obj: THREE.Object3D
+	comp: SvelthreeInteractableComponent
+	raycaster_data?: RaycasterData
+}
+
+export type SvelthreeInteractionEvent = {
+	type: string
+	detail: SvelthreeInteractionEventDetail
+}
+
+import type { createEventDispatcher } from "svelte/internal"
+
+export type InteractionEventDispatcher = {
+	[key: string]: SvelthreeInteractionEventDetail
+}
+
+export type SvelthreeInteractionEventDispatcher = ReturnType<typeof createEventDispatcher<InteractionEventDispatcher>>
+
 import type { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 export type SvelthreeStoreArrayItem = THREE.Scene | THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera | THREE_OrbitControls
 export type RaycastArrayInput = (THREE.Object3D | RaycastableSvelthreeComponents)[]

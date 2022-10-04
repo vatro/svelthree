@@ -11,13 +11,22 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 -->
 <script lang="ts">
 	import { onMount, beforeUpdate, afterUpdate, onDestroy, getContext } from "svelte"
-	import { get_current_component, SvelteComponentDev } from "svelte/internal"
+	import type { SvelteComponentDev } from "svelte/internal"
+	import { get_current_component } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
-	import type { Intersection, Camera, Ray } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name_int } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { PointerState, SvelthreeShadowDOMElement } from "../types/types-extra"
+	import type {
+		PointerState,
+		SvelthreeShadowDOMElement,
+		SvelthreeInteractionEventDetail,
+		RaycasterData,
+		AllIntersections,
+		SvelthreeInteractableComponent,
+		SvelthreeInteractionEventDispatcher,
+		CanvasComponentEvent
+	} from "../types/types-extra"
 	import type { Writable } from "svelte/store"
 	import {
 		KEYBOARD_EVENTS,
@@ -54,7 +63,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
 
 	export let interactionEnabled: boolean
-	export let parent: SvelteComponentDev
+	export let parent: SvelthreeInteractableComponent
 	export let sti: number = getContext("store_index")
 	export let obj: Object3D
 
@@ -95,22 +104,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let raycaster: Raycaster
 	$: raycaster = $svelthreeStores[sti].raycaster
 
-	export let dispatch: (type: string, detail?: any) => void
+	export let dispatch_interaction: SvelthreeInteractionEventDispatcher
 
 	const pointer: PointerState = getContext("pointer")
 
-	const all_intersections: { result: any[] } = getContext("all_intersections")
-
-	interface RaycasterData {
-		/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
-		intersection: { [P in keyof Intersection]: Intersection[P] }
-		/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
-		ray: Ray
-		/** The `Camera` used for raycasting. */
-		camera: Camera
-		/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
-		unprojected_point: Vector3
-	}
+	const all_intersections: AllIntersections = getContext("all_intersections")
 
 	let raycaster_data: RaycasterData
 
@@ -312,8 +310,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
 	function has_on_directive(on_directive: string): boolean {
-		const has_directive_key: boolean = Object.keys(parent.$$.callbacks).includes(on_directive)
-		const directive_callbacks: any[] | null = has_directive_key ? parent.$$.callbacks[on_directive] : null
+		const has_directive_key: boolean = Object.keys((parent as SvelteComponentDev).$$.callbacks).includes(
+			on_directive
+		)
+		const directive_callbacks: SvelteComponentDev["$$"]["callbacks"][] | null = has_directive_key
+			? (parent as SvelteComponentDev).$$.callbacks[on_directive]
+			: null
 
 		if (directive_callbacks?.length) {
 			for (let i = 0; i < directive_callbacks.length; i++) {
@@ -441,7 +443,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		return has_on_directive(event_name) || parent[`on_${event_name}`]
+		return has_on_directive(event_name) || !!parent[`on_${event_name}`]
 	}
 
 	function not_using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
@@ -582,9 +584,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_pointermove_listener: () => void
 	function add_canvas_pointermove_listener(): void {
-		remove_canvas_pointermove_listener = canvas_component.$on("canvas_pointermove", (e: CustomEvent<any>) =>
+		remove_canvas_pointermove_listener = canvas_component.$on("canvas_pointermove", (e: CanvasComponentEvent) =>
 			// check before dispatching 'pointermove' component event directly (not via shadow dom listener / handler)
-			check_pointer_move(e.detail.event)
+			check_pointer_move(e.detail.event as PointerEvent)
 		)
 	}
 
@@ -619,9 +621,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_pointermoveover_listener: () => void
 	function add_canvas_pointermoveover_listener(): void {
-		remove_canvas_pointermoveover_listener = canvas_component.$on("canvas_pointermove", (e: CustomEvent<any>) =>
+		remove_canvas_pointermoveover_listener = canvas_component.$on("canvas_pointermove", (e: CanvasComponentEvent) =>
 			// check before dispatching 'pointermoveover' component event via shadow dom listener / handler
-			check_pointer_moveover(e.detail.event)
+			check_pointer_moveover(e.detail.event as PointerEvent)
 		)
 	}
 
@@ -756,7 +758,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 *
 	 */
 	function get_pointerevent_modified_clone(e: PointerEvent, new_type: string = null): PointerEvent {
-		const event_init: any = {}
+		const event_init = { composed: undefined }
 
 		// we do this because simply spreading the event object -> `{...e}`:
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
@@ -846,14 +848,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_pointerevent_intersection_dep(e: PointerEvent) {
 		const action_name = `on_${e.type}`
 
-		const detail = {
+		const detail: SvelthreeInteractionEventDetail = {
 			e,
 			obj,
 			comp: parent,
 			raycaster_data
 		}
 
-		if (has_on_directive(e.type)) dispatch(e.type, detail)
+		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
 	}
 
@@ -861,13 +863,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_pointerevent_intersection_indep(e: PointerEvent) {
 		const action_name = `on_${e.type}`
 
-		const detail = {
+		const detail: SvelthreeInteractionEventDetail = {
 			e,
 			obj,
 			comp: parent
 		}
 
-		if (has_on_directive(e.type)) dispatch(e.type, detail)
+		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
 	}
 
@@ -979,14 +981,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_focusevent_intersection_indep(e: FocusEvent) {
 		const action_name = `on_${e.type}`
 
-		const detail = {
+		const detail: SvelthreeInteractionEventDetail = {
 			e,
 			obj,
 			comp: parent
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(e.type)) dispatch(e.type, detail)
+		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
 	}
 
@@ -1110,17 +1112,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_keydown_listener_action: () => void
 	function add_canvas_keydown_listener_action(): void {
-		remove_canvas_keydown_listener_action = canvas_component.$on("canvas_keydown", (e: CustomEvent<any>) =>
+		remove_canvas_keydown_listener_action = canvas_component.$on("canvas_keydown", (e: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event, null)
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	let remove_canvas_keydown_listener_directive: () => void
 	function add_canvas_keydown_listener_directive(): void {
-		remove_canvas_keydown_listener_directive = canvas_component.$on("canvas_keydown", (e: CustomEvent<any>) =>
+		remove_canvas_keydown_listener_directive = canvas_component.$on("canvas_keydown", (e: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event, null)
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
@@ -1128,17 +1130,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_keyup_listener_action: () => void
 	function add_canvas_keyup_listener_action(): void {
-		remove_canvas_keyup_listener_action = canvas_component.$on("canvas_keyup", (e: CustomEvent<any>) =>
+		remove_canvas_keyup_listener_action = canvas_component.$on("canvas_keyup", (e: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event, null)
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	let remove_canvas_keyup_listener_directive: () => void
 	function add_canvas_keyup_listener_directive(): void {
-		remove_canvas_keyup_listener_directive = canvas_component.$on("canvas_keyup", (e: CustomEvent<any>) =>
+		remove_canvas_keyup_listener_directive = canvas_component.$on("canvas_keyup", (e: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event, null)
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
@@ -1146,15 +1148,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let remove_canvas_keypress_listener_action: () => void
 	function add_canvas_keypress_listener_action(): void {
-		remove_canvas_keypress_listener_action = canvas_component.$on("canvas_keypress", (e: CustomEvent<any>) =>
-			keyboardevents_handler(e.detail.event, null)
+		remove_canvas_keypress_listener_action = canvas_component.$on("canvas_keypress", (e: CanvasComponentEvent) =>
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	let remove_canvas_keypress_listener_directive: () => void
 	function add_canvas_keypress_listener_directive(): void {
-		remove_canvas_keypress_listener_directive = canvas_component.$on("canvas_keypress", (e: CustomEvent<any>) =>
-			keyboardevents_handler(e.detail.event, null)
+		remove_canvas_keypress_listener_directive = canvas_component.$on("canvas_keypress", (e: CanvasComponentEvent) =>
+			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
 		)
 	}
 
@@ -1212,7 +1214,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_keyboardevent_intersection_indep(e: KeyboardEvent) {
 		const action_name = `on_${e.type}`
 
-		const detail = {
+		const detail: SvelthreeInteractionEventDetail = {
 			code: e.code,
 			e,
 			obj,
@@ -1220,7 +1222,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(e.type)) dispatch(e.type, detail)
+		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
 	}
 
@@ -1619,7 +1621,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		obj.userData.interact = false
 	}
 
-	function dispatch_prop_action(action_name: string, e_type: string, detail: { [key: string]: any }) {
+	function dispatch_prop_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
 		const e = new CustomEvent(e_type, { detail })
 
 		if (typeof parent[action_name] === "function") {

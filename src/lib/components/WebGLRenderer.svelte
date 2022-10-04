@@ -24,7 +24,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
-	import type { WebGLRendererMode } from "../types/types-extra"
+	import type {
+		WebGLRendererMode,
+		WebGLRendererComponentEventDispatcher,
+		WebGLRendererEventDetail
+	} from "../types/types-extra"
 	import type { PropsWebGLRenderer } from "../types/types-comp-props"
 
 	const self = get_current_component()
@@ -38,7 +42,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
-	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
+	const dispatch = createEventDispatcher<WebGLRendererComponentEventDispatcher>()
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -566,7 +570,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * - Added as an alternative to calling `dispatch` directly in order to reduce anonnymous function calls count in the stack trace.
 	 * Every `dispatch(...)` call is creating a new custom event, calling `createEventDispatcher` alone shows two anonnymous functions in the stack trace.
 	 */
-	async function dispatch_render_event(event_name: string, detail: any = null): Promise<void> {
+	async function dispatch_render_event(event_name: string, detail: WebGLRendererEventDetail = null): Promise<void> {
 		detail ? dispatch(event_name, detail) : dispatch(event_name)
 	}
 

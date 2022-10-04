@@ -80,19 +80,21 @@ export type SvelthreeModifiersProp =
 			>
 	  }
 
+import type { SvelthreeInteractionEvent } from "../types/types-extra"
+
 export type SvelthreeGenericEventHandler =
-	| [handler: (e?: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier>]
-	| ((e?: CustomEvent) => void)
+	| [handler: (e: SvelthreeInteractionEvent) => void, modifiers?: Array<SvelthreeSupportedModifier>]
+	| ((e: SvelthreeInteractionEvent) => void)
 
 export type SvelthreePointerEventHandler = SvelthreeGenericEventHandler
 export type SvelthreeFocusEventHandler = SvelthreeGenericEventHandler
 export type SvelthreeKeyboardEventHandler =
 	| [
-			handler: (e?: CustomEvent) => void,
+			handler: (e: SvelthreeInteractionEvent) => void,
 			modifiers?: Array<SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget>
 	  ]
-	| ((e?: CustomEvent) => void)
+	| ((e: SvelthreeInteractionEvent) => void)
 
 export type SvelthreeWheelEventHandler =
-	| [handler: (e?: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
-	| ((e?: CustomEvent) => void)
+	| [handler: (e: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
+	| ((e: SvelthreeInteractionEvent) => void)

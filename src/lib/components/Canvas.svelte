@@ -19,7 +19,14 @@ This is a **svelthree** _Canvas_ Component.
 	import type { Object3D } from "three"
 	import { svelthreeStores } from "svelthree/stores"
 	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
-	import type { PointerState, StoreBody } from "../types/types-extra"
+	import type {
+		PointerState,
+		StoreBody,
+		AllIntersections,
+		CanvasComponentEventDispatcher,
+		AllIntersectionsResult,
+		SvelthreeInteractableComponent
+	} from "../types/types-extra"
 	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
 	import { RaycastArray } from "../utils/RaycastArray"
@@ -41,7 +48,7 @@ This is a **svelthree** _Canvas_ Component.
 	const c_name = get_comp_name(self)
 	const verbose: boolean = verbose_mode()
 
-	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
+	const dispatch = createEventDispatcher<CanvasComponentEventDispatcher>()
 
 	export let log_all = false
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
@@ -326,7 +333,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	// IMPORTANT  not reactive!
 	// needed by 'SvelthreeInteraction' sub-components.
-	let all_intersections: { result: any[] } = { result: [] }
+	let all_intersections: AllIntersections = { result: [] }
 	setContext("all_intersections", all_intersections)
 
 	// --- Interactivity ---
@@ -752,7 +759,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** Get all interactive **svelthree components** from the currently active (_rendered_) Scene. */
-	export const get_interactive_components = (): any[] => {
+	export const get_interactive_components = (): SvelthreeInteractableComponent[] => {
 		return filtered_raycast.objects.map((item: Object3D) => {
 			return item.userData.svelthreeComponent
 		})
@@ -771,7 +778,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** Get all interactive **three.js object instances** intersected by the ray (pointer). */
-	export const get_interactive_intersections_all = (): any[] => all_intersections.result
+	export const get_interactive_intersections_all = (): AllIntersectionsResult => all_intersections.result
 
 	export const getDomElement = (): HTMLCanvasElement => c
 	export const getDomElementDimensions = (): { w: number; h: number } => {
