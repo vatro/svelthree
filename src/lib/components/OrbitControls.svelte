@@ -121,7 +121,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// schedule render
-	function on_orbitcontrols_change(e: any): void {
+	function on_orbitcontrols_change(e: Parameters<Parameters<THREE_OrbitControls["addEventListener"]>[1]>[0]): void {
 		orbitcontrols.object.userData.root_scene.userData.dirty = true
 		$svelthreeStores[sti].rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
 
