@@ -413,3 +413,5 @@ interface SvelthreeShorthandProperties<S> {
 export type prop<K extends keyof SvelthreeShorthandProperties<void>, S = void> = SvelthreeShorthandProperties<S>[K]
 import type { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 export type SvelthreeStoreArrayItem = THREE.Scene | THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera | THREE_OrbitControls
+export type RaycastArrayInput = (THREE.Object3D | RaycastableSvelthreeComponents)[]
+export type RaycastArrayOutput = THREE.Object3D[]
