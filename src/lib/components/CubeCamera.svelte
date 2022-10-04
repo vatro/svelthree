@@ -10,7 +10,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 Renders a `CubeMap` which can be used with **non-PBR** materials having an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236)).     
 [ tbd ]  Link to Docs. -->
 <script lang="ts">
-	import type { Scene as THREE_Scene } from "three"
+	import type { Scene } from "three"
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -22,22 +22,27 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
 
 	import type { Euler, Matrix4, Quaternion } from "three"
-	import type { Object3D as THREE_Object3D } from "three"
+	import type { Object3D } from "three"
+	import type { Targetable } from "../types/types-extra"
 
 	import { svelthreeStores } from "svelthree/stores"
 	import { PropUtils, SvelthreeProps } from "../utils"
 
-	import { SvelthreeAnimation } from "../ani"
-	import type { SvelthreeAnimationFunction } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
 	import { CubeCamera as THREE_CubeCamera } from "three"
 	import { WebGLCubeRenderTarget } from "three"
-	import type { CubeCameraProperties, WebGLCubeRenderTargetProperties } from "../types/types-comp-props"
+	import type {
+		PropsCubeCamera,
+		PropsWebGLCubeRenderTarget,
+		PropWebGLRenderTargetOptions
+	} from "../types/types-comp-props"
 	// custom CubeCameraHelper
 	import { CubeCameraHelper } from "../utils"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { Vector3 } from "three"
-	import type { CubeTexture, WebGLRenderer, WebGLRenderTargetOptions, Camera, Mesh } from "three"
+	import type { CubeTexture, WebGLRenderer, Camera, Mesh } from "three"
 	import type {
 		Material,
 		MeshBasicMaterialParameters,
@@ -45,19 +50,19 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		MeshBasicMaterial,
 		MeshLambertMaterial
 	} from "three"
-	import type { RemoveLast } from "../types/types-extra"
+	import type { RemoveLast, MeshAssignableMaterial } from "../types/types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 
 	/**
 	 *  SVELTEKIT  SSR /
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
-	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
+	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/env"
+	import { browser } from "$app/environment"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -82,7 +87,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	/** `CubeCamera` instances are always added to the `root_scene`
 	 * no matter which component the `CubeCamera` component was added to. */
-	let root_scene: THREE_Scene | null = undefined
+	let root_scene: Scene | null = undefined
 	let root_scene_obj = { value: undefined }
 
 	$: if (root_scene === undefined) {
@@ -94,7 +99,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	 * ☝️ The `pos` shorthand attribute will override `bind_pos`! _Alternatively (standard)_:
 	 * add the `CubeCamera` component as a child to either a `Mesh` or an `Object3D`/`Group` component,
 	 * in this case `CubeCamera`'s position will be bound to it's parent / object (three) instance. */
-	export let bind_pos: MeshSvelthreeComponent<any> | Object3DSvelthreeComponent | THREE_Object3D = undefined
+	export let bind_pos: MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent | Object3D =
+		undefined
 	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Adjust `CubeCamera`'s position by setting an offset relative to the pivot of the object specified by `bind_pos`. */
@@ -105,7 +111,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	 * Default: `CubeCamera`'s parent component's object (three) instance will be hidden.
 	 * -> ☝️ If you add `CubeCamera` as a direct child of a `Scene` component without specifying some other object / objects to be hidden,
 	 * the **root scene** will be hidden during the 'envMap'-texture rendering and your 'envMap' texture will be blank! */
-	export let hide: (MeshSvelthreeComponent<any> | Object3DSvelthreeComponent | THREE_Object3D)[] = undefined
+	export let hide: (MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent | Object3D)[] =
+		undefined
 
 	/** Binds the texture generated by the `CubeCamera` to some `Mesh`-component's `.material`(_currently non PBR + has `.envMap`_).
 	 * This is the opposite of / alternative to binding the material's `.envMap` property to `[CubeCamera component reference].texture` */
@@ -121,7 +128,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	/** Set to `true` for correct **floor reflections** (_default: `false`_). */
 	export let is_floor = false
 
-	let scene: THREE_Scene = getContext("scene")
+	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
@@ -131,7 +138,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	let create = false
 
 	/** The (three) instance that was shared to this component as it's 'parent' which can be either another instance / object or a scene / root scene. */
-	let our_parent: THREE_Object3D = undefined
+	let our_parent: Object3D = undefined
 
 	/** Shadow DOM element generated by our parent scene / root scene. Used as fallback if this component has no non-`Scene` component as parent. */
 	let scene_shadow_dom_el: SvelthreeShadowDOMElement = getContext("scene_shadow_dom_el")
@@ -328,7 +335,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	function handle_instance_change(): void {
 		if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
 			const uuid_to_remove: string = camera_uuid || camera.uuid
-			const old_instance: THREE_Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
+			const old_instance: Object3D = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
 
 			// update 'index_in_x'
 			index_in_cubecameras = old_instance.userData.index_in_cubecameras
@@ -370,24 +377,24 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		// checking if their material has an '.envMap' property and is not a PBR material and then apply the the cubemap texture to those objects.
 		// But for now, this is not possible.
 
-		let bound_pos: typeof bind_pos = bind_pos || our_parent
-		let to_hide: typeof hide | typeof bind_pos = hide || bound_pos
-		let renderer: WebGLRenderer = $svelthreeStores[sti].renderer
-		let active_scene: THREE_Scene = $svelthreeStores[sti].activeScene
+		const bound_pos: typeof bind_pos = bind_pos || our_parent
+		const to_hide: typeof hide | typeof bind_pos = hide || bound_pos
+		const renderer: WebGLRenderer = $svelthreeStores[sti].renderer
+		const active_scene: Scene = $svelthreeStores[sti].activeScene
 
 		if (pos === undefined) {
 			// the floor hack -> see https://jsfiddle.net/3mprbLc9/
 			if (is_floor) {
-				let active_cam: Camera = $svelthreeStores[sti].activeCamera
-				let target_pos: Vector3 = get_cubecam_target_position(active_cam)
+				const active_cam: Camera = $svelthreeStores[sti].activeCamera
+				const target_pos: Vector3 = get_cubecam_target_position(active_cam)
 				camera.position.copy(target_pos)
 
 				// IMPORTANT  GOOD  this does NOT triggers all 'camera' bound reactive statements as opposed to `camera.position.y *= -1`!
 				camera.position.setY(camera.position.y * -1)
 			} else {
-				let target_pos: Vector3 = get_cubecam_target_position(bound_pos)
+				const target_pos: Vector3 = get_cubecam_target_position(bound_pos)
 				if (bind_pos_offset) {
-					let corrected_target_pos: Vector3 = target_pos.clone().add(bind_pos_offset)
+					const corrected_target_pos: Vector3 = target_pos.clone().add(bind_pos_offset)
 					camera.position.copy(corrected_target_pos)
 				} else {
 					camera.position.copy(target_pos)
@@ -402,8 +409,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		camera_updated = true
 
 		if (!bind_tex) {
-			let op: Mesh = bound_pos as Mesh
-			let op_mat: MaterialWithEnvMap = op.material as MaterialWithEnvMap
+			const op = bound_pos as Mesh
+			const op_mat = op.material as MaterialWithEnvMap
 			if (op_mat && Object.prototype.hasOwnProperty.call(op_mat, "envMap")) {
 				op_mat.envMap = camera.renderTarget.texture
 			}
@@ -411,7 +418,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	function change_visibility(to_change: typeof hide | typeof bind_pos, val: boolean) {
-		let toc: typeof hide = to_change as typeof hide
+		const toc = to_change as typeof hide
 		if (toc.length && toc.length > 0) {
 			for (let i = 0; i < toc.length; i++) {
 				set_visibility(toc[i], val)
@@ -423,12 +430,10 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	function set_visibility(obj: typeof hide | typeof bind_pos, val: boolean) {
 		if (obj["is_svelthree_component"]) {
-			let o: MeshSvelthreeComponent<any> | Object3DSvelthreeComponent = obj as
-				| MeshSvelthreeComponent<any>
-				| Object3DSvelthreeComponent
+			const o = obj as MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent
 			o.get_instance().visible = val
 		} else {
-			let o: THREE_Object3D = obj as THREE_Object3D
+			const o = obj as Object3D
 			o.visible = val
 		}
 	}
@@ -437,12 +442,10 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		let wp: Vector3 = new Vector3()
 
 		if (typeof obj["getWorldPosition"] === "function") {
-			let o: THREE_Object3D = obj as THREE_Object3D
+			const o = obj as Object3D
 			o.getWorldPosition(wp)
 		} else {
-			let o: MeshSvelthreeComponent<any> | Object3DSvelthreeComponent = obj as
-				| MeshSvelthreeComponent<any>
-				| Object3DSvelthreeComponent
+			const o = obj as MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent
 			o.get_instance().getWorldPosition(wp)
 		}
 
@@ -466,8 +469,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	let sPropsTarget: SvelthreeProps
 
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let renderTargetOptions: { [P in keyof WebGLRenderTargetOptions]: WebGLRenderTargetOptions[P] } = undefined
+	/** **shorthand** attribute for setting properties via an `Object Literal`. */
+	export let renderTargetOptions: PropWebGLRenderTargetOptions = undefined
 	$: if (renderTargetOptions && camera_updated) recreate_render_target()
 
 	function recreate_render_target() {
@@ -505,9 +508,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let renderTargetProps: { [P in keyof WebGLCubeRenderTargetProperties]: WebGLCubeRenderTargetProperties[P] } =
-		undefined
+	/** **shorthand** attribute for setting properties via an `Object Literal`. */
+	export let renderTargetProps: PropsWebGLCubeRenderTarget = undefined
 
 	$: if (!sPropsTarget && renderTargetProps && renderTargetProps) sPropsTarget = new SvelthreeProps(renderTargetProps)
 	$: if (renderTargetProps && sPropsTarget) update_render_target_props()
@@ -517,8 +519,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof CubeCameraProperties]: CubeCameraProperties[P] } = undefined
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
+	export let props: PropsCubeCamera = undefined
 
 	$: if (!sProps && camera && props) sProps = new SvelthreeProps(camera)
 	$: if (props && sProps) update_props()
@@ -529,7 +531,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	// IMPORTANT  following 'shorthand' attributes will override `props` attribute!
 
-	/** **shorthand** attribute for setting the `position` property. */
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
 	export let pos: Vector3 | Parameters<Vector3["set"]> = undefined
 	$: !matrix && camera && pos ? set_pos() : pos && camera ? console.warn(w_sh.pos) : null
 	function set_pos() {
@@ -537,7 +539,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		PropUtils.setPositionFromValue(camera, pos)
 	}
 
-	/** **shorthand** attribute for setting the `rotation` property. */
+	/** **shorthand** attribute for setting the `rotation` property of the created / injected three.js instance. */
 	export let rot:
 		| Euler
 		| Parameters<Euler["set"]>
@@ -551,7 +553,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		PropUtils.setRotationFromValue(camera, rot)
 	}
 
-	/** **shorthand** attribute for setting the `quaternion` property. */
+	/** **shorthand** attribute for setting the `quaternion` property of the created / injected three.js instance. */
 	export let quat: Quaternion | Parameters<Quaternion["set"]> = undefined
 	$: !matrix && camera && quat ? set_quat() : quat && camera ? console.warn(w_sh.quat) : null
 	function set_quat() {
@@ -559,7 +561,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		PropUtils.setQuaternionFromValue(camera, quat)
 	}
 
-	export let scale: Vector3 | Parameters<Vector3["set"]> = undefined
+	export let scale: Vector3 | Parameters<Vector3["set"]> | number = undefined
 	$: !matrix && camera && scale ? set_scale() : scale && camera ? console.warn(w_sh.scale) : null
 	function set_scale() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "scale", scale))
@@ -567,7 +569,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	/** */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | THREE_Object3D = undefined
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable = undefined
 	$: !matrix && camera && lookAt ? set_lookat() : lookAt && camera ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
@@ -609,8 +611,9 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	/** Immediately start provided animation, default: `false`. Alternative: `<component_reference>.start_animation()` or shorter `.start_ani()`. */
 	export let aniauto: boolean = undefined
 
-	let ani: SvelthreeAnimation
-	$: if (animation && animationEnabled) ani = new SvelthreeAnimation(scene, camera, animation, aniauto)
+	/** (_internal_) reference to the `SvelthreeAni` instance */
+	let ani: SvelthreeAni
+	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, aniauto)
 
 	let currentSceneActive = undefined
 	$: currentSceneActive = $svelthreeStores[sti].scenes[scene.userData.index_in_scenes]?.isActive
@@ -635,12 +638,12 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	export const get_instance = (): THREE_CubeCamera => camera
 
 	/** Returns the `animation` object. */
-	export const get_animation = (): any => ani.getAnimation()
+	export const get_animation = (): SvelthreeAnimation => ani.getAnimation()
 	/** Same as `get_animation()` just shorter syntax. Returns the `animation` object. */
 	export const get_ani = get_animation
 
 	/** Starts the `animation` object. */
-	export const start_animation = (): void => ani.startAni()
+	export const start_animation = (): void => ani.startAnimation()
 	/** Same as `start_animation()` just shorter syntax. Starts the `animation` object. */
 	export const start_ani = start_animation
 
@@ -708,6 +711,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onMount_replace: (args?: any) => any = undefined
 
 	onMount(
@@ -731,14 +735,17 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	/** **Inject** functionality **before** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_before: (args?: any) => any = undefined
 
 	/** **Inject** functionality **after** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_after: (args?: any) => any = undefined
 
 	/** **Completely replace** `onDestroy` -> any `onDestroy_inject_before` & `onDestroy_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_replace: (args?: any) => any = undefined
 
 	onDestroy(
@@ -773,6 +780,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	/** **Completely replace** `beforeUpdate` -> any `beforeUpdate_inject_before` & `beforeUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let beforeUpdate_replace: (args?: any) => any = undefined
 
 	beforeUpdate(
@@ -796,14 +804,17 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	/** **Inject** functionality **before** component's existing `afterUpdate` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_inject_before: (args?: any) => any = undefined
 
 	/** **Inject** functionality **after** component's existing `afterUpdate` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_inject_after: (args?: any) => any = undefined
 
 	/** **Completely replace** `afterUpdate` -> any `afterUpdate_inject_before` & `afterUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_replace: (args?: any) => any = undefined
 
 	afterUpdate(

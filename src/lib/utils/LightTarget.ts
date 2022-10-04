@@ -45,6 +45,7 @@ export default class LightTarget {
 	// targetable component instances
 	private targetable_instance_names = ["scene", "object3d", "group", "mesh", "light", "camera", "container", "points"]
 
+	// TODO  see https://github.com/vatro/svelthree/issues/135
 	private has_targetable_instance(target_to_check: any): string | boolean {
 		for (let i = 0; i < this.targetable_instance_names.length; i++) {
 			if (target_to_check[this.targetable_instance_names[i]]) return this.targetable_instance_names[i]

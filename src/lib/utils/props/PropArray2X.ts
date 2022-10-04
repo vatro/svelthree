@@ -2,28 +2,21 @@ import { not_equal } from "svelte/internal"
 import { Propeller } from "./utils"
 import type { SvelthreePropsOwner } from "../../types/types-extra"
 
-export default class PropArray3X {
+export default class PropArray2X {
 	// previous value reference
-	prev: [number, number, number]
-	prevValues: [number, number, number]
+	prev: [number, number]
+	prevValues: [number, number]
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
-	public update(obj: SvelthreePropsOwner, value: [number, number, number]): boolean {
+	public update(obj: SvelthreePropsOwner, value: [number, number]): boolean {
 		//v1
 		switch (this.prev) {
 			case undefined:
 				this.prev = value
 				// hot!
-				Propeller.update(
-					obj,
-					this.obj_type,
-					this.key,
-					value as [number, number, number],
-					this.origin,
-					"Array3Nums"
-				)
-				this.prevValues = [value[0], value[1], value[2]]
+				Propeller.update(obj, this.obj_type, this.key, value as [number, number], this.origin, "Array2Nums")
+				this.prevValues = [value[0], value[1]]
 				return true
 
 			case value:
@@ -34,11 +27,11 @@ export default class PropArray3X {
 							obj,
 							this.obj_type,
 							this.key,
-							value as [number, number, number],
+							value as [number, number],
 							this.origin,
-							"Array3Nums"
+							"Array2Nums"
 						)
-						this.prevValues = [value[0], value[1], value[2]]
+						this.prevValues = [value[0], value[1]]
 						this.prev = value
 						return true
 					}
@@ -47,15 +40,8 @@ export default class PropArray3X {
 				return false
 			default:
 				// not undefined but !== value --> hot!
-				Propeller.update(
-					obj,
-					this.obj_type,
-					this.key,
-					value as [number, number, number],
-					this.origin,
-					"Array3Nums"
-				)
-				this.prevValues = [value[0], value[1], value[2]]
+				Propeller.update(obj, this.obj_type, this.key, value as [number, number], this.origin, "Array2Nums")
+				this.prevValues = [value[0], value[1]]
 				this.prev = value
 				return true
 		}

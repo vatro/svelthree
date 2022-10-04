@@ -14,12 +14,14 @@ const replace_tasks = [
 				//regex: /get mat\(\).*}>>;/s,
 				//regex: /get mat\(\).*?};/s,
 				regex: /get mat\(\).*?>;/s, //opt2
-				replacement: `get mat(): MeshProps<AssignedMaterial>['mat'];`
+				//replacement: `get mat(): MeshProps<AssignedMaterial>['mat'];`
+				replacement: `get mat(): PropMat<AssignedMaterial>;`
 			},
 			{
 				//regex: /set mat\(.*}>>\);/s,
 				regex: /set mat\(.*?\);/s, // opt2
-				replacement: `set mat(_: MeshProps<AssignedMaterial>['mat']);`
+				//replacement: `set mat(_: MeshProps<AssignedMaterial>['mat']);`
+				replacement: `set mat(_: PropMat<AssignedMaterial>);`
 			}
 		]
 	},
@@ -30,12 +32,14 @@ const replace_tasks = [
 				//regex: /get mat\(\).*}>>;/s,
 				//regex: /get mat\(\).*?};/s,
 				regex: /get mat\(\).*?>;/s, //opt2
-				replacement: `get mat(): PointsProps<AssignedMaterial>['mat'];`
+				//replacement: `get mat(): PointsProps<AssignedMaterial>['mat'];`
+				replacement: `get mat(): PropMat<AssignedMaterial>;`
 			},
 			{
 				//regex: /set mat\(.*}>>\);/s,
 				regex: /set mat\(.*?\);/s, // opt2
-				replacement: `set mat(_: PointsProps<AssignedMaterial>['mat']);`
+				//replacement: `set mat(_: PointsProps<AssignedMaterial>['mat']);`
+				replacement: `set mat(_: PropMat<AssignedMaterial>);`
 			}
 		]
 	}
@@ -164,7 +168,7 @@ const get_process_comments_fn = (file_path) => {
 
 			for (let [prop_name, comment] of comments_map) {
 				const str_setter = `set ${prop_name}`
-				const regex_setter = new RegExp("\\b" + str_setter + "\\b")
+				const regex_setter = new RegExp(str_setter)
 				const test_setter = content.match(regex_setter)
 				const acc_comment = comment.replace(
 					`/**`,
@@ -172,7 +176,7 @@ const get_process_comments_fn = (file_path) => {
 				)
 
 				if (test_setter) {
-					new_content = new_content.replace(`set ${prop_name}`, `${acc_comment}\n\tset ${prop_name}`)
+					new_content = new_content.replace(`set ${prop_name}(_`, `${acc_comment}\n\tset ${prop_name}(_`)
 				} else {
 					const str_getter = `get ${prop_name}`
 					const regex_getter = new RegExp("\\b" + str_getter + "\\b")
@@ -201,6 +205,8 @@ const get_process_comments_fn = (file_path) => {
 
 // --- ENTRY POINT ---
 
+const schedule_code_replacement_tasks = true
+
 /**
  * - Fix generic `mat` shorthand property type when using accessors:
  * 	- Replace `mat` accessors type definitions (accessor getter and setter) -> only `Mesh` and `Points`,
@@ -217,10 +223,12 @@ const do_postprocess = async () => {
 	console.log("🤖 SVELTHREE > post-processing package: started...")
 
 	// schedule code replacement tasks
-	console.log("🤖 SVELTHREE > post-processing package: scheduling replacement tasks...")
-	for (let i = 0; i < replace_tasks.length; i++) {
-		const task = replace_tasks[i]
-		fns.push(exec_replace_task(task))
+	if (schedule_code_replacement_tasks) {
+		console.log("🤖 SVELTHREE > post-processing package: scheduling replacement tasks...")
+		for (let i = 0; i < replace_tasks.length; i++) {
+			const task = replace_tasks[i]
+			fns.push(exec_replace_task(task))
+		}
 	}
 
 	// schedule accessors-comments optimization in `d.ts` files

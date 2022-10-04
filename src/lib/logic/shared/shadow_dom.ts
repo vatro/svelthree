@@ -1,11 +1,11 @@
 import type { SvelthreeShadowDOMElement } from "../../types/types-extra"
-import type { ButtonProperties, LinkProperties } from "../../types/types-comp-props"
+import type { PropButton, PropLink } from "../../types/types-comp-props"
 
 const recreate_shadow_dom_el = (
 	shadow_dom_el: SvelthreeShadowDOMElement | undefined,
 	our_parent_shadow_dom_el: SvelthreeShadowDOMElement,
-	button: ButtonProperties | null,
-	link: LinkProperties | null,
+	button: PropButton | null,
+	link: PropLink | null,
 	c_name: string
 ): SvelthreeShadowDOMElement | null => {
 	if (shadow_dom_el) remove_shadow_dom_el(shadow_dom_el)
@@ -18,8 +18,8 @@ const remove_shadow_dom_el = (shadow_dom_el: SvelthreeShadowDOMElement): void =>
 
 const create_shadow_dom_el = (
 	our_parent_shadow_dom_el: SvelthreeShadowDOMElement,
-	button: ButtonProperties | null,
-	link: LinkProperties | null,
+	button: PropButton | null,
+	link: PropLink | null,
 	c_name: string
 ): SvelthreeShadowDOMElement | null => {
 	let shadow_dom_el: SvelthreeShadowDOMElement

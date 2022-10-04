@@ -1,176 +1,129 @@
+import type SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory"
 import type { Object3D, Scene } from "three"
-import SvelthreeAnimationProp from "./SvelthreeAnimationProp"
-import { verbose_mode } from "../utils/SvelthreeLogger"
+import type { SvelthreeAnimation } from "../types/types-extra"
 
 export default class SvelthreeAnimationManager {
-	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
-	animation: SvelthreeAnimationProp | any
-	aniauto: boolean
-	obj: Object3D
-	scene: Scene
+	/** Generated animation-`Object Literal` (_interface `SvelthreeAnimation`_): result of `this.ani_obj_factory.create(...)`. */
+	ani_obj: SvelthreeAnimation
 
-	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
-	constructor(animation: SvelthreeAnimationProp | any, aniauto: boolean, obj: Object3D, scene: Scene | null) {
-		this.animation = animation
-		this.aniauto = aniauto
-		this.obj = obj
-		this.scene = scene
-	}
+	constructor(
+		private ani_obj_factory: SvelthreeAnimationObjectFactory,
+		private aniauto: boolean,
+		private foo: Object3D,
+		private scene: Scene | null
+	) {}
 
-	handleCurrentSceneStatus(currentSceneActive: boolean) {
+	public handleCurrentSceneStatus(currentSceneActive: boolean): void {
 		if (currentSceneActive) {
-			if (verbose_mode()) {
-				console.debug(
-					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
-				)
-			}
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
+			)
 			if (this.aniauto) {
-				if (verbose_mode()) {
-					console.debug(
-						"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!"
-					)
-				}
-				this.handleSceneActive()
+				console.debug("SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!")
+				this.handle_scene_active()
 			}
 		} else {
-			if (verbose_mode()) {
-				console.debug(
-					"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
-				)
-			}
-			this.handleSceneInActive()
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
+			)
+			this.handle_scene_inactive()
 		}
 	}
 
 	// active / reactivated
-	handleSceneActive() {
-		if (verbose_mode()) {
-			console.debug("SVELTHREE > SvelthreeAnimationManager > handleSceneActive!")
-		}
+	private handle_scene_active(): void {
+		console.debug("SVELTHREE > SvelthreeAnimationManager > handle_scene_active!")
 		// check if animation has been initiated, if so try to execute 'onSceneReactivated'...
-		if (this.animationInitiated() === true) {
-			this.tryOnSceneReactivated()
+		if (this.ani_obj) {
+			this.try_on_scene_reactivated()
 		} else {
 			// ... otherwise initate / start it (aniauto is true)
-			this.initiateAnimation()
+			this.initiate_animation()
 		}
 	}
 
 	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
-	initiateAnimation(...args: any[]): void {
-		//if (verbose_mode()) console.debug("SVELTHREE > SvelthreeAnimationManager > initiateAnimation!")
+	private initiate_animation(...args: any[]): void {
+		console.debug("SVELTHREE > SvelthreeAnimationManager > initiate_animation!")
 		// if animation is a function it has not been initiated / started yet (otherwise object)
 
 		if (this.scene) {
 			if (!this.scene.userData.isActive) {
 				console.warn(
-					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive Scene!"
+					"SVELTHREE > SvelthreeAnimationManager : initiate_animation : You're about to initiate an animation in an inactive Scene!"
 				)
 			}
-		} else if (this.scene === null && (this.obj as Scene).isScene) {
-			if (!(this.obj as Scene).userData.isActive) {
+		} else if (this.scene === null && (this.foo as Scene).isScene) {
+			if (!(this.foo as Scene).userData.isActive) {
 				console.warn(
-					"SVELTHREE > SvelthreeAnimationManager : initiateAnimation : You're about to initiate an animation in an inactive NESTED Scene!"
+					"SVELTHREE > SvelthreeAnimationManager : initiate_animation : You're about to initiate an animation in an inactive NESTED Scene!"
 				)
 			}
 		}
 
-		this.animation = this.animation.initiate(this.obj, args)
+		this.ani_obj = this.ani_obj_factory.create(this.foo, args)
 
-		if (verbose_mode())
-			console.debug(
-				"SVELTHREE > SvelthreeAnimationManager > initiateAnimation : after initialization: this.animation:",
-				this.animation
-			)
+		console.debug(
+			"SVELTHREE > SvelthreeAnimationManager > initiate_animation : after initialization: this.ani_obj:",
+			this.ani_obj
+		)
+
 		try {
-			this.animation.onStart()
+			this.ani_obj.onStart()
 		} catch (error) {
 			throw new Error("SVELTHREE Exception, " + error)
 		}
 	}
 
-	tryOnSceneReactivated(): void {
-		this.animation.onSceneReactivated
-			? this.animation.onSceneReactivated()
+	private try_on_scene_reactivated(): void {
+		Object.prototype.hasOwnProperty.call(this.ani_obj, "onSceneReactivated")
+			? this.ani_obj.onSceneReactivated()
 			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneReactivated : Animation couldn't be started, missing 'onSceneReactivated' method!"
+					"SVELTHREE > SvelthreeAnimationManager > try_on_scene_reactivated : 'onSceneReactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
+					this.ani_obj
 			  )
 	}
 
 	// inactive / deactivated
-	handleSceneInActive() {
+	private handle_scene_inactive(): void {
 		// check if animation has been initiated
 		// if it has been initated, try to execute 'onSceneDeactivated'
-		if (this.animationInitiated() === true) {
-			this.tryOnSceneDeactivated()
-		}
-	}
-
-	tryOnSceneDeactivated(): void {
-		this.animation.onSceneDeactivated
-			? this.animation.onSceneDeactivated()
-			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > tryOnSceneDeactivated : Animation couldn't be stopped, missing 'onSceneDeactivated' method!"
+		this.ani_obj
+			? this.try_on_scene_deactivated()
+			: console.debug(
+					"SVELTHREE > SvelthreeAnimationManager > handle_scene_inactive : 'SvelthreeAnimation'-Object not available!"
 			  )
 	}
 
-	startAni(): void {
-		if (this.animationInitiated() === false) {
-			this.initiateAnimation()
+	private try_on_scene_deactivated(): void {
+		Object.prototype.hasOwnProperty.call(this.ani_obj, "onSceneDeactivated")
+			? this.ani_obj.onSceneDeactivated()
+			: console.warn(
+					"SVELTHREE > SvelthreeAnimationManager > try_on_scene_deactivated : 'onSceneDeactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
+					this.ani_obj
+			  )
+	}
+
+	public startAnimation(): void {
+		if (!this.ani_obj) {
+			this.initiate_animation()
 		} else {
-			console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > startAni : animation has already been initiated! 'animation': ",
-				this.animation
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > startAnimation : animation has already been initiated! 'animation': ",
+				this.ani_obj
 			)
 		}
 	}
 
-	destroyAnimation(): void {
-		if (this.animation.prototype.hasOwnProperty.call(this.animation, "onDestroy")) {
-			this.animation.onDestroy()
-		} else {
-			console.warn(
-				"SVELTHREE > SvelthreeAnimationManager > Unable to find 'onDestroy' method in 'animation': This may be a BUG in REPL and may be safe to ignore. Please check if your animation is running as intended and consider checking it in another environment. Contributions on this issue are welcome! : this.animation",
-				this.animation
-			)
-		}
+	public destroyAnimation(): void {
+		Object.prototype.hasOwnProperty.call(this.ani_obj, "onDestroy")
+			? this.ani_obj.onDestroy()
+			: console.error(
+					"SVELTHREE > SvelthreeAnimationManager > destroyAnimation : required 'onDestroy' property is missing in 'SvelthreeAnimation'-Object!"
+			  )
 	}
 
-	animationInitiated(): boolean {
-		if (this.animationIsAnimationProp()) {
-			return false
-		} else if (this.animationIsObject()) {
-			return true
-		} else {
-			console.warn("SVELTHREE > SvelthreeAnimationManager > animationInitiated? : 'animation': ", this.animation)
-			throw new Error(
-				"SVELTHREE > SvelthreeAnimationManager > animationInitiated? : 'animation' prop is of unsupported type!"
-			)
-		}
-	}
-
-	animationIsAnimationProp(): boolean {
-		if (this.animation) {
-			if (this.animation instanceof SvelthreeAnimationProp) {
-				return true
-			}
-		}
-		return false
-	}
-
-	animationIsObject(): boolean {
-		if (this.animation) {
-			if (typeof this.animation === "object") {
-				return true
-			}
-		}
-		return false
-	}
-
-	//  TODO  (ESLint -> 'no-explicit-any') see https://github.com/vatro/svelthree/issues/165
-	getAnimation(): any {
-		if (this.animationInitiated()) {
-			return this.animation
-		}
+	public getAnimation(): SvelthreeAnimation {
+		return this.ani_obj
 	}
 }

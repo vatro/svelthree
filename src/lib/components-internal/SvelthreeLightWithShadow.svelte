@@ -12,6 +12,13 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 	import type { LightWithShadow } from "../types/types-extra"
 	import { PropUtils, SvelthreeProps } from "../utils"
 	import type { LogDEV } from "../utils/SvelthreeLogger"
+	import type {
+		PropsPerspectiveCamera,
+		PropsOrthographicCamera,
+		PropsDirectionalLightShadow,
+		PropsPointLightShadow,
+		PropsSpotLightShadow
+	} from "../types/types-comp-props"
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
 
@@ -20,8 +27,8 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 	export let shadowMapSize: number = undefined
 	export let shadowBias: number = undefined
 
-	export let shadowCameraProps: { [key: string]: any } = undefined
-	export let shadowProps: { [key: string]: any } = undefined
+	export let shadowCameraProps: PropsPerspectiveCamera | PropsOrthographicCamera = undefined
+	export let shadowProps: PropsDirectionalLightShadow | PropsPointLightShadow | PropsSpotLightShadow = undefined
 
 	let propsShadowCamera: SvelthreeProps
 	let propsShadow: SvelthreeProps
@@ -46,6 +53,3 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 	$: shadowBias ? PropUtils.setShadowBias(light, shadowBias) : null
 	$: castShadow ? PropUtils.setCastShadow(light, castShadow) : null
 </script>
-
-<!-- <SvelthreeProps props={shadowCameraProps} obj={light.shadow.camera} /> -->
-<!-- <SvelthreeProps props={shadowProps} obj={light.shadow} /> -->

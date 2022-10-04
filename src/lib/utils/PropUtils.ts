@@ -1,10 +1,18 @@
-/**
- * @author Vatroslav Vrbanic @see https://github.com/vatro
- */
-
-import type { Light, Material, Object3D, Scene } from "three"
-import { Color, Euler, Matrix4, Quaternion, Vector3 } from "three"
-import type { ComplexValueType, LightWithShadow } from "../types/types-extra"
+import type { Light, Material, Object3D, Scene, LightShadow } from "three"
+import { Color, Euler, Matrix4, Quaternion, Vector2, Vector3 } from "three"
+import type { ComplexValueType, LightWithShadow, LightWithTarget } from "../types/types-extra"
+import type {
+	matrix_value,
+	pos_value,
+	rot_value,
+	scale_value,
+	lookAt_value,
+	quat_value,
+	color_value,
+	mapsize_value,
+	//background_value,
+	any_proputils_value
+} from "../types/types-extra"
 import type { Targetable, TargetableSvelthreeComponent } from "../types/types-extra"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
@@ -15,7 +23,7 @@ import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
  * - `SvelthreeProps` (`sProps`) via `Propeller`
  */
 export default class PropUtils {
-	public static getShortHandAttrWarnings(prefix: string): { [key: string]: any } {
+	public static getShortHandAttrWarnings(prefix: string): { [key: string]: string } {
 		const warnings = {
 			rot: `${prefix} 'rot' attribute ignored! : overridden by either 'matrix' or 'quat' attribute!`,
 			pos: `${prefix} 'pos' attribute ignored! : overridden by 'matrix' attribute!`,
@@ -31,87 +39,104 @@ export default class PropUtils {
 		console.warn(message)
 	}
 
-	public static isArray3Nums(p: any): boolean {
-		return Array.isArray(p) && p.length === 3 && p.every((el: any) => !isNaN(el))
+	/** Check if an Array contains exactly 2 numbers. */
+	public static is2Nums(p: number[]): boolean {
+		return p.length === 2 && p.every((el: number) => !isNaN(el))
+	}
+
+	public static isArray2Nums(p: number[]): boolean {
+		return Array.isArray(p) && PropUtils.is2Nums(p)
+	}
+
+	public static isArray3Nums(p: number[]): boolean {
+		return Array.isArray(p) && PropUtils.is3Nums(p)
 	}
 
 	/** Check if an Array contains exactly 3 numbers. */
-	public static is3Nums(p: any): boolean {
-		return p.length === 3 && p.every((el: any) => !isNaN(el))
+	public static is3Nums(p: number[]): boolean {
+		return p.length === 3 && p.every((el: number) => !isNaN(el))
 	}
 
-	public static isMatrix4ParamsArray(p: any): boolean {
-		return Array.isArray(p) && p.length === 16 && p.every((el: any) => !isNaN(el))
+	public static isMatrix4ParamsArray(p: matrix_value): boolean {
+		return Array.isArray(p) && p.length === 16 && p.every((el: number) => !isNaN(el))
 	}
 
 	/** Check if an Array contains exactly 16 numbers. */
-	public static isMatrix4Params(p: any): boolean {
-		return p.length === 16 && p.every((el: any) => !isNaN(el))
+	public static isMatrix4Params(p: number[]): boolean {
+		return p.length === 16 && p.every((el: number) => !isNaN(el))
 	}
 
-	public static isEulerParamsArray(p: any): boolean {
+	public static isEulerParamsArray(p: (number | string)[]): boolean {
 		return (
 			Array.isArray(p) &&
 			p.length === 4 &&
-			!isNaN(p[0]) &&
-			!isNaN(p[1]) &&
-			!isNaN(p[2]) &&
+			!isNaN(p[0] as number) &&
+			!isNaN(p[1] as number) &&
+			!isNaN(p[2] as number) &&
 			typeof p[3] === "string"
 		)
 	}
 
 	/** Check if an Array contains exactly three numbers and one string. */
-	public static isEulerParams(p: any): boolean {
-		return p.length === 4 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2]) && typeof p[3] === "string"
+	public static isEulerParams(p: (number | string)[]): boolean {
+		return (
+			p.length === 4 &&
+			!isNaN(p[0] as number) &&
+			!isNaN(p[1] as number) &&
+			!isNaN(p[2] as number) &&
+			typeof p[3] === "string"
+		)
 	}
 
-	public static isQuaternionParamsArray(p: any): boolean {
-		return Array.isArray(p) && p.length === 4 && p.every((el: any) => !isNaN(el))
+	public static isQuaternionParamsArray(p: number[]): boolean {
+		return Array.isArray(p) && p.length === 4 && p.every((el: number) => !isNaN(el))
 	}
 
 	/** Check if an Array contains exactly 4 numbers. */
-	public static isQuaternionParams(p: any): boolean {
-		return p.length === 4 && p.every((el: any) => !isNaN(el))
+	public static isQuaternionParams(p: number[]): boolean {
+		return p.length === 4 && p.every((el: number) => !isNaN(el))
 	}
 
-	public static checkIfComplexValueType(val: any): ComplexValueType | undefined {
+	public static checkIfComplexValueType(val: any_proputils_value): ComplexValueType | undefined {
 		if (Array.isArray(val)) {
-			if (PropUtils.is3Nums(val)) return "Array3Nums"
-			if (PropUtils.isEulerParams(val)) return "EulerParamsArray"
-			if (PropUtils.isQuaternionParams(val)) return "QuaternionParamsArray"
-			if (PropUtils.isMatrix4Params(val)) return "Matrix4ParamsArray"
+			if (PropUtils.is2Nums(val as number[])) return "Array2Nums"
+			if (PropUtils.is3Nums(val as number[])) return "Array3Nums"
+			if (PropUtils.isEulerParams(val as (number | string)[])) return "EulerParamsArray"
+			if (PropUtils.isQuaternionParams(val as number[])) return "QuaternionParamsArray"
+			if (PropUtils.isMatrix4Params(val as number[])) return "Matrix4ParamsArray"
 		} else if (val) {
-			if (val.isVector3) return "Vector3"
-			if (val.isColor) return "Color"
-			if (val.isEuler) return "Euler"
-			if (val.isQuaternion) return "Quaternion"
-			if (val.isMatrix4) return "Matrix4"
+			if ((val as Vector2).isVector2) return "Vector2"
+			if ((val as Vector3).isVector3) return "Vector3"
+			if ((val as Color).isColor) return "Color"
+			if ((val as Euler).isEuler) return "Euler"
+			if ((val as Quaternion).isQuaternion) return "Quaternion"
+			if ((val as Matrix4)["isMatrix4"]) return "Matrix4"
 		}
 
 		return undefined
 	}
 
-	public static setRotationFromValue(obj: Object3D, val: any, complex?: ComplexValueType): void {
+	public static setRotationFromValue(obj: Object3D, val: rot_value, complex?: ComplexValueType): void {
 		switch (complex) {
 			case undefined:
 				if (Array.isArray(val)) {
-					PropUtils.is3Nums(val)
+					PropUtils.is3Nums(val as number[])
 						? PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
 						: PropUtils.isEulerParams(val)
 						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
-						: PropUtils.isQuaternionParams(val)
+						: PropUtils.isQuaternionParams(val as number[])
 						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
 						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
 								value: val
 						  })
 				} else if (val) {
-					val.isEuler
-						? PropUtils.setRotEuler(obj, val)
-						: val.isVector3
-						? PropUtils.setRotVector3(obj, val)
-						: val.isQuaternion
-						? PropUtils.setRotQuaternion(obj, val)
+					;(val as Euler).isEuler
+						? PropUtils.setRotEuler(obj, val as Euler)
+						: (val as Vector3).isVector3
+						? PropUtils.setRotVector3(obj, val as Vector3)
+						: (val as Quaternion).isQuaternion
+						? PropUtils.setRotQuaternion(obj, val as Quaternion)
 						: console.error("[ PropUtils ] -> setRotationFromValue : invalid 'rotation' value!", {
 								obj: obj,
 								value: val
@@ -124,22 +149,22 @@ export default class PropUtils {
 				}
 				break
 			case "Euler":
-				PropUtils.setRotEuler(obj, val)
+				PropUtils.setRotEuler(obj, val as Euler)
 				break
 			case "EulerParamsArray":
-				PropUtils.setRotEulerArray(obj, val)
+				PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
 				break
 			case "Vector3":
-				PropUtils.setRotVector3(obj, val)
+				PropUtils.setRotVector3(obj, val as Vector3)
 				break
 			case "Array3Nums":
-				PropUtils.setRotArray3(obj, val)
+				PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
 				break
 			case "Quaternion":
-				PropUtils.setRotQuaternion(obj, val)
+				PropUtils.setRotQuaternion(obj, val as Quaternion)
 				break
 			case "QuaternionParamsArray":
-				PropUtils.setRotQuaternionArray(obj, val)
+				PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
 				break
 			default:
 				console.error(
@@ -186,17 +211,13 @@ export default class PropUtils {
 		obj.quaternion.set(val[0], val[1], val[2], val[3])
 	}
 
-	public static setPositionFromValue(
-		obj: Object3D,
-		val: Vector3 | Parameters<Vector3["set"]>,
-		complex?: ComplexValueType
-	): any {
+	public static setPositionFromValue(obj: Object3D, val: pos_value, complex?: ComplexValueType): void {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setPositionFromValue : ", { obj, val, complex })
 		}
 		switch (complex) {
 			case undefined:
-				PropUtils.isArray3Nums(val)
+				PropUtils.isArray3Nums(val as number[])
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
 					: val?.["isVector3"]
 					? PropUtils.setPositionFromVector3(obj, val as Vector3)
@@ -238,21 +259,19 @@ export default class PropUtils {
 		obj.position.set(val[0], val[1], val[2])
 	}
 
-	public static setScaleFromValue(
-		obj: Object3D,
-		val: Vector3 | Parameters<Vector3["set"]>,
-		complex?: ComplexValueType
-	): void {
+	public static setScaleFromValue(obj: Object3D, val: scale_value, complex?: ComplexValueType): void {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setScaleFromValue : ", { obj, val, complex })
 		}
 		switch (complex) {
 			case undefined:
 				if (val) {
-					PropUtils.isArray3Nums(val)
+					PropUtils.isArray3Nums(val as number[])
 						? PropUtils.setScaleFromArray3(obj, val as Parameters<Vector3["set"]>)
-						: val["isVector3"]
+						: (val as Vector3).isVector3
 						? PropUtils.setScaleFromVector3(obj, val as Vector3)
+						: !isNaN(val as number)
+						? PropUtils.setScaleFromNumber(obj, val as number)
 						: console.error("[ PropUtils ] -> setScaleFromValue : invalid 'scale' value!", {
 								obj: obj,
 								value: val
@@ -289,6 +308,12 @@ export default class PropUtils {
 		obj.scale.copy(val as Vector3)
 	}
 
+	public static setScaleFromNumber(obj: Object3D, val: number) {
+		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromNumber : ", { obj, val })
+		// uniform scale
+		obj.scale.set(val, val, val)
+	}
+
 	public static setScaleFromArray3(obj: Object3D, val: Parameters<Vector3["set"]>) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setScaleFromArray3 : ", { obj, val })
 		obj.scale.set(val[0], val[1], val[2])
@@ -308,99 +333,111 @@ export default class PropUtils {
 	TEST: ... the last one updated will be applied
 
 	*/
-	public static setLookAtFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
+
+	public static setLookAtFromValue(obj: Object3D | LightWithTarget, val: lookAt_value, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLookAtFromValue!", { obj, val })
 
 		// IMPORTANT  update Matrix before setting `lookAt`--> lookAt has to be applied as last.
 		// this way we apply all other transforms before lookAt-update!
 		obj.updateMatrix()
 
-		let tVal: any
+		let t_val: Vector3 | Parameters<Vector3["set"]> | null
 
 		if (val) {
 			// TODO  TOFIX  this seems to be broken?! (Spotlight)
 			// can use Object3D as `lookAt` value
 
-			tVal =
-				Object.getPrototypeOf(Object.getPrototypeOf(val)).constructor.name === "Object3D"
-					? (val as Object3D).position
-					: val
+			if (!(val as TargetableSvelthreeComponent).is_svelthree_component && (val as Object3D).isObject3D) {
+				t_val = (val as Object3D).position
+			} else if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
+				t_val = (val as TargetableSvelthreeComponent).get_instance().position
+			} else if ((val as Vector3).isVector3) {
+				t_val = val as Vector3
+			} else if (PropUtils.isArray3Nums(val as number[])) {
+				t_val = val as Parameters<Vector3["set"]>
+			} else {
+				t_val = null
+			}
 
-			// limit using manipulating `target` via `lookAt` to lights only
-			if (obj["isLight"]) {
-				// THREE  IMPORTANT  Only DirectionalLight and SpotLight have own `target` properties. Object3D does not.
-				if (Object.prototype.hasOwnProperty.call(obj, "target")) {
-					if (obj["target"].isObject3D) {
-						if (obj.matrixAutoUpdate === false) {
-							obj["target"].matrixAutoUpdate = false
-						}
+			if (t_val) {
+				// Use 'target':  IMPORTANT  Manipulating `target` via `lookAt` shorthand attribute is limited to `Lights` with 'target' property only (DirectionalLight | SpotLight)
+				if (obj["isLight"]) {
+					if (Object.prototype.hasOwnProperty.call(obj, "target")) {
+						if ((obj as LightWithTarget).target.isObject3D) {
+							if ((obj as LightWithTarget).matrixAutoUpdate === false) {
+								;(obj as LightWithTarget).target.matrixAutoUpdate = false
+							}
 
-						if (obj["target"].parent === null) {
-							// add target to parent of obj (light)
-							if (obj.parent !== null) {
-								// target has no parent, add target to parent of obj
-								obj.parent.add(obj["target"])
-								console.warn(
-									`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
-									{ obj, target: obj["target"] }
-								)
+							if ((obj as LightWithTarget).target.parent === null) {
+								// add target to parent of obj (light)
+								if ((obj as LightWithTarget).parent !== null) {
+									// target has no parent, add target to parent of obj
+									;(obj as LightWithTarget).parent.add((obj as LightWithTarget).target)
+									console.warn(
+										`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
+										{ obj, target: (obj as LightWithTarget).target }
+									)
 
-								// set position of the target
-								PropUtils.setPositionFromValue(obj["target"], tVal, complex)
+									// set position of the target
+									PropUtils.setPositionFromValue((obj as LightWithTarget).target, t_val, complex)
+								} else {
+									// obj has no parent
+									console.error(
+										`[ PropUtils ] -> setLookAtFromValue : 'target' of ${
+											(obj as LightWithTarget).type
+										} couldn't be added to the parent of ${(obj as LightWithTarget).type}! ${
+											(obj as LightWithTarget).type
+										} has no parent!`,
+										{ obj, target: (obj as LightWithTarget).target }
+									)
+								}
 							} else {
-								// obj has no parent
-								console.error(
-									`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} couldn't be added to the parent of ${obj.type}! ${obj.type} has no parent!`,
-									{ obj, target: obj["target"] }
-								)
+								// target has parent, set position of the target
+								PropUtils.setPositionFromValue(obj["target"], t_val, complex)
 							}
 						} else {
-							// target has parent, set position of the target
-							PropUtils.setPositionFromValue(obj["target"], tVal, complex)
+							// target is not Object3D
+							console.error(`[ PropUtils ] -> setLookAtFromValue : 'target' has to be an 'Object3D'!`, {
+								obj,
+								target: (obj as LightWithTarget).target
+							})
 						}
 					} else {
-						// target is not Object3D
-						console.error(`[ PropUtils ] -> setLookAtFromValue : 'target' has to be an 'Object3D'!`, {
-							obj,
-							target: obj["target"]
+						console.error(`[ PropUtils ] -> setLookAtFromValue : ${obj.type} has no 'target' property!`, {
+							obj
 						})
 					}
 				} else {
-					console.error(`[ PropUtils ] -> setLookAtFromValue : ${obj.type} has no 'target' property!`, {
-						obj
-					})
-				}
-			} else {
-				if (tVal) {
-					if (PropUtils.isArray3Nums(tVal)) {
-						obj.lookAt(tVal[0], tVal[1], tVal[2])
-					} else if (tVal?.isVector3) {
-						obj.lookAt(tVal as Vector3)
+					// Use `Object3D.lookAt` function (not 'target') on any `Object3D`
+					if (PropUtils.isArray3Nums(t_val as number[])) {
+						obj.lookAt(t_val[0], t_val[1], t_val[2])
+					} else if ((t_val as Vector3).isVector3) {
+						obj.lookAt(t_val as Vector3)
 					} else {
 						console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 							obj: obj,
-							value: tVal
+							value: t_val
 						})
 					}
-				} else {
-					console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
-						obj: obj,
-						value: tVal
-					})
 				}
+			} else {
+				console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
+					obj: obj,
+					value: t_val
+				})
 			}
 		} else {
 			console.error("[ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
 				obj: obj,
-				value: tVal
+				value: val
 			})
 		}
 	}
 
 	// we know that 'obj' has property 'key', see 'Propeller'
 	public static setColorFromValueKey(
-		obj: Object3D | Material | Light | Scene,
-		val: any,
+		obj: Material | Light | Scene,
+		val: color_value,
 		key: string,
 		complex?: ComplexValueType
 	) {
@@ -409,14 +446,14 @@ export default class PropUtils {
 		}
 		// color value can be `0`
 		if (val || val === 0) {
-			PropUtils.isArray3Nums(val)
-				? PropUtils.setColorFromArray(obj, val, key)
-				: !isNaN(val)
-				? PropUtils.setColorFromNumber(obj, val, key)
-				: val.isColor
-				? PropUtils.setColorFromColor(obj, val, key)
-				: val.isVector3
-				? PropUtils.setColorFromVector3(obj, val, key)
+			PropUtils.isArray3Nums(val as number[])
+				? PropUtils.setColorFromArray(obj, val as [r: number, g: number, b: number], key)
+				: !isNaN(val as number)
+				? PropUtils.setColorFromNumber(obj, val as number, key)
+				: (val as Color).isColor
+				? PropUtils.setColorFromColor(obj, val as Color, key)
+				: (val as Vector3).isVector3
+				? PropUtils.setColorFromVector3(obj, val as Vector3, key)
 				: typeof val === "string"
 				? PropUtils.setColorFromString(obj, val, key)
 				: console.error(`[ PropUtils ] -> setColorFromValueKey : invalid '${key}' value!`, {
@@ -430,6 +467,13 @@ export default class PropUtils {
 			})
 		}
 	}
+
+	// TODO  handle background as `Texture`
+	/*
+	public static setBackgroundAsTextureFromValueKey() {
+		// TODO 
+	}
+	*/
 
 	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
@@ -480,6 +524,54 @@ export default class PropUtils {
 		light.intensity = val
 	}
 
+	public static setShadowMapSizeFromValue(obj: LightShadow, val: mapsize_value, complex?: ComplexValueType): void {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setPositionFromValue : ", { obj, val, complex })
+		}
+		switch (complex) {
+			case undefined:
+				PropUtils.isArray2Nums(val as number[])
+					? PropUtils.setMapSizeFromArray2(obj, val as Parameters<Vector2["set"]>)
+					: val?.["isVector2"]
+					? PropUtils.setMapSizeFromVector2(obj, val as Vector2)
+					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
+							obj: obj,
+							value: val
+					  })
+				break
+			case "Array2Nums":
+				PropUtils.setMapSizeFromArray2(obj, val as Parameters<Vector2["set"]>)
+				break
+			case "Vector2":
+				PropUtils.setMapSizeFromVector2(obj, val as Vector2)
+				break
+			default:
+				console.error(
+					"[ PropUtils ] -> setShadowMapSizeFromValue : invalid 'mapSize' value! No such 'ComplexValueType'!",
+					{
+						obj: obj,
+						value: val,
+						complex: complex
+					}
+				)
+				break
+		}
+	}
+
+	public static setMapSizeFromVector2(obj: LightShadow, val: Vector2) {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setMapSizeFromVector2 : ", { obj, val })
+		}
+		obj.mapSize.copy(val)
+	}
+
+	public static setMapSizeFromArray2(obj: LightShadow, val: Parameters<Vector2["set"]>) {
+		if (verbose_mode() && log_prop_utils(obj)) {
+			console.debug("[ PropUtils ] -> setMapSizeFromArray3 : ", { obj, val })
+		}
+		obj.mapSize.set(val[0], val[1])
+	}
+
 	public static setShadowMapSize(light: LightWithShadow, shadowMapSize: number) {
 		if (verbose_mode() && log_prop_utils(light)) {
 			console.debug("[ PropUtils ] -> setShadowMapSize : ", { light, shadowMapSize })
@@ -502,26 +594,10 @@ export default class PropUtils {
 		light.castShadow = castShadow
 	}
 
-	public static setShadowCameraProp(light: LightWithShadow, key: string, val: any) {
-		if (verbose_mode() && log_prop_utils(light)) {
-			console.debug("[ PropUtils ] -> setShadowCameraProp : ", { light, key, val })
-		}
-		light.shadow.camera[key] = val
-		light.shadow.camera.updateProjectionMatrix()
-	}
-
-	public static setShadowProp(light: Light, key: string, val: any) {
-		if (verbose_mode() && log_prop_utils(light)) {
-			console.debug("[ PropUtils ] -> setShadowProp : ", { light, key, val })
-		}
-		light.shadow[key] = val
-		light.shadow.needsUpdate = true
-	}
-
 	/**
 	 * TODO : test / polish this!
 	 */
-	public static setLightTarget(obj: Object3D, val: Targetable) {
+	public static setLightTarget(obj: LightWithTarget, val: Targetable) {
 		if (verbose_mode() && log_prop_utils(obj)) console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val })
 		if (!val) {
 			console.warn(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
@@ -529,11 +605,10 @@ export default class PropUtils {
 			// TODO : Check why this being called twice on init! Not severe problem, but still to be checked.
 			//console.warn("SVELTHREE > Propeller > setLightTarget : " + this.objTypeStr + " : target in 'props' now defined!!")
 
-			if (val["isObject3D"]) {
-				obj["target"] = val
-			} else if (val["is_svelthree_component"]) {
-				const obj3d: Object3D = (val as TargetableSvelthreeComponent).get_instance()
-				obj["target"] = obj3d
+			if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
+				;(obj as LightWithTarget).target = (val as TargetableSvelthreeComponent).get_instance()
+			} else if ((val as Object3D).isObject3D) {
+				obj["target"] = val as Object3D
 			} else {
 				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
 			}
@@ -545,55 +620,64 @@ export default class PropUtils {
 	 * IMPORTANT  Setting "manually" updating the `matrix` property will automatically set `matrixAutoUpdate` to `false`.
 	 * Applying transformations via `position`, `rotation`, `scale` etc. will automatically set `matrixAutoUpdate` to `true` again.
 	 */
-	public static setMatrixFromValue(obj: Object3D, val: any) {
+	public static setMatrixFromValue(obj: Object3D, val: matrix_value) {
 		if (verbose_mode() && log_prop_utils(obj))
 			console.debug("[ PropUtils ] -> obj.matrixAutoUpdate before! : ", obj.matrixAutoUpdate)
 		if (verbose_mode() && log_prop_utils(obj))
 			console.debug("[ PropUtils ] -> setMatrixFromValue! : ", { obj, val })
+		if (val) {
+			if ((val as Matrix4)["isMatrix4"]) {
+				// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
+				//mesh.applyMatrix4(matrix)
 
-		if (val?.isMatrix4) {
-			// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
-			//mesh.applyMatrix4(matrix)
+				if (verbose_mode() && log_prop_utils(obj))
+					console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 BEFORE : ", {
+						obj,
+						val,
+						m: obj.matrix
+					})
 
-			if (verbose_mode() && log_prop_utils(obj))
-				console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 BEFORE : ", { obj, val, m: obj.matrix })
+				// save initial `matrixAutoUpdate` value
+				const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
 
-			// save initial `matrixAutoUpdate` value
-			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
+				// force disable `matrixAutoUpdate` before matrix manipulation
+				obj.matrixAutoUpdate = false
 
-			// force disable `matrixAutoUpdate` before matrix manipulation
-			obj.matrixAutoUpdate = false
+				obj.matrix.copy(val as Matrix4) // copy is faster
 
-			obj.matrix.copy(val as Matrix4) // copy is faster
+				// reset inital `matrixAutoUpdate` value
+				obj.matrixAutoUpdate = initialMatrixAutoUpdate
 
-			// reset inital `matrixAutoUpdate` value
-			obj.matrixAutoUpdate = initialMatrixAutoUpdate
+				// mark for matrixWorld update (as updateMatrix() normally would)
+				obj.matrixWorldNeedsUpdate = true
 
-			// mark for matrixWorld update (as updateMatrix() normally would)
-			obj.matrixWorldNeedsUpdate = true
+				if (verbose_mode() && log_prop_utils(obj))
+					console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 AFTER : ", {
+						obj,
+						val,
+						m: obj.matrix
+					})
+			} else if (PropUtils.isMatrix4ParamsArray(val)) {
+				// save initial `matrixAutoUpdate` value
+				const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
 
-			if (verbose_mode() && log_prop_utils(obj))
-				console.debug("[ PropUtils ] -> setMatrixFromValue! is Matrix4 AFTER : ", { obj, val, m: obj.matrix })
-		} else if (PropUtils.isMatrix4ParamsArray(val)) {
-			// save initial `matrixAutoUpdate` value
-			const initialMatrixAutoUpdate: boolean = obj.matrixAutoUpdate
+				// force disable `matrixAutoUpdate` before matrix manipulation
+				obj.matrixAutoUpdate = false
 
-			// force disable `matrixAutoUpdate` before matrix manipulation
-			obj.matrixAutoUpdate = false
+				obj.matrix.set(...(val as Parameters<Matrix4["set"]>)).transpose()
+				// TODO  Nail down updating matrix / matrixWorld
 
-			obj.matrix.set(...(val as Parameters<Matrix4["set"]>)).transpose()
-			// TODO  Nail down updating matrix / matrixWorld
+				// reset inital `matrixAutoUpdate` value
+				obj.matrixAutoUpdate = initialMatrixAutoUpdate
 
-			// reset inital `matrixAutoUpdate` value
-			obj.matrixAutoUpdate = initialMatrixAutoUpdate
-
-			// mark for matrixWorld update (as updateMatrix() normally would)
-			obj.matrixWorldNeedsUpdate = true
-		} else {
-			console.error(`[ PropUtils ] -> setMatrixFromValue : invalid 'matrix' value!`, {
-				obj: obj,
-				value: val
-			})
+				// mark for matrixWorld update (as updateMatrix() normally would)
+				obj.matrixWorldNeedsUpdate = true
+			} else {
+				console.error(`[ PropUtils ] -> setMatrixFromValue : invalid 'matrix' value!`, {
+					obj: obj,
+					value: val
+				})
+			}
 		}
 
 		if (verbose_mode() && log_prop_utils(obj))
@@ -602,12 +686,12 @@ export default class PropUtils {
 			console.debug("[ PropUtils ] -> setMatrixFromValue! AFTER : ", { obj, val, m: obj.matrix })
 	}
 
-	public static setQuaternionFromValue(obj: Object3D, val: any, complex?: ComplexValueType) {
+	public static setQuaternionFromValue(obj: Object3D, val: quat_value, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setLightTarget : ", { obj, val, complex })
 		}
 
-		if (val?.isQuaternion) {
+		if (val && (val as Quaternion).isQuaternion) {
 			// see https://threejs.org/docs/#api/en/core/Object3D.setRotationFromQuaternion
 
 			// Copy the given quat into '.quat'.
@@ -627,14 +711,14 @@ export default class PropUtils {
 	}
 
 	/** Simply set property `a` to value `x` -> no special method was assigned to the prop via `Propeller`. */
-	public static applyValueToProp(obj: any, val: any, key: string, complex?: ComplexValueType) {
+	public static applyValueToProp(obj: unknown, value: unknown, key: string, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) {
-			console.debug("[ PropUtils ] -> applyValueToProp : ", { obj, val, key, complex })
+			console.debug("[ PropUtils ] -> applyValueToProp : ", { obj, value, key, complex })
 		}
 		try {
-			obj[key] = val
+			obj[key] = value
 		} catch (error) {
-			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj: obj, value: val, key: key })
+			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj, value, key })
 		}
 	}
 }

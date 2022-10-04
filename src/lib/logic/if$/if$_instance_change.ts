@@ -2,18 +2,15 @@ import type { Object3D } from "three"
 
 export const if$_instance_change = (
 	inst: Object3D,
-	our_parent: any,
+	our_parent: Object3D,
 	inst_uuid: string,
-	create: boolean,
-	inst_name: string,
+	// TODO  Remove `create`
+	_create: boolean,
+	// TODO  Remove `inst_name`
+	_inst_name: string,
 	comp_name: string,
 	handler: () => void
 ): void => {
-	if (create || inst_name) {
-		// TODO  Remove `create` and `inst_name`
-		console.warn("TODO `create` and `inst_name` should be removed -> unused!")
-	}
-
 	// console.warn(`comp ${comp_name} > Something happened with the ${inst_name} instance!`)
 
 	if (our_parent) {

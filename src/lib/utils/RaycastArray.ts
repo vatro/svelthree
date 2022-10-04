@@ -1,16 +1,16 @@
-import type { Object3D } from "three"
-import type { RaycastableSvelthreeComponents } from "../types/types-extra"
+import type { RaycastArrayInput, RaycastArrayOutput } from "../types/types-extra"
 
 class RaycastArray_Base extends Array {
 	public head_path?: string[] | undefined = undefined
 	public index_prop: string | undefined = undefined
 	public dirty = false
 
+	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 	constructor(...args: any[]) {
 		super(...args)
 	}
 
-	push(...to_check_intersection: (Object3D | RaycastableSvelthreeComponents)[]): number {
+	push(...to_check_intersection: RaycastArrayInput): number {
 		super.push(...to_check_intersection)
 		this.process_to_check_intersection()
 		this.set_index_prop()
@@ -18,7 +18,7 @@ class RaycastArray_Base extends Array {
 		return this.length
 	}
 
-	splice(start: number, deleteCount?: number): any[] {
+	splice(start: number, deleteCount?: number): RaycastArrayOutput {
 		super.splice(start, deleteCount)
 		this.set_index_prop()
 		this.dirty = true
@@ -36,7 +36,7 @@ class RaycastArray_Base extends Array {
 
 	set_index_prop() {
 		for (let i = 0; i < this.length; i++) {
-			let prop_head: any
+			let prop_head: unknown
 
 			if (this.head_path?.length) {
 				prop_head = this[i][this.head_path[0]]

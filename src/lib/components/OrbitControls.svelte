@@ -10,7 +10,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import type { Scene as THREE_Scene } from "three"
+	import type { Scene } from "three"
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -24,12 +24,16 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { Writable } from "svelte/store"
 
 	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-	import type { OrbitControlsProperties } from "../types/types-comp-props"
+	import type { PropsOrbitControls } from "../types/types-comp-props"
 	import { CameraHelper } from "three"
-	import type { Vector3, PerspectiveCamera, OrthographicCamera } from "three"
-	import type { default as PerspCamSvelthreeComponent } from "./PerspectiveCamera.svelte"
-	import type { default as OrthoCamSvelthreeComponent } from "./OrthographicCamera.svelte"
-	import type { default as CanvasSvelthreeComponent } from "../components/Canvas.svelte"
+	import type {
+		Vector3,
+		PerspectiveCamera as THREE_PerspectiveCamera,
+		OrthographicCamera as THREE_OrthographicCamera
+	} from "three"
+	import type { default as PerspectiveCamera } from "./PerspectiveCamera.svelte"
+	import type { default as OrthographicCamera } from "./OrthographicCamera.svelte"
+	import type { default as Canvas } from "../components/Canvas.svelte"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -42,7 +46,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
-	let scene: THREE_Scene = getContext("scene")
+	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
@@ -62,9 +66,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	export const get_index_in_orbitcontrols = (): number => index_in_orbitcontrols
 
-	export let cam: PerspCamSvelthreeComponent | OrthoCamSvelthreeComponent | PerspectiveCamera | OrthographicCamera =
+	export let cam: PerspectiveCamera | OrthographicCamera | THREE_PerspectiveCamera | THREE_OrthographicCamera =
 		undefined
-	export let dom_el: HTMLElement | CanvasSvelthreeComponent = undefined
+	export let dom_el: HTMLElement | Canvas = undefined
 
 	/** mode `"auto"`: schedule render loop rAF id */
 	let rAF = { id: 0 }
@@ -77,7 +81,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
 	function create_orbitcontrols(): void {
 		//console.log("create_orbitcontrols!")
-		const oc_cam: PerspectiveCamera | OrthographicCamera = get_oc_cam()
+		const oc_cam: THREE_PerspectiveCamera | THREE_OrthographicCamera = get_oc_cam()
 		const oc_dom: HTMLElement = get_oc_dom()
 
 		try {
@@ -117,7 +121,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// schedule render
-	function on_orbitcontrols_change(e: any): void {
+	function on_orbitcontrols_change(e: Parameters<Parameters<THREE_OrbitControls["addEventListener"]>[1]>[0]): void {
 		orbitcontrols.object.userData.root_scene.userData.dirty = true
 		$svelthreeStores[sti].rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
 
@@ -125,15 +129,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 	}
 
-	function get_oc_cam(): PerspectiveCamera | OrthographicCamera {
+	function get_oc_cam(): THREE_PerspectiveCamera | THREE_OrthographicCamera {
 		if (cam !== undefined && cam["is_svelthree_camera"]) {
-			return (cam as PerspCamSvelthreeComponent | OrthoCamSvelthreeComponent).get_instance()
+			return (cam as PerspectiveCamera | OrthographicCamera).get_instance()
 		}
 		if (cam !== undefined && cam["isPerspectiveCamera"]) {
-			return cam as PerspectiveCamera
+			return cam as THREE_PerspectiveCamera
 		}
 		if (cam !== undefined && cam["isOrthographicCamera"]) {
-			return cam as OrthographicCamera
+			return cam as THREE_OrthographicCamera
 		}
 		if (cam === undefined) {
 			return $svelthreeStores[sti].activeCamera
@@ -142,7 +146,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function get_oc_dom(): HTMLElement {
 		if (dom_el !== undefined && dom_el["is_svelthree_canvas"]) {
-			return (dom_el as CanvasSvelthreeComponent).getDomElement()
+			return (dom_el as Canvas).getDomElement()
 		}
 		if (dom_el !== undefined) {
 			return dom_el as HTMLElement
@@ -155,8 +159,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof OrbitControlsProperties]: OrbitControlsProperties[P] } = undefined
+	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
+	export let props: PropsOrbitControls = undefined
 
 	$: if (!sProps && orbitcontrols && props) sProps = new SvelthreeProps(orbitcontrols)
 	$: if (props && sProps) update_props()
@@ -267,6 +271,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onMount_replace: (args?: any) => any = undefined
 
 	onMount(
@@ -281,14 +286,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Inject** functionality **before** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_before: (args?: any) => any = undefined
 
 	/** **Inject** functionality **after** component's existing `onDestroy` logic.
 	 * _default verbosity not affected._ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_inject_after: (args?: any) => any = undefined
 
 	/** **Completely replace** `onDestroy` -> any `onDestroy_inject_before` & `onDestroy_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let onDestroy_replace: (args?: any) => any = undefined
 
 	onDestroy(
@@ -310,6 +318,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Completely replace** `beforeUpdate` -> any `beforeUpdate_inject_before` & `beforeUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let beforeUpdate_replace: (args?: any) => any = undefined
 
 	beforeUpdate(
@@ -324,6 +333,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** **Completely replace** `afterUpdate` -> any `afterUpdate_inject_before` & `afterUpdate_inject_after` will be ignored.
 	 * _default verbosity will be gone!_ */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let afterUpdate_replace: (args?: any) => any = undefined
 
 	afterUpdate(

@@ -80,6 +80,7 @@ export default class SvelthreeGLTF {
 		}
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	async get_parent_context(parent_component: SvelthreeComponentShadowDOMChild): Promise<Map<any, any>> {
 		return parent_component["$$"].context
 	}
@@ -95,6 +96,7 @@ export default class SvelthreeGLTF {
 		const create_component =
 			(item: ISvelthreeGLTFTreeMapMember, target_component: SvelthreeComponentShadowDOMChild) =>
 			async (): Promise<void> => {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				let context: Map<any, any> | undefined
 				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined
 				let parent_component: SvelthreeComponentShadowDOMChild | undefined

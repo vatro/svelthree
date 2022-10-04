@@ -6,7 +6,7 @@ function get_root_scene(context_scene: Scene): Scene | null {
 		return context_scene
 	} else {
 		let n = undefined
-		let o: any = context_scene
+		let o = context_scene
 		while (n !== null) {
 			n = o.parent
 			if (n !== null) {

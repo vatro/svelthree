@@ -24,8 +24,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
-	import type { WebGLRendererMode } from "../types/types-extra"
-	import type { WebGLRendererProperties } from "../types/types-comp-props"
+	import type {
+		WebGLRendererMode,
+		WebGLRendererComponentEventDispatcher,
+		WebGLRendererEventDetail
+	} from "../types/types-extra"
+	import type { PropsWebGLRenderer } from "../types/types-comp-props"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -38,17 +42,17 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
 
-	const dispatch: (type: string, detail?: any) => void = createEventDispatcher()
+	const dispatch = createEventDispatcher<WebGLRendererComponentEventDispatcher>()
 
 	/**
 	 *  SVELTEKIT  SSR /
 	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/env` where `browser = true`,
-	 * -> TS fix: `$app/env` mapped to `src/$app/env` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/env` with `../$app/env`
+	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
+	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
+	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/env"
+	import { browser } from "$app/environment"
 
 	/**
 	 * svelthreeStore index (`sti`) spread via context.  \
@@ -270,8 +274,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	let sProps: SvelthreeProps
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
-	/** **shorthand** attribute for setting properties using key-value pairs in an `Object`. */
-	export let props: { [P in keyof WebGLRendererProperties]: WebGLRendererProperties[P] } = undefined
+	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
+	export let props: { [P in keyof PropsWebGLRenderer]: PropsWebGLRenderer[P] } = undefined
 
 	$: if (!sProps && renderer && props) sProps = new SvelthreeProps(renderer)
 	$: if (props && sProps) update_props()
@@ -566,7 +570,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * - Added as an alternative to calling `dispatch` directly in order to reduce anonnymous function calls count in the stack trace.
 	 * Every `dispatch(...)` call is creating a new custom event, calling `createEventDispatcher` alone shows two anonnymous functions in the stack trace.
 	 */
-	async function dispatch_render_event(event_name: string, detail: any = null): Promise<void> {
+	async function dispatch_render_event(event_name: string, detail: WebGLRendererEventDetail = null): Promise<void> {
 		detail ? dispatch(event_name, detail) : dispatch(event_name)
 	}
 

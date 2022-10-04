@@ -1,7 +1,3 @@
-/**
- * @author Vatroslav Vrbanic @see https://github.com/vatro
- */
-
 import type { OrthographicCamera, PerspectiveCamera } from "three"
 import { CameraValues } from "../constants"
 

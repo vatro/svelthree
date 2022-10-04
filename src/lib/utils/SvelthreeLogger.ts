@@ -1,4 +1,6 @@
 import LogCSS from "../constants/LogCSS"
+import type { AnySvelthreeComponent } from "svelthree/types/types-extra"
+import type { get_current_component } from "svelte/internal"
 
 export type LogLC = { all?: boolean; om?: boolean; bu?: boolean; au?: boolean; od?: boolean }
 
@@ -22,7 +24,7 @@ function verbose_mode(): boolean {
 	}
 }
 
-function log_prop_utils(obj: any): boolean {
+function log_prop_utils(obj: ReturnType<AnySvelthreeComponent["get_instance"]>): boolean {
 	if (obj) {
 		if (obj.userData) {
 			if (obj.userData.svelthreeComponent) {
@@ -77,7 +79,7 @@ function log_prop_utils(obj: any): boolean {
 	}
 }
 
-function c_lc(comp_name: string, message: string, value?: any): any[] {
+function c_lc(comp_name: string, message: string, value?: unknown): [string, string, string, unknown] {
 	let css = undefined
 	let prefix = undefined
 
@@ -127,7 +129,7 @@ function c_lc(comp_name: string, message: string, value?: any): any[] {
 	}
 }
 
-function c_rs(comp_name: string, message: string, value?: any): any[] {
+function c_rs(comp_name: string, message: string, value?: unknown): [string, string, unknown] {
 	return [
 		`%c$: > ${comp_name} -> ${message}`,
 		`${LogCSS.REACTIVE_STATEMENT}`,
@@ -135,7 +137,7 @@ function c_rs(comp_name: string, message: string, value?: any): any[] {
 	]
 }
 
-function c_lc_int(comp_name: string, message: string, value?: any): any[] {
+function c_lc_int(comp_name: string, message: string, value?: unknown): [string, string, string, unknown] {
 	let css = undefined
 	let prefix = undefined
 
@@ -184,7 +186,7 @@ function c_lc_int(comp_name: string, message: string, value?: any): any[] {
 	}
 }
 
-function c_rs_int(comp_name: string, message: string, value?: any): any[] {
+function c_rs_int(comp_name: string, message: string, value?: unknown): [string, string, unknown] {
 	return [
 		`%c$: > ${comp_name} -> ${message}`,
 		`${LogCSS.REACTIVE_STATEMENT}`,
@@ -192,7 +194,7 @@ function c_rs_int(comp_name: string, message: string, value?: any): any[] {
 	]
 }
 
-function c_dev(comp_name: string, message: string, value?: any): any[] {
+function c_dev(comp_name: string, message: string, value?: unknown): [string, string, unknown] {
 	return [
 		`%c[ dev ] -> ${comp_name} : ${message}`,
 		`${LogCSS.DEV_DEBUG}`,
@@ -200,7 +202,7 @@ function c_dev(comp_name: string, message: string, value?: any): any[] {
 	]
 }
 
-function c_mau(comp_name: string, message: string, value?: any): any[] {
+function c_mau(comp_name: string, message: string, value?: unknown): [string, string, unknown] {
 	return [
 		`%c[ mau ] -> ${comp_name} : ${message}`,
 		`${LogCSS.FEATURE_MAU}`,
@@ -208,11 +210,12 @@ function c_mau(comp_name: string, message: string, value?: any): any[] {
 	]
 }
 
-function get_comp_name(comp: any): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function get_comp_name(comp: ReturnType<typeof get_current_component>): string {
 	return comp.constructor.name.replace("_1", "")
 }
 
-function get_comp_name_int(comp: any): string {
+function get_comp_name_int(comp: ReturnType<typeof get_current_component>): string {
 	return comp.constructor.name.replace("_1", "")
 }
 

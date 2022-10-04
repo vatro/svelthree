@@ -7,24 +7,31 @@ module.exports = {
 	plugins: ["svelte3", "@typescript-eslint"],
 
 	//(default) check *.svelte and *.ts files
-	// ignorePatterns: ["*.cjs"],
+	ignorePatterns: ["*.cjs"],
 
 	// check only *.svelte files
-	ignorePatterns: ["*.cjs", "*.ts"],
+	//ignorePatterns: ["*.cjs", "*.ts"],
 
 	overrides: [
 		{
 			files: ["*.svelte"],
-			processor: "svelte3/svelte3",
+			processor: "svelte3/svelte3"
 
 			// checking specific rules (set to "off" / "error")
 			// errors only
-			rules: {
+			/* rules: {
 				"no-inferrable-types": "error",
 				"no-undef": "error",
 				"no-empty": "error",
 				"no-case-declarations": "error",
 				"no-prototype-builtins": "error"
+			} */
+		},
+		// see: https://typescript-eslint.io/docs/linting/troubleshooting/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
+		{
+			files: ["*.ts", "*.mts", "*.cts", "*.tsx", "*.svelte"],
+			rules: {
+				"no-undef": "off"
 			}
 		}
 	],
