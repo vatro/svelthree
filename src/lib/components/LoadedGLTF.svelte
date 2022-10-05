@@ -37,13 +37,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { InteractionEventDispatcher } from "../types/types-extra"
 
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeModifiersProp } from "../constants/Interaction"
+	import type { SvelthreeModifiersProp } from "../types/types-extra"
 	import type {
 		SvelthreePointerEventHandler,
 		SvelthreeFocusEventHandler,
 		SvelthreeKeyboardEventHandler,
 		SvelthreeWheelEventHandler
-	} from "../constants/Interaction"
+	} from "../types/types-extra"
 
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils"

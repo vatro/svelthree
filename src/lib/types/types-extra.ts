@@ -477,3 +477,68 @@ import type { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/co
 export type SvelthreeStoreArrayItem = THREE.Scene | THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera | THREE_OrbitControls
 export type RaycastArrayInput = (THREE.Object3D | RaycastableSvelthreeComponents)[]
 export type RaycastArrayOutput = THREE.Object3D[]
+
+import type {
+	SUPPORTED_ADD_EVENT_LISTENER_OPTIONS,
+	SUPPORTED_MODIFIERS,
+	POINTER_EVENTS,
+	KEYBOARD_EVENTS,
+	KEYBOARD_LISTENER_TARGETS,
+	FOCUS_EVENTS,
+	WHEEL_EVENTS,
+	WHEEL_LISTENER_TARGETS
+} from "../constants/Interaction"
+
+type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
+
+export type SupportedAddEventListenerOption = ElementType<typeof SUPPORTED_ADD_EVENT_LISTENER_OPTIONS>
+
+export type SvelthreeSupportedModifier = ElementType<typeof SUPPORTED_MODIFIERS>
+
+export type SvelthreeSupportedPointerEvent = ElementType<typeof POINTER_EVENTS>
+
+export type SvelthreeSupportedKeyboardEvent = ElementType<typeof KEYBOARD_EVENTS>
+
+export type SvelthreeKeyboardListenerTarget = ElementType<typeof KEYBOARD_LISTENER_TARGETS>
+
+export type SvelthreeSupportedFocusEvent = ElementType<typeof FOCUS_EVENTS>
+
+export type SvelthreeSupportedWheelEvent = ElementType<typeof WHEEL_EVENTS>
+
+export type SvelthreeWheelListenerTarget = ElementType<typeof WHEEL_LISTENER_TARGETS>
+
+export type SvelthreeSupportedInteractionEvent =
+	| SvelthreeSupportedPointerEvent
+	| SvelthreeSupportedFocusEvent
+	| SvelthreeSupportedKeyboardEvent
+	| SvelthreeSupportedWheelEvent // TODO  -> implement
+
+//"touchstart", ->  RECONSIDER  implement?
+//"touchmove",  ->  RECONSIDER  implement?
+//"touchend",   ->  RECONSIDER  implement?
+//"touchcancel" ->  RECONSIDER  implement?
+
+export type SvelthreeModifiersProp =
+	| { all?: SvelthreeSupportedModifier[] }
+	| { [event_name in SvelthreeSupportedPointerEvent]?: Array<SvelthreeSupportedModifier> }
+	| { [event_name in SvelthreeSupportedFocusEvent]?: Array<SvelthreeSupportedModifier> }
+	| {
+			[event_name in SvelthreeSupportedKeyboardEvent]?: Array<SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget>
+	  }
+	| {
+			[event_name in SvelthreeSupportedWheelEvent]?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>
+	  }
+
+export type SvelthreeGenericEventHandler =
+	| [handler: (e: SvelthreeInteractionEvent) => void, modifiers?: Array<SvelthreeSupportedModifier>]
+	| ((e: SvelthreeInteractionEvent) => void)
+
+export type SvelthreePointerEventHandler = SvelthreeGenericEventHandler
+export type SvelthreeFocusEventHandler = SvelthreeGenericEventHandler
+export type SvelthreeKeyboardEventHandler =
+	| [handler: (e: SvelthreeInteractionEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget>]
+	| ((e: SvelthreeInteractionEvent) => void)
+
+export type SvelthreeWheelEventHandler =
+	| [handler: (e: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
+	| ((e: SvelthreeInteractionEvent) => void)

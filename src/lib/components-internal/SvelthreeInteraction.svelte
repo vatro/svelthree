@@ -43,7 +43,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeSupportedKeyboardEvent,
 		SvelthreeSupportedFocusEvent,
 		SvelthreeSupportedPointerEvent
-	} from "../constants/Interaction"
+	} from "../types/types-extra"
 
 	/**
 	 * SVELTEKIT  SSR

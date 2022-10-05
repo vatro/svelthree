@@ -32,7 +32,7 @@ This is a **svelthree** _Canvas_ Component.
 	import { RaycastArray } from "../utils/RaycastArray"
 	import { writable } from "svelte/store"
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeSupportedInteractionEvent } from "../constants/Interaction"
+	import type { SvelthreeSupportedInteractionEvent } from "../types/types-extra"
 
 	/**
 	 * SVELTEKIT  SSR
