@@ -110,10 +110,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 				}
 			}
-		} catch (error) {
+		} catch (err) {
 			console.error(
 				`SVELTHREE > ${c_name} > Oops, something went wrong while trying to create and add OrbitControls!`,
-				error,
+				err,
 				$svelthreeStores[sti],
 				{ scene, sti }
 			)

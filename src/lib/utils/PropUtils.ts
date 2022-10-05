@@ -717,8 +717,8 @@ export default class PropUtils {
 		}
 		try {
 			obj[key] = value
-		} catch (error) {
-			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, { obj, value, key })
+		} catch (err) {
+			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, err, { obj, value, key })
 		}
 	}
 }

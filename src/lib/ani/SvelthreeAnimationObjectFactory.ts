@@ -24,8 +24,8 @@ export default class SvelthreeAnimationObjectFactory {
 				})
 				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
-		} catch (error) {
-			throw new Error("SVELTHREE Exception, " + error)
+		} catch (err) {
+			throw new Error("SVELTHREE Exception, " + err)
 		}
 
 		return ani_obj

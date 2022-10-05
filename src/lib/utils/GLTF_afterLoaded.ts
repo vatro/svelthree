@@ -105,8 +105,8 @@ export default class GLTF_afterLoaded {
 						for (const prop in props) {
 							try {
 								obj["material"][prop] = props[prop]
-							} catch (e) {
-								console.error(e)
+							} catch (err) {
+								console.error(err)
 							}
 						}
 					}
@@ -154,8 +154,8 @@ export default class GLTF_afterLoaded {
 						for (const prop in props) {
 							try {
 								obj[prop] = props[prop]
-							} catch (e) {
-								console.error(e)
+							} catch (err) {
+								console.error(err)
 							}
 						}
 					}
@@ -203,8 +203,8 @@ export default class GLTF_afterLoaded {
 						for (const prop in props) {
 							try {
 								obj[prop] = props[prop]
-							} catch (e) {
-								console.error(e)
+							} catch (err) {
+								console.error(err)
 							}
 						}
 					}

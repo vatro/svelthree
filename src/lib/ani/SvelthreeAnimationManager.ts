@@ -70,8 +70,8 @@ export default class SvelthreeAnimationManager {
 
 		try {
 			this.ani_obj.onStart()
-		} catch (error) {
-			throw new Error("SVELTHREE Exception, " + error)
+		} catch (err) {
+			throw new Error("SVELTHREE Exception, " + err)
 		}
 	}
 
