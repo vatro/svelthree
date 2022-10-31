@@ -52,7 +52,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	type CurrentComponentType = import("./Group.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
-	/** svelthree component's type (e.g. component `Foo` is of type 'Foo' etc.) */
+	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
 	export const type: string = c_name
 
 	const verbose: boolean = verbose_mode()
