@@ -14,9 +14,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { self as _self } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import type { SvelthreeLifecycleCallback } from "../types/types-extra"
 	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
 	import { if$_instance_change } from "../logic/if$"
 	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
@@ -48,6 +48,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	import { browser } from "$app/environment"
 
+	type CurrentComponentType = import("./PerspectiveCamera.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. component `Foo` is of type 'Foo' etc.) */
@@ -659,14 +660,18 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export const get_user_created_children = (): SvelthreeComponentShadowDOMChild[] => user_created_children
 	export const get_generated_children = (): SvelthreeComponentShadowDOMChild[] => generated_children
 
-	/** **Completely replace** `onMount` -> any `onMount_inject_before` & `onMount_inject_after` will be ignored.
-	 * _default verbosity will be gone!_ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let onMount_replace: (args?: any) => any = undefined
+	/** **Completely replace** `svelthree`-component's default `onMount`-callback logic, any `onMountStart` & `onMountEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
 	onMount(
-		onMount_replace
-			? async () => onMount_replace(_self)
+		onMountReplace
+			? () => onMountReplace(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
 						console.info(...c_lc(c_name, "onMount"))
@@ -683,24 +688,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			  }
 	)
 
-	/** **Inject** functionality **before** component's existing `onDestroy` logic.
-	 * _default verbosity not affected._ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let onDestroy_inject_before: (args?: any) => any = undefined
+	/** **Inject** functionality at the **start** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	/** **Inject** functionality **after** component's existing `onDestroy` logic.
-	 * _default verbosity not affected._ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let onDestroy_inject_after: (args?: any) => any = undefined
+	/** **Inject** functionality at the **end** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	/** **Completely replace** `onDestroy` -> any `onDestroy_inject_before` & `onDestroy_inject_after` will be ignored.
-	 * _default verbosity will be gone!_ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let onDestroy_replace: (args?: any) => any = undefined
+	/** **Completely replace** `svelthree`-component's default `onDestroy`-callback logic, any `onDestroyStart` & `onDestroyEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
 	onDestroy(
-		onDestroy_replace
-			? async () => onDestroy_replace(_self)
+		onDestroyReplace
+			? () => onDestroyReplace(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
 						console.info(...c_lc(c_name, "onDestroy"))
@@ -715,7 +734,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						)
 					}
 
-					if (onDestroy_inject_before) onDestroy_inject_before()
+					if (onDestroyStart) {
+						if (onDestroyStart.constructor.name === "AsyncFunction") {
+							await onDestroyStart(self)
+						} else {
+							onDestroyStart(self)
+						}
+					}
 
 					remove_helper()
 					if (ani) ani.destroyAnimation()
@@ -725,18 +750,28 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					remove_instance_from_parent()
 
-					if (onDestroy_inject_after) onDestroy_inject_after()
+					if (onDestroyEnd) {
+						if (onDestroyEnd.constructor.name === "AsyncFunction") {
+							await onDestroyEnd(self)
+						} else {
+							onDestroyEnd(self)
+						}
+					}
 			  }
 	)
 
-	/** **Completely replace** `beforeUpdate` -> any `beforeUpdate_inject_before` & `beforeUpdate_inject_after` will be ignored.
-	 * _default verbosity will be gone!_ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let beforeUpdate_replace: (args?: any) => any = undefined
+	/** **Completely replace** `svelthree`-component's default `beforeUpdate`-callback logic, any `beforeUpdateStart` & `beforeUpdateEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
 	beforeUpdate(
-		beforeUpdate_replace
-			? async () => beforeUpdate_replace(_self)
+		beforeUpdateReplace
+			? () => beforeUpdateReplace(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
 						console.info(...c_lc(c_name, "beforeUpdate"))
@@ -753,24 +788,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			  }
 	)
 
-	/** **Inject** functionality **before** component's existing `afterUpdate` logic.
-	 * _default verbosity not affected._ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let afterUpdate_inject_before: (args?: any) => any = undefined
+	/** **Inject** functionality at the **start** of `svelthree`-component's default `afterUpdate`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	/** **Inject** functionality **after** component's existing `afterUpdate` logic.
-	 * _default verbosity not affected._ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let afterUpdate_inject_after: (args?: any) => any = undefined
+	/** **Inject** functionality at the **end** of `svelthree`-component's default `afterUpdate`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	/** **Completely replace** `afterUpdate` -> any `afterUpdate_inject_before` & `afterUpdate_inject_after` will be ignored.
-	 * _default verbosity will be gone!_ */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export let afterUpdate_replace: (args?: any) => any = undefined
+	/** **Completely replace** `svelthree`-component's default `afterUpdate`-callback logic, any `afterUpdateStart` & `afterUpdateEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
 	afterUpdate(
-		afterUpdate_replace
-			? async () => afterUpdate_replace(_self)
+		afterUpdateReplace
+			? () => afterUpdateReplace(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
 						console.info(...c_lc(c_name, "afterUpdate"))
@@ -785,7 +834,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						)
 					}
 
-					if (afterUpdate_inject_before) afterUpdate_inject_before()
+					if (afterUpdateStart) {
+						if (afterUpdateStart.constructor.name === "AsyncFunction") {
+							await afterUpdateStart(self)
+						} else {
+							afterUpdateStart(self)
+						}
+					}
 
 					// Update local matrix after all (props) changes (async microtasks) have been applied.
 					if (camera && !camera.matrixAutoUpdate) camera.updateMatrix()
@@ -812,7 +867,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
 					}
 
-					if (afterUpdate_inject_after) afterUpdate_inject_after()
+					if (afterUpdateEnd) {
+						if (afterUpdateEnd.constructor.name === "AsyncFunction") {
+							await afterUpdateEnd(self)
+						} else {
+							afterUpdateEnd(self)
+						}
+					}
 			  }
 	)
 </script>
