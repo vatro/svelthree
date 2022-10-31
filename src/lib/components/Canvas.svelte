@@ -46,6 +46,8 @@ This is a **svelthree** _Canvas_ Component.
 	type CurrentComponentType = import("./Canvas.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
+	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
+	export const type: string = c_name
 	const verbose: boolean = verbose_mode()
 
 	const dispatch = createEventDispatcher<CanvasComponentEventDispatcher>()
