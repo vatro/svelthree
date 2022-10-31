@@ -22,6 +22,10 @@ const replace_tasks = [
 				regex: /set mat\(.*?\);/s, // opt2
 				//replacement: `set mat(_: MeshProps<AssignedMaterial>['mat']);`
 				replacement: `set mat(_: PropMat<AssignedMaterial>);`
+			},
+			{
+				regex: /Mesh<MeshAssignableMaterial>/g,
+				replacement: `Mesh<AssignedMaterial>`
 			}
 		]
 	},
@@ -40,6 +44,10 @@ const replace_tasks = [
 				regex: /set mat\(.*?\);/s, // opt2
 				//replacement: `set mat(_: PointsProps<AssignedMaterial>['mat']);`
 				replacement: `set mat(_: PropMat<AssignedMaterial>);`
+			},
+			{
+				regex: /Points<PointsAssignableMaterial>/g,
+				replacement: `Points<AssignedMaterial>`
 			}
 		]
 	}

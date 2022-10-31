@@ -77,7 +77,13 @@ export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types
 // TODO  config
 
 // misc
-export type { Targetable, TargetableSvelthreeComponent } from "./types/types-extra"
+export type {
+	Targetable,
+	TargetableSvelthreeComponent,
+	SvelthreeLifecycleCallback,
+	SvelthreeLifecycleCallbackAsync,
+	SvelthreeLifecycleCallbackSync
+} from "./types/types-extra"
 
 // Animation related
 export type { SvelthreeAnimationFunction, SvelthreeAnimation } from "./types/types-extra"

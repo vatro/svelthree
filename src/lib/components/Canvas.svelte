@@ -14,7 +14,6 @@ This is a **svelthree** _Canvas_ Component.
 
 	import { afterUpdate, beforeUpdate, onMount, onDestroy, setContext, createEventDispatcher } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { self as _self } from "svelte/internal"
 	import { Raycaster, Vector2, Vector3 } from "three"
 	import type { Object3D } from "three"
 	import { svelthreeStores } from "svelthree/stores"
@@ -32,7 +31,7 @@ This is a **svelthree** _Canvas_ Component.
 	import { RaycastArray } from "../utils/RaycastArray"
 	import { writable } from "svelte/store"
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeSupportedInteractionEvent } from "../types/types-extra"
+	import type { SvelthreeSupportedInteractionEvent, SvelthreeLifecycleCallback } from "../types/types-extra"
 
 	/**
 	 * SVELTEKIT  SSR
@@ -44,6 +43,7 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	import { browser } from "$app/environment"
 
+	type CurrentComponentType = import("./Canvas.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	const verbose: boolean = verbose_mode()
@@ -847,30 +847,97 @@ This is a **svelthree** _Canvas_ Component.
 		}
 	}
 
-	onMount(async () => {
-		if (verbose && log_lc && (log_lc.all || log_lc.om)) console.info(...c_lc(c_name, "onMount"))
-		if (verbose && log_dev) {
-			console.debug(...c_dev(c_name, "onMount -> $svelthreeStores[sti]", $svelthreeStores[sti]))
-		}
-	})
+	/** **Completely replace** `svelthree`-component's default `onMount`-callback logic, any `onMountStart` & `onMountEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	onDestroy(async () => {
-		if (verbose && log_lc && (log_lc.all || log_lc.od)) console.info(...c_lc(c_name, "onDestroy"))
-		remove_all_listeners()
-		// if canvas is being removed set the the whole store to 'null'
-		// this way we don't have to handle anything, other store 'sti' will remain valid
-		// any newly added canvas will create a new store at the next highest index
-		// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
-		$svelthreeStores[sti] = null
+	onMount(
+		onMountReplace
+			? () => onMountReplace(self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
+						console.info(...c_lc(c_name, "onMount"))
+					}
+					if (verbose && log_dev) {
+						console.debug(...c_dev(c_name, "onMount -> $svelthreeStores[sti]", $svelthreeStores[sti]))
+					}
+			  }
+	)
 
-		// if all stores are `null` we can safely reset the `svelthreeStores` array, e.g. when switching pages / routes.
-		if (all_stores_are_null()) {
-			$svelthreeStores = []
-		} else {
-			// trim `svelthreeStores` array's tail
-			trim_stores_array()
-		}
-	})
+	/** **Inject** functionality at the **start** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+
+	/** **Inject** functionality at the **end** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
+	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+
+	/** **Completely replace** `svelthree`-component's default `onDestroy`-callback logic, any `onDestroyStart` & `onDestroyEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+
+	onDestroy(
+		onDestroyReplace
+			? () => onDestroyReplace(self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
+						console.info(...c_lc(c_name, "onDestroy"))
+					}
+
+					if (onDestroyStart) {
+						if (onDestroyStart.constructor.name === "AsyncFunction") {
+							await onDestroyStart(self)
+						} else {
+							onDestroyStart(self)
+						}
+					}
+
+					remove_all_listeners()
+					// if canvas is being removed set the the whole store to 'null'
+					// this way we don't have to handle anything, other store 'sti' will remain valid
+					// any newly added canvas will create a new store at the next highest index
+					// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
+					$svelthreeStores[sti] = null
+
+					// if all stores are `null` we can safely reset the `svelthreeStores` array, e.g. when switching pages / routes.
+					if (all_stores_are_null()) {
+						$svelthreeStores = []
+					} else {
+						// trim `svelthreeStores` array's tail
+						trim_stores_array()
+					}
+
+					if (onDestroyEnd) {
+						if (onDestroyEnd.constructor.name === "AsyncFunction") {
+							await onDestroyEnd(self)
+						} else {
+							onDestroyEnd(self)
+						}
+					}
+			  }
+	)
 
 	function all_stores_are_null(): boolean {
 		for (let i = 0; i < $svelthreeStores.length; i++) {
@@ -899,13 +966,43 @@ This is a **svelthree** _Canvas_ Component.
 		}
 	}
 
-	beforeUpdate(async () => {
-		if (verbose && log_lc && (log_lc.all || log_lc.bu)) console.info(...c_lc(c_name, "beforeUpdate"))
-	})
+	/** **Completely replace** `svelthree`-component's default `beforeUpdate`-callback logic, any `beforeUpdateStart` & `beforeUpdateEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
 
-	afterUpdate(async () => {
-		if (verbose && log_lc && (log_lc.all || log_lc.au)) console.info(...c_lc(c_name, "afterUpdate"))
-	})
+	beforeUpdate(
+		beforeUpdateReplace
+			? () => beforeUpdateReplace(self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
+						console.info(...c_lc(c_name, "beforeUpdate"))
+					}
+			  }
+	)
+
+	/** **Completely replace** `svelthree`-component's default `afterUpdate`-callback logic, any `afterUpdateStart` & `afterUpdateEnd` logic will be ignored (_default verbosity will be gone_).
+	 *
+	 * **Accepts** a `SvelthreeLifecycleCallback<T>`-type function as a **value**, which can also be explicitly typed as a **synchronous** (_type `SvelthreeLifecycleCallbackSync<T>`_) or an **asynchronous** (_type `SvelthreeLifecycleCallbackAsync<T>`_) callback:
+	 * ```ts
+	 * (comp: T) => unknown | Promise<unknown>
+	 * ```
+	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
+	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+
+	afterUpdate(
+		afterUpdateReplace
+			? () => afterUpdateReplace(self)
+			: async () => {
+					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
+						console.info(...c_lc(c_name, "afterUpdate"))
+					}
+			  }
+	)
 </script>
 
 <canvas data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />

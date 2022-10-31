@@ -542,3 +542,57 @@ export type SvelthreeKeyboardEventHandler =
 export type SvelthreeWheelEventHandler =
 	| [handler: (e: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
 	| ((e: SvelthreeInteractionEvent) => void)
+
+/** An explicitly **asynchoronous** callback-function
+ * ```ts
+ * (comp: T) => Promise<unknown>
+ * ```
+ * (_the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_)
+ * which can be used as a value for `svelthree`-component's additional lifecycle-callback-attributes:
+ * - `onMountReplace`
+ * - `onDestroyReplace`
+ * - `onDestroyStart` (_if available_)
+ * - `onDestroyEnd` (_if available_)
+ * - `beforeUpdateReplace`
+ * - `afterUpdateReplace`
+ * - `afterUpdateStart` (_if available_)
+ * - `afterUpdateEnd` (_if available_)
+ *
+ */
+export type SvelthreeLifecycleCallbackAsync<T = AnySvelthreeComponent> = (comp: T) => Promise<unknown>
+
+/** An explicitly **synchronous** callback-function
+ * ```ts
+ * (comp: T) => unknown
+ * ```
+ * (_the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_)
+ * which can be used as a value for `svelthree`-component's additional lifecycle-callback-attributes:
+ * - `onMountReplace`
+ * - `onDestroyReplace`
+ * - `onDestroyStart` (_if available_)
+ * - `onDestroyEnd` (_if available_)
+ * - `beforeUpdateReplace`
+ * - `afterUpdateReplace`
+ * - `afterUpdateStart` (_if available_)
+ * - `afterUpdateEnd` (_if available_)
+ *
+ */
+export type SvelthreeLifecycleCallbackSync<T = AnySvelthreeComponent> = (comp: T) => unknown
+
+/** A **synchoronous** or **asynchoronous** callback-function
+ * ```ts
+ * (comp: T) => unknown | Promise<unknown>
+ * ```
+ * (_the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_)
+ * which can be used as a value for `svelthree`-component's additional lifecycle-callback-attributes:
+ * - `onMountReplace`
+ * - `onDestroyReplace`
+ * - `onDestroyStart` (_if available_)
+ * - `onDestroyEnd` (_if available_)
+ * - `beforeUpdateReplace`
+ * - `afterUpdateReplace`
+ * - `afterUpdateStart` (_if available_)
+ * - `afterUpdateEnd` (_if available_)
+ *
+ */
+export type SvelthreeLifecycleCallback<T = AnySvelthreeComponent> = SvelthreeLifecycleCallbackSync<T> | SvelthreeLifecycleCallbackAsync<T>
