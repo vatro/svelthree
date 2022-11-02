@@ -479,7 +479,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function get_cam_to_render(store_index: number, cam_id: string): PerspectiveCamera | OrthographicCamera {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render_2!"))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render!"))
 		if ($svelthreeStores[store_index].cameras.length > 0) {
 			if (cam_id === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
