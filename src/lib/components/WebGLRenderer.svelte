@@ -12,7 +12,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onDestroy, createEventDispatcher, onMount, tick, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer } from "three"
+	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer, Vector2 } from "three"
 	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera, WebGLRendererParameters } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { svelthreeStores } from "svelthree/stores"
@@ -479,7 +479,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function get_cam_to_render(store_index: number, cam_id: string): PerspectiveCamera | OrthographicCamera {
-		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render_2!"))
+		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render!"))
 		if ($svelthreeStores[store_index].cameras.length > 0) {
 			if (cam_id === undefined) {
 				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
@@ -580,7 +580,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			// if the `current_cam` instance is not being managed by a component (anymore),
 			// it means a new (premade) camera instance was injected via `camera` attribute,
 			// so the `current_cam` reference needs to be updated.
-			if (!current_cam.userData.svelthreeComponent) set_current_cam()
+			if (current_cam) {
+				if (!current_cam.userData.svelthreeComponent) set_current_cam()
+			}
 
 			if (log_once) do_log_once(mode)
 
@@ -608,7 +610,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		// inserting await tick() here enables cross-referencing:
 		await tick()
 
-		if ($svelthreeStores[sti].canvas.interactive) {
+		if ($svelthreeStores[sti] && $svelthreeStores[sti].canvas.interactive) {
 			// filter interactive objects in currently active (rendered) scene
 			await dispatch_render_event("interaction_0")
 
@@ -684,7 +686,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				const inp = inputs_queue[i]
 				// inside should be false if inputs_queue.length
 				if (!outputs_queue?.length && inside === false) {
-					renderer.setSize(inp.dom_element.width, inp.dom_element.height)
+					const curr_rnd_size_vec2: Vector2 = new Vector2()
+					renderer.getSize(curr_rnd_size_vec2)
+					if (
+						curr_rnd_size_vec2.x !== inp.dom_element.width ||
+						curr_rnd_size_vec2.y !== inp.dom_element.height
+					) {
+						renderer.setSize(inp.dom_element.width, inp.dom_element.height)
+					}
 				}
 
 				if (outputs_queue?.length) {
@@ -699,7 +708,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 							out.viewOffset[4],
 							out.viewOffset[5]
 						)
-						renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+
+						const curr_rnd_size_vec2: Vector2 = new Vector2()
+						renderer.getSize(curr_rnd_size_vec2)
+						if (curr_rnd_size_vec2.x !== out.viewOffset[4] || curr_rnd_size_vec2.y !== out.viewOffset[5]) {
+							renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+						}
 						renderer.render(inp.scene, inp.cam)
 
 						const context = out.dom_element.getContext("2d")
