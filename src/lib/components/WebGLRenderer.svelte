@@ -12,7 +12,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onDestroy, createEventDispatcher, onMount, tick, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer } from "three"
+	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer, Vector2 } from "three"
 	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera, WebGLRendererParameters } from "three"
 	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import { svelthreeStores } from "svelthree/stores"
@@ -686,7 +686,14 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				const inp = inputs_queue[i]
 				// inside should be false if inputs_queue.length
 				if (!outputs_queue?.length && inside === false) {
-					renderer.setSize(inp.dom_element.width, inp.dom_element.height)
+					const curr_rnd_size_vec2: Vector2 = new Vector2()
+					renderer.getSize(curr_rnd_size_vec2)
+					if (
+						curr_rnd_size_vec2.x !== inp.dom_element.width ||
+						curr_rnd_size_vec2.y !== inp.dom_element.height
+					) {
+						renderer.setSize(inp.dom_element.width, inp.dom_element.height)
+					}
 				}
 
 				if (outputs_queue?.length) {
@@ -701,7 +708,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 							out.viewOffset[4],
 							out.viewOffset[5]
 						)
-						renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+
+						const curr_rnd_size_vec2: Vector2 = new Vector2()
+						renderer.getSize(curr_rnd_size_vec2)
+						if (curr_rnd_size_vec2.x !== out.viewOffset[4] || curr_rnd_size_vec2.y !== out.viewOffset[5]) {
+							renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+						}
 						renderer.render(inp.scene, inp.cam)
 
 						const context = out.dom_element.getContext("2d")
