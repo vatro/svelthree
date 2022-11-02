@@ -580,7 +580,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			// if the `current_cam` instance is not being managed by a component (anymore),
 			// it means a new (premade) camera instance was injected via `camera` attribute,
 			// so the `current_cam` reference needs to be updated.
-			if (!current_cam.userData.svelthreeComponent) set_current_cam()
+			if (current_cam) {
+				if (!current_cam.userData.svelthreeComponent) set_current_cam()
+			}
 
 			if (log_once) do_log_once(mode)
 
@@ -608,7 +610,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		// inserting await tick() here enables cross-referencing:
 		await tick()
 
-		if ($svelthreeStores[sti].canvas.interactive) {
+		if ($svelthreeStores[sti] && $svelthreeStores[sti].canvas.interactive) {
 			// filter interactive objects in currently active (rendered) scene
 			await dispatch_render_event("interaction_0")
 
