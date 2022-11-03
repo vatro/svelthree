@@ -1,5 +1,5 @@
 ### IN CASE YOU'RE HERE BECAUSE YOU WERE LOOKING FOR SVELTE THREE SOMETHING:
-There's an **impressive (_pretty new_) three.js component library for Svelte: [threlte website](https://threlte.xyz/) / [threlte repo](https://github.com/threlte/threlte)** which is (_atm_) far more feature rich, complete and polished compared to `svelthree`. Also: **it's powered by Vercel + Rich Harris likes it a lot too!**
+There's a (_pretty_) new three.js component library for Svelte: **[threlte website](https://threlte.xyz/) / [threlte repo](https://github.com/threlte/threlte)** which is (_atm_) more complete and polished compared to `svelthree`. Also: **it's powered by Vercel + Rich Harris likes it a lot too!**
 
 Although the completeness of `threlte` could demotivate me concerning further `svelthree` development, I'm going to continue working on `svelthree` because it's my baby and I love it 🥰. Also: the API / DX / capability is / will be different to `threlte` in quite a few ways and I think it's always good to have alternatives.
 
@@ -38,7 +38,7 @@ Thanks for dropping by & stay tuned! 🚀 + feel free to try `svelthree` & leave
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.95.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.96.tgz",
       ...
   }
   ```

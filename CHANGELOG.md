@@ -1,5 +1,13 @@
 # svelthree changelog
 
+## 1.0.0-next.0.96
+
+- Resolved all ESLint errors and warnings see pull-requests [#169](https://github.com/vatro/svelthree/pull/169) and [#179](https://github.com/vatro/svelthree/pull/179), except one warning which is yet to be fixed by [#135](https://github.com/vatro/svelthree/issues/135).
+- Refactored additional (`svelthree`-specific) lifecycle logic, see pull-request [#181](https://github.com/vatro/svelthree/pull/181).
+- Rendering multiple inputs / outputs example / test-scene (_not public_) works again ([#159](https://github.com/vatro/svelthree/issues/159)). See pull-request [#184](https://github.com/vatro/svelthree/pull/184)
+- Updated peer dependency `svelte-accmod-patch` to `^1.0.2`
+
+
 ## 1.0.0-next.0.95
 
 [_**major refactor**_] Changed project structure / setup using `npm create svelte@latest` + library option as a starting point, including custom post-processing of the generated package (TypeScript / DX related). So far so good, tested. 🚀 ([#161](https://github.com/vatro/svelthree/issues/161))
