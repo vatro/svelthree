@@ -107,6 +107,7 @@ export type PropBlackList =
 	| "modelViewMatrix"
 	| "normalMatrix"
 	| "version"
+	| "isMaterial"
 
 export type ComplexValueType =
 	| "Vector2"
@@ -199,7 +200,7 @@ export type TargetableSvelthreeComponent =
 
 export type Targetable = THREE.Object3D | TargetableSvelthreeComponent | undefined
 
-type AnyTHREEMeshMaterial = THREE.MeshToonMaterial &
+export type AnyTHREEMeshMaterial = THREE.MeshToonMaterial &
 	THREE.MeshBasicMaterial &
 	THREE.MeshDepthMaterial &
 	THREE.Material &
@@ -246,16 +247,16 @@ export type SvelthreeGLTFTreeMap = Map<string, ISvelthreeGLTFTreeMapMember>
 
 export interface PointerState {
 	pos: THREE.Vector2
-	event: PointerEvent
+	event: PointerEvent | undefined
 	unprojected: THREE.Vector3
 }
 
-export interface StoreCanvas {
-	dom: HTMLCanvasElement
+interface StoreCanvas {
+	dom: HTMLCanvasElement | undefined
 	svelthreeComponent: Canvas
 	dim: {
-		w: number
-		h: number
+		w: number | undefined
+		h: number | undefined
 	}
 	interactive: boolean
 }
@@ -265,7 +266,7 @@ export interface StoreCanvas {
 import type { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
 
 export type StoreBody = {
-	id: number
+	id: number | undefined
 	canvas: StoreCanvas
 	scenes: SvelthreeStoreArray
 
@@ -273,15 +274,15 @@ export type StoreBody = {
 	/** `currentSceneIndex` will always be `+1` real index, because index `0` means `false`,
 	 * so the change from `undefined` to `0` will not be triggered.
 	 */
-	currentSceneIndex: number
+	currentSceneIndex: number | undefined
 
 	cameras: SvelthreeStoreArray
 	cubeCameras: SvelthreeStoreArray
-	activeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera
-	activeScene: THREE.Scene
-	renderer: THREE.WebGLRenderer
-	rendererComponent: WebGLRenderer
-	raycaster: THREE.Raycaster
+	activeCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera | undefined
+	activeScene: THREE.Scene | undefined
+	renderer: THREE.WebGLRenderer | undefined
+	rendererComponent: WebGLRenderer | undefined
+	raycaster: THREE.Raycaster | undefined
 	orbitcontrols: SvelthreeStoreArray
 	useBVH: boolean
 }
@@ -416,7 +417,7 @@ export type SvelthreeInteractableComponent = Mesh<MeshAssignableMaterial> | Poin
 
 export type WebGLRendererEventDetail = {
 	frame: number
-}
+} | null
 
 export type WebGLRendererComponentEventDispatcher = {
 	[key: string]: WebGLRendererEventDetail
@@ -454,8 +455,8 @@ export type RaycasterData = {
 
 export type SvelthreeInteractionEventDetail = {
 	code?: KeyboardEvent["code"]
-	e: PointerEvent | KeyboardEvent | FocusEvent
-	obj: THREE.Object3D
+	evt: PointerEvent | KeyboardEvent | FocusEvent
+	obj: THREE.Object3D | undefined | null
 	comp: SvelthreeInteractableComponent
 	raycaster_data?: RaycasterData
 }
@@ -543,6 +544,12 @@ export type SvelthreeWheelEventHandler =
 	| [handler: (e: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
 	| ((e: SvelthreeInteractionEvent) => void)
 
+export type SvelthreePropActionHandler =
+	| SvelthreeGenericEventHandler
+	| SvelthreePointerEventHandler
+	| SvelthreeFocusEventHandler
+	| SvelthreeKeyboardEventHandler
+	| SvelthreeWheelEventHandler
 /** An explicitly **asynchoronous** callback-function
  * ```ts
  * (comp: T) => Promise<unknown>

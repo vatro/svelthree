@@ -42,7 +42,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeModifiersProp,
 		SvelthreeSupportedKeyboardEvent,
 		SvelthreeSupportedFocusEvent,
-		SvelthreeSupportedPointerEvent
+		SvelthreeSupportedPointerEvent,
+		SvelthreePropActionHandler
 	} from "../types/types-extra"
 
 	/**
@@ -58,19 +59,21 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const c_name = get_comp_name_int(get_current_component())
 	const verbose: boolean = verbose_mode()
 
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
 	//export let log_rs = false
-	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = undefined
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = undefined
 
-	export let interactionEnabled: boolean
+	export let interactionEnabled: boolean | undefined
 	export let parent: SvelthreeInteractableComponent
 	export let sti: number = getContext("store_index")
-	export let obj: Object3D
+	export let obj: Object3D | undefined | null
+
+	$: store = $svelthreeStores[sti]
 
 	// TODO  still not sure if we even need this / want to handle this like svelte
 	//const passive_events = new Set([])
 
-	export let modifiers: SvelthreeModifiersProp = undefined
+	export let modifiers: SvelthreeModifiersProp | undefined = undefined
 	const user_modifiers_prop = new Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeSupportedModifier>>()
 	const user_modifiers_action = new Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeSupportedModifier>>()
 	type UserModifiersMap = typeof user_modifiers_prop | typeof user_modifiers_action
@@ -78,7 +81,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// modifiers set by the `modifiers` prop
 	$: if (modifiers) {
 		for (const event_name_or_all in modifiers) {
-			const modifiers_arr: SvelthreeSupportedModifier[] = modifiers[event_name_or_all]
+			const modifiers_arr: SvelthreeSupportedModifier[] =
+				modifiers[event_name_or_all as keyof SvelthreeModifiersProp]
 			const valid_modifiers: Set<SvelthreeSupportedModifier> = get_valid_modifiers_only(modifiers_arr)
 
 			user_modifiers_prop.set(event_name_or_all as SvelthreeSupportedInteractionEvent | "all", valid_modifiers)
@@ -101,8 +105,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		return new Set(valid_modifiers)
 	}
 
-	let raycaster: Raycaster
-	$: raycaster = $svelthreeStores[sti].raycaster
+	let raycaster: Raycaster | undefined
+	$: raycaster = store?.raycaster
 
 	export let dispatch_interaction: SvelthreeInteractionEventDispatcher
 
@@ -113,7 +117,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let raycaster_data: RaycasterData
 
 	function intersects(): boolean {
-		if (all_intersections) {
+		if (raycaster && all_intersections) {
 			if (all_intersections.result.length && all_intersections.result[0].object === obj) {
 				raycaster_data = {
 					intersection: all_intersections.result[0],
@@ -133,16 +137,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
-	const canvas_component = $svelthreeStores[sti].canvas.svelthreeComponent
+	const canvas_component = store?.canvas.svelthreeComponent
 
-	const pointer_events_queue = []
-	const keyboard_events_queue = []
-	const focus_events_queue = []
+	const pointer_events_queue: (() => void)[] = []
+	const keyboard_events_queue: (() => void)[] = []
+	const focus_events_queue: (() => void)[] = []
 
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
-	export let shadow_dom_el: SvelthreeShadowDOMElement = undefined
+	export let shadow_dom_el: SvelthreeShadowDOMElement | undefined | null = undefined
 
 	let listeners = false
 
@@ -158,7 +162,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let out_of_canvas_triggered = false
 
 	// pointer is out of / exited the `<canvas>` element.
-	$: if (obj.userData.interact && pointer.event && $pointer_over_canvas.status === false) {
+	$: if (obj?.userData.interact && pointer.event && $pointer_over_canvas.status === false) {
 		if (!out_of_canvas_triggered) {
 			out_of_canvas_triggered = true
 
@@ -171,7 +175,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	// pointer is over / entered the `<canvas>` element.
-	$: if (obj.userData.interact && $pointer_over_canvas.status === true) {
+	$: if (obj?.userData.interact && $pointer_over_canvas.status === true) {
 		if (out_of_canvas_triggered) {
 			out_of_canvas_triggered = false
 		}
@@ -180,7 +184,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	//  RENDER EVENT interaction_2  ALWAYS  ->  IMPORTANT  In mode `always` ALL component / shadow dom EVENTS are queued!
 
 	/** [ _mode `always` only_ ] Removes `interaction_2` render event listener. */
-	let remove_interaction_2_listener: () => void
+	let remove_interaction_2_listener: (() => void) | undefined | null
 
 	/**
 	 * [ _mode `always` only_ ] Adds `interaction_2` render event listener -> `on_interaction_2()` handler will
@@ -188,7 +192,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * if the pointer is not moving.
 	 */
 	function add_interaction_2_listener(): void {
-		remove_interaction_2_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_2", on_interaction_2)
+		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", on_interaction_2)
 	}
 
 	/**
@@ -208,14 +212,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/**
 	 * [ _mode `always` only_ ]
-	 * Triggers `pointerover` / `pointerout` events -> even if the pointer is not moving, e.g. if the pointer
+	 * Triggers `pointerover` / `pointerout` events -> even if the pointer is not moving, evt.g. if the pointer
 	 * is over the `<canvas>` element an some interactive object intersects ( _animated_ ) the pointer
 	 * during animation rendering ( _raf_ ).
 	 *
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
-	function interaction2_check_pointer_overout(e: PointerEvent): void {
-		check_pointer_overout(e)
+	function interaction2_check_pointer_overout(evt: PointerEvent): void {
+		check_pointer_overout(evt)
 	}
 
 	/**
@@ -224,8 +228,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 *
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
-	function interaction2_check_pointer_move_moveover(e: PointerEvent) {
-		check_pointer_moveover(e)
+	function interaction2_check_pointer_move_moveover(evt: PointerEvent) {
+		check_pointer_moveover(evt)
 	}
 
 	/** [ _mode `always` only_ ] Executes any queue `pointer` related events. */
@@ -251,7 +255,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/** [ _mode `always` only_ ] Removes `interaction_3` render event listener. */
-	let remove_interaction_3_listener: () => void
+	let remove_interaction_3_listener: (() => void) | undefined | null
 
 	/**
 	 * [ _mode `always` only_ ] Adds `interaction_3` render event listener -> `on_interaction_3()` handler will
@@ -259,7 +263,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * if the pointer is not moving.
 	 */
 	function add_interaction_3_listener(): void {
-		remove_interaction_3_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_3", on_interaction_3)
+		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", on_interaction_3)
 	}
 
 	/**
@@ -308,7 +312,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	type HandlerSetBy = "on_directive" | "prop_action"
 
-	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
+	/** If the callbacks array of a certain directive (evt.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (evt.g. "click") will be removed. */
 	function has_on_directive(on_directive: string): boolean {
 		const has_directive_key: boolean = Object.keys((parent as SvelteComponentDev).$$.callbacks).includes(
 			on_directive
@@ -331,14 +335,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// ---  LISTENER OPTIONS AND MODIFIERS  UTILS ---
 
-	function get_listener_options_from_modifiers_prop(event_name: SvelthreeSupportedInteractionEvent): {
-		[key in SupportedAddEventListenerOption]?: boolean
-	} {
+	function get_listener_options_from_modifiers_prop(event_name: SvelthreeSupportedInteractionEvent):
+		| {
+				[key in SupportedAddEventListenerOption]?: boolean
+		  }
+		| undefined {
 		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
 
-		let mods: Set<SvelthreeSupportedModifier>
-		let opts: { [key in SupportedAddEventListenerOption]?: boolean } = undefined
+		let mods: Set<SvelthreeSupportedModifier> | undefined | null
+		let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
 
 		if (all && spec) {
 			mods = new Set([...all, ...spec])
@@ -361,14 +367,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function get_listener_options_from_modifiers_arr(
 		event_name: SvelthreeSupportedInteractionEvent,
 		modifiers_arr: string[]
-	): { [key in SupportedAddEventListenerOption]?: boolean } {
+	): { [key in SupportedAddEventListenerOption]?: boolean } | undefined {
 		if (user_modifiers_prop.has(event_name) || user_modifiers_prop.has("all")) {
 			const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 			const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
 			const user = get_valid_modifiers_only(modifiers_arr)
 
-			let mods: Set<SvelthreeSupportedModifier>
-			let opts: { [key in SupportedAddEventListenerOption]?: boolean } = undefined
+			let mods: Set<SvelthreeSupportedModifier> | undefined | null
+			let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
 
 			if (all && spec) {
 				mods = new Set([...all, ...spec, ...user])
@@ -376,22 +382,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				mods = all || spec
 			}
 
-			mods.forEach((key) => {
-				if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
-					if (!opts) opts = {}
-					opts[key] = true
-				}
-			})
+			if (mods) {
+				mods.forEach((key) => {
+					if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
+						if (!opts) opts = {}
+						opts[key as SupportedAddEventListenerOption] = true
+					}
+				})
+			}
 
 			return opts
 		} else {
 			const user = get_valid_modifiers_only(modifiers_arr)
-			let opts: { [key in SupportedAddEventListenerOption]?: boolean } = undefined
+			let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
 
 			user.forEach((key) => {
 				if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
 					if (!opts) opts = {}
-					opts[key] = true
+					opts[key as SupportedAddEventListenerOption] = true
 				}
 			})
 
@@ -401,13 +409,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function update_prop_action_modifiers(
 		event_name: SvelthreeSupportedInteractionEvent,
-		modifiers_arr: string[]
+		modifiers_arr: SvelthreeSupportedModifier[] | null
 	): void {
 		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
 		const user = modifiers_arr ? get_valid_modifiers_only(modifiers_arr) : null
 
-		let mods: Set<SvelthreeSupportedModifier>
+		let mods: Set<SvelthreeSupportedModifier> | undefined = undefined
 
 		if (all && spec) {
 			if (user) {
@@ -433,13 +441,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		if (mods) user_modifiers_action.set(event_name, mods)
+		if (mods) {
+			user_modifiers_action.set(event_name, mods)
+		} else {
+			// TODO  do nothing / silent?
+		}
 	}
 
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
 	function has_prop_action(prop_action: string): boolean {
-		return !!parent[prop_action]
+		return !!parent[prop_action as keyof typeof parent]
 	}
 
 	function using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
@@ -454,12 +466,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		return typeof parent[`on_${event_name}`] === "function"
 	}
 
-	function prop_action_is_complex(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		return parent[`on_${event_name}`].length && typeof parent[`on_${event_name}`][0] === "function"
+	function prop_action_is_complex(prop_action_handler: SvelthreePropActionHandler): boolean {
+		return (
+			!!(prop_action_handler as Array<unknown>).length &&
+			!!(typeof (prop_action_handler as Array<unknown>)[0] === "function")
+		)
 	}
 
-	function get_prop_action_modifiers(event_name: SvelthreeSupportedInteractionEvent): string[] | null {
-		return parent[`on_${event_name}`].length > 1 ? parent[`on_${event_name}`][1] : null
+	function get_prop_action_modifiers(
+		prop_action_handler: SvelthreePropActionHandler
+	): SvelthreeSupportedModifier[] | null {
+		return (prop_action_handler as Array<unknown>).length > 1
+			? ((prop_action_handler as Array<unknown>)[1] as SvelthreeSupportedModifier[])
+			: null
 	}
 
 	//  POINTER Event  CANVAS Component POINTER Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
@@ -467,7 +486,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// IMPORTANT  LIMITATIONS:
 	// - if using directives  -> `once` should also be set as standard svelte modifier if set in modifiers-prop
 	// - `modifiers` prop will affect directives and actions if these are being mixed
-	// -  TODO  / CHECK e.g. `on:click` without handler (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
+	// -  TODO  / CHECK evt.g. `on:click` without handler (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
 	// the component itself should emit the event ... isn't this already like this?
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
@@ -483,15 +502,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		if (parent[`on_${event_name}`]) {
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+
+		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_pointer_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					update_prop_action_modifiers(event_name, null)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "prop_action")
-				} else if (prop_action_is_complex(event_name)) {
-					const modifiers_arr = get_prop_action_modifiers(event_name)
+				} else if (prop_action_is_complex(prop_action_handler)) {
+					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
 					update_prop_action_modifiers(event_name, modifiers_arr)
 
 					const listener_options = modifiers_arr
@@ -520,13 +541,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		dispatch_via_shadow_dom: boolean,
 		set_by: HandlerSetBy
 	) {
-		let handler: (e: PointerEvent) => void = undefined
-		if (set_by === "prop_action") handler = pointerevents_handler_action
-		if (set_by === "on_directive") handler = pointerevents_handler_directive
+		let listener: ((evt: PointerEvent) => void) | undefined = undefined
+		if (set_by === "prop_action") listener = pointerevents_handler_action
+		if (set_by === "on_directive") listener = pointerevents_handler_directive
 
 		//  IMPORTANT  only `pointermove` event is NOT being re-dispatched via shadow dom!
 		if (dispatch_via_shadow_dom) {
-			add_shadow_dom_pointer_listener(event_name, listener_options, handler)
+			add_shadow_dom_pointer_listener(event_name, listener_options, listener)
 		}
 
 		add_canvas_pointer_listener(event_name)
@@ -535,11 +556,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_shadow_dom_pointer_listener(
 		event_name: SvelthreeSupportedInteractionEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
-		handler: (e: PointerEvent) => void
+		listener: ((evt: PointerEvent) => void) | undefined
 	): void {
-		listener_options
-			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_el.addEventListener(event_name, handler)
+		if (shadow_dom_el && listener) {
+			if (listener_options) {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
+			} else {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+			}
+		}
 	}
 
 	/*  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  */
@@ -580,89 +605,108 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointermove`
 
-	const queued_pointer_move_events = []
+	const queued_pointer_move_events: (() => void)[] = []
 
-	let remove_canvas_pointermove_listener: () => void
+	let remove_canvas_pointermove_listener: (() => void) | undefined
 	function add_canvas_pointermove_listener(): void {
-		remove_canvas_pointermove_listener = canvas_component.$on("canvas_pointermove", (e: CanvasComponentEvent) =>
-			// check before dispatching 'pointermove' component event directly (not via shadow dom listener / handler)
-			check_pointer_move(e.detail.event as PointerEvent)
+		remove_canvas_pointermove_listener = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
+			// check before dispatching 'pointermove' component event directly (not via shadow dom element)
+			check_pointer_move(evt.detail.event as PointerEvent)
 		)
 	}
 
-	const last_pointer_move = {
+	const last_pointer_move: {
+		clientX: number | undefined
+		clientY: number | undefined
+	} = {
 		clientX: undefined,
 		clientY: undefined
 	}
 
-	function pointer_has_not_moved_move(e: PointerEvent): boolean {
-		return last_pointer_move.clientX === e.clientX && last_pointer_move.clientY === e.clientY
+	function pointer_has_not_moved_move(evt: PointerEvent): boolean {
+		return last_pointer_move.clientX === evt.clientX && last_pointer_move.clientY === evt.clientY
 	}
 
-	function check_pointer_move(e: PointerEvent) {
+	function check_pointer_move(evt: PointerEvent) {
 		if (
 			used_pointer_events.has("pointermove") &&
 			$pointer_over_canvas.status === true &&
-			!pointer_has_not_moved_move(e)
+			!pointer_has_not_moved_move(evt)
 		) {
 			// `check_pointer_move` & `check_pointer_moveover` use the same `pointerevent`
 			// so we have to separate `last_pointer_...`
-			last_pointer_move.clientX = e.clientX
-			last_pointer_move.clientY = e.clientY
+			last_pointer_move.clientX = evt.clientX
+			last_pointer_move.clientY = evt.clientY
 
 			// no check, no dispatch via shadow dom but also queue pointer move in "always" mode
-			pointerevents_handler(get_pointerevent_modified_clone(e))
+			pointerevents_handler(get_pointerevent_modified_clone(evt))
 		}
 	}
 
-	const queued_pointer_moveover_events = []
+	const queued_pointer_moveover_events: (() => void)[] = []
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointermoveover`
 
-	let remove_canvas_pointermoveover_listener: () => void
+	let remove_canvas_pointermoveover_listener: (() => void) | undefined
 	function add_canvas_pointermoveover_listener(): void {
-		remove_canvas_pointermoveover_listener = canvas_component.$on("canvas_pointermove", (e: CanvasComponentEvent) =>
-			// check before dispatching 'pointermoveover' component event via shadow dom listener / handler
-			check_pointer_moveover(e.detail.event as PointerEvent)
+		remove_canvas_pointermoveover_listener = canvas_component?.$on(
+			"canvas_pointermove",
+			(evt: CanvasComponentEvent) =>
+				// check before dispatching 'pointermoveover' component event via shadow dom element
+				check_pointer_moveover(evt.detail.event as PointerEvent)
 		)
 	}
 
-	const last_pointer_moveover = {
+	const last_pointer_moveover: {
+		clientX: number | undefined
+		clientY: number | undefined
+	} = {
 		clientX: undefined,
 		clientY: undefined
 	}
 
-	function pointer_has_not_moved_moveover(e: PointerEvent): boolean {
-		return last_pointer_moveover.clientX === e.clientX && last_pointer_moveover.clientY === e.clientY
+	function pointer_has_not_moved_moveover(evt: PointerEvent): boolean {
+		return last_pointer_moveover.clientX === evt.clientX && last_pointer_moveover.clientY === evt.clientY
 	}
 
 	/**
 	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`e.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
 	 */
-	function check_pointer_moveover(e: PointerEvent) {
+	function check_pointer_moveover(evt: PointerEvent) {
 		//  IMPORTANT  -> `pointermoveover` is not a standard DOM event, so it will not bubble up back to the `<canvas>` element!
-		if ($pointer_over_canvas.status === true) {
-			if (intersects() && used_pointer_events.has("pointermoveover") && !pointer_has_not_moved_moveover(e)) {
-				// `check_pointer_move` & `check_pointer_moveover` use the same `pointerevent` so we have to separate `last_pointer_...`
-				last_pointer_moveover.clientX = e.clientX
-				last_pointer_moveover.clientY = e.clientY
+		if (shadow_dom_el) {
+			if ($pointer_over_canvas.status === true) {
+				if (
+					intersects() &&
+					used_pointer_events.has("pointermoveover") &&
+					!pointer_has_not_moved_moveover(evt)
+				) {
+					// `check_pointer_move` & `check_pointer_moveover` use the same `pointerevent` so we have to separate `last_pointer_...`
+					last_pointer_moveover.clientX = evt.clientX
+					last_pointer_moveover.clientY = evt.clientY
 
-				// immediatelly dispatch component event via shadow dom listener / handler
-				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointermoveover"))
+					// immediatelly dispatch component event via shadow dom element
+					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointermoveover"))
+				}
 			}
+		} else {
+			console.error(
+				`SVELTHREE > SvelthreeInteraction > check_pointer_moveover : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				{ shadow_dom_el }
+			)
 		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointerover` / `pointerout`
 
-	let remove_canvas_pointeroverout_listener: () => void
+	let remove_canvas_pointeroverout_listener: (() => void) | undefined
 	function add_canvas_pointeroverout_listener(): void {
-		remove_canvas_pointeroverout_listener = canvas_component.$on(
+		remove_canvas_pointeroverout_listener = canvas_component?.$on(
 			"canvas_pointermove",
-			(e: { detail: { event: PointerEvent } }) =>
-				// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom listener / handler
-				check_pointer_overout(e.detail.event)
+			(evt: { detail: { event: PointerEvent } }) =>
+				// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom element
+				check_pointer_overout(evt.detail.event)
 		)
 	}
 
@@ -671,78 +715,107 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/**
 	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`e.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
 	 */
-	function check_pointer_overout(e: PointerEvent) {
-		if (intersects()) {
-			if (!pointer_is_over) {
-				pointer_is_over = true
-				pointer_is_out = false
+	function check_pointer_overout(evt: PointerEvent) {
+		if (shadow_dom_el) {
+			if (intersects()) {
+				if (!pointer_is_over) {
+					pointer_is_over = true
+					pointer_is_out = false
 
-				if (used_pointer_events.has("pointerover")) {
-					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointerover"))
+					if (used_pointer_events.has("pointerover")) {
+						shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointerover"))
+					}
+				}
+			} else {
+				if (!pointer_is_out) {
+					pointer_is_out = true
+					pointer_is_over = false
+
+					if (used_pointer_events.has("pointerout")) {
+						shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointerout"))
+					}
 				}
 			}
 		} else {
-			if (!pointer_is_out) {
-				pointer_is_out = true
-				pointer_is_over = false
-
-				if (used_pointer_events.has("pointerout")) {
-					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e, "pointerout"))
-				}
-			}
+			console.error(
+				`SVELTHREE > SvelthreeInteraction > check_pointer_overout : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				{ shadow_dom_el }
+			)
 		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointerdown` -> `pointerdown`
 
-	let remove_canvas_pointerdown_listener: () => void
+	let remove_canvas_pointerdown_listener: (() => void) | undefined
 	function add_canvas_pointerdown_listener(): void {
-		remove_canvas_pointerdown_listener = canvas_component.$on(
+		remove_canvas_pointerdown_listener = canvas_component?.$on(
 			"canvas_pointerdown",
-			(e: { detail: { event: PointerEvent } }) => check_pointer_pointerdown(e.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => check_pointer_pointerdown(evt.detail.event)
 		)
 	}
 
-	function check_pointer_pointerdown(e: PointerEvent) {
-		if (intersects()) {
-			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
+	function check_pointer_pointerdown(evt: PointerEvent) {
+		if (shadow_dom_el) {
+			if (intersects()) {
+				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
+			}
+		} else {
+			console.error(
+				`SVELTHREE > SvelthreeInteraction > check_pointer_pointerdown : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				{ shadow_dom_el }
+			)
 		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointerup` -> `pointerup`
 
-	let remove_canvas_pointerup_listener: () => void
+	let remove_canvas_pointerup_listener: (() => void) | undefined
 	function add_canvas_pointerup_listener(): void {
-		remove_canvas_pointerup_listener = canvas_component.$on(
+		remove_canvas_pointerup_listener = canvas_component?.$on(
 			"canvas_pointerup",
-			(e: { detail: { event: PointerEvent } }) => check_pointer_pointerup(e.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => check_pointer_pointerup(evt.detail.event)
 		)
 	}
 
-	function check_pointer_pointerup(e: PointerEvent) {
-		if (intersects()) {
-			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
+	function check_pointer_pointerup(evt: PointerEvent) {
+		if (shadow_dom_el) {
+			if (intersects()) {
+				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
+			}
+		} else {
+			console.error(
+				`SVELTHREE > SvelthreeInteraction > check_pointer_pointerup : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				{ shadow_dom_el }
+			)
 		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_click` -> `click`
 
-	let remove_canvas_click_listener: () => void
+	let remove_canvas_click_listener: (() => void) | undefined
 	function add_canvas_click_listener(): void {
-		remove_canvas_click_listener = canvas_component.$on("canvas_click", (e: { detail: { event: PointerEvent } }) =>
-			check_pointer_click(e.detail.event)
+		remove_canvas_click_listener = canvas_component?.$on(
+			"canvas_click",
+			(evt: { detail: { event: PointerEvent } }) => check_pointer_click(evt.detail.event)
 		)
 	}
 
 	/**
 	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`e.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
 	 */
-	function check_pointer_click(e: PointerEvent) {
-		if (intersects()) {
-			shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(e))
+	function check_pointer_click(evt: PointerEvent) {
+		if (shadow_dom_el) {
+			if (raycaster && intersects()) {
+				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
+			}
+		} else {
+			console.error(
+				`SVELTHREE > SvelthreeInteraction > check_pointer_click : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				{ shadow_dom_el }
+			)
 		}
 	}
 
@@ -757,15 +830,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * element through some other DOM / shadow DOM element.
 	 *
 	 */
-	function get_pointerevent_modified_clone(e: PointerEvent, new_type: string = null): PointerEvent {
-		const event_init = { composed: undefined }
+	function get_pointerevent_modified_clone(evt: PointerEvent, new_type: string | null = null): PointerEvent {
+		const event_init: { [key: string]: unknown } = { composed: undefined }
 
 		// we do this because simply spreading the event object -> `{...e}`:
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
-		// also we cannot simply alter the value of `composed` via the event object like e.g. `e.composed = false`
-		for (const key in e) {
+		// also we cannot simply alter the value of `composed` via the event object like evt.g. `evt.composed = false`
+		for (const key in evt) {
 			if (key !== "path") {
-				event_init[key] = e[key]
+				event_init[key] = evt[key as keyof PointerEvent]
 			}
 		}
 
@@ -776,25 +849,25 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		const cloned_and_modified_event: PointerEvent = new_type
 			? new PointerEvent(new_type, event_init)
-			: new PointerEvent(e.type, event_init)
+			: new PointerEvent(evt.type, event_init)
 		return cloned_and_modified_event
 	}
 
 	/*  POINTER Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function pointerevents_handler_action(e: PointerEvent): void {
-		pointerevents_handler(e, cancel_or_stop_propagation_action)
+	function pointerevents_handler_action(evt: PointerEvent): void {
+		pointerevents_handler(evt, cancel_or_stop_propagation_action)
 	}
 
-	function pointerevents_handler_directive(e: PointerEvent): void {
-		pointerevents_handler(e, cancel_or_stop_propagation_directive)
+	function pointerevents_handler_directive(evt: PointerEvent): void {
+		pointerevents_handler(evt, cancel_or_stop_propagation_directive)
 	}
 
 	function pointerevents_handler(
-		e: PointerEvent,
-		cancel_or_stop_propagation_fn: (e: PointerEvent | FocusEvent | KeyboardEvent) => void = null
+		evt: PointerEvent,
+		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null = null
 	): void {
-		const render_mode = $svelthreeStores[sti].rendererComponent.mode
+		const render_mode = store?.rendererComponent?.mode
 
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
@@ -802,25 +875,25 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			case "always":
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
 
-				if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(e)
+				if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
 
-				switch (e.type) {
+				switch (evt.type) {
 					case "pointermove": {
-						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(e)
+						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(evt)
 						queued_pointer_move_events[0] = queued_pointermove_event
-						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(e)
+						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					case "pointermoveover": {
-						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(e)
+						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(evt)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
-						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(e)
+						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					default: {
-						const queued_pointer_event = () => dispatch_pointerevent_intersection_dep(e)
+						const queued_pointer_event = () => dispatch_pointerevent_intersection_dep(evt)
 						pointer_events_queue.push(queued_pointer_event)
-						//pointer_events_queue.push(() => dispatch_pointerevent_intersection_dep(e))
+						//pointer_events_queue.push(() => dispatch_pointerevent_intersection_dep(evt))
 						break
 					}
 				}
@@ -829,12 +902,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 
-				cancel_or_stop_propagation_fn(e)
+				if (cancel_or_stop_propagation_fn !== null) cancel_or_stop_propagation_fn(evt)
 
-				if (e.type === "pointermove") {
-					dispatch_pointerevent_intersection_indep(e)
+				if (evt.type === "pointermove") {
+					dispatch_pointerevent_intersection_indep(evt)
 				} else {
-					dispatch_pointerevent_intersection_dep(e)
+					dispatch_pointerevent_intersection_dep(evt)
 				}
 
 				break
@@ -845,32 +918,32 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/** intersection dependent -> has raycaster_data! */
-	function dispatch_pointerevent_intersection_dep(e: PointerEvent) {
-		const action_name = `on_${e.type}`
+	function dispatch_pointerevent_intersection_dep(evt: PointerEvent) {
+		const action_name = `on_${evt.type}`
 
 		const detail: SvelthreeInteractionEventDetail = {
-			e,
+			evt,
 			obj,
 			comp: parent,
 			raycaster_data
 		}
 
-		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
 	/** intersection independent -> no raycaster_data! */
-	function dispatch_pointerevent_intersection_indep(e: PointerEvent) {
-		const action_name = `on_${e.type}`
+	function dispatch_pointerevent_intersection_indep(evt: PointerEvent) {
+		const action_name = `on_${evt.type}`
 
 		const detail: SvelthreeInteractionEventDetail = {
-			e,
+			evt,
 			obj,
 			comp: parent
 		}
 
-		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
 	/*  FOCUS Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -889,15 +962,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		if (parent[`on_${event_name}`]) {
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+
+		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_focus_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					update_prop_action_modifiers(event_name, null)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_focus_listener(event_name, listener_options, "prop_action")
-				} else if (prop_action_is_complex(event_name)) {
-					const modifiers_arr = get_prop_action_modifiers(event_name)
+				} else if (prop_action_is_complex(prop_action_handler)) {
+					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
 					update_prop_action_modifiers(event_name, modifiers_arr)
 
 					const listener_options = modifiers_arr
@@ -926,51 +1001,55 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
 		set_by: HandlerSetBy
 	) {
-		let handler: (e: FocusEvent) => void = undefined
-		if (set_by === "prop_action") handler = focusevents_handler_action
-		if (set_by === "on_directive") handler = focusevents_handler_directive
+		let listener: ((evt: FocusEvent) => void) | undefined = undefined
+		if (set_by === "prop_action") listener = focusevents_handler_action
+		if (set_by === "on_directive") listener = focusevents_handler_directive
 
-		add_shadow_dom_focus_listeners(event_name, listener_options, handler)
+		add_shadow_dom_focus_listeners(event_name, listener_options, listener)
 	}
 
 	function add_shadow_dom_focus_listeners(
 		event_name: SvelthreeSupportedInteractionEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
-		handler: (e: FocusEvent) => void
+		listener: ((evt: FocusEvent) => void) | undefined
 	): void {
-		listener_options
-			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_el.addEventListener(event_name, handler)
+		if (shadow_dom_el && listener) {
+			if (listener_options) {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
+			} else {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+			}
+		}
 	}
 
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function focusevents_handler_action(e: FocusEvent): void {
-		focusevents_handler(e, cancel_or_stop_propagation_action)
+	function focusevents_handler_action(evt: FocusEvent): void {
+		focusevents_handler(evt, cancel_or_stop_propagation_action)
 	}
 
-	function focusevents_handler_directive(e: FocusEvent): void {
-		focusevents_handler(e, cancel_or_stop_propagation_directive)
+	function focusevents_handler_directive(evt: FocusEvent): void {
+		focusevents_handler(evt, cancel_or_stop_propagation_directive)
 	}
 
 	function focusevents_handler(
-		e: FocusEvent,
-		cancel_or_stop_propagation_fn: (e: PointerEvent | FocusEvent | KeyboardEvent) => void
+		evt: FocusEvent,
+		cancel_or_stop_propagation_fn: (evt: PointerEvent | FocusEvent | KeyboardEvent) => void
 	): void {
-		const render_mode = $svelthreeStores[sti].rendererComponent.mode
+		const render_mode = store?.rendererComponent?.mode
 
-		cancel_or_stop_propagation_fn(e)
+		cancel_or_stop_propagation_fn(evt)
 
 		switch (render_mode) {
 			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
-				const queued_focus_event = () => dispatch_focusevent_intersection_indep(e)
+				const queued_focus_event = () => dispatch_focusevent_intersection_indep(evt)
 				focus_events_queue.push(queued_focus_event)
 				break
 			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
-				dispatch_focusevent_intersection_indep(e)
+				dispatch_focusevent_intersection_indep(evt)
 				break
 			default:
 				console.error(`SvelthreeInteraction > focusevents_handler > no such 'render_mode' -> ${render_mode}!`)
@@ -978,18 +1057,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function dispatch_focusevent_intersection_indep(e: FocusEvent) {
-		const action_name = `on_${e.type}`
+	function dispatch_focusevent_intersection_indep(evt: FocusEvent) {
+		const action_name = `on_${evt.type}`
 
 		const detail: SvelthreeInteractionEventDetail = {
-			e,
+			evt,
 			obj,
 			comp: parent
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
 	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -1011,15 +1090,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		if (parent[`on_${event_name}`]) {
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+
+		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_keyboard_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					update_prop_action_modifiers(event_name, null)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_keyboard_listener(event_name, listener_options, "prop_action")
-				} else if (prop_action_is_complex(event_name)) {
-					const modifiers_arr = get_prop_action_modifiers(event_name)
+				} else if (prop_action_is_complex(prop_action_handler)) {
+					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
 					update_prop_action_modifiers(event_name, modifiers_arr)
 
 					const listener_options = modifiers_arr
@@ -1047,7 +1128,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
 		set_by: HandlerSetBy
 	) {
-		let modifiers_map: UserModifiersMap
+		let modifiers_map: UserModifiersMap | undefined = undefined
 
 		if (set_by === "prop_action") {
 			modifiers_map = user_modifiers_action
@@ -1055,19 +1136,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			modifiers_map = user_modifiers_prop
 		}
 
-		if (modifiers_map.get(event_name)?.has("self")) {
+		if (modifiers_map?.get(event_name)?.has("self")) {
 			// listener is added directly to shadow dom.
 			// The shadow dom element has to have focus in order to react to keyboard input.
-			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
-			let handler: (e: KeyboardEvent) => void = undefined
-			if (set_by === "prop_action") handler = keyboardevents_handler_action
-			if (set_by === "on_directive") handler = keyboardevents_handler_directive
+			//  IMPORTANT  MODIFIERS possible! evt.g. `preventDefault` modifier will have 'local' effect.
+			let listener: ((evt: KeyboardEvent) => void) | undefined = undefined
+			if (set_by === "prop_action") listener = keyboardevents_handler_action
+			if (set_by === "on_directive") listener = keyboardevents_handler_directive
 
-			add_shadow_dom_keyboard_listener(event_name, listener_options, handler)
+			add_shadow_dom_keyboard_listener(event_name, listener_options, listener)
 		} else {
 			// <canvas> element is listening (listener attached to `window` or `document`) and spreading Keyboard events to all interactive
-			// components via an internal event, e.g. `canvas_keydown`, just like pointer events.
-			//  IMPORTANT  NO MODIFIERS possible, e.g. `preventDefault()` has to be called from inside some user defined global handler.
+			// components via an internal event, evt.g. `canvas_keydown`, just like pointer events.
+			//  IMPORTANT  NO MODIFIERS possible, evt.g. `preventDefault()` has to be called from inside some user defined global handler.
 			add_canvas_keyboard_listener(event_name, set_by)
 		}
 	}
@@ -1075,11 +1156,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_shadow_dom_keyboard_listener(
 		event_name: SvelthreeSupportedInteractionEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
-		handler: (e: KeyboardEvent) => void
+		listener: ((evt: KeyboardEvent) => void) | undefined
 	): void {
-		listener_options
-			? shadow_dom_el.addEventListener(event_name, handler, listener_options)
-			: shadow_dom_el.addEventListener(event_name, handler)
+		if (shadow_dom_el && listener) {
+			if (listener_options) {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
+			} else {
+				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+			}
+		}
 	}
 
 	/** Keyboard events are also being provided (re-dispatched) by the Canvas component. */
@@ -1110,91 +1195,109 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_keydown` -> `keydown`
 
-	let remove_canvas_keydown_listener_action: () => void
+	let remove_canvas_keydown_listener_action: (() => void) | undefined
 	function add_canvas_keydown_listener_action(): void {
-		remove_canvas_keydown_listener_action = canvas_component.$on("canvas_keydown", (e: CanvasComponentEvent) =>
+		remove_canvas_keydown_listener_action = canvas_component?.$on("canvas_keydown", (evt: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+			keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
-	let remove_canvas_keydown_listener_directive: () => void
+	let remove_canvas_keydown_listener_directive: (() => void) | undefined
 	function add_canvas_keydown_listener_directive(): void {
-		remove_canvas_keydown_listener_directive = canvas_component.$on("canvas_keydown", (e: CanvasComponentEvent) =>
-			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+		remove_canvas_keydown_listener_directive = canvas_component?.$on(
+			"canvas_keydown",
+			(evt: CanvasComponentEvent) =>
+				// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
+				keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_keyup` -> `keyup`
 
-	let remove_canvas_keyup_listener_action: () => void
+	let remove_canvas_keyup_listener_action: (() => void) | undefined
 	function add_canvas_keyup_listener_action(): void {
-		remove_canvas_keyup_listener_action = canvas_component.$on("canvas_keyup", (e: CanvasComponentEvent) =>
+		remove_canvas_keyup_listener_action = canvas_component?.$on("canvas_keyup", (evt: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+			keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
-	let remove_canvas_keyup_listener_directive: () => void
+	let remove_canvas_keyup_listener_directive: (() => void) | undefined
 	function add_canvas_keyup_listener_directive(): void {
-		remove_canvas_keyup_listener_directive = canvas_component.$on("canvas_keyup", (e: CanvasComponentEvent) =>
+		remove_canvas_keyup_listener_directive = canvas_component?.$on("canvas_keyup", (evt: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+			keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_press` -> `keypress`
 
-	let remove_canvas_keypress_listener_action: () => void
+	let remove_canvas_keypress_listener_action: (() => void) | undefined
 	function add_canvas_keypress_listener_action(): void {
-		remove_canvas_keypress_listener_action = canvas_component.$on("canvas_keypress", (e: CanvasComponentEvent) =>
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+		remove_canvas_keypress_listener_action = canvas_component?.$on("canvas_keypress", (evt: CanvasComponentEvent) =>
+			keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
-	let remove_canvas_keypress_listener_directive: () => void
+	let remove_canvas_keypress_listener_directive: (() => void) | undefined
 	function add_canvas_keypress_listener_directive(): void {
-		remove_canvas_keypress_listener_directive = canvas_component.$on("canvas_keypress", (e: CanvasComponentEvent) =>
-			keyboardevents_handler(e.detail.event as KeyboardEvent, null)
+		remove_canvas_keypress_listener_directive = canvas_component?.$on(
+			"canvas_keypress",
+			(evt: CanvasComponentEvent) => keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
 		)
 	}
 
 	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function keyboardevents_handler_action(e: KeyboardEvent): void {
-		keyboardevents_handler(e, cancel_or_stop_propagation_action)
+	function keyboardevents_handler_action(evt: KeyboardEvent): void {
+		keyboardevents_handler(evt, cancel_or_stop_propagation_action)
 	}
 
-	function keyboardevents_handler_directive(e: KeyboardEvent): void {
-		keyboardevents_handler(e, cancel_or_stop_propagation_directive)
+	function keyboardevents_handler_directive(evt: KeyboardEvent): void {
+		keyboardevents_handler(evt, cancel_or_stop_propagation_directive)
 	}
 
 	function keyboardevents_handler(
-		e: KeyboardEvent,
-		cancel_or_stop_propagation_fn: (e: PointerEvent | FocusEvent | KeyboardEvent) => void | null
+		evt: KeyboardEvent,
+		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null
 	): void {
-		const render_mode = $svelthreeStores[sti].rendererComponent.mode
+		const render_mode = store?.rendererComponent?.mode
 
 		//  IMPORTANT  //
 		// any specified `default_keyboard_events_handler` for the received keyboard event
 		// will override any present `preventDefault` and `stopPropagation` modifier prop setting.
-		if (default_keyboard_handler_specified(e.type)) {
-			canvas_component.default_keyboard_events_handler[e.type](e)
-		} else {
-			if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(e)
+
+		// TODO  improve / simplify
+		const is_default_keyboard_handler_specified: boolean | null = default_keyboard_handler_specified(evt.type)
+		if (is_default_keyboard_handler_specified === true) {
+			if (canvas_component) {
+				canvas_component.default_keyboard_events_handler[evt.type](evt)
+			} else {
+				console.error(
+					"SVELTHREE > SvelthreeInteraction > keyboardevents_handler > Couldn't call 'canvas_component.default_keyboard_events_handler[evt.type](evt)', 'canvas_component' is not available!",
+					{ canvas_component }
+				)
+			}
+		} else if (is_default_keyboard_handler_specified === false) {
+			if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
+		} else if (is_default_keyboard_handler_specified === null) {
+			console.error(
+				"SVELTHREE > SvelthreeInteraction > keyboardevents_handler > 'is_default_keyboard_handler_specified' is 'null', means 'canvas_component' is not available!",
+				{ canvas_component }
+			)
 		}
 
 		switch (render_mode) {
 			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
-				const queued_keyboard_event = () => dispatch_keyboardevent_intersection_indep(e)
+				const queued_keyboard_event = () => dispatch_keyboardevent_intersection_indep(evt)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
 			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
-				dispatch_keyboardevent_intersection_indep(e)
+				dispatch_keyboardevent_intersection_indep(evt)
 				break
 			default:
 				console.error(
@@ -1204,26 +1307,34 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function default_keyboard_handler_specified(event_name: KeyboardEvent["type"]): boolean {
-		return (
-			canvas_component.default_keyboard_events_handler &&
-			canvas_component.default_keyboard_events_handler[event_name]
-		)
+	function default_keyboard_handler_specified(event_name: KeyboardEvent["type"]): boolean | null {
+		if (canvas_component) {
+			return (
+				canvas_component.default_keyboard_events_handler &&
+				canvas_component.default_keyboard_events_handler[event_name]
+			)
+		} else {
+			console.error(
+				"SVELTHREE > SvelthreeInteraction > default_keyboard_handler_specified : 'canvas_component' not available!",
+				{ canvas_component }
+			)
+			return false
+		}
 	}
 
-	function dispatch_keyboardevent_intersection_indep(e: KeyboardEvent) {
-		const action_name = `on_${e.type}`
+	function dispatch_keyboardevent_intersection_indep(evt: KeyboardEvent) {
+		const action_name = `on_${evt.type}`
 
 		const detail: SvelthreeInteractionEventDetail = {
-			code: e.code,
-			e,
+			code: evt.code,
+			evt,
 			obj,
 			comp: parent
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(e.type)) dispatch_interaction(e.type, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, e.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
 	/*  CANCEL OR STOP PROPAGATION  */
@@ -1234,54 +1345,54 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * but _prop action modifiers_ **do NOT affect** the `modifiers` prop / _`on:` directives_!
 	 *
 	 * -  IMPORTANT  mode `"always"`:
-	 *   calling `e.preventDefault()` / `e.stopPropagation()` inside a handler **will have NO effect** ☝️,
-	 * because the was already emitted at some point during the animation, so `e.preventDefault()` / `e.stopPropagation()` **HAVE TO**
+	 *   calling `evt.preventDefault()` / `evt.stopPropagation()` inside a handler **will have NO effect** ☝️,
+	 * because the was already emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
 	 * be set via `modifiers` prop in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
 	 *
 	 * -  IMPORTANT  mode `"auto"`:
-	 *   calling `e.preventDefault()` inside a handler **will have effect** ☝️, means
-	 * `e.preventDefault()` / `e.stopPropagation()` **CAN** but **do NOT HAVE TO** be set via `modifiers` prop
+	 *   calling `evt.preventDefault()` inside a handler **will have effect** ☝️, means
+	 * `evt.preventDefault()` / `evt.stopPropagation()` **CAN** but **do NOT HAVE TO** be set via `modifiers` prop
 	 * in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
 	 */
-	function cancel_or_stop_propagation_action(e: PointerEvent | FocusEvent | KeyboardEvent): void {
-		const e_type = e.type as SvelthreeSupportedInteractionEvent
+	function cancel_or_stop_propagation_action(evt: PointerEvent | FocusEvent | KeyboardEvent): void {
+		const e_type = evt.type as SvelthreeSupportedInteractionEvent
 		if (
 			user_modifiers_action.get(e_type)?.has("preventDefault") ||
 			user_modifiers_prop.get("all")?.has("preventDefault") ||
 			user_modifiers_prop.get(e_type)?.has("preventDefault")
 		)
-			prevent_default(e)
+			prevent_default(evt)
 		if (
 			user_modifiers_action.get(e_type)?.has("stopPropagation") ||
 			user_modifiers_prop.get("all")?.has("stopPropagation") ||
 			user_modifiers_prop.get(e_type)?.has("stopPropagation")
 		)
-			stop_propagation(e)
+			stop_propagation(evt)
 	}
 
-	function cancel_or_stop_propagation_directive(e: PointerEvent | FocusEvent | KeyboardEvent): void {
+	function cancel_or_stop_propagation_directive(evt: PointerEvent | FocusEvent | KeyboardEvent): void {
 		if (
 			user_modifiers_prop.get("all")?.has("preventDefault") ||
-			user_modifiers_prop.get(e.type as SvelthreeSupportedInteractionEvent)?.has("preventDefault")
+			user_modifiers_prop.get(evt.type as SvelthreeSupportedInteractionEvent)?.has("preventDefault")
 		) {
-			prevent_default(e)
+			prevent_default(evt)
 		}
 		if (
 			user_modifiers_prop.get("all")?.has("stopPropagation") ||
-			user_modifiers_prop.get(e.type as SvelthreeSupportedInteractionEvent)?.has("stopPropagation")
+			user_modifiers_prop.get(evt.type as SvelthreeSupportedInteractionEvent)?.has("stopPropagation")
 		) {
-			stop_propagation(e)
+			stop_propagation(evt)
 		}
 	}
 
-	function prevent_default(e: PointerEvent | FocusEvent | KeyboardEvent) {
+	function prevent_default(evt: PointerEvent | FocusEvent | KeyboardEvent) {
 		if (verbose && log_dev) console.info(...c_dev(c_name, "prevent_default!"))
-		e.preventDefault()
+		evt.preventDefault()
 	}
 
-	function stop_propagation(e: PointerEvent | FocusEvent | KeyboardEvent) {
+	function stop_propagation(evt: PointerEvent | FocusEvent | KeyboardEvent) {
 		if (verbose && log_dev) console.info(...c_dev(c_name, "stop_propagation!"))
-		e.stopPropagation()
+		evt.stopPropagation()
 	}
 
 	/*  ADDING AND REGISTERING  */
@@ -1294,7 +1405,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	$: r_add_on_init = interactionEnabled && listeners
 	$: r_remove = !interactionEnabled && listeners
 
-	// Reactively add / remove pointer listeners, works with e.g. (syntax):
+	// Reactively add / remove pointer listeners, works with evt.g. (syntax):
 
 	// programmatically:
 	//   - add/re-add: `comp.on("click", do_on_click)`
@@ -1382,19 +1493,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		set_block_status()
 
-		if (!obj.userData.block) {
-			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
-				add_interaction_2_listener()
-			}
-		} else {
-			if ($svelthreeStores[sti].rendererComponent?.mode === "always" && remove_interaction_2_listener) {
-				remove_interaction_2_listener()
-				remove_interaction_2_listener = null
-			}
-		}
+		if (obj) {
+			if (store) {
+				if (!obj.userData.block) {
+					if (store.rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
+						add_interaction_2_listener()
+					}
+				} else {
+					if (store.rendererComponent?.mode === "always" && remove_interaction_2_listener) {
+						remove_interaction_2_listener()
+						remove_interaction_2_listener = null
+					}
+				}
 
-		if ($svelthreeStores[sti].rendererComponent?.mode === "always" && !remove_interaction_3_listener) {
-			add_interaction_3_listener()
+				if (store.rendererComponent?.mode === "always" && !remove_interaction_3_listener) {
+					add_interaction_3_listener()
+				}
+			}
 		}
 	}
 
@@ -1405,11 +1520,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 */
 	function set_block_status(): void {
 		//cursor will change on `interact: true` + `block: false`
-		console.warn("SvelthreeInteraction > set_block_status > used_pointer_events.size:", used_pointer_events.size)
+		console.debug("SvelthreeInteraction > set_block_status > used_pointer_events.size:", used_pointer_events.size)
 		if (used_pointer_events.size === 0) {
 			// cursor will not change
 			parent.block = true
-			obj.userData.block = true
+			if (obj) {
+				obj.userData.block = true
+			} else {
+				console.error(
+					"SvelthreeInteraction > set_block_status > Couldn't set 'obj.userData.block' to 'true', 'obj' is not available!",
+					{ obj }
+				)
+			}
 			console.warn("SvelthreeInteraction > set_block_status > parent.block, obj.userData.block -> true")
 		} else {
 			// cursor will change
@@ -1420,24 +1542,31 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function register_event(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
-		if (!target_set.has(event_name)) {
-			target_set.add(event_name)
+		if (canvas_component) {
+			if (!target_set.has(event_name)) {
+				target_set.add(event_name)
 
-			// register specific events on the <canvas> element (some pointer and all keyboard events)
-			switch (event_name) {
-				case "click":
-				case "pointerdown":
-				case "pointerup":
-					canvas_component.register_canvas_listener(event_name)
-					break
-				case "keydown":
-				case "keyup":
-				case "keypress":
-					canvas_component.register_canvas_listener(event_name)
-					break
-				default:
-					break
+				// register specific events on the <canvas> element (some pointer and all keyboard events)
+				switch (event_name) {
+					case "click":
+					case "pointerdown":
+					case "pointerup":
+						canvas_component.register_canvas_listener(event_name)
+						break
+					case "keydown":
+					case "keyup":
+					case "keypress":
+						canvas_component.register_canvas_listener(event_name)
+						break
+					default:
+						break
+				}
 			}
+		} else {
+			console.error(
+				`SVELTHREE > register_event : Cannot register '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				{ canvas_component }
+			)
 		}
 	}
 
@@ -1515,10 +1644,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action, false)
-			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action, true)
-			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive, false)
-			shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive, true)
+			if (shadow_dom_el) {
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_action as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive as EventListener, true)
+			} else {
+				console.error(
+					`SVELTHREE > SvelthreeInteraction > completely_remove_keyboard_listener > Cannot remove listener from unavailable 'shadow_dom_el'!`,
+					{ shadow_dom_el }
+				)
+			}
 
 			unregister_keyboard_event(event_name)
 		}
@@ -1529,7 +1665,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		delete_event_from_set(event_name, used_keyboard_events_action)
 		delete_event_from_set(event_name, used_keyboard_events)
 
-		canvas_component.unregister_canvas_listener(event_name)
+		if (canvas_component) {
+			canvas_component.unregister_canvas_listener(event_name)
+		} else {
+			console.error(
+				`SVELTHREE > unregister_keyboard_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				{ canvas_component }
+			)
+		}
 	}
 
 	function remove_all_focus_listeners(): void {
@@ -1541,11 +1684,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// remove unused but registered (were used) listeners
 	function completely_remove_focus_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		if (event_is_registered(event_name, used_focus_events)) {
-			shadow_dom_el.removeEventListener(event_name, focusevents_handler_action, true)
-			shadow_dom_el.removeEventListener(event_name, focusevents_handler_action, false)
-			shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive, true)
-			shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive, false)
-
+			if (shadow_dom_el) {
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler_action as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler_action as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive as EventListener, false)
+			} else {
+				console.error(
+					`SVELTHREE > SvelthreeInteraction > completely_remove_focus_listener > Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+					{ shadow_dom_el }
+				)
+			}
 			unregister_focus_event(event_name)
 		}
 	}
@@ -1586,10 +1735,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action, false)
-			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action, true)
-			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive, false)
-			shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive, true)
+			if (shadow_dom_el) {
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_action as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive as EventListener, true)
+			} else {
+				console.error(
+					`SVELTHREE > SvelthreeInteraction > completely_remove_pointer_listener > Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+					{ shadow_dom_el }
+				)
+			}
 
 			unregister_pointer_event(event_name)
 		}
@@ -1600,14 +1756,21 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		delete_event_from_set(event_name, used_pointer_events_action)
 		delete_event_from_set(event_name, used_pointer_events)
 
-		switch (event_name) {
-			case "click":
-			case "pointerdown":
-			case "pointerup":
-				canvas_component.unregister_canvas_listener(event_name)
-				break
-			default:
-				break
+		if (canvas_component) {
+			switch (event_name) {
+				case "click":
+				case "pointerdown":
+				case "pointerup":
+					canvas_component.unregister_canvas_listener(event_name)
+					break
+				default:
+					break
+			}
+		} else {
+			console.error(
+				`SVELTHREE > unregister_pointer_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				{ canvas_component }
+			)
 		}
 	}
 
@@ -1622,15 +1785,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function dispatch_prop_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
-		const e = new CustomEvent(e_type, { detail })
+		const evt = new CustomEvent(e_type, { detail })
+		const action = parent[action_name as keyof typeof parent]
 
-		if (typeof parent[action_name] === "function") {
-			parent[action_name](e)
-		} else if (parent[action_name].length) {
-			parent[action_name][0](e)
+		if (action) {
+			if (typeof parent[action_name as keyof typeof parent] === "function") {
+				action(evt)
+			} else if (parent[action_name as keyof typeof parent].length) {
+				action[0](evt)
+			} else {
+				console.error(
+					`SVELTHREE > SvelthreeInteraction > dispatch_prop_action : provided '${action_name}' action prop is not of valid type!`,
+					{ action_name, action }
+				)
+			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > dispatch_prop_action : provided '${action_name}' action prop is not a valid!`
+				`SVELTHREE > SvelthreeInteraction > dispatch_prop_action : '${action_name}' action prop is not available!`,
+				{ action_name, action }
 			)
 		}
 	}

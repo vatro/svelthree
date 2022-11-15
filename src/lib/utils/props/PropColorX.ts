@@ -5,8 +5,8 @@ import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropColorX {
 	// previous value reference
-	prev: Color
-	prevValues: { r: number; g: number; b: number }
+	prev: Color | undefined
+	prevValues: { r: number; g: number; b: number } | undefined
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
@@ -22,11 +22,18 @@ export default class PropColorX {
 			case value:
 				// same object, perform deep check
 				for (const k in this.prevValues) {
-					if (not_equal(this.prevValues[k], value[k])) {
-						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Color")
-						this.setPrevValues(value)
-						this.prev = value
-						return true
+					if (this.prevValues) {
+						if (
+							not_equal(
+								this.prevValues[k as keyof typeof this.prevValues],
+								value[k as keyof typeof this.prevValues]
+							)
+						) {
+							Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Color")
+							this.setPrevValues(value)
+							this.prev = value
+							return true
+						}
 					}
 				}
 

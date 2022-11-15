@@ -5,8 +5,8 @@ import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropMatrix4X {
 	// previous value reference
-	prev: Matrix4
-	prevValues: Parameters<Matrix4["set"]>
+	prev: Matrix4 | undefined
+	prevValues: Parameters<Matrix4["set"]> | undefined
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
@@ -21,12 +21,14 @@ export default class PropMatrix4X {
 
 			case value:
 				// same object, perform deep check
-				for (let i = 0; i < 16; i++) {
-					if (not_equal(this.prevValues[i], value.elements[i])) {
-						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Matrix4")
-						this.setPrevValues(value)
-						this.prev = value
-						return true
+				if (this.prevValues) {
+					for (let i = 0; i < 16; i++) {
+						if (not_equal(this.prevValues[i], value.elements[i])) {
+							Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Matrix4")
+							this.setPrevValues(value)
+							this.prev = value
+							return true
+						}
 					}
 				}
 

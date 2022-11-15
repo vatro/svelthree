@@ -1,8 +1,8 @@
 import type { RaycastArrayInput, RaycastArrayOutput } from "../types/types-extra"
 
 class RaycastArray_Base extends Array {
-	public head_path?: string[] | undefined = undefined
-	public index_prop: string | undefined = undefined
+	public head_path: string[] = ["userData"]
+	public index_prop = "index_in_raycast"
 	public dirty = false
 
 	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
@@ -26,7 +26,7 @@ class RaycastArray_Base extends Array {
 	}
 
 	// replace component references with three.js object instances created by the component
-	process_to_check_intersection() {
+	process_to_check_intersection(): void {
 		for (let i = 0; i < this.length; i++) {
 			if (this[i]["is_svelthree_component"]) {
 				this[i] = this[i].get_instance()
@@ -34,29 +34,15 @@ class RaycastArray_Base extends Array {
 		}
 	}
 
-	set_index_prop() {
+	set_index_prop(): void {
 		for (let i = 0; i < this.length; i++) {
-			let prop_head: unknown
-
-			if (this.head_path?.length) {
-				prop_head = this[i][this.head_path[0]]
-
-				let j = 1
-				while (j < this.head_path.length) {
-					prop_head = prop_head[this.head_path[j]]
-					j++
-				}
-			}
-
-			if (prop_head && this.index_prop) {
-				prop_head[this.index_prop] = i
-			}
+			this[i][this.head_path[0]][this.index_prop] = i
 		}
 	}
 }
 
 class RaycastArray extends RaycastArray_Base {
-	constructor(public index_prop: string = "index_in_raycast", public head_path: string[] = ["userData"]) {
+	constructor() {
 		super()
 	}
 }

@@ -6,7 +6,7 @@ export default class Calc {
 		c: HTMLCanvasElement,
 		e: PointerEvent,
 		cam: PerspectiveCamera | OrthographicCamera
-	): Vector3 {
+	): Vector3 | undefined {
 		const rect: DOMRect = c.getBoundingClientRect()
 
 		const px = ((e.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1

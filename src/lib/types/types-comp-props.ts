@@ -296,4 +296,8 @@ type PropsSvelthree =
 	| PropsWebGLCubeRenderTarget
 	| PropsWebGLRenderer
 
-export type SvelthreePropsObjectLiteral = PropsSvelthree | PropMat<MeshAssignableMaterial> | PropMat<PointsAssignableMaterial>
+//export type SvelthreePropsObjectLiteral = PropsSvelthree | PropMat<MeshAssignableMaterial> | PropMat<PointsAssignableMaterial>
+export type SvelthreePropsObjectLiteral =
+	| Omit<PropsSvelthree, "$T">
+	| Omit<PropMat<MeshAssignableMaterial>, "$T">
+	| Omit<PropMat<PointsAssignableMaterial>, "$T">

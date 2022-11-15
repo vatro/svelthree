@@ -110,7 +110,7 @@ export default class PropUtils {
 			if ((val as Color).isColor) return "Color"
 			if ((val as Euler).isEuler) return "Euler"
 			if ((val as Quaternion).isQuaternion) return "Quaternion"
-			if ((val as Matrix4)["isMatrix4"]) return "Matrix4"
+			if ((val as Matrix4)["isMatrix4" as keyof Matrix4]) return "Matrix4"
 		}
 
 		return undefined
@@ -119,10 +119,10 @@ export default class PropUtils {
 	public static setRotationFromValue(obj: Object3D, val: rot_value, complex?: ComplexValueType): void {
 		switch (complex) {
 			case undefined:
-				if (Array.isArray(val)) {
+				if (val && Array.isArray(val)) {
 					PropUtils.is3Nums(val as number[])
 						? PropUtils.setRotArray3(obj, val as Parameters<Vector3["set"]>)
-						: PropUtils.isEulerParams(val)
+						: PropUtils.isEulerParams(val as (number | string)[])
 						? PropUtils.setRotEulerArray(obj, val as Parameters<Euler["set"]>)
 						: PropUtils.isQuaternionParams(val as number[])
 						? PropUtils.setRotQuaternionArray(obj, val as Parameters<Quaternion["set"]>)
@@ -219,7 +219,7 @@ export default class PropUtils {
 			case undefined:
 				PropUtils.isArray3Nums(val as number[])
 					? PropUtils.setPositionFromArray3(obj, val as Parameters<Vector3["set"]>)
-					: val?.["isVector3"]
+					: (val as Vector3)?.isVector3
 					? PropUtils.setPositionFromVector3(obj, val as Vector3)
 					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
@@ -341,7 +341,7 @@ export default class PropUtils {
 		// this way we apply all other transforms before lookAt-update!
 		obj.updateMatrix()
 
-		let t_val: Vector3 | Parameters<Vector3["set"]> | null
+		let t_val: Vector3 | Parameters<Vector3["set"]> | undefined | null
 
 		if (val) {
 			// TODO  TOFIX  this seems to be broken?! (Spotlight)
@@ -350,7 +350,7 @@ export default class PropUtils {
 			if (!(val as TargetableSvelthreeComponent).is_svelthree_component && (val as Object3D).isObject3D) {
 				t_val = (val as Object3D).position
 			} else if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
-				t_val = (val as TargetableSvelthreeComponent).get_instance().position
+				t_val = (val as TargetableSvelthreeComponent).get_instance()?.position
 			} else if ((val as Vector3).isVector3) {
 				t_val = val as Vector3
 			} else if (PropUtils.isArray3Nums(val as number[])) {
@@ -361,8 +361,8 @@ export default class PropUtils {
 
 			if (t_val) {
 				// Use 'target':  IMPORTANT  Manipulating `target` via `lookAt` shorthand attribute is limited to `Lights` with 'target' property only (DirectionalLight | SpotLight)
-				if (obj["isLight"]) {
-					if (Object.prototype.hasOwnProperty.call(obj, "target")) {
+				if ((obj as LightWithTarget).isLight) {
+					if (Object.hasOwn(obj, "target")) {
 						if ((obj as LightWithTarget).target.isObject3D) {
 							if ((obj as LightWithTarget).matrixAutoUpdate === false) {
 								;(obj as LightWithTarget).target.matrixAutoUpdate = false
@@ -370,9 +370,10 @@ export default class PropUtils {
 
 							if ((obj as LightWithTarget).target.parent === null) {
 								// add target to parent of obj (light)
-								if ((obj as LightWithTarget).parent !== null) {
+								const obj_parent = (obj as LightWithTarget).parent
+								if (obj_parent !== null) {
 									// target has no parent, add target to parent of obj
-									;(obj as LightWithTarget).parent.add((obj as LightWithTarget).target)
+									obj_parent.add((obj as LightWithTarget).target)
 									console.warn(
 										`[ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
 										{ obj, target: (obj as LightWithTarget).target }
@@ -393,7 +394,10 @@ export default class PropUtils {
 								}
 							} else {
 								// target has parent, set position of the target
-								PropUtils.setPositionFromValue(obj["target"], t_val, complex)
+								const obj_target = (obj as LightWithTarget).target as Object3D
+								if (obj_target) {
+									PropUtils.setPositionFromValue(obj_target, t_val, complex)
+								}
 							}
 						} else {
 							// target is not Object3D
@@ -410,6 +414,9 @@ export default class PropUtils {
 				} else {
 					// Use `Object3D.lookAt` function (not 'target') on any `Object3D`
 					if (PropUtils.isArray3Nums(t_val as number[])) {
+						// TODO  Type wrong in  THREE  -> Object3D.d.ts
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						//@ts-ignore
 						obj.lookAt(t_val[0], t_val[1], t_val[2])
 					} else if ((t_val as Vector3).isVector3) {
 						obj.lookAt(t_val as Vector3)
@@ -475,46 +482,66 @@ export default class PropUtils {
 	}
 	*/
 
-	public static setColorFromArray(obj: Object3D | Material, val: [r: number, g: number, b: number], key: string) {
+	public static setColorFromArray(
+		obj: Material | Light | Scene,
+		val: [r: number, g: number, b: number],
+		key: string
+	) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromArray : ", { obj, val, key })
 		}
-		!obj[key] ? (obj[key] = new Color(val[0], val[1], val[2])) : obj[key].setRGB(val[0], val[1], val[2])
+		if (obj[key as keyof typeof obj] === null || obj[key as keyof typeof obj] === undefined) {
+			;(obj[key as keyof typeof obj] as Color) = new Color(val[0], val[1], val[2])
+		} else {
+			obj[key as keyof typeof obj].setRGB(val[0], val[1], val[2])
+		}
 	}
 
-	public static setColorFromNumber(obj: Object3D | Material, val: number, key: string) {
+	public static setColorFromNumber(obj: Material | Light | Scene | Material, val: number, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromNumber : ", { obj, val, key })
 		}
-		!obj[key] ? (obj[key] = new Color(val)) : obj[key].set(val)
+		if (obj[key as keyof typeof obj] === null || obj[key as keyof typeof obj] === undefined) {
+			;(obj[key as keyof typeof obj] as Color) = new Color(val)
+		} else {
+			obj[key as keyof typeof obj].set(val)
+		}
 	}
 
-	public static setColorFromColor(obj: Object3D | Material, val: Color, key: string) {
+	public static setColorFromColor(obj: Material | Light | Scene, val: Color, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromColor : ", { obj, val, key })
 		}
-		if (!obj[key]) {
-			// only copy the received Color in order to prevent circular binding to the prop
-			obj[key] = new Color()
-			obj[key].copy(val)
+		if (obj[key as keyof typeof obj] === null || obj[key as keyof typeof obj] === undefined) {
+			;(obj[key as keyof typeof obj] as Color) = new Color()
+			obj[key as keyof typeof obj].copy(val)
 		} else {
-			// only copy the received Color in order to prevent circular binding to the prop
-			obj[key].copy(val)
+			obj[key as keyof typeof obj].copy(val)
 		}
 	}
 
-	public static setColorFromVector3(obj: Object3D | Material, val: Vector3, key: string) {
+	public static setColorFromVector3(obj: Material | Light | Scene | Material, val: Vector3, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromVector3 : ", { obj, val, key })
 		}
-		!obj[key] ? (obj[key] = new Color(val.x, val.y, val.z)) : obj[key].setRGB(val.x, val.y, val.z)
+
+		if (obj[key as keyof typeof obj] === null || obj[key as keyof typeof obj] === undefined) {
+			;(obj[key as keyof typeof obj] as Color) = new Color(val.x, val.y, val.z)
+		} else {
+			obj[key as keyof typeof obj].setRGB(val.x, val.y, val.z)
+		}
 	}
 
-	public static setColorFromString(obj: Object3D | Material, val: string, key: string) {
+	public static setColorFromString(obj: Material | Light | Scene | Material, val: string, key: string) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> setColorFromString : ", { obj, val, key })
 		}
-		!obj[key] ? (obj[key] = new Color(val)) : obj[key].set(val)
+
+		if (obj[key as keyof typeof obj] === null || obj[key as keyof typeof obj] === undefined) {
+			;(obj[key as keyof typeof obj] as Color) = new Color(val)
+		} else {
+			obj[key as keyof typeof obj].set(val)
+		}
 	}
 
 	// Light specific
@@ -532,7 +559,7 @@ export default class PropUtils {
 			case undefined:
 				PropUtils.isArray2Nums(val as number[])
 					? PropUtils.setMapSizeFromArray2(obj, val as Parameters<Vector2["set"]>)
-					: val?.["isVector2"]
+					: val?.["isVector2" as keyof typeof val]
 					? PropUtils.setMapSizeFromVector2(obj, val as Vector2)
 					: console.error("[ PropUtils ] -> setPositionFromValue : invalid 'position' value!", {
 							obj: obj,
@@ -572,26 +599,32 @@ export default class PropUtils {
 		obj.mapSize.set(val[0], val[1])
 	}
 
-	public static setShadowMapSize(light: LightWithShadow, shadowMapSize: number) {
+	public static setShadowMapSize(light: LightWithShadow | undefined | null, shadowMapSize: number) {
 		if (verbose_mode() && log_prop_utils(light)) {
 			console.debug("[ PropUtils ] -> setShadowMapSize : ", { light, shadowMapSize })
 		}
-		light.shadow.mapSize.width = shadowMapSize
-		light.shadow.mapSize.height = shadowMapSize
+		if (light) {
+			light.shadow.mapSize.width = shadowMapSize
+			light.shadow.mapSize.height = shadowMapSize
+		}
 	}
 
-	public static setShadowBias(light: LightWithShadow, shadowBiasSize: number): void {
+	public static setShadowBias(light: LightWithShadow | undefined | null, shadowBiasSize: number): void {
 		if (verbose_mode() && log_prop_utils(light)) {
 			console.debug("[ PropUtils ] -> setShadowBias : ", { light, shadowBiasSize })
 		}
-		light.shadow.bias = shadowBiasSize
+		if (light) {
+			light.shadow.bias = shadowBiasSize
+		}
 	}
 
-	public static setCastShadow(light: LightWithShadow, castShadow: boolean): void {
+	public static setCastShadow(light: LightWithShadow | undefined | null, castShadow: boolean): void {
 		if (verbose_mode() && log_prop_utils(light)) {
 			console.debug("[ PropUtils ] -> setCastShadow : ", { light, castShadow })
 		}
-		light.castShadow = castShadow
+		if (light) {
+			light.castShadow = castShadow
+		}
 	}
 
 	/**
@@ -606,7 +639,7 @@ export default class PropUtils {
 			//console.warn("SVELTHREE > Propeller > setLightTarget : " + this.objTypeStr + " : target in 'props' now defined!!")
 
 			if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
-				;(obj as LightWithTarget).target = (val as TargetableSvelthreeComponent).get_instance()
+				;(obj as LightWithTarget).target = (val as TargetableSvelthreeComponent).get_instance() as Object3D
 			} else if ((val as Object3D).isObject3D) {
 				obj["target"] = val as Object3D
 			} else {
@@ -626,7 +659,7 @@ export default class PropUtils {
 		if (verbose_mode() && log_prop_utils(obj))
 			console.debug("[ PropUtils ] -> setMatrixFromValue! : ", { obj, val })
 		if (val) {
-			if ((val as Matrix4)["isMatrix4"]) {
+			if ((val as Matrix4)["isMatrix4" as keyof Matrix4]) {
 				// see https://stackoverflow.com/questions/60393190/threejs-transform-by-applymatrix4-doesnt-preserve-eigen-vectors-direction
 				//mesh.applyMatrix4(matrix)
 
@@ -711,12 +744,15 @@ export default class PropUtils {
 	}
 
 	/** Simply set property `a` to value `x` -> no special method was assigned to the prop via `Propeller`. */
-	public static applyValueToProp(obj: unknown, value: unknown, key: string, complex?: ComplexValueType) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	public static applyValueToProp(obj: any, value: unknown, key: string, complex?: ComplexValueType) {
 		if (verbose_mode() && log_prop_utils(obj)) {
 			console.debug("[ PropUtils ] -> applyValueToProp : ", { obj, value, key, complex })
 		}
 		try {
-			obj[key] = value
+			if (Object.hasOwn(obj, key)) {
+				obj[key] = value
+			}
 		} catch (err) {
 			console.error(`[ PropUtils ] -> applyValueToProp : failed!`, err, { obj, value, key })
 		}

@@ -2,6 +2,7 @@ import type { Object3D, Group } from "three"
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 import type { PropsMesh } from "../types/types-comp-props"
 import type { PropsAnyTHREEMeshMaterial, PropsAnyTHREELight } from "../types/types-extra"
+//import type { AnyTHREEMeshMaterial } from "../types/types-extra"
 
 export default class GLTF_afterLoaded {
 	// TODO  RECONSIDER  static for_all_cameras ?
@@ -52,9 +53,9 @@ export default class GLTF_afterLoaded {
 		if (scene) {
 			const fns: (() => Promise<void>)[] = []
 
-			const check_obj = (obj: Object3D, parent: Object3D | undefined, typ: string) => async () => {
+			const check_obj = (obj: Object3D | undefined, parent: Object3D | undefined, typ: string) => async () => {
 				if (obj) {
-					if (obj[typ]) {
+					if (Object.hasOwn(obj, typ)) {
 						// see https://github.com/mrdoob/three.js/blob/1a241ef10048770d56e06d6cd6a64c76cc720f95/src/core/Object3D.js#L342-L369
 						if (parent) {
 							const index_to_remove: number = parent.children.indexOf(obj)
@@ -99,12 +100,18 @@ export default class GLTF_afterLoaded {
 		if (scene) {
 			const fns: (() => Promise<void>)[] = []
 
-			const check_obj = (obj: Object3D, props: PropsAnyTHREEMeshMaterial) => async () => {
+			const check_obj = (obj: Object3D | undefined, props: PropsAnyTHREEMeshMaterial) => async () => {
 				if (obj) {
-					if (obj["isMesh"] && obj["material"]) {
+					if (Object.hasOwn(obj, "isMesh") && Object.hasOwn(obj, "material")) {
 						for (const prop in props) {
 							try {
-								obj["material"][prop] = props[prop]
+								// TODO  TS Error
+								//const mesh = obj as THREE.Mesh
+								//const mesh_material = mesh.material as AnyTHREEMeshMaterial
+								//if (mesh_material && Object.hasOwn(mesh_material, prop)) mesh_material[prop as keyof AnyTHREEMeshMaterial] = props[prop as keyof PropsAnyTHREEMeshMaterial]
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
+								mesh_material[prop] = props[prop as keyof PropsAnyTHREEMeshMaterial]
 							} catch (err) {
 								console.error(err)
 							}
@@ -150,9 +157,11 @@ export default class GLTF_afterLoaded {
 
 			const check_obj = (obj: Object3D, props: PropsMesh) => async () => {
 				if (obj) {
-					if (obj["isMesh"]) {
+					if (Object.hasOwn(obj, "isMesh")) {
 						for (const prop in props) {
 							try {
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
 								obj[prop] = props[prop]
 							} catch (err) {
 								console.error(err)
@@ -199,9 +208,11 @@ export default class GLTF_afterLoaded {
 
 			const check_obj = (obj: Object3D, props: PropsAnyTHREELight) => async () => {
 				if (obj) {
-					if (obj["isLight"]) {
+					if (Object.hasOwn(obj, "isLight")) {
 						for (const prop in props) {
 							try {
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
 								obj[prop] = props[prop]
 							} catch (err) {
 								console.error(err)

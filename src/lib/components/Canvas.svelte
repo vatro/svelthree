@@ -53,9 +53,9 @@ This is a **svelthree** _Canvas_ Component.
 	const dispatch = createEventDispatcher<CanvasComponentEventDispatcher>()
 
 	export let log_all = false
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
-	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 
 	// #endregion
 
@@ -74,16 +74,20 @@ This is a **svelthree** _Canvas_ Component.
 	/** RECONSIDER  `name` attribute is currently unused, but could be somehow useful in future. */
 	// export let name: string = undefined
 
-	export let style: string = undefined
-	let clazz: string = undefined
+	export let style: string | undefined = undefined
+	let clazz: string | undefined = undefined
 	export { clazz as class }
 
 	/** If `true` (_default_) the cursor will change automatically (_e.g. over/out canvas DOM element, **interactive** objects or when using the `OrbitControls` component_). */
 	export let change_cursor = true
 
-	export let interactive: boolean = undefined
+	export let interactive: boolean | undefined = undefined
 	$: if (interactive !== undefined) {
-		$svelthreeStores[sti].canvas.interactive = interactive
+		if (store) {
+			store.canvas.interactive = interactive
+		} else {
+			console.error("SVELTHREE > Canvas > Couldn't set 'interactive' status, 'store' not avialble!", { store })
+		}
 	}
 
 	/**
@@ -109,14 +113,14 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 * ☝️ _This will **NOT** affect event propagation inside the **svelthree shadow dom tree** / any modifiers specified by the `modifiers` prop._
 	 */
-	export let on_pointerevents: (e: PointerEvent) => void = undefined
+	export let on_pointerevents: ((e: PointerEvent) => void) | undefined = undefined
 
 	type SvelthreeDefaultKeyboardListenerHost = "window" | "canvas" | "document" | undefined
 
 	/**
 	 * Specifies where to add `KeyboardEvent` listeners to.
 	 *
-	 * ☝️ _Note on **`default_keyboardevents_handler` usage**: if you're using the `KeyboardEvent` modifier **`"self"`**,  \
+	 * ☝️ _Note on **`default_keyboardevents_listener` usage**: if you're using the `KeyboardEvent` modifier **`"self"`**,  \
 	 * you'll have to set `default_keyboard_listeners_host` to `"window"` or `"document"` in order for it to have effect._
 	 * ---
 	 * `"window"` (_default_)  \
@@ -145,9 +149,9 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 */
 	export let default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost = "window"
-	let keyboard_listeners_host: Window | Document | HTMLCanvasElement = undefined
+	let keyboard_listeners_host: Window | Document | HTMLCanvasElement | undefined = undefined
 
-	interface DefaultKeyboardEventsHandler {
+	interface DefaultKeyboardEventsListener {
 		keydown?: (e: KeyboardEvent) => void
 		keyup?: (e: KeyboardEvent) => void
 		keypress?: (e: KeyboardEvent) => void
@@ -157,11 +161,11 @@ This is a **svelthree** _Canvas_ Component.
 	 * If defined, an additional listener will be added to the `default_keyboard_listeners_host` (_default: `window`_).
 	 * 
 	 * ☝️ _if you're using the `KeyboardEvent` modifier **`"self"`**:  \
-	 * you have to set `default_keyboard_listeners_host` to `"window"` or `"document"`, otherwise `default_keyboardevents_handler` will have no effect!_
+	 * you have to set `default_keyboard_listeners_host` to `"window"` or `"document"`, otherwise `default_keyboardevents_listener` will have no effect!_
 	 * 
 	 * **Usage example**:
 	 * ```
-	 * default_keyboardevents_handler = {{
+	 * default_keyboardevents_listener = {{
         keydown: (e) => { if (e.code === "ArrowDown") e.preventDefault() }
     }}
 	 * ```
@@ -170,7 +174,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * ☝️ _This is an alternative to using the `on_keyboardevents` prop which allows you to specify a **single global (default)** `KeyboardEvent`
 	 * handler without adding a new listener to the `default_keyboard_listeners_host` (default: `window`)._
 	 */
-	export let default_keyboardevents_handler: DefaultKeyboardEventsHandler | undefined = undefined
+	export let default_keyboardevents_listener: DefaultKeyboardEventsListener | undefined = undefined
 
 	/**
 	 * Set listener options for all keyboard listeners ( _internally_ ) bound to either:
@@ -197,12 +201,12 @@ This is a **svelthree** _Canvas_ Component.
 	 * ```
 	 * will prevent scrolling down (_default browser behavior_) when the `ArrowDown` key was pressed.
 	 *
-	 * ☝️ _This is an alternative to using the `default_keyboardevents_handler` prop which allows you specify
+	 * ☝️ _This is an alternative to using the `default_keyboardevents_listener` prop which allows you specify
 	 * a different handler for `"keydown"`, `"keyup"` and `"keypress"` event._
 	 */
-	export let on_keyboardevents: (e: KeyboardEvent) => void = undefined
+	export let on_keyboardevents: ((e: KeyboardEvent) => void) | undefined = undefined
 
-	const canvas_interactivity: Writable<{ enabled: boolean }> = writable({ enabled: interactive })
+	const canvas_interactivity: Writable<{ enabled: boolean | undefined }> = writable({ enabled: interactive })
 	setContext("canvas_interactivity", canvas_interactivity)
 	$: if (interactive !== undefined) $canvas_interactivity.enabled = interactive
 
@@ -254,6 +258,8 @@ This is a **svelthree** _Canvas_ Component.
 	setContext("store_index", sti)
 	export const get_sti = (): number => sti
 
+	$: store = $svelthreeStores[sti]
+
 	// canvas
 	let c: HTMLCanvasElement
 
@@ -273,39 +279,39 @@ This is a **svelthree** _Canvas_ Component.
 		}
 	}
 
-	$: if (c && keyboard_listeners_host !== undefined && default_keyboardevents_handler !== undefined) {
-		if (default_keyboardevents_handler.keydown)
+	$: if (c && keyboard_listeners_host !== undefined && default_keyboardevents_listener !== undefined) {
+		if (default_keyboardevents_listener.keydown)
 			keyboard_listeners_host.addEventListener(
 				"keydown",
-				default_keyboardevents_handler.keydown,
+				default_keyboardevents_listener.keydown as EventListener,
 				keyboard_listener_options
 			)
-		if (default_keyboardevents_handler.keyup)
+		if (default_keyboardevents_listener.keyup)
 			keyboard_listeners_host.addEventListener(
 				"keyup",
-				default_keyboardevents_handler.keyup,
+				default_keyboardevents_listener.keyup as EventListener,
 				keyboard_listener_options
 			)
-		if (default_keyboardevents_handler.keypress)
+		if (default_keyboardevents_listener.keypress)
 			keyboard_listeners_host.addEventListener(
 				"keypress",
-				default_keyboardevents_handler.keypress,
+				default_keyboardevents_listener.keypress as EventListener,
 				keyboard_listener_options
 			)
 	}
 
 	// IMPORTANT  reactive!
-	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = writable({ element: c })
+	const canvas_dom: Writable<{ element: HTMLCanvasElement | undefined }> = writable({ element: undefined })
 	setContext("canvas_dom", canvas_dom)
 	$: $canvas_dom.element = c
 
 	// IMPORTANT  reactive!
 	let sh_root: HTMLDivElement
-	const shadow_root: Writable<{ element: ShadowRoot }> = writable({ element: null })
+	const shadow_root: Writable<{ element: ShadowRoot | null }> = writable({ element: null })
 	setContext("shadow_root", shadow_root)
 
 	/** Returns the shadow DOM root element. */
-	export const get_shadow_root_el = (): ShadowRoot => $shadow_root.element
+	export const get_shadow_root_el = (): ShadowRoot | null => $shadow_root.element
 
 	$: if (sh_root) {
 		$shadow_root.element = sh_root.attachShadow({ mode: "open", delegatesFocus: false })
@@ -340,7 +346,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	// --- Interactivity ---
 
-	let raycaster: Raycaster
+	let raycaster: Raycaster | null
 
 	$: if (c && !interactive) {
 		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_listener_options)
@@ -348,43 +354,44 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	// reactive create raycaster
-	$: interactive && !raycaster && c && $svelthreeStores[sti].renderer ? createRaycaster() : null
+	$: interactive && !raycaster && c && store?.renderer ? createRaycaster() : null
 
 	function createRaycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > interactive", interactive))
 
 		raycaster = new Raycaster()
 
-		$svelthreeStores[sti].raycaster = raycaster
-		$canvas_interactivity.enabled = true
+		if (store) {
+			store.raycaster = raycaster
+			$canvas_interactivity.enabled = true
 
-		if ($svelthreeStores[sti].renderer.xr.enabled === false) {
-			start_updating_pointer()
-			add_interaction_0_listener()
-		}
+			if (store.renderer?.xr.enabled === false) {
+				start_updating_pointer()
+				add_interaction_0_listener()
+			}
 
-		if (verbose && log_dev) {
-			console.info(
-				"SVELTHREE > Canvas : after Raycaster creation, $svelthreeStores[sti]: ",
-				$svelthreeStores[sti]
-			)
+			if (verbose && log_dev) {
+				console.info("SVELTHREE > Canvas : after Raycaster creation, store: ", store)
+			}
 		}
 	}
 
 	// reactively remove raycaster
-	$: !interactive && raycaster && $svelthreeStores[sti].renderer ? remove_raycaster() : null
+	$: !interactive && raycaster && store?.renderer ? remove_raycaster() : null
 
 	function remove_raycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "remove_raycaster > interactive", interactive))
 
-		$canvas_interactivity.enabled = false
-		$svelthreeStores[sti].raycaster = undefined
-		raycaster = null
+		if (store) {
+			$canvas_interactivity.enabled = false
+			store.raycaster = undefined
+			raycaster = null
 
-		remove_all_listeners()
+			remove_all_listeners()
+		}
 
 		if (verbose && log_rs) {
-			console.debug(...c_rs(c_name, "after Raycaster remove, $svelthreeStores[sti]:", $svelthreeStores[sti]))
+			console.debug(...c_rs(c_name, "after Raycaster remove, store:", store))
 		}
 	}
 
@@ -392,7 +399,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * Removes the `interaction_1` render event listener which updates all intersections, changes cursor appearance
 	 * and updates / removes ( _unused_ ) `click` related event listeners bound to the `<canvas>` element.
 	 */
-	let remove_interaction_1_listener: () => void
+	let remove_interaction_1_listener: (() => void) | undefined | null
 
 	/**
 	 * Adss the `interaction_1` render event listener.
@@ -401,7 +408,7 @@ This is a **svelthree** _Canvas_ Component.
 	 *   - updates / removes ( _unused_ ) `click` related event listeners bound to the `<canvas>` element.
 	 */
 	function add_interaction_1_listener(): void {
-		remove_interaction_1_listener = $svelthreeStores[sti].rendererComponent.$on("interaction_1", on_interaction_1)
+		remove_interaction_1_listener = store?.rendererComponent?.$on("interaction_1", on_interaction_1)
 	}
 
 	function on_interaction_1(): void {
@@ -443,9 +450,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 
 		if (change_cursor) {
-			$svelthreeStores[sti].orbitcontrols.length > 0
-				? set_cursor_style("all-scroll")
-				: set_cursor_style("default")
+			if (store) store.orbitcontrols.length > 0 ? set_cursor_style("all-scroll") : set_cursor_style("default")
 		}
 	}
 
@@ -505,9 +510,11 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** Get the `pointer_state` object which is being internally shared via context / used for various interaction functionality. */
-	export const get_pointer_state = (): { clientX: number; clientY: number } => {
+	export const get_pointer_state = (): { clientX: number; clientY: number } | undefined => {
 		if (pointer_state.event) {
 			return { clientX: pointer_state.event.clientX, clientY: pointer_state.event.clientY }
+		} else {
+			return undefined
 		}
 	}
 
@@ -525,20 +532,17 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	// Mark the `filtered_raycast` as `dirty` if the active Scene has changed.
-	$: if ($svelthreeStores[sti].activeScene) filtered_raycast.dirty = true
+	$: if (store?.activeScene) filtered_raycast.dirty = true
 
 	/**
 	 * Removes the `interaction_0` render event listener.
 	 * - `interaction_0` render event listener -> checks if the `filtered_raycast` object should be re-processed on every render.
 	 */
-	let remove_interaction_0_listener: () => void
+	let remove_interaction_0_listener: (() => void) | undefined | null
 
 	/** Adds the `interaction_0` render event listener -> checks if the `filtered_raycast` object should be re-processed on every render. */
 	function add_interaction_0_listener(): void {
-		remove_interaction_0_listener = $svelthreeStores[sti].rendererComponent.$on(
-			"interaction_0",
-			check_filter_raycast
-		)
+		remove_interaction_0_listener = store?.rendererComponent?.$on("interaction_0", check_filter_raycast)
 	}
 
 	/**
@@ -561,7 +565,7 @@ This is a **svelthree** _Canvas_ Component.
 		for (let i = 0; i < raycast.length; i++) {
 			const obj: Object3D = raycast[i]
 			if (obj.userData.root_scene) {
-				if (obj.userData.root_scene === $svelthreeStores[sti].activeScene) {
+				if (obj.userData.root_scene === store?.activeScene) {
 					filtered_raycast.objects.push(obj)
 				} else {
 					/* nothing, object will not be raycasted */
@@ -583,8 +587,8 @@ This is a **svelthree** _Canvas_ Component.
 
 	/** Updates the `all_intersections.result` array and changes the pointer appearance if the `change_cursor` prop is set to `true`.*/
 	function update_all_intersections_and_cursor(): void {
-		if (interactive && $pointer_over_canvas.status === true) {
-			raycaster.setFromCamera(pointer_state.pos, $svelthreeStores[sti].activeCamera)
+		if (raycaster && interactive && $pointer_over_canvas.status === true && store?.activeCamera !== undefined) {
+			raycaster.setFromCamera(pointer_state.pos, store.activeCamera as THREE.Camera)
 			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, recursive)
 
 			if (change_cursor) {
@@ -595,14 +599,12 @@ This is a **svelthree** _Canvas_ Component.
 				) {
 					set_cursor_style("pointer")
 				} else {
-					$svelthreeStores[sti].orbitcontrols.length > 0
-						? set_cursor_style("all-scroll")
-						: set_cursor_style("default")
+					store.orbitcontrols.length > 0 ? set_cursor_style("all-scroll") : set_cursor_style("default")
 				}
 			}
 		}
 
-		dispatch("canvas_pointermove", { event: pointer_state.event })
+		if (pointer_state.event) dispatch("canvas_pointermove", { event: pointer_state.event })
 	}
 
 	function set_cursor_style(css_value: string): void {
@@ -637,6 +639,7 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	export const register_canvas_listener = (event_name: SvelthreeSupportedInteractionEvent) => {
 		//console.log("register_canvas_listener!")
+
 		if (!canvas_listeners.has(event_name)) {
 			switch (event_name) {
 				case "click":
@@ -646,7 +649,7 @@ This is a **svelthree** _Canvas_ Component.
 						total: 1
 					})
 
-					c.addEventListener(event_name, on_pointer_event_handler, pointer_listener_options)
+					c.addEventListener(event_name, on_pointer_event_listener as EventListener, pointer_listener_options)
 
 					break
 				case "keydown":
@@ -656,11 +659,18 @@ This is a **svelthree** _Canvas_ Component.
 						total: 1
 					})
 
-					keyboard_listeners_host.addEventListener(
-						event_name,
-						on_keyboard_event_handler,
-						keyboard_listener_options
-					)
+					if (keyboard_listeners_host) {
+						keyboard_listeners_host.addEventListener(
+							event_name,
+							on_keyboard_event_listener as EventListener,
+							keyboard_listener_options
+						)
+					} else {
+						console.error(
+							"SVELTHREE > Canvas > register_canvas_listener : Couldn't register 'Canvas' keyboard-listener, 'keyboard_listeners_host' not available!",
+							{ keyboard_listeners_host }
+						)
+					}
 					break
 				default:
 					break
@@ -668,7 +678,7 @@ This is a **svelthree** _Canvas_ Component.
 		} else {
 			// update event usage count.
 			// if the event is not being used (total = 0), the corresponding listener will be removed.
-			canvas_listeners.get(event_name).total += 1
+			increase_listener_usage_for_event(event_name)
 		}
 	}
 
@@ -676,7 +686,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * Spread a pointer event to all interactive components.
 	 * `SvelthreeInteraction` component will listen / react to this if it's using the corresponding pointer event.
 	 */
-	function on_pointer_event_handler(e: PointerEvent) {
+	function on_pointer_event_listener(e: PointerEvent) {
 		if (e.target === c) {
 			if (on_pointerevents && typeof on_pointerevents === "function") on_pointerevents(e)
 			dispatch(`canvas_${e.type}`, { event: e })
@@ -687,7 +697,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * Spread a keyboard event to all interactive components.
 	 * `SvelthreeInteraction` component will listen / react to this if it's using the corresponding keyboard event.
 	 */
-	function on_keyboard_event_handler(e: KeyboardEvent) {
+	function on_keyboard_event_listener(e: KeyboardEvent) {
 		// TODO  clarify: in Chrome `e.target` is always `document.body` regardless if we've added the listener to `window` or `document`.
 		if (e.target === document.body || e.target === document || e.target === c) {
 			if (on_keyboardevents && typeof on_keyboardevents === "function") on_keyboardevents(e)
@@ -703,11 +713,49 @@ This is a **svelthree** _Canvas_ Component.
 		if (canvas_listeners.has(event_name)) {
 			// update pointer event usage count
 			// if the event is not being used (total = 0), the corresponding listener will be removed.
-			canvas_listeners.get(event_name).total -= 1
+			decrease_listener_usage_for_event(event_name)
 			update_canvas_listeners()
 		} else {
 			// silently nothing
 			//console.error(`SVELTHREE > Canvas : tried to unregister non-existant pointer listener.`)
+		}
+	}
+
+	function increase_listener_usage_for_event(event_name: SvelthreeSupportedInteractionEvent) {
+		const listener_obj = canvas_listeners.get(event_name)
+		if (listener_obj) {
+			if (listener_obj.total) {
+				listener_obj.total += 1
+			} else {
+				console.error(
+					"SVELTHREE > Canvas > register_canvas_listener : Couldn't increase 'Canvas' listener usage count, 'listener_obj.total' not available!",
+					{ total: listener_obj.total }
+				)
+			}
+		} else {
+			console.error(
+				"SVELTHREE > Canvas > register_canvas_listener : Couldn't increase 'Canvas' listener usage count, 'listener_obj' not available!",
+				{ listener_obj }
+			)
+		}
+	}
+
+	function decrease_listener_usage_for_event(event_name: SvelthreeSupportedInteractionEvent) {
+		const listener_obj = canvas_listeners.get(event_name)
+		if (listener_obj) {
+			if (listener_obj.total) {
+				listener_obj.total -= 1
+			} else {
+				console.error(
+					"SVELTHREE > Canvas > register_canvas_listener : Couldn't decrease 'Canvas' listener usage count, 'listener_obj.total' not available!",
+					{ total: listener_obj.total }
+				)
+			}
+		} else {
+			console.error(
+				"SVELTHREE > Canvas > register_canvas_listener : Couldn't decrease 'Canvas' listener usage count, 'listener_obj' not available!",
+				{ listener_obj }
+			)
 		}
 	}
 
@@ -723,12 +771,12 @@ This is a **svelthree** _Canvas_ Component.
 					case "click":
 					case "pointerdown":
 					case "pointerup":
-						c.removeEventListener(event_name, on_pointer_event_handler, pointer_capture)
+						c.removeEventListener(event_name, on_pointer_event_listener as EventListener, pointer_capture)
 						break
 					case "keydown":
 					case "keyup":
 					case "keypress":
-						document.removeEventListener(event_name, on_keyboard_event_handler, keyboard_capture)
+						document.removeEventListener(event_name, on_keyboard_event_listener, keyboard_capture)
 						break
 					default:
 						break
@@ -740,16 +788,15 @@ This is a **svelthree** _Canvas_ Component.
 
 	// --- Accessabilty ---
 
-	export let tabindex: number = undefined
+	export let tabindex: number | undefined = undefined
 	// eslint-disable-next-line no-undef
-	export let aria: Partial<ARIAMixin> = undefined
+	export let aria: Partial<ARIAMixin> | undefined = undefined
 
 	$: if (c && browser) {
 		if (tabindex !== undefined) c.tabIndex = tabindex
 		if (aria !== undefined) {
-			for (const key in aria) {
-				c[key] = aria[key]
-			}
+			// TODO  is this ok like this?
+			Object.assign(c, aria)
 		}
 	}
 
@@ -818,33 +865,49 @@ This is a **svelthree** _Canvas_ Component.
 			c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 			c.removeEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_capture)
 
-			c.removeEventListener("click", on_pointer_event_handler, pointer_capture)
-			c.removeEventListener("pointerdown", on_pointer_event_handler, pointer_capture)
-			c.removeEventListener("pointerup", on_pointer_event_handler, pointer_capture)
+			c.removeEventListener("click", on_pointer_event_listener as EventListener, pointer_capture)
+			c.removeEventListener("pointerdown", on_pointer_event_listener, pointer_capture)
+			c.removeEventListener("pointerup", on_pointer_event_listener, pointer_capture)
 
-			keyboard_listeners_host.removeEventListener("keydown", on_keyboard_event_handler, keyboard_capture)
-			keyboard_listeners_host.removeEventListener("keyup", on_keyboard_event_handler, keyboard_capture)
-			keyboard_listeners_host.removeEventListener("keypress", on_keyboard_event_handler, keyboard_capture)
+			if (keyboard_listeners_host) {
+				keyboard_listeners_host.removeEventListener(
+					"keydown",
+					on_keyboard_event_listener as EventListener,
+					keyboard_capture
+				)
+				keyboard_listeners_host.removeEventListener(
+					"keyup",
+					on_keyboard_event_listener as EventListener,
+					keyboard_capture
+				)
+				keyboard_listeners_host.removeEventListener(
+					"keypress",
+					on_keyboard_event_listener as EventListener,
+					keyboard_capture
+				)
 
-			if (default_keyboardevents_handler) {
-				if (default_keyboardevents_handler.keydown)
-					keyboard_listeners_host.removeEventListener(
-						"keydown",
-						default_keyboardevents_handler.keydown,
-						keyboard_capture
-					)
-				if (default_keyboardevents_handler.keyup)
-					keyboard_listeners_host.removeEventListener(
-						"keyup",
-						default_keyboardevents_handler.keyup,
-						keyboard_capture
-					)
-				if (default_keyboardevents_handler.keypress)
-					keyboard_listeners_host.removeEventListener(
-						"keypress",
-						default_keyboardevents_handler.keypress,
-						keyboard_capture
-					)
+				if (default_keyboardevents_listener) {
+					if (default_keyboardevents_listener.keydown)
+						keyboard_listeners_host.removeEventListener(
+							"keydown",
+							default_keyboardevents_listener.keydown as EventListener,
+							keyboard_capture
+						)
+					if (default_keyboardevents_listener.keyup)
+						keyboard_listeners_host.removeEventListener(
+							"keyup",
+							default_keyboardevents_listener.keyup as EventListener,
+							keyboard_capture
+						)
+					if (default_keyboardevents_listener.keypress)
+						keyboard_listeners_host.removeEventListener(
+							"keypress",
+							default_keyboardevents_listener.keypress as EventListener,
+							keyboard_capture
+						)
+				}
+			} else {
+				// TODO  fail silently?
 			}
 		}
 	}
@@ -856,17 +919,17 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onMount(
 		onMountReplace
-			? () => onMountReplace(self)
+			? () => (onMountReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
 						console.info(...c_lc(c_name, "onMount"))
 					}
 					if (verbose && log_dev) {
-						console.debug(...c_dev(c_name, "onMount -> $svelthreeStores[sti]", $svelthreeStores[sti]))
+						console.debug(...c_dev(c_name, "onMount -> store", store))
 					}
 			  }
 	)
@@ -879,7 +942,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Inject** functionality at the **end** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
 	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
@@ -889,7 +952,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Completely replace** `svelthree`-component's default `onDestroy`-callback logic, any `onDestroyStart` & `onDestroyEnd` logic will be ignored (_default verbosity will be gone_).
 	 *
@@ -898,11 +961,11 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onDestroy(
 		onDestroyReplace
-			? () => onDestroyReplace(self)
+			? () => (onDestroyReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
 						console.info(...c_lc(c_name, "onDestroy"))
@@ -921,7 +984,7 @@ This is a **svelthree** _Canvas_ Component.
 					// this way we don't have to handle anything, other store 'sti' will remain valid
 					// any newly added canvas will create a new store at the next highest index
 					// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
-					$svelthreeStores[sti] = null
+					store = null
 
 					// if all stores are `null` we can safely reset the `svelthreeStores` array, e.g. when switching pages / routes.
 					if (all_stores_are_null()) {
@@ -951,7 +1014,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	function trim_stores_array(): void {
-		let start_index: number
+		let start_index: number | undefined
 
 		for (let i = $svelthreeStores.length - 1; i > 0; i--) {
 			if ($svelthreeStores[i] === null && $svelthreeStores[i - 1] !== null) {
@@ -962,7 +1025,7 @@ This is a **svelthree** _Canvas_ Component.
 			}
 		}
 
-		if (start_index) {
+		if (start_index !== undefined) {
 			const trim_length: number = $svelthreeStores.length - start_index
 			$svelthreeStores.splice(start_index, trim_length)
 		}
@@ -975,11 +1038,11 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	beforeUpdate(
 		beforeUpdateReplace
-			? () => beforeUpdateReplace(self)
+			? () => (beforeUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
 						console.info(...c_lc(c_name, "beforeUpdate"))
@@ -994,11 +1057,11 @@ This is a **svelthree** _Canvas_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	afterUpdate(
 		afterUpdateReplace
-			? () => afterUpdateReplace(self)
+			? () => (afterUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
 						console.info(...c_lc(c_name, "afterUpdate"))

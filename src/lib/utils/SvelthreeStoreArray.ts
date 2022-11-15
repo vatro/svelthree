@@ -21,16 +21,20 @@ class SvelthreeStoreArray_Base extends Array {
 		return this
 	}
 
-	set_index_prop() {
+	set_index_prop(): void {
 		for (let i = 0; i < this.length; i++) {
-			let prop_head: unknown
+			let prop_head: { [key: string]: unknown } | undefined
 
 			if (this.head_path?.length) {
 				prop_head = this[i][this.head_path[0]]
 
 				let j = 1
 				while (j < this.head_path.length) {
-					prop_head = prop_head[this.head_path[j]]
+					if (prop_head) {
+						prop_head = prop_head[this.head_path[j]] as { [key: string]: unknown }
+					} else {
+						console.error("SVELTHREE > SvelthreeStoreArray : invalid 'prop_head' value!", { prop_head })
+					}
 					j++
 				}
 			}

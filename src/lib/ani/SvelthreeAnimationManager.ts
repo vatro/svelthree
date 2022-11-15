@@ -4,14 +4,16 @@ import type { SvelthreeAnimation } from "../types/types-extra"
 
 export default class SvelthreeAnimationManager {
 	/** Generated animation-`Object Literal` (_interface `SvelthreeAnimation`_): result of `this.ani_obj_factory.create(...)`. */
-	ani_obj: SvelthreeAnimation
+	private ani_obj: SvelthreeAnimation | undefined
 
 	constructor(
 		private ani_obj_factory: SvelthreeAnimationObjectFactory,
 		private aniauto: boolean,
 		private foo: Object3D,
-		private scene: Scene | null
-	) {}
+		private scene: Scene | null | undefined
+	) {
+		this.ani_obj = undefined
+	}
 
 	public handleCurrentSceneStatus(currentSceneActive: boolean): void {
 		if (currentSceneActive) {
@@ -76,32 +78,46 @@ export default class SvelthreeAnimationManager {
 	}
 
 	private try_on_scene_reactivated(): void {
-		Object.prototype.hasOwnProperty.call(this.ani_obj, "onSceneReactivated")
-			? this.ani_obj.onSceneReactivated()
-			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > try_on_scene_reactivated : 'onSceneReactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
-					this.ani_obj
-			  )
+		if (
+			this.ani_obj &&
+			Object.hasOwn(this.ani_obj, "onSceneReactivated") &&
+			typeof this.ani_obj["onSceneReactivated"] === "function"
+		) {
+			this.ani_obj.onSceneReactivated()
+		} else {
+			console.warn(
+				"SVELTHREE > SvelthreeAnimationManager > try_on_scene_reactivated : 'onSceneReactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
+				this.ani_obj
+			)
+		}
 	}
 
 	// inactive / deactivated
 	private handle_scene_inactive(): void {
 		// check if animation has been initiated
 		// if it has been initated, try to execute 'onSceneDeactivated'
-		this.ani_obj
-			? this.try_on_scene_deactivated()
-			: console.debug(
-					"SVELTHREE > SvelthreeAnimationManager > handle_scene_inactive : 'SvelthreeAnimation'-Object not available!"
-			  )
+		if (this.ani_obj) {
+			this.try_on_scene_deactivated()
+		} else {
+			console.debug(
+				"SVELTHREE > SvelthreeAnimationManager > handle_scene_inactive : 'SvelthreeAnimation'-Object not available!"
+			)
+		}
 	}
 
 	private try_on_scene_deactivated(): void {
-		Object.prototype.hasOwnProperty.call(this.ani_obj, "onSceneDeactivated")
-			? this.ani_obj.onSceneDeactivated()
-			: console.warn(
-					"SVELTHREE > SvelthreeAnimationManager > try_on_scene_deactivated : 'onSceneDeactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
-					this.ani_obj
-			  )
+		if (
+			this.ani_obj &&
+			Object.hasOwn(this.ani_obj, "onSceneDeactivated") &&
+			typeof this.ani_obj["onSceneDeactivated"] === "function"
+		) {
+			this.ani_obj.onSceneDeactivated()
+		} else {
+			console.warn(
+				"SVELTHREE > SvelthreeAnimationManager > try_on_scene_deactivated : 'onSceneDeactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
+				this.ani_obj
+			)
+		}
 	}
 
 	public startAnimation(): void {
@@ -116,14 +132,20 @@ export default class SvelthreeAnimationManager {
 	}
 
 	public destroyAnimation(): void {
-		Object.prototype.hasOwnProperty.call(this.ani_obj, "onDestroy")
-			? this.ani_obj.onDestroy()
-			: console.error(
-					"SVELTHREE > SvelthreeAnimationManager > destroyAnimation : required 'onDestroy' property is missing in 'SvelthreeAnimation'-Object!"
-			  )
+		if (
+			this.ani_obj &&
+			Object.hasOwn(this.ani_obj, "onDestroy") &&
+			typeof this.ani_obj["onDestroy"] === "function"
+		) {
+			this.ani_obj.onDestroy()
+		} else {
+			console.error(
+				"SVELTHREE > SvelthreeAnimationManager > destroyAnimation : required 'onDestroy' property is missing in 'SvelthreeAnimation'-Object!"
+			)
+		}
 	}
 
-	public getAnimation(): SvelthreeAnimation {
+	public getAnimation(): SvelthreeAnimation | undefined {
 		return this.ani_obj
 	}
 }

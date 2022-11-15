@@ -98,7 +98,7 @@ export default class SvelthreeGLTF {
 			async (): Promise<void> => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				let context: Map<any, any> | undefined
-				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined
+				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined | null
 				let parent_component: SvelthreeComponentShadowDOMChild | undefined
 
 				if (item.parent_uuid) {

@@ -11,14 +11,14 @@ export default class SvelthreeAnimationObjectFactory {
 		try {
 			ani_obj = this.ani_fn(foo, args)
 
-			if (!Object.prototype.hasOwnProperty.call(ani_obj, "onStart")) {
+			if (!Object.hasOwn(ani_obj, "onStart")) {
 				console.error("SVELTHREE > Provided animation is missing 'onStart' function!", {
 					animation: ani_obj
 				})
 				//throw new Error("SVELTHREE Exception (see warning above)")
 			}
 
-			if (!Object.prototype.hasOwnProperty.call(ani_obj, "onDestroy")) {
+			if (!Object.hasOwn(ani_obj, "onDestroy")) {
 				console.error("SVELTHREE > Provided animation has no 'onDestroy' function!", {
 					animation: ani_obj
 				})

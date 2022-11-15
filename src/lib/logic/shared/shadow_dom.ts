@@ -2,10 +2,10 @@ import type { SvelthreeShadowDOMElement } from "../../types/types-extra"
 import type { PropButton, PropLink } from "../../types/types-comp-props"
 
 const recreate_shadow_dom_el = (
-	shadow_dom_el: SvelthreeShadowDOMElement | undefined,
-	our_parent_shadow_dom_el: SvelthreeShadowDOMElement,
-	button: PropButton | null,
-	link: PropLink | null,
+	shadow_dom_el: SvelthreeShadowDOMElement | undefined | null,
+	our_parent_shadow_dom_el: SvelthreeShadowDOMElement | undefined,
+	button: PropButton | undefined | null,
+	link: PropLink | undefined | null,
 	c_name: string
 ): SvelthreeShadowDOMElement | null => {
 	if (shadow_dom_el) remove_shadow_dom_el(shadow_dom_el)
@@ -17,25 +17,21 @@ const remove_shadow_dom_el = (shadow_dom_el: SvelthreeShadowDOMElement): void =>
 }
 
 const create_shadow_dom_el = (
-	our_parent_shadow_dom_el: SvelthreeShadowDOMElement,
-	button: PropButton | null,
-	link: PropLink | null,
+	our_parent_shadow_dom_el: SvelthreeShadowDOMElement | undefined,
+	button: PropButton | undefined | null,
+	link: PropLink | undefined | null,
 	c_name: string
 ): SvelthreeShadowDOMElement | null => {
 	let shadow_dom_el: SvelthreeShadowDOMElement
 
 	if (button) {
 		shadow_dom_el = document.createElement("button")
-
-		for (const key in button) {
-			shadow_dom_el[key] = button[key]
-		}
+		// TODO  is this ok like this?
+		Object.assign(shadow_dom_el, button)
 	} else if (link) {
 		shadow_dom_el = document.createElement("a")
-
-		for (const key in link) {
-			shadow_dom_el[key] = link[key]
-		}
+		// TODO  is this ok like this?
+		Object.assign(shadow_dom_el, link)
 	} else {
 		shadow_dom_el = document.createElement("div")
 	}

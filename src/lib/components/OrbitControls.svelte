@@ -45,13 +45,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export let log_all = false
 	export let log_rs: boolean = log_all
-	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
-	export let orbitcontrols: THREE_OrbitControls = undefined
+	export let orbitcontrols: THREE_OrbitControls | undefined | null = undefined
 
 	export const is_svelthree_component = true
 	export const is_svelthree_orbitcontrols = true
@@ -60,16 +60,20 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let warn = true
 
 	// TODO  clarify why / when we would need this.
-	let index_in_orbitcontrols: number = undefined
+	let index_in_orbitcontrols: number | undefined = undefined
 
 	/** Get `OrbitControls` three.js instance's index in the `orbitcontrols`-array (svelthreeStore).
 	 * Can also be obtained via created `orbitcontrols` instance directly: `orbitcontrols_comp_ref.orbitcontrols.userData.index_in_orbitcontrols`
 	 */
 	export const get_index_in_orbitcontrols = (): number => index_in_orbitcontrols
 
-	export let cam: PerspectiveCamera | OrthographicCamera | THREE_PerspectiveCamera | THREE_OrthographicCamera =
-		undefined
-	export let dom_el: HTMLElement | Canvas = undefined
+	export let cam:
+		| PerspectiveCamera
+		| OrthographicCamera
+		| THREE_PerspectiveCamera
+		| THREE_OrthographicCamera
+		| undefined = undefined
+	export let dom_el: HTMLElement | Canvas | undefined = undefined
 
 	/** mode `"auto"`: schedule render loop rAF id */
 	let rAF = { id: 0 }
@@ -161,13 +165,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting properties of the created / injected three.js instance via an `Object Literal`. */
-	export let props: PropsOrbitControls = undefined
+	export let props: PropsOrbitControls | undefined = undefined
 
 	$: if (!sProps && orbitcontrols && props) sProps = new SvelthreeProps(orbitcontrols)
 	$: if (props && sProps) update_props()
 	function update_props() {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
-		sProps.update(props)
+		if (props) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
+			sProps.update(props)
+		}
 	}
 
 	/** When set to false, the controls will not respond to user input. Default is `true`.
@@ -182,7 +188,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** The focus point of the controls, the `.object` orbits around this. It can be updated manually at any point to change the focus of the controls.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.target) */
-	export let target: Vector3 = undefined
+	export let target: Vector3 | undefined = undefined
 	$: if (orbitcontrols && target !== undefined) set_target()
 
 	function set_target(): void {
@@ -229,7 +235,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** How fast to rotate around the target if `autorot` is `true`. Default is `2.0`, which equates to 30 seconds per orbit at 60fps.
 	 * [See threejs-docs.](https://threejs.org/docs/#examples/en/controls/OrbitControls.autoRotateSpeed) */
-	export let auto_speed: number = undefined
+	export let auto_speed: number | undefined = undefined
 	$: if (orbitcontrols && auto_speed !== undefined) set_auto_speed()
 
 	function set_auto_speed(): void {
@@ -268,7 +274,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	/** Returns the (three) instance of the object created by the component. */
-	export const get_instance = (): THREE_OrbitControls => orbitcontrols
+	export const get_instance = (): THREE_OrbitControls | undefined | null => orbitcontrols
 
 	/** **Completely replace** `svelthree`-component's default `onMount`-callback logic, any `onMountStart` & `onMountEnd` logic will be ignored (_default verbosity will be gone_).
 	 *
@@ -277,14 +283,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onMount(
 		onMountReplace
-			? () => onMountReplace(self)
+			? () => (onMountReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
 						console.info(...c_lc(c_name, "onMount"))
+					}
+
+					if (orbitcontrols) {
 					}
 			  }
 	)
@@ -297,7 +306,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Inject** functionality at the **end** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
 	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
@@ -307,7 +316,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Completely replace** `svelthree`-component's default `onDestroy`-callback logic, any `onDestroyStart` & `onDestroyEnd` logic will be ignored (_default verbosity will be gone_).
 	 *
@@ -316,32 +325,34 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onDestroy(
 		onDestroyReplace
-			? () => onDestroyReplace(self)
+			? () => (onDestroyReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
 						console.info(...c_lc(c_name, "onDestroy"))
 					}
 
-					if (onDestroyStart) {
-						if (onDestroyStart.constructor.name === "AsyncFunction") {
-							await onDestroyStart(self)
-						} else {
-							onDestroyStart(self)
+					if (orbitcontrols) {
+						if (onDestroyStart) {
+							if (onDestroyStart.constructor.name === "AsyncFunction") {
+								await onDestroyStart(self)
+							} else {
+								onDestroyStart(self)
+							}
 						}
-					}
 
-					if (rAF.id) cancelAnimationFrame(rAF.id)
-					orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
+						if (rAF.id) cancelAnimationFrame(rAF.id)
+						orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
 
-					if (onDestroyEnd) {
-						if (onDestroyEnd.constructor.name === "AsyncFunction") {
-							await onDestroyEnd(self)
-						} else {
-							onDestroyEnd(self)
+						if (onDestroyEnd) {
+							if (onDestroyEnd.constructor.name === "AsyncFunction") {
+								await onDestroyEnd(self)
+							} else {
+								onDestroyEnd(self)
+							}
 						}
 					}
 			  }
@@ -354,14 +365,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	beforeUpdate(
 		beforeUpdateReplace
-			? () => beforeUpdateReplace(self)
+			? () => (beforeUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
 						console.info(...c_lc(c_name, "beforeUpdate"))
+					}
+
+					if (orbitcontrols) {
 					}
 			  }
 	)
@@ -373,14 +387,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	afterUpdate(
 		afterUpdateReplace
-			? () => afterUpdateReplace(self)
+			? () => (afterUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
 						console.info(...c_lc(c_name, "afterUpdate"))
+					}
+
+					if (orbitcontrols) {
 					}
 			  }
 	)

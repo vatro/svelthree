@@ -77,6 +77,8 @@ function log_prop_utils(obj: ReturnType<AnySvelthreeComponent["get_instance"]>):
 		// this shouldn't happen!
 		throw new Error("SVELTHREE > SvelthreeLogger > no 'obj'!")
 	}
+
+	return false
 }
 
 function c_lc(comp_name: string, message: string, value?: unknown): [string, string, string, unknown] {

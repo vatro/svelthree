@@ -27,7 +27,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		WebGLRendererMode,
 		WebGLRendererComponentEventDispatcher,
 		WebGLRendererEventDetail,
-		SvelthreeLifecycleCallback
+		SvelthreeLifecycleCallback,
+		StoreBody
 	} from "../types/types-extra"
 	import type { PropsWebGLRenderer } from "../types/types-comp-props"
 
@@ -39,9 +40,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	const verbose: boolean = verbose_mode()
 
 	export let log_all = false
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = log_all ? { all: true } : undefined
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
-	export let log_lc: { [P in keyof LogLC]: LogLC[P] } = log_all ? { all: true } : undefined
+	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 
 	const dispatch = createEventDispatcher<WebGLRendererComponentEventDispatcher>()
 
@@ -60,6 +61,22 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * _will be `undefined` if the `WebGlRenderer` is placed **outside** of a `Canvas` component._
 	 */
 	const sti: number = getContext("store_index")
+	$: stores = $svelthreeStores
+
+	function get_store(store_index: number): StoreBody | null | undefined {
+		if (stores) {
+			const store = stores[store_index]
+			if (store) {
+				return store
+			} else {
+				if (store === undefined) return undefined
+				if (store === null) return null
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > get_store -> 'stores' not available!`, { stores })
+			throw new Error("SVELTHREE Exception (see warning above)")
+		}
+	}
 
 	/**
 	 * Position of the `WebGLRenderer` component in the markup.
@@ -68,7 +85,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 *
 	 * TODO : describe handling differencies in detail ...
 	 */
-	let inside: boolean = undefined
+	let inside: boolean | undefined = undefined
 	$: inside = !!sti
 
 	interface WebGLRendererInput {
@@ -80,13 +97,13 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	/**
 	 * An array of configuration objects specifying `Canvas` components incl. `Scene` and `Camera` components' `id`s that should be rendered.
 	 */
-	export let inputs: WebGLRendererInput[] = undefined
+	export let inputs: WebGLRendererInput[] | undefined = undefined
 	let inputs_processed = false
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 
 	// inside -> wait for canvas...
 	// set canvas_dom_element to parent canvas_dom_element (canvas_dom && sti should be !== undefined)
-	let canvas_dom_element: HTMLCanvasElement = undefined
+	let canvas_dom_element: HTMLCanvasElement | undefined = undefined
 	$: if (canvas_dom_element === undefined && $canvas_dom?.element && sti >= 0) {
 		canvas_dom_element = $canvas_dom.element
 	}
@@ -104,40 +121,42 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// get canvas_dom_element from the 'canvas' attribute
 
-	let first_inputs_canvas: Canvas = undefined
+	let first_inputs_canvas: Canvas | undefined = undefined
 	$: if (inputs?.length && inputs[0].canvas) first_inputs_canvas = inputs[0].canvas
 	$: if (inside === false && first_inputs_canvas) process_canvas_inputs()
 
 	function process_canvas_inputs(): void {
 		//console.log("process_canvas_inputs!")
-		for (let i = 0; i < inputs.length; i++) {
-			// if it's a canvas component, also get / set sti from it
-			const input: WebGLRendererInput = inputs[i]
+		if (inputs) {
+			for (let i = 0; i < inputs.length; i++) {
+				// if it's a canvas component, also get / set sti from it
+				const input: WebGLRendererInput = inputs[i]
 
-			if (input.canvas["is_svelthree_canvas"]) {
-				inputs_queue.push({
-					dom_element: (input.canvas as Canvas).getDomElement(),
-					sti: (input.canvas as Canvas).get_sti(),
-					scene_id: input.scene_id,
-					cam_id: input.cam_id
-				})
-			} else {
-				throw new Error(
-					"SVELTHREE > WebGLRendererInput Error > the 'canvas' prop has to be a svelthree Canvas component!"
-				)
+				if (input.canvas["is_svelthree_canvas"]) {
+					inputs_queue.push({
+						dom_element: (input.canvas as Canvas).getDomElement(),
+						sti: (input.canvas as Canvas).get_sti(),
+						scene_id: input.scene_id,
+						cam_id: input.cam_id
+					})
+				} else {
+					throw new Error(
+						"SVELTHREE > WebGLRendererInput Error > the 'canvas' prop has to be a svelthree Canvas component!"
+					)
+				}
 			}
-		}
 
-		// get and activate specified cams and scenes
-		for (let j = 0; j < inputs_queue.length; j++) {
-			const queued: WebGLRendererInputsQueueItem = inputs_queue[j]
-			queued.scene = get_scene_to_render(queued.sti, queued.scene_id)
-			queued.cam = get_cam_to_render(queued.sti, queued.cam_id)
-			activate_cam(queued.cam, queued.sti)
-			activate_scene(queued.scene, queued.sti)
-		}
+			// get and activate specified cams and scenes
+			for (let j = 0; j < inputs_queue.length; j++) {
+				const queued: WebGLRendererInputsQueueItem = inputs_queue[j]
+				queued.scene = get_scene_to_render(queued.sti, queued.scene_id)
+				queued.cam = get_cam_to_render(queued.sti, queued.cam_id)
+				activate_cam(queued.cam, queued.sti)
+				activate_scene(queued.scene, queued.sti)
+			}
 
-		inputs_processed = true
+			inputs_processed = true
+		}
 	}
 
 	interface WebGLRendererOutput {
@@ -150,9 +169,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/** An array of `Canvas` components or `<canvas>` DOM elements to rendered to. */
-	export let outputs: WebGLRendererOutput[] = undefined
+	export let outputs: WebGLRendererOutput[] | undefined = undefined
 	let outputs_processed = false
-	let first_outputs_canvas: HTMLCanvasElement | HTMLElement = undefined
+	let first_outputs_canvas: HTMLCanvasElement | HTMLElement | undefined = undefined
 	$: if (outputs?.length && outputs[0].canvas) first_outputs_canvas = outputs[0].canvas
 	$: if (inside === false && first_outputs_canvas && inputs_processed) process_canvas_outputs()
 
@@ -160,25 +179,26 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	async function process_canvas_outputs(): Promise<void> {
 		//console.log("process_canvas_outputs!")
+		if (outputs) {
+			await tick()
 
-		await tick()
+			for (let i = 0; i < outputs.length; i++) {
+				// if it's a canvas component, also get / set sti from it
+				const output: WebGLRendererOutput = outputs[i]
 
-		for (let i = 0; i < outputs.length; i++) {
-			// if it's a canvas component, also get / set sti from it
-			const output: WebGLRendererOutput = outputs[i]
-
-			if (output.canvas instanceof HTMLCanvasElement) {
-				outputs_queue.push({
-					dom_element: output.canvas as HTMLCanvasElement
-				})
-			} else {
-				throw new Error(
-					"SVELTHREE > WebGLRendererOutput Error > the 'canvas' prop has to be a <canvas> DOM Element!"
-				)
+				if (output.canvas instanceof HTMLCanvasElement) {
+					outputs_queue.push({
+						dom_element: output.canvas as HTMLCanvasElement
+					})
+				} else {
+					throw new Error(
+						"SVELTHREE > WebGLRendererOutput Error > the 'canvas' prop has to be a <canvas> DOM Element!"
+					)
+				}
 			}
-		}
 
-		outputs_processed = await calculate_output_viewOffset()
+			outputs_processed = await calculate_output_viewOffset()
+		}
 	}
 
 	/**
@@ -240,7 +260,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	$: if (inputs?.length && inputs_processed && (!outputs || (outputs?.length && outputs_processed))) create_renderer()
 
-	export let params: { [P in keyof WebGLRendererParameters]: WebGLRendererParameters[P] } = undefined
+	export let params: { [P in keyof WebGLRendererParameters]: WebGLRendererParameters[P] } | undefined = undefined
 
 	let renderer: WebGLRenderer
 
@@ -257,14 +277,37 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		renderer = new WebGLRenderer({ ...params })
 		renderer.setPixelRatio(window.devicePixelRatio)
 
-		if (inputs_queue.length) {
-			for (let i = 0; i < inputs_queue.length; i++) {
-				$svelthreeStores[inputs_queue[i].sti].renderer = renderer
-				$svelthreeStores[inputs_queue[i].sti].rendererComponent = self
+		if (stores) {
+			if (inputs_queue.length) {
+				for (let i = 0; i < inputs_queue.length; i++) {
+					const store = get_store(inputs_queue[i].sti)
+					if (store) {
+						store.renderer = renderer
+						store.rendererComponent = self
+					} else {
+						console.error(
+							`SVELTHREE > ${c_name} > create_renderer ('inputs_queue' not empty) : Couldn't update 'store' -> 'store' not available!`,
+							{ store }
+						)
+					}
+				}
+			} else {
+				const store = get_store(sti)
+				if (store) {
+					store.renderer = renderer
+					store.rendererComponent = self
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > create_renderer ('inputs_queue' empty) : Couldn't update 'store' -> 'store' not available!`,
+						{ store }
+					)
+				}
 			}
 		} else {
-			$svelthreeStores[sti].renderer = renderer
-			$svelthreeStores[sti].rendererComponent = self
+			console.error(
+				`SVELTHREE > ${c_name} > create_renderer : Couldn't update 'store' -> 'stores' not available!`,
+				{ stores }
+			)
 		}
 
 		if (verbose && log_rs) {
@@ -276,13 +319,15 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	// IMPORTANT  `props` will be overridden by 'shorthand' attributes!
 	/** **shorthand** attribute for setting the `position` property of the created / injected three.js instance. */
-	export let props: { [P in keyof PropsWebGLRenderer]: PropsWebGLRenderer[P] } = undefined
+	export let props: { [P in keyof PropsWebGLRenderer]: PropsWebGLRenderer[P] } | undefined = undefined
 
 	$: if (!sProps && renderer && props) sProps = new SvelthreeProps(renderer)
 	$: if (props && sProps) update_props()
 	function update_props() {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
-		sProps.update(props)
+		if (props) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "props", props))
+			sProps.update(props)
+		}
 	}
 
 	// 'shorthand' attributes
@@ -329,7 +374,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
-	export let xr: boolean = undefined
+	export let xr: boolean | undefined = undefined
 
 	$: if (renderer) set_xr()
 
@@ -341,33 +386,37 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/** `WebGLRenderer` component's prop `sceneId` -> `id` of a `Scene` component to render. */
-	let scene_to_render_id: string = undefined
+	let scene_to_render_id: string | undefined = undefined
 	export { scene_to_render_id as sceneId }
-	let current_scene: Scene = undefined
+	let current_scene: Scene | undefined = undefined
 	let current_scene_id = ""
 
 	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
 	$: if (!inputs && renderer && !current_scene && scene_to_render_id) set_current_scene()
 
 	function set_current_scene(): void {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_scene! ->", { scene_to_render_id }))
-		current_scene = get_scene_to_render(sti, scene_to_render_id)
-		activate_scene(current_scene, sti)
+		if (scene_to_render_id) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_scene! ->", { scene_to_render_id }))
+			current_scene = get_scene_to_render(sti, scene_to_render_id)
+			activate_scene(current_scene, sti)
+		}
 	}
 
 	/** `WebGLRenderer` component's prop `camId` -> `id` of a camera component to render. */
-	let cam_to_render_id: string = undefined
+	let cam_to_render_id: string | undefined = undefined
 	export { cam_to_render_id as camId }
-	let current_cam: PerspectiveCamera | OrthographicCamera = undefined
+	let current_cam: PerspectiveCamera | OrthographicCamera | undefined = undefined
 	let current_cam_id = ""
 
 	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
 	$: if (!inputs && renderer && !current_cam && current_scene_id) set_current_cam()
 
 	function set_current_cam(): void {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_cam! ->", { cam_to_render_id }))
-		current_cam = get_cam_to_render(sti, cam_to_render_id)
-		activate_cam(current_cam, sti)
+		if (cam_to_render_id) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "set_current_cam! ->", { cam_to_render_id }))
+			current_cam = get_cam_to_render(sti, cam_to_render_id)
+			activate_cam(current_cam, sti)
+		}
 	}
 
 	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
@@ -382,9 +431,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function update_current_scene(): void {
-		deactivate_scene(current_scene, sti)
-		current_scene = get_scene_to_render(sti, scene_to_render_id)
-		activate_scene(current_scene, sti)
+		if (current_scene && scene_to_render_id) {
+			deactivate_scene(current_scene, sti)
+			current_scene = get_scene_to_render(sti, scene_to_render_id)
+			activate_scene(current_scene, sti)
+		}
 	}
 
 	// inside only -> if the `WebGLRenderer` component is placed inside a `Canvas` or a `Scene` component
@@ -397,9 +448,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	function update_current_cam(): void {
-		deactivate_cam(current_cam, sti)
-		current_cam = get_cam_to_render(sti, cam_to_render_id)
-		activate_cam(current_cam, sti)
+		if (current_cam && cam_to_render_id) {
+			deactivate_cam(current_cam, sti)
+			current_cam = get_cam_to_render(sti, cam_to_render_id)
+			activate_cam(current_cam, sti)
+		}
 	}
 
 	let resize_renderer_on_next_frame = false
@@ -437,73 +490,124 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 	function activate_cam(camera: PerspectiveCamera | OrthographicCamera, store_index: number) {
 		camera.userData.isActive = true
-		$svelthreeStores[store_index].cameras[camera.userData.index_in_cameras].isActive = true
-		$svelthreeStores[store_index].activeCamera = camera
+
+		if (stores) {
+			const store = stores[store_index]
+			if (store) {
+				store.cameras[camera.userData.index_in_cameras].isActive = true
+				store.activeCamera = camera
+			} else {
+				console.error(
+					...c_rs(
+						c_name,
+						"activate_cam! -> Couldn't update 'store' after setting Camera's '.userData.isActive' to 'true' -> 'store' not available!",
+						{ store }
+					)
+				)
+			}
+		} else {
+			console.error(
+				...c_rs(
+					c_name,
+					"activate_cam! -> Couldn't update 'store' after setting Camera's '.userData.isActive' to 'true' -> 'stores' not available!",
+					{ stores }
+				)
+			)
+		}
 	}
 
 	function deactivate_cam(camera: PerspectiveCamera | OrthographicCamera, store_index: number): void {
 		camera.userData.isActive = false
-		$svelthreeStores[store_index].cameras[camera.userData.index_in_cameras].isActive = false
+		const store = get_store(store_index)
+		if (store) {
+			store.cameras[camera.userData.index_in_cameras].isActive = false
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > deactivate_cam : Couldn't update 'store' -> 'store' not available!`,
+				{ store }
+			)
+		}
 	}
 
 	function get_scene_to_render(store_index: number, scene_id: string): Scene {
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_scene_to_render!"))
 
-		if ($svelthreeStores[store_index].scenes.length > 0) {
-			if (scene_id === undefined) {
-				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
-					sceneId: scene_id
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			} else {
-				for (let i = 0; i < $svelthreeStores[store_index].scenes.length; i++) {
-					let item = $svelthreeStores[store_index].scenes[i]
+		const store = get_store(store_index)
 
-					if (item.id === scene_id) {
-						current_scene_id = scene_id
-						return item.scene
+		if (store) {
+			if (store.scenes.length > 0) {
+				if (scene_id === undefined) {
+					console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'sceneId' prop!", {
+						sceneId: scene_id
+					})
+					throw new Error("SVELTHREE Exception (see warning above)")
+				} else {
+					for (let i = 0; i < store.scenes.length; i++) {
+						let item = store.scenes[i]
+
+						if (item.id === scene_id) {
+							current_scene_id = scene_id
+							return item.scene
+						}
 					}
-				}
 
-				console.warn("SVELTHREE > WebGLRenderer : Scene with id '" + scene_id + "' not found!", {
-					scenes: $svelthreeStores[store_index].scenes
+					console.error("SVELTHREE > WebGLRenderer : Scene with id '" + scene_id + "' not found!", {
+						scenes: store.scenes
+					})
+					throw new Error("SVELTHREE Exception (see error above)")
+				}
+			} else {
+				console.error("SVELTHREE > WebGLRenderer : get_scene_to_render: No Scenes available!", {
+					scenes: store.scenes
 				})
-				throw new Error("SVELTHREE Exception (see warning above)")
+				throw new Error("SVELTHREE Exception (see error above)")
 			}
 		} else {
-			console.warn("SVELTHREE > WebGLRenderer : get_scene_to_render: No Scenes available!", {
-				scenes: $svelthreeStores[store_index].scenes
-			})
-			throw new Error("SVELTHREE Exception (see warning above)")
+			console.error(
+				`SVELTHREE > ${c_name} > get_scene_to_render : Couldn't update 'store' -> 'store' not available!`,
+				{ store }
+			)
+			throw new Error("SVELTHREE Exception (see error above)")
 		}
 	}
 
 	function get_cam_to_render(store_index: number, cam_id: string): PerspectiveCamera | OrthographicCamera {
 		if (verbose && log_dev) console.debug(...c_dev(c_name, "get_cam_to_render!"))
-		if ($svelthreeStores[store_index].cameras.length > 0) {
-			if (cam_id === undefined) {
-				console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
-					camId: cam_id
-				})
-				throw new Error("SVELTHREE Exception (see warning above)")
-			} else {
-				for (let i = 0; i < $svelthreeStores[store_index].cameras.length; i++) {
-					let item = $svelthreeStores[store_index].cameras[i]
-					if (item.id === cam_id) {
-						current_cam_id = cam_id
-						return item.camera
-					}
-				}
 
-				console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + cam_id + "' not found!", {
-					cameras: $svelthreeStores[store_index].cameras
-				})
+		const store = get_store(store_index)
+
+		if (store) {
+			if (store.cameras.length > 0) {
+				if (cam_id === undefined) {
+					console.warn("SVELTHREE > WebGLRenderer : You have to provide the 'camId' prop!", {
+						camId: cam_id
+					})
+					throw new Error("SVELTHREE Exception (see warning above)")
+				} else {
+					for (let i = 0; i < store.cameras.length; i++) {
+						let item = store.cameras[i]
+						if (item.id === cam_id) {
+							current_cam_id = cam_id
+							return item.camera
+						}
+					}
+
+					console.warn("SVELTHREE > WebGLRenderer : Camera with id '" + cam_id + "' not found!", {
+						cameras: store.cameras
+					})
+					throw new Error("SVELTHREE Exception (see warning above)")
+				}
+			} else {
+				console.warn(
+					"SVELTHREE > WebGLRenderer : get_cam_to_render: No Cameras available! $svelthreeStores[store_index].cameras:",
+					{ cameras: store.cameras }
+				)
 				throw new Error("SVELTHREE Exception (see warning above)")
 			}
 		} else {
-			console.warn(
-				"SVELTHREE > WebGLRenderer : get_cam_to_render: No Cameras available! $svelthreeStores[store_index].cameras:",
-				{ cameras: $svelthreeStores[store_index].cameras }
+			console.error(
+				`SVELTHREE > ${c_name} > get_cam_to_render : Couldn't find Camera to render! -> 'store' not available!`,
+				{ store }
 			)
 			throw new Error("SVELTHREE Exception (see warning above)")
 		}
@@ -521,22 +625,40 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 
 		scene.userData.isActive = true
-		$svelthreeStores[sti].scenes[scene.userData.index_in_scenes].isActive = true
-		$svelthreeStores[sti].activeScene = scene
-		$svelthreeStores[sti].currentSceneIndex = scene.userData.index_in_scenes + 1
+
+		const store = get_store(sti)
+		if (store) {
+			store.scenes[scene.userData.index_in_scenes].isActive = true
+			store.activeScene = scene
+			store.currentSceneIndex = scene.userData.index_in_scenes + 1
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > activate_scene : Couldn't update 'store' -> 'store' not available!`,
+				{ store }
+			)
+		}
 	}
 
 	function deactivate_scene(scene: Scene, store_index: number): void {
 		if (scene.userData.isActive === true) {
 			scene.userData.isActive = false
-			$svelthreeStores[store_index].activeScene = undefined
-			$svelthreeStores[store_index].scenes[scene.userData.index_in_scenes].isActive = false
+
+			const store = get_store(store_index)
+			if (store) {
+				store.activeScene = undefined
+				store.scenes[scene.userData.index_in_scenes].isActive = false
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > deactivate_scene : Couldn't update 'store' -> 'store' not available!`,
+					{ store }
+				)
+			}
 		}
 	}
 
 	// IMPORTANT  avoid component updates if not neccessary by e.g. putting values into
 	// **NOT** EXPORTED top-level objects -> EXPORTED top-level objects will be reactive due to `svelte-accmod`!
-	const rAF = { id: undefined }
+	const rAF: { id: number | undefined } = { id: undefined }
 	const frames = { total: 0 }
 
 	export let enabled = true
@@ -610,7 +732,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		// inserting await tick() here enables cross-referencing:
 		await tick()
 
-		if ($svelthreeStores[sti] && $svelthreeStores[sti].canvas.interactive) {
+		const store = get_store(sti)
+		if (store && store.canvas.interactive) {
 			// filter interactive objects in currently active (rendered) scene
 			await dispatch_render_event("interaction_0")
 
@@ -636,19 +759,35 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				const queued = inputs_queue[i]
 				const sti = queued.sti
 
-				if ($svelthreeStores[sti].orbitcontrols.length) {
-					for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
-						const oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
-						if (oc.autoRotate || oc.enableDamping) oc.update()
+				const store = get_store(sti)
+				if (store) {
+					if (store.orbitcontrols.length) {
+						for (let i = 0; i < store.orbitcontrols.length; i++) {
+							const oc: OrbitControls = store.orbitcontrols[i]
+							if (oc.autoRotate || oc.enableDamping) oc.update()
+						}
 					}
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > svelthree_extra : Couldn't update OrbitControls ('inputs_queue' not empty) -> 'store' not available!`,
+						{ store }
+					)
 				}
 			}
 		} else {
-			if ($svelthreeStores[sti].orbitcontrols.length) {
-				for (let i = 0; i < $svelthreeStores[sti].orbitcontrols.length; i++) {
-					const oc: OrbitControls = $svelthreeStores[sti].orbitcontrols[i]
-					if (oc.autoRotate || oc.enableDamping) oc.update()
+			const store = get_store(sti)
+			if (store) {
+				if (store.orbitcontrols.length) {
+					for (let i = 0; i < store.orbitcontrols.length; i++) {
+						const oc: OrbitControls = store.orbitcontrols[i]
+						if (oc.autoRotate || oc.enableDamping) oc.update()
+					}
 				}
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > svelthree_extra : Couldn't update OrbitControls ('inputs_queue' empty) -> 'store' not available!`,
+					{ store }
+				)
 			}
 		}
 
@@ -657,24 +796,39 @@ This is a **svelthree** _WebGLRenderer_ Component.
 			for (let i = 0; i < inputs_queue.length; i++) {
 				const queued = inputs_queue[i]
 				const sti = queued.sti
-
-				if ($svelthreeStores[sti].cubeCameras.length) {
-					for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
-						const cubecam: CubeCamera = $svelthreeStores[sti].cubeCameras[i]
+				const store = get_store(sti)
+				if (store) {
+					if (store.cubeCameras.length) {
+						for (let i = 0; i < store.cubeCameras.length; i++) {
+							const cubecam: CubeCamera = store.cubeCameras[i]
+							if (cubecam.dynamic) {
+								cubecam.update_cubecam()
+							}
+						}
+					}
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > svelthree_extra : Couldn't update CubeCameras ('inputs_queue' not empty) -> 'store' not available!`,
+						{ store }
+					)
+				}
+			}
+		} else {
+			const store = get_store(sti)
+			if (store) {
+				if (store.cubeCameras.length) {
+					for (let i = 0; i < store.cubeCameras.length; i++) {
+						const cubecam: CubeCamera = store.cubeCameras[i]
 						if (cubecam.dynamic) {
 							cubecam.update_cubecam()
 						}
 					}
 				}
-			}
-		} else {
-			if ($svelthreeStores[sti].cubeCameras.length) {
-				for (let i = 0; i < $svelthreeStores[sti].cubeCameras.length; i++) {
-					const cubecam: CubeCamera = $svelthreeStores[sti].cubeCameras[i]
-					if (cubecam.dynamic) {
-						cubecam.update_cubecam()
-					}
-				}
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > svelthree_extra : Couldn't update CubeCameras ('inputs_queue' empty) -> 'store' not available!`,
+					{ store }
+				)
 			}
 		}
 	}
@@ -683,7 +837,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		if (inputs_queue.length) {
 			// outside only -> if the `WebGLRenderer` component is placed outside of a `Canvas` component
 			for (let i = 0; i < inputs_queue.length; i++) {
-				const inp = inputs_queue[i]
+				const inp: WebGLRendererInputsQueueItem = inputs_queue[i]
 				// inside should be false if inputs_queue.length
 				if (!outputs_queue?.length && inside === false) {
 					const curr_rnd_size_vec2: Vector2 = new Vector2()
@@ -696,34 +850,56 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					}
 				}
 
-				if (outputs_queue?.length) {
-					for (let j = 0; j < outputs_queue.length; j++) {
-						const out = outputs_queue[j]
+				if (inp.cam && inp.scene) {
+					if (outputs_queue?.length) {
+						for (let j = 0; j < outputs_queue.length; j++) {
+							const out: WebGLRendererOutputsQueueItem = outputs_queue[j]
 
-						inp.cam.setViewOffset(
-							out.viewOffset[0],
-							out.viewOffset[1],
-							out.viewOffset[2],
-							out.viewOffset[3],
-							out.viewOffset[4],
-							out.viewOffset[5]
-						)
+							if (out?.viewOffset?.length) {
+								inp.cam.setViewOffset(
+									out.viewOffset[0],
+									out.viewOffset[1],
+									out.viewOffset[2],
+									out.viewOffset[3],
+									out.viewOffset[4],
+									out.viewOffset[5]
+								)
 
-						const curr_rnd_size_vec2: Vector2 = new Vector2()
-						renderer.getSize(curr_rnd_size_vec2)
-						if (curr_rnd_size_vec2.x !== out.viewOffset[4] || curr_rnd_size_vec2.y !== out.viewOffset[5]) {
-							renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+								const curr_rnd_size_vec2: Vector2 = new Vector2()
+								renderer.getSize(curr_rnd_size_vec2)
+								if (
+									curr_rnd_size_vec2.x !== out.viewOffset[4] ||
+									curr_rnd_size_vec2.y !== out.viewOffset[5]
+								) {
+									renderer.setSize(out.viewOffset[4], out.viewOffset[5])
+								}
+
+								renderer.render(inp.scene, inp.cam)
+
+								const context = out.dom_element.getContext("2d")
+								if (context) {
+									context.drawImage(renderer.domElement, 0, 0)
+								} else {
+									console.error(
+										"SVELTHREE > WebGLRenderer > Cannot 'context.drawImage', 'context' (out) not avilable",
+										{ context }
+									)
+								}
+								inp.cam.clearViewOffset()
+							}
 						}
+					} else {
 						renderer.render(inp.scene, inp.cam)
-
-						const context = out.dom_element.getContext("2d")
-						context.drawImage(renderer.domElement, 0, 0)
-						inp.cam.clearViewOffset()
+						const context = inp.dom_element.getContext("2d")
+						if (context) {
+							context.drawImage(renderer.domElement, 0, 0)
+						} else {
+							console.error(
+								"SVELTHREE > WebGLRenderer > Cannot 'context.drawImage', 'context' (inp) not avilable",
+								{ context }
+							)
+						}
 					}
-				} else {
-					renderer.render(inp.scene, inp.cam)
-					const context = inp.dom_element.getContext("2d")
-					context.drawImage(renderer.domElement, 0, 0)
 				}
 			}
 		} else {
@@ -733,9 +909,23 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				resize_renderer_on_next_frame = false
 			}
 
-			renderer.render(current_scene, current_cam)
-			const context = canvas_dom_element.getContext("2d")
-			context.drawImage(renderer.domElement, 0, 0)
+			if (current_scene && current_cam) {
+				renderer.render(current_scene, current_cam)
+			} else {
+				console.error(
+					"SVELTHREE > WebGLRenderer > Cannot render, 'current_scene' and / or 'current_cam' not avilable",
+					{ current_scene, current_cam }
+				)
+			}
+			const context = canvas_dom_element?.getContext("2d")
+			if (context) {
+				context.drawImage(renderer.domElement, 0, 0)
+			} else {
+				console.error(
+					"SVELTHREE > WebGLRenderer > Cannot 'context.drawImage', 'context' (canvas_dom_element) not avilable",
+					{ canvas_dom_element, context }
+				)
+			}
 		}
 	}
 
@@ -745,9 +935,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * Schedules a render if the current scene has been marked as `dirty`. \
 	 * _Primarly called internally by components if `WebGLRenderer` component's `mode` is set to `"auto"`_.
 	 */
-	export const schedule_render_auto = (scene: Scene = null): void => {
+	export const schedule_render_auto = (scene: Scene | null = null): void => {
 		if (enabled && render_scheduled.status === false) {
-			const scene_to_check: Scene = scene ? scene : current_scene
+			const scene_to_check: Scene | undefined = scene || current_scene
 			if (scene_to_check) {
 				if (scene_to_check && scene_to_check.userData.dirty) {
 					scene_to_check.userData.dirty = false
@@ -781,7 +971,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	/** Cancel any scheduled `requestAnimationFrame` and disable further rendering. */
 	export const stop_rendering = (): void => {
 		enabled = false
-		cancelAnimationFrame(rAF.id)
+		if (rAF.id) cancelAnimationFrame(rAF.id)
 		render_scheduled.status = false
 	}
 
@@ -810,7 +1000,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	}
 
 	/** Returns the **three.js instance** of `Camera` currently used by the renderer. */
-	export const get_current_camera = (): Camera => {
+	export const get_current_camera = (): Camera | undefined => {
 		return current_cam
 	}
 
@@ -833,11 +1023,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onMount(
 		onMountReplace
-			? () => onMountReplace(self)
+			? () => (onMountReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.om)) {
 						console.info(...c_lc(c_name, "onMount"))
@@ -853,7 +1043,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Inject** functionality at the **end** of `svelthree`-component's default `onDestroy`-callback logic (`asynchronous`).
 	 * Only asynchronous functions will be `await`ed. (_default verbosity will not be affected_)
@@ -863,7 +1053,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	/** **Completely replace** `svelthree`-component's default `onDestroy`-callback logic, any `onDestroyStart` & `onDestroyEnd` logic will be ignored (_default verbosity will be gone_).
 	 *
@@ -872,11 +1062,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	onDestroy(
 		onDestroyReplace
-			? () => onDestroyReplace(self)
+			? () => (onDestroyReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.od)) {
 						console.info(...c_lc(c_name, "onDestroy"))
@@ -914,11 +1104,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	beforeUpdate(
 		beforeUpdateReplace
-			? () => beforeUpdateReplace(self)
+			? () => (beforeUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.bu)) {
 						console.info(...c_lc(c_name, "beforeUpdate"))
@@ -933,11 +1123,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * (comp: T) => unknown | Promise<unknown>
 	 * ```
 	 * ☝️ _the **callback's argument** (`comp`) will be the actual **`svelthree`-component's instance reference**_. */
-	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> = undefined
+	export let afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined = undefined
 
 	afterUpdate(
 		afterUpdateReplace
-			? () => afterUpdateReplace(self)
+			? () => (afterUpdateReplace as SvelthreeLifecycleCallback<CurrentComponentType>)(self)
 			: async () => {
 					if (verbose && log_lc && (log_lc.all || log_lc.au)) {
 						console.info(...c_lc(c_name, "afterUpdate"))
