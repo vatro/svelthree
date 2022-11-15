@@ -88,6 +88,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
+	$: store = $svelthreeStores[sti]
 
 	/** The (three) instance that was shared to this component as it's 'parent' which can be either another instance / object or a scene / root scene. */
 	let our_parent: Object3D | undefined = undefined

@@ -83,6 +83,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
+	$: store = $svelthreeStores[sti]
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.

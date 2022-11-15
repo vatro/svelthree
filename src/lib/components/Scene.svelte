@@ -90,6 +90,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let id: string | undefined = undefined
 
 	const sti: number = getContext("store_index")
+	$: store = $svelthreeStores[sti]
 
 	const svelthreeStore = $svelthreeStores[sti]
 

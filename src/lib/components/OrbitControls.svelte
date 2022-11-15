@@ -49,6 +49,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
+	$: store = $svelthreeStores[sti]
+
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	/** Returns the `orbitcontrols` instance created by the component & allows providing (_injection_) of (_already created / premade_) `THREE.OrbitControls` instances. */
 	export let orbitcontrols: THREE_OrbitControls | undefined | null = undefined
