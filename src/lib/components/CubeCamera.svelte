@@ -106,11 +106,11 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		| Object3DSvelthreeComponent
 		| Object3D
 		| undefined = undefined
-	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
+	$: if (camera && store.renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Adjust `CubeCamera`'s position by setting an offset relative to the pivot of the object specified by `bind_pos`. */
 	export let bind_pos_offset: Vector3 | undefined = undefined
-	$: if (camera && $svelthreeStores[sti].renderer && bind_pos && bind_pos_offset && !dynamic) update_cubecam()
+	$: if (camera && store.renderer && bind_pos && bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Specify which objects / components should be hidden on `CubeCamera` update.
 	 * Default: `CubeCamera`'s parent component's object (three) instance will be hidden.
@@ -190,7 +190,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 			// with `CubeCameras` we push the component reference to svelthreeStores,
 			// beacuse we need to access it's `update()` function from the `WebGLRenderer` component.
 
-			$svelthreeStores[sti].cubeCameras.push(self)
+			store.cubeCameras.push(self)
 
 			index_in_cubecameras = camera.userData.index_in_cubecameras
 		} else if (camera) {
@@ -254,7 +254,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		// with `CubeCameras` we push the component reference to svelthreeStores,
 		// beacuse we need to access it's `update()` function from the `WebGLRenderer` component.
 
-		$svelthreeStores[sti].cubeCameras.push(self)
+		store.cubeCameras.push(self)
 
 		index_in_cubecameras = camera.userData.index_in_cubecameras
 
@@ -344,7 +344,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		if (camera) {
 			if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
 				const uuid_to_remove: string = camera_uuid || camera.uuid
-				const old_instance: Object3D | undefined = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					// update 'index_in_x'
@@ -358,7 +358,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 						if (props) sProps = new SvelthreeProps(camera)
 
 						// update store
-						$svelthreeStores[sti].cubeCameras[index_in_cubecameras] = self
+						store.cubeCameras[index_in_cubecameras] = self
 					} else {
 						console.error(
 							`SVELTHREE > ${c_name} > handle_instance_change : Cannot process CubeCamera instance change correctly, invalid 'index_in_cubecameras' prop value!`,
@@ -404,14 +404,14 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 		const bound_pos: typeof bind_pos = bind_pos || our_parent
 		const to_hide: typeof hide | typeof bind_pos = hide || bound_pos
-		const renderer: WebGLRenderer | undefined = $svelthreeStores[sti].renderer
-		const active_scene: Scene | undefined = $svelthreeStores[sti].activeScene
+		const renderer: WebGLRenderer | undefined = store.renderer
+		const active_scene: Scene | undefined = store.activeScene
 
 		if (camera && renderer && active_scene) {
 			if (pos === undefined) {
 				// the floor hack -> see https://jsfiddle.net/3mprbLc9/
 				if (is_floor) {
-					const active_cam: Camera | undefined = $svelthreeStores[sti].activeCamera
+					const active_cam: Camera | undefined = store.activeCamera
 					const target_pos: Vector3 = get_cubecam_target_position(active_cam)
 					camera.position.copy(target_pos)
 
@@ -736,7 +736,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
@@ -1046,7 +1046,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 							)
 						}
 
-						if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						if (store.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true
@@ -1056,7 +1056,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 									{ root_scene_obj, root_scene }
 								)
 							}
-							$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
+							store.rendererComponent.schedule_render_auto(root_scene)
 						}
 
 						if (afterUpdateEnd) {

@@ -92,8 +92,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	const sti: number = getContext("store_index")
 	$: store = $svelthreeStores[sti]
 
-	const svelthreeStore = $svelthreeStores[sti]
-
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.
 	 * It's being set to `false` on initialization if an (_already created_) threejs object instance was provided,
@@ -207,7 +205,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			scene_is_active = false
 			scene.userData.isActive = scene_is_active
 
-			svelthreeStore.scenes.push({ scene: scene, id: id, isActive: false })
+			store.scenes.push({ scene: scene, id: id, isActive: false })
 		}
 
 		// every scene spreads it's onw instance to children overwriting the 'root scene' instance
@@ -295,7 +293,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			if ((scene_uuid && scene.uuid !== scene_uuid) || !scene_uuid) {
 				const uuid_to_remove: string = scene_uuid || scene.uuid
-				const old_instance: Object3D | undefined = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					remove_instance(old_instance, "scene", scene, self)
@@ -719,7 +717,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && scene && scene.userData.box && $svelthreeStores[sti].rendererComponent && root_scene) {
+	$: if (box && scene && scene.userData.box && store.rendererComponent && root_scene) {
 		apply_box()
 	}
 
@@ -742,10 +740,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			// start updating
 			if (!remove_update_box_on_render_event) {
-				remove_update_box_on_render_event = $svelthreeStores[sti].rendererComponent?.$on(
-					"update_helpers",
-					update_box
-				)
+				remove_update_box_on_render_event = store.rendererComponent?.$on("update_helpers", update_box)
 			}
 		} else {
 			console.error(`SVELTHREE > ${c_name} > apply_box : invalid 'scene' instance value!`, { scene })
@@ -1037,7 +1032,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, scene, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
@@ -1345,7 +1340,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							)
 						}
 
-						if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						if (store.rendererComponent?.mode === "auto") {
 							if (root_scene) {
 								// we're not the root scene (root_scene is not `null`)
 								// prevent an additional component update by not accessing the `root_scene` prop directly.
@@ -1357,7 +1352,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 										{ root_scene_obj, root_scene }
 									)
 								}
-								$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
+								store.rendererComponent.schedule_render_auto(root_scene)
 							} else {
 								// we're are the root scene (root_scene is `null`)
 								// prevent an additional component update by not accessing the `scene` prop directly.
@@ -1369,7 +1364,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 										{ scene_obj, scene }
 									)
 								}
-								$svelthreeStores[sti].rendererComponent.schedule_render_auto(scene)
+								store.rendererComponent.schedule_render_auto(scene)
 							}
 						}
 
@@ -1387,7 +1382,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 <slot />
 
-{#if $svelthreeStores[sti].renderer && $svelthreeStores[sti].renderer.xr.enabled === false && interact}
+{#if store.renderer && store.renderer.xr.enabled === false && interact}
 	<SvelthreeInteraction
 		bind:this={interaction_comp}
 		{shadow_dom_el}

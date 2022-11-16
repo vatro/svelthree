@@ -82,7 +82,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
-	$: if (!orbitcontrols && $canvas_dom?.element && $svelthreeStores[sti].activeCamera) create_orbitcontrols()
+	$: if (!orbitcontrols && $canvas_dom?.element && store.activeCamera) create_orbitcontrols()
 
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
@@ -94,11 +94,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		try {
 			orbitcontrols = new THREE_OrbitControls(oc_cam, oc_dom)
 			if (!orbitcontrols["userData"]) orbitcontrols["userData"] = {}
-			$svelthreeStores[sti].orbitcontrols.push(orbitcontrols)
+			store.orbitcontrols.push(orbitcontrols)
 			index_in_orbitcontrols = orbitcontrols["userData"].index_in_orbitcontrols
 			orbitcontrols["userData"].svelthreeComponent = self
 
-			if (oc_cam !== $svelthreeStores[sti].activeCamera && warn) {
+			if (oc_cam !== store.activeCamera && warn) {
 				let camhelper = new CameraHelper(oc_cam)
 				oc_cam.parent.add(camhelper)
 				console.warn(
@@ -108,7 +108,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 
 			// mode 'auto'
-			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+			if (store.rendererComponent?.mode === "auto") {
 				if (auto === true) {
 					// schedule render every animation frame
 					rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
@@ -121,7 +121,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			console.error(
 				`SVELTHREE > ${c_name} > Oops, something went wrong while trying to create and add OrbitControls!`,
 				err,
-				$svelthreeStores[sti],
+				store,
 				{ scene, sti }
 			)
 		}
@@ -130,7 +130,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	// schedule render
 	function on_orbitcontrols_change(e: Parameters<Parameters<THREE_OrbitControls["addEventListener"]>[1]>[0]): void {
 		orbitcontrols.object.userData.root_scene.userData.dirty = true
-		$svelthreeStores[sti].rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
+		store.rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
 
 		// schedule next render (loop) if function was not called by an event
 		if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
@@ -147,7 +147,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			return cam as THREE_OrthographicCamera
 		}
 		if (cam === undefined) {
-			return $svelthreeStores[sti].activeCamera
+			return store.activeCamera
 		}
 	}
 
@@ -228,7 +228,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 			}
 		} else {
-			if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+			if (store.rendererComponent?.mode === "auto") {
 				orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
 				if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
 			}

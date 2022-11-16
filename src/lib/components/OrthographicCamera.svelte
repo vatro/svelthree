@@ -136,7 +136,7 @@ If you use this approach you'll see a warning in the console if you define left,
 			camera_is_active = false
 			camera.userData.isActive = camera_is_active
 
-			$svelthreeStores[sti].cameras.push({
+			store.cameras.push({
 				camera: camera,
 				id: id,
 				isActive: camera_is_active
@@ -212,7 +212,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		camera_is_active = false
 		camera.userData.isActive = camera_is_active
 
-		$svelthreeStores[sti].cameras.push({
+		store.cameras.push({
 			camera: camera,
 			id: id,
 			isActive: camera_is_active
@@ -306,7 +306,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		if (camera) {
 			if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
 				const uuid_to_remove: string = camera_uuid || camera.uuid
-				const old_instance: Object3D | undefined = find_in_canvas($svelthreeStores[sti].scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					camera_is_active = old_instance.userData.isActive
@@ -332,9 +332,9 @@ If you use this approach you'll see a warning in the console if you define left,
 			camera_uuid = camera.uuid
 
 			if (index_in_cameras) {
-				$svelthreeStores[sti].cameras[index_in_cameras].camera = camera
-				$svelthreeStores[sti].cameras[index_in_cameras].id = id
-				$svelthreeStores[sti].cameras[index_in_cameras].isActive = camera_is_active
+				store.cameras[index_in_cameras].camera = camera
+				store.cameras[index_in_cameras].id = id
+				store.cameras[index_in_cameras].isActive = camera_is_active
 
 				camera.userData.index_in_cameras = index_in_cameras
 
@@ -653,7 +653,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = $svelthreeStores[sti].scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */
@@ -979,7 +979,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 						if (helper && camera.userData.helper) camera.userData.helper.update()
 
-						if ($svelthreeStores[sti].rendererComponent?.mode === "auto") {
+						if (store.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true
@@ -989,7 +989,7 @@ If you use this approach you'll see a warning in the console if you define left,
 									{ root_scene_obj, root_scene }
 								)
 							}
-							$svelthreeStores[sti].rendererComponent.schedule_render_auto(root_scene)
+							store.rendererComponent.schedule_render_auto(root_scene)
 						}
 
 						if (afterUpdateEnd) {
