@@ -341,7 +341,6 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	}
 
 	// accessability -> shadow dom wai-aria
-	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> | undefined = undefined
 
 	$: if (shadow_dom_el && aria !== undefined) {

@@ -289,7 +289,6 @@ If you use this approach you'll see a warning in the console if you define left,
 	}
 
 	// accessability -> shadow dom wai-aria
-	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> | undefined = undefined
 
 	$: if (shadow_dom_el && aria !== undefined) {

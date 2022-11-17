@@ -209,7 +209,6 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	}
 
 	// accessability -> shadow dom wai-aria
-	// eslint-disable-next-line no-undef
 	export let aria: Partial<ARIAMixin> | undefined = undefined
 
 	$: if (shadow_dom_el && aria !== undefined) {
