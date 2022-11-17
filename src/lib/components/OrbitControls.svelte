@@ -10,8 +10,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 [ tbd ]  Link to Docs.
 -->
 <script lang="ts">
-	import type { Scene } from "three"
-
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
@@ -25,7 +23,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 	import type { PropsOrbitControls } from "../types/types-comp-props"
-	import { CameraHelper } from "three"
+	// TODO  implement correctly
+	//import { CameraHelper } from "three"
 	import type {
 		Vector3,
 		PerspectiveCamera as THREE_PerspectiveCamera,
@@ -47,7 +46,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 
-	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
 	$: store = $svelthreeStores[sti]
 
@@ -67,7 +65,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** Get `OrbitControls` three.js instance's index in the `orbitcontrols`-array (svelthreeStore).
 	 * Can also be obtained via created `orbitcontrols` instance directly: `orbitcontrols_comp_ref.orbitcontrols.userData.index_in_orbitcontrols`
 	 */
-	export const get_index_in_orbitcontrols = (): number => index_in_orbitcontrols
+	export const get_index_in_orbitcontrols = (): number | undefined => index_in_orbitcontrols
 
 	export let cam:
 		| PerspectiveCamera
@@ -88,19 +86,35 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
 	function create_orbitcontrols(): void {
 		//console.log("create_orbitcontrols!")
-		const oc_cam: THREE_PerspectiveCamera | THREE_OrthographicCamera = get_oc_cam()
-		const oc_dom: HTMLElement = get_oc_dom()
+		const oc_cam: THREE_PerspectiveCamera | THREE_OrthographicCamera | undefined | null = get_oc_cam()
+		const oc_dom: HTMLElement | undefined = get_oc_dom()
 
-		try {
+		if (oc_cam && oc_dom) {
 			orbitcontrols = new THREE_OrbitControls(oc_cam, oc_dom)
-			if (!orbitcontrols["userData"]) orbitcontrols["userData"] = {}
-			store.orbitcontrols.push(orbitcontrols)
-			index_in_orbitcontrols = orbitcontrols["userData"].index_in_orbitcontrols
-			orbitcontrols["userData"].svelthreeComponent = self
+			let oc_userData: { [key: string]: unknown } | undefined = orbitcontrols[
+				"userData" as keyof typeof orbitcontrols
+			] as { [key: string]: unknown }
+
+			if (!oc_userData) {
+				Object.defineProperty(orbitcontrols, "userData", { value: {}, writable: true })
+				oc_userData = orbitcontrols["userData" as keyof typeof orbitcontrols] as { [key: string]: unknown }
+			}
+
+			if (oc_userData && oc_userData.index_in_orbitcontrols !== undefined) {
+				store.orbitcontrols.push(orbitcontrols)
+				index_in_orbitcontrols = oc_userData.index_in_orbitcontrols as number
+				oc_userData.svelthreeComponent = self
+			}
 
 			if (oc_cam !== store.activeCamera && warn) {
-				let camhelper = new CameraHelper(oc_cam)
-				oc_cam.parent.add(camhelper)
+				/* TODO  Why are we adding a helper here?! (probably for hard-testing) -> it seems the helper functionality is unfinshed.
+				if (oc_cam.parent) {
+					const camhelper = new CameraHelper(oc_cam)
+					oc_cam.parent.add(camhelper)
+				} else {
+					console.warn(`SVELTHREE > ${c_name} > ${c_name} > create_orbitcontrols: Cannot add camera helper to 'parent', 'oc_cam' has no 'parent'!.`,{ oc_cam }
+				}
+				*/
 				console.warn(
 					`SVELTHREE > ${c_name} > OrbitControls 'cam' is not the currently active camera, is this intended? Set 'warn={false}' to hide this warning (CameraHelper will also not be added anymore).`,
 					{ orbitcontrols }
@@ -117,33 +131,44 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 				}
 			}
-		} catch (err) {
+		} else {
 			console.error(
-				`SVELTHREE > ${c_name} > Oops, something went wrong while trying to create and add OrbitControls!`,
-				err,
-				store,
-				{ scene, sti }
+				`SVELTHREE > ${c_name} > create_orbitcontrols : Cannot create 'orbitcontrols', invalid 'oc_cam' and/or 'oc_dom' value!`,
+				{ oc_cam, oc_dom }
 			)
 		}
 	}
 
 	// schedule render
 	function on_orbitcontrols_change(e: Parameters<Parameters<THREE_OrbitControls["addEventListener"]>[1]>[0]): void {
-		orbitcontrols.object.userData.root_scene.userData.dirty = true
-		store.rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
+		if (orbitcontrols) {
+			orbitcontrols.object.userData.root_scene.userData.dirty = true
+			if (store.rendererComponent) {
+				store.rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > on_orbitcontrols_change : Cannot schedule render (auto), invalid 'store.rendererComponent' value!`,
+					{ store_rendererComponent: store.rendererComponent }
+				)
+			}
 
-		// schedule next render (loop) if function was not called by an event
-		if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+			// schedule next render (loop) if function was not called by an event
+			if (e === null) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_orbitcontrols_change : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
-	function get_oc_cam(): THREE_PerspectiveCamera | THREE_OrthographicCamera {
-		if (cam !== undefined && cam["is_svelthree_camera"]) {
+	function get_oc_cam(): THREE_PerspectiveCamera | THREE_OrthographicCamera | undefined | null {
+		if (cam !== undefined && cam["is_svelthree_camera" as keyof typeof cam]) {
 			return (cam as PerspectiveCamera | OrthographicCamera).get_instance()
 		}
-		if (cam !== undefined && cam["isPerspectiveCamera"]) {
+		if (cam !== undefined && (cam as THREE_PerspectiveCamera)["isPerspectiveCamera"]) {
 			return cam as THREE_PerspectiveCamera
 		}
-		if (cam !== undefined && cam["isOrthographicCamera"]) {
+		if (cam !== undefined && (cam as THREE_OrthographicCamera)["isOrthographicCamera"]) {
 			return cam as THREE_OrthographicCamera
 		}
 		if (cam === undefined) {
@@ -151,8 +176,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	function get_oc_dom(): HTMLElement {
-		if (dom_el !== undefined && dom_el["is_svelthree_canvas"]) {
+	function get_oc_dom(): HTMLElement | undefined {
+		if (dom_el !== undefined && (dom_el as Canvas)["is_svelthree_canvas"]) {
 			return (dom_el as Canvas).getDomElement()
 		}
 		if (dom_el !== undefined) {
@@ -185,7 +210,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_enabled(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "enabled", enabled))
-		orbitcontrols.enabled = !!enabled
+		if (orbitcontrols) {
+			orbitcontrols.enabled = !!enabled
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_enabled : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
 	/** The focus point of the controls, the `.object` orbits around this. It can be updated manually at any point to change the focus of the controls.
@@ -195,7 +226,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_target(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "target", target))
-		orbitcontrols.target = target
+		if (orbitcontrols && target !== undefined) {
+			orbitcontrols.target = target
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > set_target : invalid 'orbitcontrols' instance and / or 'target' prop value!`,
+				{ orbitcontrols, target }
+			)
+		}
 	}
 
 	/** Enable or disable horizontal and vertical rotation of the camera. Default `true`.
@@ -205,7 +243,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_rotate(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "rotate", rotate))
-		orbitcontrols.enableRotate = !!rotate
+		if (orbitcontrols) {
+			orbitcontrols.enableRotate = !!rotate
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_rotate : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
 	/** Set to `true` to automatically rotate around the target. Default is `false`.
@@ -218,20 +262,27 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (orbitcontrols && auto !== undefined) set_auto()
 
 	function set_auto(): void {
-		if (verbose && log_rs) console.debug(...c_rs(c_name, "auto", auto))
-		orbitcontrols.autoRotate = !!auto
+		if (orbitcontrols && auto !== undefined) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "auto", auto))
+			orbitcontrols.autoRotate = !!auto
 
-		if (!orbitcontrols.autoRotate) {
-			if (rAF.id) {
-				cancelAnimationFrame(rAF.id)
-				rAF.id = 0
-				orbitcontrols.addEventListener("change", on_orbitcontrols_change)
+			if (!orbitcontrols.autoRotate) {
+				if (rAF.id) {
+					cancelAnimationFrame(rAF.id)
+					rAF.id = 0
+					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
+				}
+			} else {
+				if (store.rendererComponent?.mode === "auto") {
+					orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
+					if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+				}
 			}
 		} else {
-			if (store.rendererComponent?.mode === "auto") {
-				orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
-				if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
-			}
+			console.error(
+				`SVELTHREE > ${c_name} > set_auto : invalid 'orbitcontrols' instance and / or 'auto' prop value!`,
+				{ orbitcontrols, auto }
+			)
 		}
 	}
 
@@ -242,7 +293,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_auto_speed(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "auto_speed", auto_speed))
-		orbitcontrols.autoRotateSpeed = auto_speed
+		if (orbitcontrols && auto_speed !== undefined) {
+			orbitcontrols.autoRotateSpeed = auto_speed
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > set_auto_speed : invalid 'orbitcontrols' instance and / or 'auto_speed' prop value!`,
+				{ orbitcontrols, auto_speed }
+			)
+		}
 	}
 
 	/** Set to true to enable damping (inertia), which can be used to give a sense of weight to the controls. Default is `false`.
@@ -252,7 +310,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_damping(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "damping", damping))
-		orbitcontrols.enableDamping = !!damping
+		if (orbitcontrols) {
+			orbitcontrols.enableDamping = !!damping
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_damping : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
 	/** Enable or disable camera panning. Default is `true`.
@@ -262,7 +326,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_pan(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "pan", pan))
-		orbitcontrols.enablePan = !!pan
+		if (orbitcontrols) {
+			orbitcontrols.enablePan = !!pan
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_pan : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
 	/** Enable or disable zooming (dollying) of the camera. Default `false`.
@@ -272,7 +342,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function set_zoom(): void {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "zoom", zoom))
-		orbitcontrols.enableZoom = !!zoom
+		if (orbitcontrols) {
+			orbitcontrols.enableZoom = !!zoom
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_zoom : invalid 'orbitcontrols' instance value!`, {
+				orbitcontrols
+			})
+		}
 	}
 
 	/** Returns the (three) instance of the object created by the component. */
