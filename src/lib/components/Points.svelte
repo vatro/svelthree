@@ -150,17 +150,24 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (points?.type === "Points") {
-			if (!points.geometry) {
-				throw new Error(`SVELTHREE > ${c_name} : provided 'points' instance has no geometry!`)
-			}
+		if (store) {
+			if (points?.type === "Points") {
+				if (!points.geometry) {
+					throw new Error(`SVELTHREE > ${c_name} : provided 'points' instance has no geometry!`)
+				}
 
-			if (!points.material) {
-				throw new Error(`SVELTHREE > ${c_name} : provided 'points' instance has no material!`)
+				if (!points.material) {
+					throw new Error(`SVELTHREE > ${c_name} : provided 'points' instance has no material!`)
+				}
+			} else if (points) {
+				throw new Error(
+					`SVELTHREE > ${c_name} : provided 'points' instance has wrong type '${points.type}', should be '${c_name}'!`
+				)
 			}
-		} else if (points) {
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_instance_provided : invalid 'store' instance value!`, { store })
 			throw new Error(
-				`SVELTHREE > ${c_name} provided 'points' instance has wrong type '${points.type}', should be '${c_name}'!`
+				`SVELTHREE > ${c_name} : Cannot process provided 'points' instance, invalid 'store' value!'`
 			)
 		}
 	}
@@ -392,7 +399,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			if ((points_uuid && points.uuid !== points_uuid) || !points_uuid) {
 				const uuid_to_remove: string = points_uuid || points.uuid
-				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store?.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					remove_instance(old_instance, "points", points, self)
@@ -636,7 +643,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && points && points.userData.box && store.rendererComponent && root_scene) {
+	$: if (box && points && points.userData.box && store?.rendererComponent && root_scene) {
 		apply_box()
 	}
 
@@ -659,7 +666,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			// start updating
 			if (!remove_update_box_on_render_event) {
-				remove_update_box_on_render_event = store.rendererComponent?.$on("update_helpers", update_box)
+				remove_update_box_on_render_event = store?.rendererComponent?.$on("update_helpers", update_box)
 			}
 		} else {
 			console.error(`SVELTHREE > ${c_name} > apply_box : invalid 'points' instance value!`, { points })
@@ -951,7 +958,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, points, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
@@ -1266,7 +1273,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							)
 						}
 
-						if (store.rendererComponent?.mode === "auto") {
+						if (store?.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true
@@ -1293,7 +1300,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 <slot />
 
-{#if store.renderer && store.renderer.xr.enabled === false && interact}
+{#if store?.renderer?.xr.enabled === false && interact}
 	<SvelthreeInteraction
 		bind:this={interaction_comp}
 		{shadow_dom_el}

@@ -130,22 +130,29 @@ If you use this approach you'll see a warning in the console if you define left,
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (camera?.type === "OrthographicCamera") {
-			camera.userData.id = id
+		if (store) {
+			if (camera?.type === "OrthographicCamera") {
+				camera.userData.id = id
 
-			camera_is_active = false
-			camera.userData.isActive = camera_is_active
+				camera_is_active = false
+				camera.userData.isActive = camera_is_active
 
-			store.cameras.push({
-				camera: camera,
-				id: id,
-				isActive: camera_is_active
-			})
+				store.cameras.push({
+					camera: camera,
+					id: id,
+					isActive: camera_is_active
+				})
 
-			index_in_cameras = camera.userData.index_in_cameras
-		} else if (camera) {
+				index_in_cameras = camera.userData.index_in_cameras
+			} else if (camera) {
+				throw new Error(
+					`SVELTHREE > ${c_name} : provided 'camera' instance has wrong type '${camera.type}', should be '${c_name}'!`
+				)
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_instance_provided : invalid 'store' instance value!`, { store })
 			throw new Error(
-				`SVELTHREE > ${c_name} provided 'camera' instance has wrong type '${camera.type}', should be '${c_name}'!`
+				`SVELTHREE > ${c_name} : Cannot process provided 'camera' instance, invalid 'store' value!'`
 			)
 		}
 	}
@@ -197,7 +204,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	 */
 	export let params: ConstructorParameters<typeof THREE_OrthographicCamera> | undefined = undefined
 
-	$: if (!camera && create) {
+	$: if (!camera && create && store) {
 		if (params) {
 			camera = new THREE_OrthographicCamera(...params)
 		} else {
@@ -306,7 +313,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		if (camera) {
 			if ((camera_uuid && camera.uuid !== camera_uuid) || !camera_uuid) {
 				const uuid_to_remove: string = camera_uuid || camera.uuid
-				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store?.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					camera_is_active = old_instance.userData.isActive
@@ -332,14 +339,21 @@ If you use this approach you'll see a warning in the console if you define left,
 			camera_uuid = camera.uuid
 
 			if (index_in_cameras) {
-				store.cameras[index_in_cameras].camera = camera
-				store.cameras[index_in_cameras].id = id
-				store.cameras[index_in_cameras].isActive = camera_is_active
+				if (store) {
+					store.cameras[index_in_cameras].camera = camera
+					store.cameras[index_in_cameras].id = id
+					store.cameras[index_in_cameras].isActive = camera_is_active
 
-				camera.userData.index_in_cameras = index_in_cameras
+					camera.userData.index_in_cameras = index_in_cameras
 
-				camera.userData.id = id
-				camera.userData.isActive = camera_is_active
+					camera.userData.id = id
+					camera.userData.isActive = camera_is_active
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > handle_instance_change : Cannot process Camera instance change correctly, invalid 'store' prop value!`,
+						{ store }
+					)
+				}
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > handle_instance_change : Cannot process Camera instance change correctly, invalid 'index_in_cameras' prop value!`,
@@ -653,7 +667,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */
@@ -983,7 +997,7 @@ If you use this approach you'll see a warning in the console if you define left,
 
 						if (helper && camera.userData.helper) camera.userData.helper.update()
 
-						if (store.rendererComponent?.mode === "auto") {
+						if (store?.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true

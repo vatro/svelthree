@@ -117,12 +117,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (group?.type === "Group") {
-			//nothing
-		} else if (group) {
-			throw new Error(
-				`SVELTHREE > ${c_name} provided 'group' instance has wrong type '${group.type}', should be '${c_name}'!`
-			)
+		if (store) {
+			if (group?.type === "Group") {
+				//nothing
+			} else if (group) {
+				throw new Error(
+					`SVELTHREE > ${c_name} : provided 'group' instance has wrong type '${group.type}', should be '${c_name}'!`
+				)
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_instance_provided : invalid 'store' instance value!`, { store })
+			throw new Error(`SVELTHREE > ${c_name} : Cannot process provided 'group' instance, invalid 'store' value!'`)
 		}
 	}
 
@@ -236,7 +241,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (group) {
 			if ((group_uuid && group.uuid !== group_uuid) || !group_uuid) {
 				const uuid_to_remove: string = group_uuid || group.uuid
-				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store?.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					remove_instance(old_instance, "group", group, self)
@@ -435,7 +440,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && group && group.userData.box && store.rendererComponent && root_scene) {
+	$: if (box && group && group.userData.box && store?.rendererComponent && root_scene) {
 		apply_box()
 	}
 
@@ -458,7 +463,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			// start updating
 			if (!remove_update_box_on_render_event) {
-				remove_update_box_on_render_event = store.rendererComponent?.$on("update_helpers", update_box)
+				remove_update_box_on_render_event = store?.rendererComponent?.$on("update_helpers", update_box)
 			}
 		} else {
 			console.error(`SVELTHREE > ${c_name} > apply_box : invalid 'group' instance value!`, { group })
@@ -497,7 +502,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, group, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
@@ -805,7 +810,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							)
 						}
 
-						if (store.rendererComponent?.mode === "auto") {
+						if (store?.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true

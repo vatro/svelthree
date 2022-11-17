@@ -80,7 +80,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
-	$: if (!orbitcontrols && $canvas_dom?.element && store.activeCamera) create_orbitcontrols()
+	$: if (!orbitcontrols && $canvas_dom?.element && store?.activeCamera) create_orbitcontrols()
 
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
@@ -89,7 +89,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		const oc_cam: THREE_PerspectiveCamera | THREE_OrthographicCamera | undefined | null = get_oc_cam()
 		const oc_dom: HTMLElement | undefined = get_oc_dom()
 
-		if (oc_cam && oc_dom) {
+		if (store && oc_cam && oc_dom) {
 			orbitcontrols = new THREE_OrbitControls(oc_cam, oc_dom)
 			let oc_userData: { [key: string]: unknown } | undefined = orbitcontrols[
 				"userData" as keyof typeof orbitcontrols
@@ -133,8 +133,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 		} else {
 			console.error(
-				`SVELTHREE > ${c_name} > create_orbitcontrols : Cannot create 'orbitcontrols', invalid 'oc_cam' and/or 'oc_dom' value!`,
-				{ oc_cam, oc_dom }
+				`SVELTHREE > ${c_name} > create_orbitcontrols : Cannot create 'orbitcontrols', invalid 'store' and/or 'oc_cam' and/or 'oc_dom' value!`,
+				{ store, oc_cam, oc_dom }
 			)
 		}
 	}
@@ -143,12 +143,12 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function on_orbitcontrols_change(e: Parameters<Parameters<THREE_OrbitControls["addEventListener"]>[1]>[0]): void {
 		if (orbitcontrols) {
 			orbitcontrols.object.userData.root_scene.userData.dirty = true
-			if (store.rendererComponent) {
+			if (store?.rendererComponent) {
 				store.rendererComponent.schedule_render_auto(orbitcontrols.object.userData.root_scene)
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > on_orbitcontrols_change : Cannot schedule render (auto), invalid 'store.rendererComponent' value!`,
-					{ store_rendererComponent: store.rendererComponent }
+					{ rendererComponent: store?.rendererComponent }
 				)
 			}
 
@@ -172,7 +172,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			return cam as THREE_OrthographicCamera
 		}
 		if (cam === undefined) {
-			return store.activeCamera
+			return store?.activeCamera
 		}
 	}
 
@@ -273,9 +273,14 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 				}
 			} else {
-				if (store.rendererComponent?.mode === "auto") {
+				if (store?.rendererComponent?.mode === "auto") {
 					orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
 					if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > set_auto : Cannot remove 'change' EventListener, invalid 'store' or 'store.rendererComponent' value!`,
+						{ store, rendererComponent: store?.rendererComponent }
+					)
 				}
 			}
 		} else {

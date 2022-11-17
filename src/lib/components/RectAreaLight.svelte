@@ -110,12 +110,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (light?.type === "RectAreaLight") {
-			//nothing
-		} else if (light) {
-			throw new Error(
-				`SVELTHREE > ${c_name} provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
-			)
+		if (store) {
+			if (light?.type === "RectAreaLight") {
+				//nothing
+			} else if (light) {
+				throw new Error(
+					`SVELTHREE > ${c_name} : provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
+				)
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_instance_provided : invalid 'store' instance value!`, { store })
+			throw new Error(`SVELTHREE > ${c_name} : Cannot process provided 'light' instance, invalid 'store' value!'`)
 		}
 	}
 
@@ -240,7 +245,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (light) {
 			if ((light_uuid && light.uuid !== light_uuid) || !light_uuid) {
 				const uuid_to_remove: string = light_uuid || light.uuid
-				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store?.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					remove_instance(old_instance, "light", light, self)
@@ -539,7 +544,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, light, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */
@@ -873,7 +878,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 						if (helper && light.userData.helper) light.userData.helper.updateMatrixWorld()
 
-						if (store.rendererComponent?.mode === "auto") {
+						if (store?.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true

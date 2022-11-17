@@ -113,12 +113,17 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	/** Executed when / if an instance was provided **on initializiation** -> only once if at all! */
 	function on_instance_provided(): void {
-		if (light?.type === "SpotLight") {
-			//nothing
-		} else if (light) {
-			throw new Error(
-				`SVELTHREE > ${c_name} provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
-			)
+		if (store) {
+			if (light?.type === "SpotLight") {
+				//nothing
+			} else if (light) {
+				throw new Error(
+					`SVELTHREE > ${c_name} : provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
+				)
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > on_instance_provided : invalid 'store' instance value!`, { store })
+			throw new Error(`SVELTHREE > ${c_name} : Cannot process provided 'light' instance, invalid 'store' value!'`)
 		}
 	}
 
@@ -237,7 +242,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (light) {
 			if ((light_uuid && light.uuid !== light_uuid) || !light_uuid) {
 				const uuid_to_remove: string = light_uuid || light.uuid
-				const old_instance: Object3D | undefined = find_in_canvas(store.scenes, uuid_to_remove)
+				const old_instance: Object3D | undefined = find_in_canvas(store?.scenes, uuid_to_remove)
 
 				if (old_instance) {
 					remove_instance(old_instance, "light", light, self)
@@ -280,7 +285,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (!matrix && light && target && light_target) light_target.change = true
 
 	// if the Light is a Light with a 'target' property, start / stop monitoring 'target' position changes if helper is enabled / disabled
-	$: !matrix && light && target && light_target && light.target?.isObject3D && store.rendererComponent
+	$: !matrix && light && target && light_target && light.target?.isObject3D && store?.rendererComponent
 		? start_monitoring_target_position()
 		: stop_monitoring_target_position()
 
@@ -292,7 +297,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		// COOL!  this way the helper is 100% synchronious (not 1 frame late)
 		if (!remove_target_position_listener) {
 			if (verbose && log_rs) console.debug(...c_rs(c_name, "start_monitoring_target_position!"))
-			remove_target_position_listener = store.rendererComponent?.$on("before_render_int", update_light_target)
+			remove_target_position_listener = store?.rendererComponent?.$on("before_render_int", update_light_target)
 		}
 	}
 
@@ -603,7 +608,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, light, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */
@@ -937,7 +942,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 						if (helper && light.userData.helper) light.userData.helper.update()
 
-						if (store.rendererComponent?.mode === "auto") {
+						if (store?.rendererComponent?.mode === "auto") {
 							// prevent an additional component update by not accessing the `root_scene` prop directly.
 							if (root_scene_obj.value) {
 								root_scene_obj.value.userData.dirty = true
