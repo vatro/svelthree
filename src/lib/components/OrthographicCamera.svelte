@@ -345,7 +345,7 @@ If you use this approach you'll see a warning in the console if you define left,
 			if (our_parent) our_parent.add(camera)
 			camera_uuid = camera.uuid
 
-			if (index_in_cameras) {
+			if (index_in_cameras !== undefined && index_in_cameras >= 0) {
 				if (store) {
 					store.cameras[index_in_cameras].camera = camera
 					store.cameras[index_in_cameras].id = id
