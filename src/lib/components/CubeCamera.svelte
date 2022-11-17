@@ -376,7 +376,15 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 						remove_instance(old_instance, "camera", camera, self)
 
-						if (props) sProps = new SvelthreeProps(camera)
+						// recreate 'sProps'
+						if (props) {
+							sProps = new SvelthreeProps(camera)
+						} else {
+							console.error(
+								`SVELTHREE > ${c_name} > handle_instance_change : Cannot recreate 'sProps', invalid 'props' prop value!`,
+								{ props }
+							)
+						}
 
 						// update store
 						if (store) {

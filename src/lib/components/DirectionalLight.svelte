@@ -251,7 +251,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				if (old_instance) {
 					remove_instance(old_instance, "light", light, self)
 
-					if (props) sProps = new SvelthreeProps(light)
+					// recreate 'sProps'
+					if (props) {
+						sProps = new SvelthreeProps(light)
+					} else {
+						console.error(
+							`SVELTHREE > ${c_name} > handle_instance_change : Cannot recreate 'sProps', invalid 'props' prop value!`,
+							{ props }
+						)
+					}
 				} else {
 					console.error(
 						`SVELTHREE > ${c_name} > handle_instance_change : invalid 'old_instance' instance value!`,

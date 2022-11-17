@@ -409,7 +409,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						raycast.splice(old_instance.userData.index_in_raycast, 1)
 					}
 
-					if (props) sProps = new SvelthreeProps(mesh)
+					// recreate 'sProps'
+					if (props) {
+						sProps = new SvelthreeProps(mesh)
+					} else {
+						console.error(
+							`SVELTHREE > ${c_name} > handle_instance_change : Cannot recreate 'sProps', invalid 'props' prop value!`,
+							{ props }
+						)
+					}
 				} else {
 					console.error(
 						`SVELTHREE > ${c_name} > handle_instance_change : invalid 'old_instance' instance value!`,

@@ -289,7 +289,15 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					old_instance.userData.isActive = null
 					old_instance.userData.id = null
 
-					if (props) sProps = new SvelthreeProps(camera)
+					// recreate 'sProps'
+					if (props) {
+						sProps = new SvelthreeProps(camera)
+					} else {
+						console.error(
+							`SVELTHREE > ${c_name} > handle_instance_change : Cannot recreate 'sProps', invalid 'props' prop value!`,
+							{ props }
+						)
+					}
 				} else {
 					console.error(
 						`SVELTHREE > ${c_name} > handle_instance_change : invalid 'old_instance' instance value!`,
