@@ -469,6 +469,8 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)
@@ -572,6 +574,8 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)

@@ -797,6 +797,8 @@ If you use this approach you'll see a warning in the console if you define left,
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)
@@ -901,6 +903,8 @@ If you use this approach you'll see a warning in the console if you define left,
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)

@@ -872,6 +872,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)
@@ -975,6 +977,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 								})
 							)
 						}
+
+						//no special `svelthree`-logic here
 					}
 			  }
 	)
