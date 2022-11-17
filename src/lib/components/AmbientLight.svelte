@@ -241,8 +241,8 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 					if (props) {
 						sProps = new SvelthreeProps(light)
 					} else {
-						console.error(
-							`SVELTHREE > ${c_name} > handle_instance_change : Cannot recreate 'sProps', invalid 'props' prop value!`,
+						console.debug(
+							`SVELTHREE > ${c_name} > handle_instance_change : Didn't recreate 'sProps', invalid 'props' prop value!`,
 							{ props }
 						)
 					}
