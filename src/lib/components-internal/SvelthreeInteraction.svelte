@@ -68,7 +68,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let sti: number = getContext("store_index")
 	export let obj: Object3D | undefined | null
 
-	$: store = $svelthreeStores[sti]
+	const store = $svelthreeStores[sti]
 
 	// TODO  still not sure if we even need this / want to handle this like svelte
 	//const passive_events = new Set([])

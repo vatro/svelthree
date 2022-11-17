@@ -61,7 +61,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * _will be `undefined` if the `WebGlRenderer` is placed **outside** of a `Canvas` component._
 	 */
 	const sti: number = getContext("store_index")
-	$: stores = $svelthreeStores
+	const stores = $svelthreeStores
 
 	function get_store(store_index: number): StoreBody | null | undefined {
 		if (stores) {

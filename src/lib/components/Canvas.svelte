@@ -258,7 +258,7 @@ This is a **svelthree** _Canvas_ Component.
 	setContext("store_index", sti)
 	export const get_sti = (): number => sti
 
-	$: store = $svelthreeStores[sti]
+	let store = $svelthreeStores[sti]
 
 	// canvas
 	let c: HTMLCanvasElement

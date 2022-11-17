@@ -136,7 +136,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
-	$: store = $svelthreeStores[sti]
+	const store = $svelthreeStores[sti]
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.

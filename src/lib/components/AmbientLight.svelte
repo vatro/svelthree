@@ -59,7 +59,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
-	$: store = $svelthreeStores[sti]
+	const store = $svelthreeStores[sti]
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.

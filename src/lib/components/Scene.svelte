@@ -90,7 +90,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let id: string | undefined = undefined
 
 	const sti: number = getContext("store_index")
-	$: store = $svelthreeStores[sti]
+	const store = $svelthreeStores[sti]
 
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.
