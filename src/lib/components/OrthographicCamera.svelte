@@ -325,12 +325,11 @@ If you use this approach you'll see a warning in the console if you define left,
 
 					// recreate 'sProps'
 					if (props) {
-						sProps = new SvelthreeProps(camera)
-					} else {
-						console.debug(
-							`SVELTHREE > ${c_name} > handle_instance_change : Didn't recreate 'sProps', invalid 'props' prop value!`,
-							{ props }
-						)
+						try {
+							sProps = new SvelthreeProps(camera)
+						} catch (err) {
+							console.error(err)
+						}
 					}
 				} else {
 					console.error(

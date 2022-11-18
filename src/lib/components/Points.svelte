@@ -412,12 +412,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 					// recreate 'sProps'
 					if (props) {
-						sProps = new SvelthreeProps(points)
-					} else {
-						console.debug(
-							`SVELTHREE > ${c_name} > handle_instance_change : Didn't recreate 'sProps', invalid 'props' prop value!`,
-							{ props }
-						)
+						try {
+							sProps = new SvelthreeProps(points)
+						} catch (err) {
+							console.error(err)
+						}
 					}
 				} else {
 					console.error(
