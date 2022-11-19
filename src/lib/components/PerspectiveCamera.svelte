@@ -729,9 +729,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				console.error(
+				console.debug(
 					`SVELTHREE > ${c_name} > remove_helper : Couldn't remove unavailable 'camera.userData.helper' instance!`,
-					{ camera }
+					{ camera, helper: camera.userData.helper }
 				)
 			}
 		} else {

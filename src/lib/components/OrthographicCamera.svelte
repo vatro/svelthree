@@ -653,9 +653,9 @@ If you use this approach you'll see a warning in the console if you define left,
 					)
 				}
 			} else {
-				console.error(
+				console.debug(
 					`SVELTHREE > ${c_name} > remove_helper : Couldn't remove unavailable 'camera.userData.helper' instance!`,
-					{ camera }
+					{ camera, helper: camera.userData.helper }
 				)
 			}
 		} else {
