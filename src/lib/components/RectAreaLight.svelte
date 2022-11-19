@@ -492,21 +492,29 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let helperParams: RemoveFirst<HelperParams> | undefined = undefined
 	export let helper: boolean | undefined = undefined
 
-	$: light && !light.userData.helper && helper ? add_helper() : null
-	$: light && light.userData.helper && !helper ? remove_helper() : null
+	$: light && helper ? add_helper() : null
+	$: light && helper !== undefined && !helper ? remove_helper() : null
 
+	// TODO  implements changing params / recreating helper
 	function add_helper(): void {
 		if (light) {
-			if (helperParams) {
-				light.userData.helper = new RectAreaLightHelper(light, ...helperParams)
-			} else {
-				light.userData.helper = new RectAreaLightHelper(light)
-			}
+			if (!light.userData.helper) {
+				if (helperParams) {
+					light.userData.helper = new RectAreaLightHelper(light, ...helperParams)
+				} else {
+					light.userData.helper = new RectAreaLightHelper(light)
+				}
 
-			if (scene) {
-				scene.add(light.userData.helper)
+				if (scene) {
+					scene.add(light.userData.helper)
+				} else {
+					console.error(`SVELTHREE > ${c_name} > add_helper : invalid 'scene' instance value!`, { scene })
+				}
 			} else {
-				console.error(`SVELTHREE > ${c_name} > add_helper : invalid 'scene' instance value!`, { scene })
+				console.debug(
+					`SVELTHREE > ${c_name} > add_helper : Didn't create new helper, 'light.userData.helper' instance already available!`,
+					{ light, helper: light.userData.helper }
+				)
 			}
 		} else {
 			console.error(`SVELTHREE > ${c_name} > add_helper : invalid 'light' instance value!`, { light })
