@@ -611,18 +611,25 @@ If you use this approach you'll see a warning in the console if you define left,
 	/** Creates and adds a `CameraHelper` (_no `helperParams`_). */
 	export let helper: boolean | undefined = undefined
 
-	$: camera && !camera.userData.helper && helper === true ? add_helper() : null
-	$: camera && camera.userData.helper && !helper ? remove_helper() : null
+	$: camera && helper === true ? add_helper() : null
+	$: camera && helper !== undefined && !helper ? remove_helper() : null
 
 	function add_helper(): void {
 		if (camera) {
-			camera.userData.helper = new CameraHelper(camera)
-			if (scene) {
-				scene.add(camera.userData.helper)
+			if (!camera.userData.helper) {
+				camera.userData.helper = new CameraHelper(camera)
+				if (scene) {
+					scene.add(camera.userData.helper)
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > add_helper : Couldn't add helper to unavailable 'scene' instance!`,
+						{ scene }
+					)
+				}
 			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > add_helper : Couldn't add helper to unavailable 'scene' instance!`,
-					{ scene }
+				console.debug(
+					`SVELTHREE > ${c_name} > add_helper : Didn't create new helper, 'camera.userData.helper' instance already available!`,
+					{ camera, helper: camera.userData.helper }
 				)
 			}
 		} else {
