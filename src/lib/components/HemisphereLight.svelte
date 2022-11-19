@@ -399,9 +399,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					)
 				}
 			} else {
-				console.error(
+				console.debug(
 					`SVELTHREE > ${c_name} > remove_helper : Couldn't remove unavailable 'light.userData.helper' instance!`,
-					{ light }
+					{ light, helper: light.userData.helper }
 				)
 			}
 		} else {
