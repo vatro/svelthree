@@ -747,54 +747,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
 	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
-	$: if (interactionEnabled && raycast && !block) {
-		if (mesh) {
-			if (!raycast.includes(mesh)) {
-				mesh.userData.block = false
-				raycast.push(mesh)
-			} else {
-				mesh.userData.block = false
-			}
+	$: if (interactionEnabled && raycast && !block && mesh) {
+		if (!raycast.includes(mesh)) {
+			mesh.userData.block = false
+			raycast.push(mesh)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'mesh' instance value!`,
-				{ mesh }
-			)
+			mesh.userData.block = false
 		}
 	}
 
 	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
 	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
 	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && block) {
-		if (mesh) {
-			if (!raycast.includes(mesh)) {
-				mesh.userData.block = true
-				raycast.push(mesh)
-			} else {
-				mesh.userData.block = true
-			}
+	$: if (!interactionEnabled && raycast && block && mesh) {
+		if (!raycast.includes(mesh)) {
+			mesh.userData.block = true
+			raycast.push(mesh)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively ENABLE raycasting : invalid 'mesh' instance value!`,
-				{ mesh }
-			)
+			mesh.userData.block = true
 		}
 	}
 
 	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
 	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && !block) {
-		if (mesh) {
-			if (raycast.includes(mesh)) {
-				raycast.splice(mesh.userData.index_in_raycast, 1)
-				mesh.userData.block = false
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'mesh' instance value!`,
-					{ mesh }
-				)
-			}
+	$: if (!interactionEnabled && raycast && !block && mesh) {
+		if (raycast.includes(mesh)) {
+			raycast.splice(mesh.userData.index_in_raycast, 1)
+			mesh.userData.block = false
 		}
 	}
 
@@ -962,7 +941,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, mesh, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
@@ -1304,7 +1283,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 <slot />
 
-{#if store?.renderer?.xr.enabled === false && interact}
+{#if $svelthreeStores[sti]?.renderer?.xr.enabled === false && interact}
 	<SvelthreeInteraction
 		bind:this={interaction_comp}
 		{shadow_dom_el}

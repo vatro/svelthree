@@ -623,54 +623,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
 	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
-	$: if (interactionEnabled && raycast && !block) {
-		if (container) {
-			if (!raycast.includes(container)) {
-				container.userData.block = false
-				raycast.push(container)
-			} else {
-				container.userData.block = false
-			}
+	$: if (interactionEnabled && raycast && !block && container) {
+		if (!raycast.includes(container)) {
+			container.userData.block = false
+			raycast.push(container)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'container' instance value!`,
-				{ container }
-			)
+			container.userData.block = false
 		}
 	}
 
 	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
 	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
 	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && block) {
-		if (container) {
-			if (!raycast.includes(container)) {
-				container.userData.block = true
-				raycast.push(container)
-			} else {
-				container.userData.block = true
-			}
+	$: if (!interactionEnabled && raycast && block && container) {
+		if (!raycast.includes(container)) {
+			container.userData.block = true
+			raycast.push(container)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively ENABLE raycasting : invalid 'container' instance value!`,
-				{ container }
-			)
+			container.userData.block = true
 		}
 	}
 
 	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
 	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && !block) {
-		if (container) {
-			if (raycast.includes(container)) {
-				raycast.splice(container.userData.index_in_raycast, 1)
-				container.userData.block = false
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'container' instance value!`,
-					{ container }
-				)
-			}
+	$: if (!interactionEnabled && raycast && !block && container) {
+		if (raycast.includes(container)) {
+			raycast.splice(container.userData.index_in_raycast, 1)
+			container.userData.block = false
 		}
 	}
 

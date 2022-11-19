@@ -828,54 +828,33 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
 	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
-	$: if (interactionEnabled && raycast && !block) {
-		if (scene) {
-			if (!raycast.includes(scene)) {
-				scene.userData.block = false
-				raycast.push(scene)
-			} else {
-				scene.userData.block = false
-			}
+	$: if (interactionEnabled && raycast && !block && scene) {
+		if (!raycast.includes(scene)) {
+			scene.userData.block = false
+			raycast.push(scene)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'scene' instance value!`,
-				{ scene }
-			)
+			scene.userData.block = false
 		}
 	}
 
 	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
 	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
 	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && block) {
-		if (scene) {
-			if (!raycast.includes(scene)) {
-				scene.userData.block = true
-				raycast.push(scene)
-			} else {
-				scene.userData.block = true
-			}
+	$: if (!interactionEnabled && raycast && block && scene) {
+		if (!raycast.includes(scene)) {
+			scene.userData.block = true
+			raycast.push(scene)
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > trying to reactively ENABLE raycasting : invalid 'scene' instance value!`,
-				{ scene }
-			)
+			scene.userData.block = true
 		}
 	}
 
 	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
 	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && !block) {
-		if (scene) {
-			if (raycast.includes(scene)) {
-				raycast.splice(scene.userData.index_in_raycast, 1)
-				scene.userData.block = false
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > trying to reactively DISABLE raycasting : invalid 'scene' instance value!`,
-					{ scene }
-				)
-			}
+	$: if (!interactionEnabled && raycast && !block && scene) {
+		if (raycast.includes(scene)) {
+			raycast.splice(scene.userData.index_in_raycast, 1)
+			scene.userData.block = false
 		}
 	}
 
