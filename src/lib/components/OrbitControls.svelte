@@ -80,7 +80,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
-	$: if (!orbitcontrols && $canvas_dom?.element && $svelthreeStores[sti]?.activeCamera) create_orbitcontrols()
+	$: if (
+		!orbitcontrols &&
+		$canvas_dom?.element &&
+		$svelthreeStores[sti]?.activeCamera &&
+		$svelthreeStores[sti]?.rendererComponent
+	)
+		create_orbitcontrols()
 
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
@@ -100,11 +106,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				oc_userData = orbitcontrols["userData" as keyof typeof orbitcontrols] as { [key: string]: unknown }
 			}
 
-			if (oc_userData && oc_userData.index_in_orbitcontrols !== undefined) {
-				store.orbitcontrols.push(orbitcontrols)
-				index_in_orbitcontrols = oc_userData.index_in_orbitcontrols as number
-				oc_userData.svelthreeComponent = self
-			}
+			store.orbitcontrols.push(orbitcontrols)
+			index_in_orbitcontrols = oc_userData.index_in_orbitcontrols as number
+			oc_userData.svelthreeComponent = self
 
 			if (oc_cam !== store.activeCamera && warn) {
 				/* TODO  Why are we adding a helper here?! (probably for hard-testing) -> it seems the helper functionality is unfinshed.
