@@ -322,14 +322,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	function update_light_target(): void {
 		if (light_target) {
-			if (helper) {
-				light_target.update(helper)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > update_light_target : Couldn't update 'light_target', 'helper' not available!`,
-					{ helper }
-				)
-			}
+			light_target.update(!!helper)
 		} else {
 			console.error(`SVELTHREE > ${c_name} > update_light_target : Couldn't update unavailable 'light_target'!`, {
 				light_target
