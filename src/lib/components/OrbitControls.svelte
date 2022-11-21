@@ -80,7 +80,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	// renderer (needed) updates orbitcontrols in case of damping and autorotate,
 	// canvas_dom.element and activeCamera are needed for default values if no 'cam' or 'dom_el' were provided.
-	$: if (!orbitcontrols && $canvas_dom?.element && store?.activeCamera) create_orbitcontrols()
+	$: if (!orbitcontrols && $canvas_dom?.element && $svelthreeStores[sti]?.activeCamera) create_orbitcontrols()
 
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */

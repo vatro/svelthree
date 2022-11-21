@@ -647,7 +647,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && mesh && mesh.userData.box && store?.rendererComponent && root_scene) {
+	$: if (box && mesh && mesh.userData.box && $svelthreeStores[sti]?.rendererComponent && root_scene) {
 		apply_box()
 	}
 

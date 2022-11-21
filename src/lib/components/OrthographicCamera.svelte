@@ -43,6 +43,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import { CameraValues } from "../constants"
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { CAM_PROPS_PMU } from "../constants/Cameras"
+	import type { StoreBody } from "../types/types-extra"
 	import type { Writable } from "svelte/store"
 
 	/**
@@ -346,9 +347,9 @@ If you use this approach you'll see a warning in the console if you define left,
 
 			if (index_in_cameras !== undefined && index_in_cameras >= 0) {
 				if (store) {
-					store.cameras[index_in_cameras].camera = camera
-					store.cameras[index_in_cameras].id = id
-					store.cameras[index_in_cameras].isActive = camera_is_active
+					;($svelthreeStores[sti] as StoreBody).cameras[index_in_cameras].camera = camera
+					;($svelthreeStores[sti] as StoreBody).cameras[index_in_cameras].id = id
+					;($svelthreeStores[sti] as StoreBody).cameras[index_in_cameras].isActive = camera_is_active
 
 					camera.userData.index_in_cameras = index_in_cameras
 
@@ -680,7 +681,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */

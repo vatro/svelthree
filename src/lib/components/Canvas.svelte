@@ -84,7 +84,7 @@ This is a **svelthree** _Canvas_ Component.
 	export let interactive: boolean | undefined = undefined
 	$: if (interactive !== undefined) {
 		if (store) {
-			store.canvas.interactive = interactive
+			;($svelthreeStores[sti] as StoreBody).canvas.interactive = interactive
 		} else {
 			console.error("SVELTHREE > Canvas > Couldn't set 'interactive' status, 'store' not avialble!", { store })
 		}
@@ -354,7 +354,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	// reactive create raycaster
-	$: interactive && !raycaster && c && store?.renderer ? createRaycaster() : null
+	$: interactive && !raycaster && c && $svelthreeStores[sti]?.renderer ? createRaycaster() : null
 
 	function createRaycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "createRaycaster > interactive", interactive))
@@ -362,7 +362,7 @@ This is a **svelthree** _Canvas_ Component.
 		raycaster = new Raycaster()
 
 		if (store) {
-			store.raycaster = raycaster
+			;($svelthreeStores[sti] as StoreBody).raycaster = raycaster
 			$canvas_interactivity.enabled = true
 
 			if (store.renderer?.xr.enabled === false) {
@@ -377,14 +377,14 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	// reactively remove raycaster
-	$: !interactive && raycaster && store?.renderer ? remove_raycaster() : null
+	$: !interactive && raycaster && $svelthreeStores[sti]?.renderer ? remove_raycaster() : null
 
 	function remove_raycaster() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "remove_raycaster > interactive", interactive))
 
 		if (store) {
 			$canvas_interactivity.enabled = false
-			store.raycaster = undefined
+			;($svelthreeStores[sti] as StoreBody).raycaster = undefined
 			raycaster = null
 
 			remove_all_listeners()
@@ -532,7 +532,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	// Mark the `filtered_raycast` as `dirty` if the active Scene has changed.
-	$: if (store?.activeScene) filtered_raycast.dirty = true
+	$: if ($svelthreeStores[sti]?.activeScene) filtered_raycast.dirty = true
 
 	/**
 	 * Removes the `interaction_0` render event listener.
@@ -983,7 +983,7 @@ This is a **svelthree** _Canvas_ Component.
 					// this way we don't have to handle anything, other store 'sti' will remain valid
 					// any newly added canvas will create a new store at the next highest index
 					// the value of 'sti' is completely irrelevant to the user, doesn't need to be handled.
-					store = null
+					$svelthreeStores[sti] = null
 
 					// if all stores are `null` we can safely reset the `svelthreeStores` array, e.g. when switching pages / routes.
 					if (all_stores_are_null()) {

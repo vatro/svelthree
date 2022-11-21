@@ -280,22 +280,23 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		if (stores) {
 			if (inputs_queue.length) {
 				for (let i = 0; i < inputs_queue.length; i++) {
-					const store = get_store(inputs_queue[i].sti)
-					if (store) {
-						store.renderer = renderer
-						store.rendererComponent = self
+					const input_sti = inputs_queue[i].sti
+					const input_store = get_store(input_sti)
+					if (input_store) {
+						;($svelthreeStores[input_sti] as StoreBody).renderer = renderer
+						;($svelthreeStores[input_sti] as StoreBody).rendererComponent = self
 					} else {
 						console.error(
-							`SVELTHREE > ${c_name} > create_renderer ('inputs_queue' not empty) : Couldn't update 'store' -> 'store' not available!`,
-							{ store }
+							`SVELTHREE > ${c_name} > create_renderer ('inputs_queue' not empty) : Couldn't update 'input_store' -> 'input_store' not available!`,
+							{ input_store }
 						)
 					}
 				}
 			} else {
 				const store = get_store(sti)
 				if (store) {
-					store.renderer = renderer
-					store.rendererComponent = self
+					;($svelthreeStores[sti] as StoreBody).renderer = renderer
+					;($svelthreeStores[sti] as StoreBody).rendererComponent = self
 				} else {
 					console.error(
 						`SVELTHREE > ${c_name} > create_renderer ('inputs_queue' empty) : Couldn't update 'store' -> 'store' not available!`,
@@ -494,8 +495,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		if (stores) {
 			const store = stores[store_index]
 			if (store) {
-				store.cameras[camera.userData.index_in_cameras].isActive = true
-				store.activeCamera = camera
+				;($svelthreeStores[store_index] as StoreBody).cameras[camera.userData.index_in_cameras].isActive = true
+				;($svelthreeStores[store_index] as StoreBody).activeCamera = camera
 			} else {
 				console.error(
 					...c_rs(
@@ -520,7 +521,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		camera.userData.isActive = false
 		const store = get_store(store_index)
 		if (store) {
-			store.cameras[camera.userData.index_in_cameras].isActive = false
+			;($svelthreeStores[store_index] as StoreBody).cameras[camera.userData.index_in_cameras].isActive = false
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > deactivate_cam : Couldn't update 'store' -> 'store' not available!`,
@@ -628,9 +629,9 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 		const store = get_store(sti)
 		if (store) {
-			store.scenes[scene.userData.index_in_scenes].isActive = true
-			store.activeScene = scene
-			store.currentSceneIndex = scene.userData.index_in_scenes + 1
+			;($svelthreeStores[sti] as StoreBody).scenes[scene.userData.index_in_scenes].isActive = true
+			;($svelthreeStores[sti] as StoreBody).activeScene = scene
+			;($svelthreeStores[sti] as StoreBody).currentSceneIndex = scene.userData.index_in_scenes + 1
 		} else {
 			console.error(
 				`SVELTHREE > ${c_name} > activate_scene : Couldn't update 'store' -> 'store' not available!`,
@@ -645,8 +646,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			const store = get_store(store_index)
 			if (store) {
-				store.activeScene = undefined
-				store.scenes[scene.userData.index_in_scenes].isActive = false
+				;($svelthreeStores[store_index] as StoreBody).activeScene = undefined
+				;($svelthreeStores[store_index] as StoreBody).scenes[scene.userData.index_in_scenes].isActive = false
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > deactivate_scene : Couldn't update 'store' -> 'store' not available!`,

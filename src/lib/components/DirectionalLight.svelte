@@ -295,9 +295,18 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (!matrix && light && target && light_target) light_target.change = true
 
 	// if the Light is a Light with a 'target' property, start / stop monitoring 'target' position changes if helper is enabled / disabled
-	$: !matrix && light && target && light_target && light.target?.isObject3D && store?.rendererComponent
-		? start_monitoring_target_position()
-		: stop_monitoring_target_position()
+	$: if (
+		!matrix &&
+		light &&
+		target &&
+		light_target &&
+		light.target?.isObject3D &&
+		$svelthreeStores[sti]?.rendererComponent
+	) {
+		start_monitoring_target_position()
+	} else {
+		stop_monitoring_target_position()
+	}
 
 	// call this to remove the renderer component listener
 	let remove_target_position_listener: (() => void) | undefined
@@ -546,7 +555,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, light, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** The root scene -> `scene.parent = null`. */

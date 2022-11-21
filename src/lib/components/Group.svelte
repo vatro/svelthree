@@ -446,7 +446,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	}
 
 	// update and show box on next frame
-	$: if (box && group && group.userData.box && store?.rendererComponent && root_scene) {
+	$: if (box && group && group.userData.box && $svelthreeStores[sti]?.rendererComponent && root_scene) {
 		apply_box()
 	}
 
@@ -508,7 +508,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, group, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */

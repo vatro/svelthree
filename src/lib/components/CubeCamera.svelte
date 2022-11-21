@@ -54,6 +54,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import type { RemoveLast, MeshAssignableMaterial } from "../types/types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
+	import type { StoreBody } from "../types/types-extra"
 
 	/**
 	 *  SVELTEKIT  SSR /
@@ -106,11 +107,12 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		| Object3DSvelthreeComponent
 		| Object3D
 		| undefined = undefined
-	$: if (camera && store?.renderer && bind_pos && !bind_pos_offset && !dynamic) update_cubecam()
 
 	/** Adjust `CubeCamera`'s position by setting an offset relative to the pivot of the object specified by `bind_pos`. */
 	export let bind_pos_offset: Vector3 | undefined = undefined
-	$: if (camera && store?.renderer && bind_pos && bind_pos_offset && !dynamic) update_cubecam()
+
+	$: renderer = $svelthreeStores[sti]?.renderer
+	$: if (camera && renderer && bind_pos && !dynamic) update_cubecam()
 
 	/** Specify which objects / components should be hidden on `CubeCamera` update.
 	 * Default: `CubeCamera`'s parent component's object (three) instance will be hidden.
@@ -386,7 +388,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 						// update store
 						if (store) {
-							store.cubeCameras[index_in_cubecameras] = self
+							;($svelthreeStores[sti] as StoreBody).cubeCameras[index_in_cubecameras] = self
 						} else {
 							console.error(
 								`SVELTHREE > ${c_name} > handle_instance_change : invalid 'store' instance value!`,
@@ -770,7 +772,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	$: if (animation && animationEnabled) ani = new SvelthreeAni(scene, camera, animation, !!aniauto)
 
 	let currentSceneActive: boolean | undefined = undefined
-	$: currentSceneActive = store?.scenes[scene?.userData.index_in_scenes]?.isActive
+	$: currentSceneActive = $svelthreeStores[sti]?.scenes[scene?.userData.index_in_scenes]?.isActive
 	$: if (ani && currentSceneActive !== undefined) ani.onCurrentSceneActiveChange(currentSceneActive)
 
 	/** Removes the (three) instance created by / provided to the component from it's parent. */
