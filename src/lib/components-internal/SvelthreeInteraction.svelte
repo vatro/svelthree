@@ -1520,23 +1520,41 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 */
 	function set_block_status(): void {
 		//cursor will change on `interact: true` + `block: false`
-		console.debug("SvelthreeInteraction > set_block_status > used_pointer_events.size:", used_pointer_events.size)
+		if (verbose && log_dev)
+			console.debug(
+				"SvelthreeInteraction > set_block_status > used_pointer_events.size:",
+				used_pointer_events.size
+			)
 		if (used_pointer_events.size === 0) {
 			// cursor will not change
 			parent.block = true
 			if (obj) {
 				obj.userData.block = true
+				if (verbose && log_dev) {
+					console.debug(
+						`SVELTHREE > ${c_name} > set_block_status : parent.block, obj.userData.block -> true`,
+						{
+							parent,
+							parent_block: parent.block,
+							obj_userData_block: obj.userData.block
+						}
+					)
+				}
 			} else {
 				console.error(
-					"SvelthreeInteraction > set_block_status > Couldn't set 'obj.userData.block' to 'true', 'obj' is not available!",
+					`SVELTHREE > ${c_name} > set_block_status : Couldn't set 'obj.userData.block' to 'true', invalid 'obj' value!`,
 					{ obj }
 				)
 			}
-			console.warn("SvelthreeInteraction > set_block_status > parent.block, obj.userData.block -> true")
 		} else {
 			// cursor will change
 			parent.block = false
-			console.warn("SvelthreeInteraction > set_block_status > parent.block -> false")
+			if (verbose && log_dev) {
+				console.debug(`SVELTHREE > ${c_name} > set_block_status : parent.block -> false`, {
+					parent,
+					parent_block: parent.block
+				})
+			}
 			//obj.userData.block = false
 		}
 	}
