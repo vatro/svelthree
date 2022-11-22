@@ -88,7 +88,7 @@ export interface SvelthreeAnimation {
  *
  */
 /*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
-export type SvelthreeAnimationFunction = (foo?: THREE.Object3D, ...args: any[]) => SvelthreeAnimation
+export type SvelthreeAnimationFunction = (foo: THREE.Object3D, ...args: any[]) => SvelthreeAnimation
 
 export type LightWithShadow = THREE.DirectionalLight | THREE.SpotLight | THREE.PointLight
 export type LightWithTarget = THREE.DirectionalLight | THREE.SpotLight
