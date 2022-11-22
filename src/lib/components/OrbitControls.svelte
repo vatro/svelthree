@@ -85,8 +85,9 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		$canvas_dom?.element &&
 		$svelthreeStores[sti]?.activeCamera &&
 		$svelthreeStores[sti]?.rendererComponent
-	)
+	) {
 		create_orbitcontrols()
+	}
 
 	/** `OrbitControls` are bound to a `Camera` and a `<canvas>` DOM Element,
 	 * so the `OrbitControls` component can be placed anywhere in the components scene graph. */
