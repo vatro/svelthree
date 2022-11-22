@@ -254,7 +254,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		if (url) {
 			doLoad()
 		} else {
-			console.error(`SVELTHREE > ${c_name} : You have to provide an 'url' attribute to load some GLTF file!`, {
+			console.warn(`SVELTHREE > ${c_name} : You have to provide an 'url' attribute to load some GLTF file!`, {
 				url
 			})
 		}
