@@ -34,8 +34,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import { RectAreaLight as THREE_RectAreaLight } from "three"
 	import type { PropsRectAreaLight } from "../types/types-comp-props"
 	import type { Color } from "three"
-	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
-	import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js"
+	import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper"
+	import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib"
 	import type { RemoveFirst } from "../types/types-extra"
 	import { get_root_scene } from "../utils/SceneUtils"
 

@@ -21,7 +21,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import type { Writable } from "svelte/store"
 
-	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 	import type { PropsOrbitControls } from "../types/types-comp-props"
 	// TODO  implement correctly
 	//import { CameraHelper } from "three"
