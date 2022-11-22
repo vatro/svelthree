@@ -278,9 +278,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					orbitcontrols.addEventListener("change", on_orbitcontrols_change)
 				}
 			} else {
-				if (store?.rendererComponent?.mode === "auto") {
-					orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
-					if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+				if (store?.rendererComponent) {
+					if (store.rendererComponent.mode === "auto") {
+						orbitcontrols.removeEventListener("change", on_orbitcontrols_change)
+						if (rAF.id === 0) rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
+					}
 				} else {
 					console.error(
 						`SVELTHREE > ${c_name} > set_auto : Cannot remove 'change' EventListener, invalid 'store' or 'store.rendererComponent' value!`,
