@@ -644,32 +644,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 		//  SVELTEKIT  SSR
 		if (browser) {
-			if (scene && env_tex) {
-				const env_texture_loader = new TextureLoader().load(env_tex.url, (tex) => {
-					if (env_tex && env_tex.mapping) {
-						tex.mapping = env_tex.mapping | EquirectangularReflectionMapping
-					} else {
-						console.warn(
-							`SVELTHREE > ${c_name} > set_env_tex : invalid 'env_tex' prop or 'env_tex.mapping' value!`,
-							{ env_tex }
-						)
-					}
-					if (scene && tex) {
-						scene.environment = tex
-					} else {
-						console.error(
-							`SVELTHREE > ${c_name} > set_env_tex : invalid 'scene' instance and / or 'tex' value!`,
-							{ scene, tex }
-						)
-					}
-				})
+			if (scene) {
+				if (env_tex) {
+					const env_texture_loader = new TextureLoader().load(env_tex.url, (tex) => {
+						if (env_tex) {
+							if (env_tex.mapping) {
+								tex.mapping = env_tex.mapping | EquirectangularReflectionMapping
+							} else {
+								// default mapping
+								tex.mapping = EquirectangularReflectionMapping
+							}
+							if (scene && tex) {
+								scene.environment = tex
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > set_env_tex : invalid 'scene' instance and / or 'tex' value!`,
+									{ scene, tex }
+								)
+							}
+						} else {
+							console.error(`SVELTHREE > ${c_name} > set_env_tex : invalid 'env_tex' prop value!`, {
+								env_tex
+							})
+						}
+					})
 
-				return env_texture_loader
+					return env_texture_loader
+				} else {
+					console.error(`SVELTHREE > ${c_name} > set_env_tex : invalid 'env_tex' prop value!`, { env_tex })
+					return null
+				}
 			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > set_env_tex : invalid 'scene' instance and / or 'env_tex' prop value!`,
-					{ scene, env_tex }
-				)
+				console.error(`SVELTHREE > ${c_name} > set_env_tex : invalid 'scene' instance value!`, { scene })
 				return null
 			}
 		}
