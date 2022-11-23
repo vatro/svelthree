@@ -1,5 +1,12 @@
 # svelthree changelog
 
+## 1.0.0-next.0.97
+
+[_**major refactor**_] Refactored everything in `strict` mode, see pull-request [#185](https://github.com/vatro/svelthree/pull/185) and issue [#153](https://github.com/vatro/svelthree/issues/153). We're a **strictly typed** Svelte components library now! 🥳
+
+Also: various improvements and fixes.
+
+
 ## 1.0.0-next.0.96
 
 - Resolved all ESLint errors and warnings see pull-requests [#169](https://github.com/vatro/svelthree/pull/169) and [#179](https://github.com/vatro/svelthree/pull/179), except one warning which is yet to be fixed by [#135](https://github.com/vatro/svelthree/issues/135).
