@@ -17,24 +17,24 @@ export default class SvelthreeAnimationManager {
 
 	public handleCurrentSceneStatus(currentSceneActive: boolean): void {
 		if (currentSceneActive) {
-			console.debug(
+			/* console.info(
 				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = true!"
-			)
+			) */
 			if (this.aniauto) {
-				console.debug("SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!")
+				// console.info("SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : this.aniauto = true!")
 				this.handle_scene_active()
 			}
 		} else {
-			console.debug(
+			/* console.info(
 				"SVELTHREE > SvelthreeAnimationManager > handleCurrentSceneStatus : currentSceneActive = false!"
-			)
+			) */
 			this.handle_scene_inactive()
 		}
 	}
 
 	// active / reactivated
 	private handle_scene_active(): void {
-		console.debug("SVELTHREE > SvelthreeAnimationManager > handle_scene_active!")
+		// console.info("SVELTHREE > SvelthreeAnimationManager > handle_scene_active!")
 		// check if animation has been initiated, if so try to execute 'onSceneReactivated'...
 		if (this.ani_obj) {
 			this.try_on_scene_reactivated()
@@ -46,29 +46,29 @@ export default class SvelthreeAnimationManager {
 
 	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
 	private initiate_animation(...args: any[]): void {
-		console.debug("SVELTHREE > SvelthreeAnimationManager > initiate_animation!")
+		// console.info("SVELTHREE > SvelthreeAnimationManager > initiate_animation!")
 		// if animation is a function it has not been initiated / started yet (otherwise object)
 
 		if (this.scene) {
 			if (!this.scene.userData.isActive) {
-				console.warn(
+				/* console.warn(
 					"SVELTHREE > SvelthreeAnimationManager : initiate_animation : You're about to initiate an animation in an inactive Scene!"
-				)
+				) */
 			}
 		} else if (this.scene === null && (this.foo as Scene).isScene) {
 			if (!(this.foo as Scene).userData.isActive) {
-				console.warn(
+				/* console.warn(
 					"SVELTHREE > SvelthreeAnimationManager : initiate_animation : You're about to initiate an animation in an inactive NESTED Scene!"
-				)
+				) */
 			}
 		}
 
 		this.ani_obj = this.ani_obj_factory.create(this.foo, args)
 
-		console.debug(
+		/* console.info(
 			"SVELTHREE > SvelthreeAnimationManager > initiate_animation : after initialization: this.ani_obj:",
 			this.ani_obj
-		)
+		) */
 
 		try {
 			this.ani_obj.onStart()
@@ -85,10 +85,10 @@ export default class SvelthreeAnimationManager {
 		) {
 			this.ani_obj.onSceneReactivated()
 		} else {
-			console.warn(
+			/* console.warn(
 				"SVELTHREE > SvelthreeAnimationManager > try_on_scene_reactivated : 'onSceneReactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
 				this.ani_obj
-			)
+			) */
 		}
 	}
 
@@ -99,9 +99,9 @@ export default class SvelthreeAnimationManager {
 		if (this.ani_obj) {
 			this.try_on_scene_deactivated()
 		} else {
-			console.debug(
+			/* console.info(
 				"SVELTHREE > SvelthreeAnimationManager > handle_scene_inactive : 'SvelthreeAnimation'-Object not available!"
-			)
+			) */
 		}
 	}
 
@@ -113,10 +113,10 @@ export default class SvelthreeAnimationManager {
 		) {
 			this.ani_obj.onSceneDeactivated()
 		} else {
-			console.warn(
+			/* console.warn(
 				"SVELTHREE > SvelthreeAnimationManager > try_on_scene_deactivated : 'onSceneDeactivated' property is missing in 'SvelthreeAnimation'-Object! Please ensure this is correct.",
 				this.ani_obj
-			)
+			) */
 		}
 	}
 
@@ -124,10 +124,10 @@ export default class SvelthreeAnimationManager {
 		if (!this.ani_obj) {
 			this.initiate_animation()
 		} else {
-			console.debug(
+			/* console.info(
 				"SVELTHREE > SvelthreeAnimationManager > startAnimation : animation has already been initiated! 'animation': ",
 				this.ani_obj
-			)
+			) */
 		}
 	}
 
