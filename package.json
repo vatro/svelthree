@@ -1,7 +1,7 @@
 {
 	"name": "svelthree",
 	"description": "Create three.js content with Svelte components.",
-	"version": "1.0.0-next.0.96",
+	"version": "1.0.0-next.0.97",
 	"author": "Vatroslav Vrbanic <hello@svelthree.dev> (https://svelthree.dev)",
 	"license": "MIT",
 	"scripts": {
