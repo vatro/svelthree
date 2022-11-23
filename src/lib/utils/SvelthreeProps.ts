@@ -202,7 +202,7 @@ export default class SvelthreeProps {
 					}
 				} else {
 					console.warn(
-						`SVELTHREE > SvelthreeProps > resetAndMap : unknown property '${k}' in 'props' object -> not available on ${this.obj_type}`
+						`SVELTHREE > SvelthreeProps > resetAndMap : unknown property '${k}' in 'props' object -> not available for '${this.obj_type}'`
 					)
 				}
 			}
