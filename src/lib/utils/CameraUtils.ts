@@ -4,7 +4,9 @@ import { CameraValues } from "../constants"
 export default class CameraUtils {
 	// #region --- Orthographic Camera
 
-	public static getOrthoCamDefaultParams(frustumSize: number): ConstructorParameters<typeof OrthographicCamera> {
+	public static getOrthoCamDefaultParams(
+		frustumSize: number | undefined
+	): ConstructorParameters<typeof OrthographicCamera> {
 		const _frustumSize = frustumSize || CameraValues.CAM_ORTHO_FRUSTUM_SIZE
 		const _aspect = CameraValues.CAM_ORTHO_ASPECT
 		const _near = CameraValues.CAM_ORTHO_NEAR

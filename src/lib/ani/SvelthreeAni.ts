@@ -4,12 +4,12 @@ import SvelthreeAnimationManager from "./SvelthreeAnimationManager"
 import SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory"
 
 export default class SvelthreeAni {
-	private ani_obj_factory: SvelthreeAnimationObjectFactory
-	private ani_manager: SvelthreeAnimationManager
+	private ani_obj_factory: SvelthreeAnimationObjectFactory | undefined = undefined
+	private ani_manager: SvelthreeAnimationManager | undefined = undefined
 
 	constructor(
-		private scene: Scene,
-		private foo: Object3D,
+		private scene: Scene | undefined | null,
+		private foo: Object3D | undefined | null,
 		private ani_fn: SvelthreeAnimationFunction,
 		private aniauto: boolean
 	) {
@@ -19,7 +19,7 @@ export default class SvelthreeAni {
 	private create_ani_manager(): void {
 		//if (verbose && log_dev) console.debug(...c_dev(c_name, "createAnimationManager!"))
 
-		if (!this.ani_manager) {
+		if (this.foo && !this.ani_manager) {
 			this.ani_obj_factory = new SvelthreeAnimationObjectFactory(this.ani_fn)
 			this.ani_manager = new SvelthreeAnimationManager(this.ani_obj_factory, this.aniauto, this.foo, this.scene)
 		}
@@ -29,7 +29,7 @@ export default class SvelthreeAni {
 		this.ani_manager ? this.ani_manager.handleCurrentSceneStatus(currentSceneActive) : null
 	}
 
-	public getAnimation(): SvelthreeAnimation {
+	public getAnimation(): SvelthreeAnimation | undefined {
 		if (this.ani_manager) {
 			return this.ani_manager.getAnimation()
 		} else {
@@ -46,12 +46,9 @@ export default class SvelthreeAni {
 		if (this.ani_manager) {
 			this.ani_manager.destroyAnimation()
 		} else {
-			if (this.ani_fn) {
-				console.error(
-					"SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!",
-					{ ani_manager: this.ani_manager }
-				)
-			}
+			console.error("SVELTHREE > SvelthreeAnimation > destroyAnimation : missing SvelthreeAnimationManager!", {
+				ani_manager: this.ani_manager
+			})
 		}
 	}
 

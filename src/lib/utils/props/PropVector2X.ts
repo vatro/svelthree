@@ -5,8 +5,8 @@ import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropVector2X {
 	// previous value reference
-	prev: Vector2
-	prevValues: { x: number; y: number }
+	prev: Vector2 | undefined
+	prevValues: { x: number; y: number } | undefined
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
@@ -21,12 +21,19 @@ export default class PropVector2X {
 
 			case value:
 				// same object, perform deep check
-				for (const k in value) {
-					if (not_equal(this.prevValues[k], value[k])) {
-						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector2")
-						this.setPrevValues(value)
-						this.prev = value
-						return true
+				if (this.prevValues) {
+					for (const k in value) {
+						if (
+							not_equal(
+								this.prevValues[k as keyof typeof this.prevValues],
+								value[k as keyof typeof this.prevValues]
+							)
+						) {
+							Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Vector2")
+							this.setPrevValues(value)
+							this.prev = value
+							return true
+						}
 					}
 				}
 				return false

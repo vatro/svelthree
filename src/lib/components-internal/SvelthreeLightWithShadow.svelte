@@ -20,15 +20,16 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 		PropsSpotLightShadow
 	} from "../types/types-comp-props"
 
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } = undefined
+	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
 
-	export let light: LightWithShadow
+	export let light: LightWithShadow | null | undefined
 
-	export let shadowMapSize: number = undefined
-	export let shadowBias: number = undefined
+	export let shadowMapSize: number | undefined = undefined
+	export let shadowBias: number | undefined = undefined
 
-	export let shadowCameraProps: PropsPerspectiveCamera | PropsOrthographicCamera = undefined
-	export let shadowProps: PropsDirectionalLightShadow | PropsPointLightShadow | PropsSpotLightShadow = undefined
+	export let shadowCameraProps: PropsPerspectiveCamera | PropsOrthographicCamera | undefined = undefined
+	export let shadowProps: PropsDirectionalLightShadow | PropsPointLightShadow | PropsSpotLightShadow | undefined =
+		undefined
 
 	let propsShadowCamera: SvelthreeProps
 	let propsShadow: SvelthreeProps
@@ -47,7 +48,7 @@ This is an internal _SvelthreeLightWithShadow_ Component.
 	 * 🔺 WARNING: This is expensive and requires tweaking to get shadows looking right.
 	 * See the [DirectionalLightShadow](https://threejs.org/docs/#api/en/lights/shadows/DirectionalLightShadow) for details. The default is false."*
 	 */
-	export let castShadow: boolean = undefined
+	export let castShadow: boolean | undefined = undefined
 
 	$: shadowMapSize ? PropUtils.setShadowMapSize(light, shadowMapSize) : null
 	$: shadowBias ? PropUtils.setShadowBias(light, shadowBias) : null

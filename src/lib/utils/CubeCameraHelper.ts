@@ -1,4 +1,4 @@
-import type { CubeCamera, Object3D, PerspectiveCamera, Scene } from "three"
+import type { CubeCamera, PerspectiveCamera, Scene } from "three"
 import { CameraHelper } from "three"
 
 export default class CubeCameraHelper {
@@ -28,7 +28,7 @@ export default class CubeCameraHelper {
 	public remove(): void {
 		for (let i = 0; i < this.allHelpers.length; i++) {
 			const helper = this.allHelpers[i]
-			if (helper.parent as Object3D) helper.parent.remove(helper)
+			if (helper && helper.parent) helper.parent.remove(helper)
 		}
 	}
 }

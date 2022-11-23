@@ -5,8 +5,8 @@ import type { SvelthreePropsOwner } from "../../types/types-extra"
 
 export default class PropEulerX {
 	// previous value reference
-	prev: Euler
-	prevValues: { _x: number; _y: number; _z: number; _order: string }
+	prev: Euler | undefined
+	prevValues: { _x: number; _y: number; _z: number; _order: string } | undefined
 
 	constructor(private key: string, private obj_type: string, private origin: string) {}
 
@@ -21,12 +21,14 @@ export default class PropEulerX {
 
 			case value:
 				// same object, perform deep check
-				for (const k in this.prevValues) {
-					if (not_equal(this.prevValues[k], value[k])) {
-						Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Euler")
-						this.setPrevValues(value)
-						this.prev = value
-						return true
+				if (this.prevValues) {
+					for (const k in this.prevValues) {
+						if (not_equal(this.prevValues[k as keyof typeof this.prevValues], value[k as keyof Euler])) {
+							Propeller.update(obj, this.obj_type, this.key, value, this.origin, "Euler")
+							this.setPrevValues(value)
+							this.prev = value
+							return true
+						}
 					}
 				}
 

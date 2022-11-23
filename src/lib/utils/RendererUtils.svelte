@@ -10,12 +10,12 @@
 		skip_frames = 0
 	) => {
 		let skip = 0
-		let remove_on_render_event: () => void = undefined
+		let remove_on_render_event: (() => void) | undefined | null = undefined
 
 		function check() {
 			if (skip === skip_frames) {
 				callback()
-				remove_on_render_event()
+				if (remove_on_render_event) remove_on_render_event()
 				remove_on_render_event = null
 				skip = 0
 			} else {

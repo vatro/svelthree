@@ -76,13 +76,13 @@ type SimpleValueItem = {
  * allows special handling if needed when updating a specific `props` object's property.
  */
 export default class SvelthreeProps {
-	obj: SvelthreePropsOwner
+	obj: SvelthreePropsOwner | null
 	obj_type: string | null
-	propsPrev: SvelthreePropsObjectLiteral
-	simpleValues: SimpleValueItem[]
+	propsPrev: SvelthreePropsObjectLiteral | undefined
+	simpleValues: SimpleValueItem[] | undefined
 
-	updatedKeys: string[]
-	complexValues: ComplexValueItem[]
+	updatedKeys: string[] = []
+	complexValues: ComplexValueItem[] | undefined
 
 	complexValuators: { [key in ComplexValueType]: ComplexValuator } = {
 		Array2Nums: PropArray2X,
@@ -105,7 +105,7 @@ export default class SvelthreeProps {
 
 	get_obj_type(): string | null {
 		if (this.obj) {
-			return this.obj["type"] || this.obj.constructor.name
+			return this.obj["type" as keyof typeof this.obj] || this.obj.constructor.name
 		} else {
 			return null
 		}
@@ -119,7 +119,7 @@ export default class SvelthreeProps {
 	 * not at each (reactive) properties change._
 	 */
 	public update(props: SvelthreePropsObjectLiteral): string[] {
-		if (this.obj) {
+		if (this.obj && this.obj_type) {
 			// UPDATE -> `props` has already been processed at least once -> `this.propsPrev` available
 			if (this.propsPrev) {
 				// `props` was assigned a new object different from the initially processed one (`this.propsPrev`)
@@ -153,41 +153,61 @@ export default class SvelthreeProps {
 		this.complexValues = []
 		this.updatedKeys = []
 
-		// analyze and sort `props` object's properties
-		for (const k in props) {
-			const complexType: ComplexValueType | undefined = PropUtils.checkIfComplexValueType(props[k])
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const is_own_prop: any = has_prop(this.obj, k)
-			const is_inherited_prop: boolean = is_own_prop ? false : this.obj[k] ? true : false
-			const origin: PropOrigin | null = is_own_prop ? "own" : is_inherited_prop ? "inherited" : null
-
-			if (origin) {
-				if (complexType) {
-					// determine the correct `valuator`
-					const valuator: ComplexValuator = this.complexValuators[complexType]
-
-					const item: ComplexValueItem = {
-						key: k,
-						value: new valuator(k, this.obj_type, origin),
-						complex: complexType
-					}
-					this.complexValues.push(item)
-
-					// initialize
-					item.value.update(this.obj, props[k])
-					this.updatedKeys.push(k)
-				} else {
-					const item: SimpleValueItem = { key: k, value: props[k], origin }
-					this.simpleValues.push(item)
-					// initialize
-					Propeller.update(this.obj, this.obj_type, k, props[k], origin)
-					this.updatedKeys.push(k)
-				}
-			} else {
-				console.warn(
-					`SVELTHREE > SvelthreeProps > unknown property '${k}' in 'props' object -> not available on ${this.obj_type}`
+		if (this.obj) {
+			// analyze and sort `props` object's properties
+			for (const k in props) {
+				const complexType: ComplexValueType | undefined = PropUtils.checkIfComplexValueType(
+					props[k as keyof SvelthreePropsObjectLiteral]
 				)
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const is_own_prop: any = has_prop(this.obj, k)
+				const is_inherited_prop: boolean = is_own_prop
+					? false
+					: this.obj[k as keyof SvelthreePropsOwner]
+					? true
+					: false
+				const origin: PropOrigin | null = is_own_prop ? "own" : is_inherited_prop ? "inherited" : null
+
+				if (this.obj_type && origin) {
+					if (complexType) {
+						// determine the correct `valuator`
+						const valuator: ComplexValuator = this.complexValuators[complexType]
+
+						const item: ComplexValueItem = {
+							key: k,
+							value: new valuator(k, this.obj_type, origin),
+							complex: complexType
+						}
+						this.complexValues.push(item)
+
+						// initialize
+						item.value.update(this.obj, props[k as keyof SvelthreePropsObjectLiteral])
+						this.updatedKeys.push(k)
+					} else {
+						const item: SimpleValueItem = {
+							key: k,
+							value: props[k as keyof SvelthreePropsObjectLiteral],
+							origin
+						}
+						this.simpleValues.push(item)
+						// initialize
+						Propeller.update(
+							this.obj,
+							this.obj_type,
+							k,
+							props[k as keyof SvelthreePropsObjectLiteral],
+							origin
+						)
+						this.updatedKeys.push(k)
+					}
+				} else {
+					console.warn(
+						`SVELTHREE > SvelthreeProps > resetAndMap : unknown property '${k}' in 'props' object -> not available for '${this.obj_type}'`
+					)
+				}
 			}
+		} else {
+			console.error(`SVELTHREE > SvelthreeProps > resetAndMap : ivalid 'obj' value!`, { obj: this.obj })
 		}
 	}
 
@@ -195,24 +215,37 @@ export default class SvelthreeProps {
 	checkProps(props: SvelthreePropsObjectLiteral) {
 		// check complex props
 		// reassign / update only if the 'complex' value object itself or any of its parts have changed.
-		for (let i = 0; i < this.complexValues.length; i++) {
-			const k: string = this.complexValues[i].key
-			const updated: boolean = this.complexValues[i].value.update(this.obj, props[k])
-			if (updated) this.updatedKeys.push(k)
+		if (this.complexValues) {
+			for (let i = 0; i < this.complexValues.length; i++) {
+				const k: string = this.complexValues[i].key
+				const updated: boolean = this.complexValues[i].value.update(
+					this.obj as SvelthreePropsOwner,
+					props[k as keyof SvelthreePropsObjectLiteral]
+				)
+				if (updated) this.updatedKeys.push(k)
+			}
 		}
 
 		// check 'simple' props (nummeric, strings, boolean... + objects and functions)
-		for (let j = 0; j < this.simpleValues.length; j++) {
-			const k: string = this.simpleValues[j].key
-			const prop_value = this.simpleValues[j].value
-			const prop_origin = this.simpleValues[j].origin
+		if (this.simpleValues) {
+			for (let j = 0; j < this.simpleValues.length; j++) {
+				const k: string = this.simpleValues[j].key
+				const prop_value = this.simpleValues[j].value
+				const prop_origin = this.simpleValues[j].origin
 
-			// current property value is different than the previous one.
-			// always reassign / update nested ('non complex value') objects and functions.
-			if (safe_not_equal(prop_value, props[k])) {
-				Propeller.update(this.obj, this.obj_type, k, props[k], prop_origin)
-				this.simpleValues[j].value = props[k]
-				this.updatedKeys.push(k)
+				// current property value is different than the previous one.
+				// always reassign / update nested ('non complex value') objects and functions.
+				if (safe_not_equal(prop_value, props[k as keyof SvelthreePropsObjectLiteral])) {
+					Propeller.update(
+						this.obj as SvelthreePropsOwner,
+						this.obj_type as string,
+						k,
+						props[k as keyof SvelthreePropsObjectLiteral],
+						prop_origin
+					)
+					this.simpleValues[j].value = props[k as keyof SvelthreePropsObjectLiteral]
+					this.updatedKeys.push(k)
+				}
 			}
 		}
 	}
