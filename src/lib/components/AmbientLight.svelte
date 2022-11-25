@@ -12,7 +12,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 <script lang="ts">
 	import type { Scene } from "three"
 
-	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext } from "svelte"
+	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
 	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
@@ -658,17 +658,22 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 							)
 						}
 
-						if (store?.rendererComponent?.mode === "auto") {
-							// prevent an additional component update by not accessing the `root_scene` prop directly.
-							if (root_scene_obj.value) {
-								root_scene_obj.value.userData.dirty = true
-							} else {
-								console.error(
-									`SVELTHREE > ${c_name} > afterUpdate : Cannot mark 'root_scene' as 'dirty', 'root_scene_obj.value' not available!`,
-									{ root_scene_obj, root_scene }
-								)
+						if (store) {
+							if (!store.rendererComponent) {
+								await tick()
 							}
-							store.rendererComponent.schedule_render_auto(root_scene)
+							if (!store.rendererComponent) {
+								console.error(
+									`SVELTHREE > ${c_name} > afterUpdate : Cannot schedule auto-render, 'store.rendererComponent' not available!`,
+									{ rendererComponent: store.rendererComponent }
+								)
+							} else {
+								schedule_render_auto()
+							}
+						} else {
+							console.error(`SVELTHREE > ${c_name} > afterUpdate : invalid 'store' instance value!`, {
+								store
+							})
 						}
 
 						if (afterUpdateEnd) {
@@ -681,6 +686,21 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 					}
 			  }
 	)
+
+	const schedule_render_auto = (): void => {
+		if (store?.rendererComponent?.mode === "auto") {
+			// prevent an additional component update by not accessing the `root_scene` prop directly.
+			if (root_scene_obj.value) {
+				root_scene_obj.value.userData.dirty = true
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > schedule_render_auto : Cannot mark 'root_scene' as 'dirty', 'root_scene_obj.value' not available!`,
+					{ root_scene_obj, root_scene }
+				)
+			}
+			store.rendererComponent.schedule_render_auto(root_scene)
+		}
+	}
 </script>
 
 <slot />

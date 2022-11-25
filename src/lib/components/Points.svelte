@@ -1258,17 +1258,22 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 							)
 						}
 
-						if (store?.rendererComponent?.mode === "auto") {
-							// prevent an additional component update by not accessing the `root_scene` prop directly.
-							if (root_scene_obj.value) {
-								root_scene_obj.value.userData.dirty = true
-							} else {
-								console.error(
-									`SVELTHREE > ${c_name} > afterUpdate : Cannot mark 'root_scene' as 'dirty', 'root_scene_obj.value' not available!`,
-									{ root_scene_obj, root_scene }
-								)
+						if (store) {
+							if (!store.rendererComponent) {
+								await tick()
 							}
-							store.rendererComponent.schedule_render_auto(root_scene)
+							if (!store.rendererComponent) {
+								console.error(
+									`SVELTHREE > ${c_name} > afterUpdate : Cannot schedule auto-render, 'store.rendererComponent' not available!`,
+									{ rendererComponent: store.rendererComponent }
+								)
+							} else {
+								schedule_render_auto()
+							}
+						} else {
+							console.error(`SVELTHREE > ${c_name} > afterUpdate : invalid 'store' instance value!`, {
+								store
+							})
 						}
 
 						if (afterUpdateEnd) {
@@ -1281,6 +1286,21 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					}
 			  }
 	)
+
+	const schedule_render_auto = (): void => {
+		if (store?.rendererComponent?.mode === "auto") {
+			// prevent an additional component update by not accessing the `root_scene` prop directly.
+			if (root_scene_obj.value) {
+				root_scene_obj.value.userData.dirty = true
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > schedule_render_auto : Cannot mark 'root_scene' as 'dirty', 'root_scene_obj.value' not available!`,
+					{ root_scene_obj, root_scene }
+				)
+			}
+			store.rendererComponent.schedule_render_auto(root_scene)
+		}
+	}
 </script>
 
 <slot />
