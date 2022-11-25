@@ -381,25 +381,36 @@ export default class PropUtils {
 				if ((obj as LightWithTarget).isLight) {
 					if (Object.hasOwn(obj, "target")) {
 						if ((obj as LightWithTarget).target.isObject3D) {
+							const obj_target = (obj as LightWithTarget).target as Object3D
+
 							if ((obj as LightWithTarget).matrixAutoUpdate === false) {
-								;(obj as LightWithTarget).target.matrixAutoUpdate = false
+								obj_target.matrixAutoUpdate = false
 							}
 
 							if ((obj as LightWithTarget).target.parent === null) {
 								// add target to parent of obj (light)
 								const obj_parent = (obj as LightWithTarget).parent
+
 								if (obj_parent !== null) {
 									// target has no parent, add target to parent of obj
-									obj_parent.add((obj as LightWithTarget).target)
+									obj_parent.add(obj_target)
 									if (this.verbose) {
 										console.warn(
 											`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
-											{ obj, target: (obj as LightWithTarget).target }
+											{ obj, target: obj_target }
 										)
 									}
 
 									// set position of the target
-									PropUtils.setPositionFromValue((obj as LightWithTarget).target, t_val, complex)
+									PropUtils.setPositionFromValue(obj_target, t_val, complex)
+									// IMPORTANT  We have to update 'matrixWorld' of 'target' here (at least with render modes 'auto'), regardles of 'obj_target.matrixAutoUpdate' value!
+									// 'SpotlightHelper' and 'DirectionalLightHelper' use 'lookAt' to 'light.target.matrixWorld' for orientation.
+									if (obj.matrixAutoUpdate === false) {
+										obj_target.updateMatrix()
+										obj_target.updateMatrixWorld()
+									} else {
+										obj_target.updateMatrixWorld()
+									}
 								} else {
 									// obj has no parent
 									console.error(
@@ -416,6 +427,14 @@ export default class PropUtils {
 								const obj_target = (obj as LightWithTarget).target as Object3D
 								if (obj_target) {
 									PropUtils.setPositionFromValue(obj_target, t_val, complex)
+									// IMPORTANT  We have to update 'matrixWorld' of 'target' here (at least with render modes 'auto'), regardles of 'obj_target.matrixAutoUpdate' value!
+									// 'SpotlightHelper' and 'DirectionalLightHelper' use 'lookAt' to 'light.target.matrixWorld' for orientation.
+									if (obj.matrixAutoUpdate === false) {
+										obj_target.updateMatrix()
+										obj_target.updateMatrixWorld()
+									} else {
+										obj_target.updateMatrixWorld()
+									}
 								}
 							}
 						} else {
