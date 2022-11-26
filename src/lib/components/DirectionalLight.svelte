@@ -32,8 +32,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	import SvelthreeLightWithShadow from "../components-internal/SvelthreeLightWithShadow.svelte"
 
-	import { LightTarget } from "../utils"
-	import { Object3D } from "three"
+	import type { Object3D } from "three"
 
 	import { DirectionalLight as THREE_DirectionalLight } from "three"
 	import { DirectionalLightHelper } from "three"
@@ -278,83 +277,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 						scene,
 						total: scene?.children.length
 					})
-				)
-			}
-		}
-	}
-
-	/** Defaults to `true` which means that components / objects with targets (_`DirectionalLight`, `SpotLight`, `OrthographicCamera` and `PerspectiveCamera`_)
-	 * will add the built-in 'blank' target-Object3D to component's / object's parent on initialization. `target` can be either set to `false` ( TODO ) (_which will remove the target from parent only if it's
-	 * not the built-in 'blank' `Object3D`_) or some other object in the scene (_any `Object3D` instance or a supported svelthree component reference._) */
-	export let target: Targetable | boolean | undefined = undefined
-	$: if (target === undefined) target = true
-
-	let light_target: LightTarget | undefined | null = undefined
-	$: if (light && scene && target) light_target = new LightTarget(false, target, scene, light)
-
-	$: if (!matrix && light && target && light_target) light_target.change = true
-
-	// if the Light is a Light with a 'target' property, start / stop monitoring 'target' position changes if helper is enabled / disabled
-	$: if (
-		!matrix &&
-		light &&
-		target &&
-		light_target &&
-		light.target?.isObject3D &&
-		$svelthreeStores[sti]?.rendererComponent
-	) {
-		start_monitoring_target_position()
-	} else {
-		stop_monitoring_target_position()
-	}
-
-	// call this to remove the renderer component listener
-	let remove_target_position_listener: (() => void) | undefined
-
-	function start_monitoring_target_position(): void {
-		// IMPORTANT  this does NOT cause a component update! (instead of using requestAnimationFrame)
-		// COOL!  this way the helper is 100% synchronious (not 1 frame late)
-		if (!remove_target_position_listener) {
-			if (verbose && log_rs) console.debug(...c_rs(c_name, "start_monitoring_target_position!"))
-			remove_target_position_listener = store?.rendererComponent?.$on("before_render_int", update_light_target)
-		}
-	}
-
-	function update_light_target(): void {
-		if (light_target) {
-			light_target.update(!!helper)
-		} else {
-			console.error(`SVELTHREE > ${c_name} > update_light_target : Couldn't update unavailable 'light_target'!`, {
-				light_target
-			})
-		}
-	}
-
-	function stop_monitoring_target_position(): void {
-		if (remove_target_position_listener) {
-			remove_target_position_listener()
-			remove_target_position_listener = undefined
-			kill_light_target()
-		}
-	}
-
-	function kill_light_target(): void {
-		if (!target) {
-			light_target = null
-
-			if (light) {
-				if (light.target) {
-					// remove target from parent only if it's the built-in target
-					if (light.target.userData.is_builtin_target && light.target.parent) {
-						light.target.parent.remove(light.target)
-					}
-					// recreate / reset target
-					light.target = new Object3D()
-				}
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > kill_light_target : Couldn't try to remove built-in 'target' from unavailable 'light' instance!`,
-					{ light }
 				)
 			}
 		}
