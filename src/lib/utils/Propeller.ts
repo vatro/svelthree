@@ -12,7 +12,7 @@ import type {
 	any_propeller_value
 } from "../types/types-extra"
 import PropUtils from "./PropUtils"
-import type { ComplexValueType, SvelthreePropsOwner, Targetable, LightWithTarget } from "../types/types-extra"
+import type { ComplexValueType, SvelthreePropsOwner, LightWithTarget } from "../types/types-extra"
 
 /** ⚙️ `Propeller`'s `update` method redirects some `props` object properties to specific `PropUtils` update
  * methods and also allows special handling if needed when updating a specific `props` object's property.
@@ -59,11 +59,6 @@ export default class Propeller {
 					} else {
 						// TODO  handle background as `Texture`
 						//PropUtils.setBackgroundAsTextureFromValueKey(obj as Scene, value as Texture, key, complex)
-					}
-					break
-				case "target":
-					if (obj_type === "DirectionalLight" || obj_type === "SpotLight") {
-						PropUtils.setLightTarget(obj as LightWithTarget, value as Targetable)
 					}
 					break
 

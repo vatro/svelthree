@@ -13,7 +13,7 @@ import type {
 	//background_value,
 	any_proputils_value
 } from "../types/types-extra"
-import type { Targetable, TargetableSvelthreeComponent } from "../types/types-extra"
+import type { TargetableSvelthreeComponent } from "../types/types-extra"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
@@ -667,28 +667,6 @@ export default class PropUtils {
 	}
 
 	/**
-	 * TODO : test / polish this!
-	 */
-	public static setLightTarget(obj: LightWithTarget, val: Targetable) {
-		if (this.verbose && log_prop_utils(obj))
-			console.debug("SVELTHREE > [ PropUtils ] -> setLightTarget : ", { obj, val })
-		if (!val) {
-			console.warn(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
-		} else {
-			// TODO : Check why this being called twice on init! Not severe problem, but still to be checked.
-			//console.warn("SVELTHREE > Propeller > setLightTarget : " + this.objTypeStr + " : target in 'props' now defined!!")
-
-			if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
-				;(obj as LightWithTarget).target = (val as TargetableSvelthreeComponent).get_instance() as Object3D
-			} else if ((val as Object3D).isObject3D) {
-				obj["target"] = val as Object3D
-			} else {
-				console.error(`[ PropUtils ] -> setLightTarget : invalid 'target' value!`, { val })
-			}
-		}
-	}
-
-	/**
 	 * Sets `matrix` of an object.
 	 * IMPORTANT  Setting "manually" updating the `matrix` property will automatically set `matrixAutoUpdate` to `false`.
 	 * Applying transformations via `position`, `rotation`, `scale` etc. will automatically set `matrixAutoUpdate` to `true` again.
@@ -761,7 +739,7 @@ export default class PropUtils {
 
 	public static setQuaternionFromValue(obj: Object3D, val: quat_value, complex?: ComplexValueType) {
 		if (this.verbose && log_prop_utils(obj)) {
-			console.debug("SVELTHREE > [ PropUtils ] -> setLightTarget : ", { obj, val, complex })
+			console.debug("SVELTHREE > [ PropUtils ] -> setQuaternionFromValue : ", { obj, val, complex })
 		}
 
 		if (val && (val as Quaternion).isQuaternion) {
