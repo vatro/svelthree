@@ -316,7 +316,7 @@ interface SHTypes {
 	fog: THREE.FogBase // Scene -> TODO  different: type PropFog = get_props<THREE.FogBase>
 	geometry: THREE.BufferGeometry
 	groundColor: THREE.Texture | THREE.Color | string | number | [r: number, g: number, b: number] | THREE.Vector3 //HemisphereLight
-	lookAt: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | Targetable
+	lookAt: THREE.Vector3 | Parameters<THREE.Vector3["set"]> | Targetable | null
 	material: THREE.Material | THREE.Material[]
 	matrix: THREE.Matrix4 | Parameters<THREE.Matrix4["set"]>
 	pos: THREE.Vector3 | Parameters<THREE.Vector3["set"]>
