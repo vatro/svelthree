@@ -13,7 +13,7 @@ import type {
 	//background_value,
 	any_proputils_value
 } from "../types/types-extra"
-import type { TargetableSvelthreeComponent } from "../types/types-extra"
+import type { TargetableSvelthreeComponent, Targetable } from "../types/types-extra"
 import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
 
 /**
@@ -350,130 +350,176 @@ export default class PropUtils {
 
 	*/
 
-	public static setLookAtFromValue(obj: Object3D | LightWithTarget, val: lookAt_value, complex?: ComplexValueType) {
-		if (this.verbose && log_prop_utils(obj))
-			console.debug("SVELTHREE > [ PropUtils ] -> setLookAtFromValue!", { obj, val })
+	public static setLookAtFromValue(
+		three_instance: Object3D | LightWithTarget,
+		val: lookAt_value,
+		complex?: ComplexValueType
+	) {
+		if (this.verbose && log_prop_utils(three_instance))
+			console.debug("SVELTHREE > [ PropUtils ] -> setLookAtFromValue!", { three_instance, val })
 
 		// IMPORTANT  update Matrix before setting `lookAt`--> lookAt has to be applied as last.
 		// this way we apply all other transforms before lookAt-update!
-		obj.updateMatrix()
+		three_instance.updateMatrix()
 
-		let t_val: Vector3 | Parameters<Vector3["set"]> | undefined | null
+		// target lookat position
+		let t_pos: Vector3 | Parameters<Vector3["set"]> | undefined | null
 
 		if (val) {
 			// TODO  TOFIX  this seems to be broken?! (Spotlight)
 			// can use Object3D as `lookAt` value
 
+			let target_instance: Targetable | null
+
+			// set target lookat position
+
 			if (!(val as TargetableSvelthreeComponent).is_svelthree_component && (val as Object3D).isObject3D) {
-				t_val = (val as Object3D).position
+				// val is a manually created `Object3D` instance
+				target_instance = val as Object3D
+				t_pos = new Vector3()
+				target_instance.getWorldPosition(t_pos)
 			} else if ((val as TargetableSvelthreeComponent).is_svelthree_component) {
-				t_val = (val as TargetableSvelthreeComponent).get_instance()?.position
+				// val is an instance created by a svelthree component
+				const target_component = val as TargetableSvelthreeComponent
+				target_instance = target_component.get_instance() as Object3D
+				t_pos = new Vector3()
+				target_instance.getWorldPosition(t_pos)
 			} else if ((val as Vector3).isVector3) {
-				t_val = val as Vector3
+				// val is a Vector3
+				target_instance = null
+				t_pos = val as Vector3
 			} else if (PropUtils.isArray3Nums(val as number[])) {
-				t_val = val as Parameters<Vector3["set"]>
+				// val is [number, number, number]
+				target_instance = null
+				t_pos = val as Parameters<Vector3["set"]>
 			} else {
-				t_val = null
+				target_instance = null
+				t_pos = null
 			}
 
-			if (t_val) {
+			if (t_pos) {
 				// Use 'target':  IMPORTANT  Manipulating `target` via `lookAt` shorthand attribute is limited to `Lights` with 'target' property only (DirectionalLight | SpotLight)
-				if ((obj as LightWithTarget).isLight) {
-					if (Object.hasOwn(obj, "target")) {
-						if ((obj as LightWithTarget).target.isObject3D) {
-							const obj_target = (obj as LightWithTarget).target as Object3D
-
-							if ((obj as LightWithTarget).matrixAutoUpdate === false) {
-								obj_target.matrixAutoUpdate = false
+				if ((three_instance as LightWithTarget).isLight) {
+					const light = three_instance as LightWithTarget
+					if (Object.hasOwn(light, "target")) {
+						// set target to provided component / instance
+						if (target_instance) {
+							if (light.userData.target_uuid) {
+								if (light.userData.target_uuid !== target_instance.uuid) {
+									light.target = target_instance
+									light.userData.target_uuid = target_instance.uuid
+									light.target.updateMatrixWorld()
+								} else {
+									light.target.updateMatrixWorld()
+								}
+							} else {
+								light.target = target_instance
+								light.userData.target_uuid = target_instance.uuid
+								light.target.updateMatrixWorld()
 							}
+						} else {
+							// set target to built-in target (Object3D)
+							light.target = light.userData.builtin_target
+							light.userData.target_uuid = light.target.uuid
 
-							if ((obj as LightWithTarget).target.parent === null) {
-								// add target to parent of obj (light)
-								const obj_parent = (obj as LightWithTarget).parent
+							// change position of built-in target (Object3D)
+							const light_target = light.target as Object3D
 
-								if (obj_parent !== null) {
-									// target has no parent, add target to parent of obj
-									obj_parent.add(obj_target)
-									if (this.verbose) {
-										console.warn(
-											`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : 'target' of ${obj.type} was added to the parent of ${obj.type}!`,
-											{ obj, target: obj_target }
-										)
+							if (light_target) {
+								if (light_target.isObject3D) {
+									if (light.matrixAutoUpdate === false) {
+										light_target.matrixAutoUpdate = false
+									}
+
+									// add target to light's parent if needed
+									if (light.target.parent === null) {
+										const light_parent = light.parent
+										if (light_parent !== null) {
+											// target has no parent, add target to parent of obj
+											light_parent.add(light_target)
+											if (this.verbose) {
+												console.warn(
+													`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : 'target' of ${light.type} was added to the parent of ${light.type}!`,
+													{ light, target: light_target }
+												)
+											}
+										} else {
+											console.error(
+												`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : Cannot add 'target' to the unavilable 'parent' of ${light.type}!`,
+												{ light, parent: light_parent }
+											)
+										}
+									} else {
+										// nothing, 'target' was already added to light's parent
 									}
 
 									// set position of the target
-									PropUtils.setPositionFromValue(obj_target, t_val, complex)
+									PropUtils.setPositionFromValue(light_target, t_pos, complex)
 									// IMPORTANT  We have to update 'matrixWorld' of 'target' here (at least with render modes 'auto'), regardles of 'obj_target.matrixAutoUpdate' value!
 									// 'SpotlightHelper' and 'DirectionalLightHelper' use 'lookAt' to 'light.target.matrixWorld' for orientation.
-									if (obj.matrixAutoUpdate === false) {
-										obj_target.updateMatrix()
-										obj_target.updateMatrixWorld()
+									if (light.matrixAutoUpdate === false) {
+										light_target.updateMatrix()
+										light_target.updateMatrixWorld()
 									} else {
-										obj_target.updateMatrixWorld()
+										light_target.updateMatrixWorld()
 									}
 								} else {
-									// obj has no parent
 									console.error(
-										`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : 'target' of ${
-											(obj as LightWithTarget).type
-										} couldn't be added to the parent of ${(obj as LightWithTarget).type}! ${
-											(obj as LightWithTarget).type
-										} has no parent!`,
-										{ obj, target: (obj as LightWithTarget).target }
+										`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : ${light.type}'s 'target' has to be an 'Object3D'!`,
+										{
+											light,
+											target: light_target
+										}
 									)
 								}
 							} else {
-								// target has parent, set position of the target
-								const obj_target = (obj as LightWithTarget).target as Object3D
-								if (obj_target) {
-									PropUtils.setPositionFromValue(obj_target, t_val, complex)
-									// IMPORTANT  We have to update 'matrixWorld' of 'target' here (at least with render modes 'auto'), regardles of 'obj_target.matrixAutoUpdate' value!
-									// 'SpotlightHelper' and 'DirectionalLightHelper' use 'lookAt' to 'light.target.matrixWorld' for orientation.
-									if (obj.matrixAutoUpdate === false) {
-										obj_target.updateMatrix()
-										obj_target.updateMatrixWorld()
-									} else {
-										obj_target.updateMatrixWorld()
+								console.error(
+									`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : invalid '${light.type}.target' value!`,
+									{
+										light,
+										target: light_target
 									}
-								}
+								)
 							}
-						} else {
-							// target is not Object3D
-							console.error(`[ PropUtils ] -> setLookAtFromValue : 'target' has to be an 'Object3D'!`, {
-								obj,
-								target: (obj as LightWithTarget).target
-							})
 						}
 					} else {
-						console.error(`[ PropUtils ] -> setLookAtFromValue : ${obj.type} has no 'target' property!`, {
-							obj
-						})
+						console.error(
+							`SVELTHREE > [ PropUtils ] -> setLookAtFromValue : ${light.type} has no 'target' property!`,
+							{
+								light
+							}
+						)
 					}
 				} else {
 					// Use `Object3D.lookAt` function (not 'target') on any `Object3D`
-					if (PropUtils.isArray3Nums(t_val as number[])) {
+					if (PropUtils.isArray3Nums(t_pos as number[])) {
 						// TODO  Type wrong in  THREE  -> Object3D.d.ts
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						//@ts-ignore
-						obj.lookAt(t_val[0], t_val[1], t_val[2])
-					} else if ((t_val as Vector3).isVector3) {
-						obj.lookAt(t_val as Vector3)
+						three_instance.lookAt(
+							(t_pos as [number, number, number])[0],
+							(t_pos as [number, number, number])[1],
+							(t_pos as [number, number, number])[2]
+						)
+					} else if ((t_pos as Vector3).isVector3) {
+						three_instance.lookAt(t_pos as Vector3)
 					} else {
 						console.error("SVELTHREE > [ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
-							obj: obj,
-							value: t_val
+							three_instance,
+							value: t_pos
 						})
 					}
 				}
 			} else {
-				console.error("SVELTHREE > [ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
-					obj: obj,
-					value: t_val
-				})
+				console.error(
+					"SVELTHREE > [ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' target-position value!",
+					{
+						three_instance,
+						value: t_pos
+					}
+				)
 			}
 		} else {
 			console.error("SVELTHREE > [ PropUtils ] -> setLookAtFromValue : invalid 'lookAt' value!", {
-				obj: obj,
+				three_instance,
 				value: val
 			})
 		}
