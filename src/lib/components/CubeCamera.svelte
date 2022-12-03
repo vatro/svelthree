@@ -706,8 +706,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
-	/** */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined = undefined
+	/** **shorthand** attribute for calling the `svelthree`-custom `lookAt` method with the provided value as argument. */
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null = undefined
 	$: !matrix && camera && lookAt ? set_lookat() : lookAt && camera ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
