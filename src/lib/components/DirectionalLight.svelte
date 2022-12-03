@@ -118,7 +118,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	function on_instance_provided(): void {
 		if (store) {
 			if (light?.type === "DirectionalLight") {
-				//nothing
+				// light with `target`: remember built-in target.
+				light.target.userData.is_builtin_target
+				light.userData.builtin_target = light.target
+				light.userData.target_uuid = light.target.uuid
 			} else if (light) {
 				throw new Error(
 					`SVELTHREE > ${c_name} : provided 'light' instance has wrong type '${light.type}', should be '${c_name}'!`
@@ -266,6 +269,10 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 
 			set_initial_userdata(light, self)
+			// light with `target`: remember built-in target.
+			light.target.userData.is_builtin_target
+			light.userData.builtin_target = light.target
+			light.userData.target_uuid = light.target.uuid
 
 			if (our_parent) our_parent.add(light)
 			light_uuid = light.uuid
@@ -279,6 +286,38 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					})
 				)
 			}
+		}
+	}
+
+	/** Set `target` of a `Light` with a `target` (`SpotLight` and `DirectionalLight`). Alternatively use `lookAt` which has the same funcionality. */
+	export let target: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null = undefined
+	$: if (!matrix && !lookAt && light && target) {
+		set_target()
+	} else {
+		if (!light && target) {
+			console.error(`SVELTHREE > ${c_name} > Trying to set 'target' : Invalid 'light' instance!`, { light })
+		}
+		if (matrix && target) {
+			console.error(
+				`SVELTHREE > ${c_name} > Trying to set 'target' : You cannot use 'target' prop together with 'matrix' prop!`
+			)
+		}
+		if (lookAt && target) {
+			console.error(
+				`SVELTHREE > ${c_name} > Trying to set 'target' : You cannot use 'lookAt' & 'target' props together!`
+			)
+		}
+	}
+
+	function set_target(): void {
+		if (verbose && log_rs) console.debug(...c_rs(c_name, "target", target))
+		if (light && target) {
+			PropUtils.setLookAtFromValue(light, target)
+		} else {
+			console.error(`SVELTHREE > ${c_name} > set_target : invalid 'light' instance and / or 'target' value!`, {
+				light,
+				target
+			})
 		}
 	}
 
@@ -328,11 +367,25 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	/** With components / objects having a `target` property like `DirectionalLight`, `lookAt` is used to specify a **point (coordinates) in world space** and cannot be set to an `Object3D`!
-	 * By setting `LookAt` to some value, you're basically moving the built-in 'blank' `Object3D` used as a point in space to look at.
-	 * ☝️ _In order to update the `DirectionalLightHelper` correctly, the `target: boolean` attribute needs to be set / set to `true` (**default**)!_ */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined = undefined
-	$: !matrix && light && lookAt ? set_lookat() : lookAt && light ? console.warn(w_sh.lookAt) : null
+	/** **shorthand** attribute for calling the `svelthree`-custom `lookAt` method with the provided value as argument. You can alternatively use the `target` **shorthand** attribute which has the same funcionality. */
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null = undefined
+	$: if (!matrix && !target && light && lookAt) {
+		set_lookat()
+	} else {
+		if (!light && lookAt) {
+			console.error(`SVELTHREE > ${c_name} > Trying to set 'lookAt' : Invalid 'light' instance!`, { light })
+		}
+		if (matrix && lookAt) {
+			console.error(
+				`SVELTHREE > ${c_name} > Trying to set 'lookAt' : You cannot use 'lookAt' prop together with 'matrix' prop!`
+			)
+		}
+		if (target && lookAt) {
+			console.error(
+				`SVELTHREE > ${c_name} > Trying to set 'lookAt' : You cannot use 'lookAt' & 'target' props together!`
+			)
+		}
+	}
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
 		if (light && lookAt) {
@@ -453,6 +506,84 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 		} else {
 			console.error(`SVELTHREE > ${c_name} > remove_helper : invalid 'light' instance value!`, { light })
+		}
+	}
+
+	// update light helper on every render!
+	$: if (
+		light &&
+		helper &&
+		((!matrix && !!lookAt !== !!target) || (matrix && !lookAt && !target)) &&
+		light.target?.isObject3D &&
+		$svelthreeStores[sti]?.rendererComponent
+	) {
+		start_updating_helper()
+	} else {
+		reset_light_target()
+		stop_updating_helper()
+		update_light_helper()
+	}
+
+	// call this to remove the renderer component listener
+	let remove_helper_updater: (() => void) | undefined
+
+	function start_updating_helper() {
+		// IMPORTANT  this does NOT cause a component update! (instead of using requestAnimationFrame)
+		// COOL!  this way the helper is 100% synchronious (not 1 frame late)
+		if (!remove_helper_updater) {
+			if (verbose && log_rs) console.debug(...c_rs(c_name, "start updating light helper on 'before_render_int'!"))
+			remove_helper_updater = store?.rendererComponent?.$on("before_render_int", update_light_helper)
+		}
+	}
+
+	function update_light_helper(): void {
+		if (helper) {
+			if (light) {
+				if (light.userData.helper) {
+					light.userData.helper.update()
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > update_light_target : Invalid 'light.userData.helper' value!`,
+						{
+							helper: light.userData.helper
+						}
+					)
+				}
+			} else {
+				console.error(`SVELTHREE > ${c_name} > update_light_target : Invalid 'light' value!`, {
+					light
+				})
+			}
+		}
+	}
+
+	function stop_updating_helper(): void {
+		if (remove_helper_updater) {
+			remove_helper_updater()
+			remove_helper_updater = undefined
+		}
+	}
+
+	// set light target to built-in target and remove it from it's parent
+	// we want to keep the last orientation.
+	function reset_light_target(): void {
+		if (light) {
+			if (light.userData.target_uuid !== light.userData.builtin_target.uuid) {
+				const builtin_target = light.userData.builtin_target as THREE.Object3D
+				light.target.getWorldPosition(builtin_target.position)
+				builtin_target.updateMatrix()
+				builtin_target.updateMatrixWorld()
+				light.target = light.userData.builtin_target
+				light.userData.target_uuid = light.userData.builtin_target.uuid
+			}
+
+			if (light.target.parent) {
+				light.target.parent.remove(light.target)
+			}
+		} else {
+			console.error(`SVELTHREE > ${c_name} > reset_light_target : Invalid 'light' value!`, {
+				light
+			})
 		}
 	}
 
