@@ -447,8 +447,8 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		}
 	}
 
-	/** */
-	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined = undefined
+	/** **shorthand** attribute for calling the `svelthree`-custom `lookAt` method with the provided value as argument. */
+	export let lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null = undefined
 	$: !matrix && container && lookAt ? set_lookat() : lookAt && container ? console.warn(w_sh.lookAt) : null
 	function set_lookat() {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "lookAt", lookAt))
