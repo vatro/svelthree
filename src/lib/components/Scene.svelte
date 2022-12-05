@@ -204,8 +204,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			scene.userData.id = id
 			scene.userData.sti = sti
-			// TODO / TOFIX  // HÄÄÄ??? This is unused / not implemented!!!
-			//scene.userData.animations = []
 
 			scene_is_active = false
 			scene.userData.isActive = scene_is_active
