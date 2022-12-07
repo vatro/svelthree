@@ -212,9 +212,8 @@ function c_mau(comp_name: string, message: string, value?: unknown): [string, st
 	]
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function get_comp_name(comp: ReturnType<typeof get_current_component>): string {
-	return comp.constructor.name.replace("_1", "")
+	return comp.constructor.name.replace(/[\d_]/g, "")
 }
 
 function get_comp_name_int(comp: ReturnType<typeof get_current_component>): string {
