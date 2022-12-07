@@ -216,8 +216,4 @@ function get_comp_name(comp: ReturnType<typeof get_current_component>): string {
 	return comp.constructor.name.replace(/[\d_]/g, "")
 }
 
-function get_comp_name_int(comp: ReturnType<typeof get_current_component>): string {
-	return comp.constructor.name.replace("_1", "")
-}
-
-export { c_rs, c_dev, c_lc, c_lc_int, c_rs_int, c_mau, verbose_mode, get_comp_name, get_comp_name_int, log_prop_utils }
+export { c_rs, c_dev, c_lc, c_lc_int, c_rs_int, c_mau, verbose_mode, get_comp_name, log_prop_utils }
