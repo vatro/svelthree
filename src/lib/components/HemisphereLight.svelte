@@ -220,8 +220,11 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 				shadow_dom_el.innerText += `${aria[key]}`
 			}
 
-			// TODO  is this ok like this?
-			Object.assign(shadow_dom_el, aria)
+			try {
+				Object.assign(shadow_dom_el, aria)
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 

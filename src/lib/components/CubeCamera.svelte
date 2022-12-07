@@ -353,8 +353,11 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 				shadow_dom_el.innerText += `${aria[key]}`
 			}
 
-			// TODO  is this ok like this?
-			Object.assign(shadow_dom_el, aria)
+			try {
+				Object.assign(shadow_dom_el, aria)
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 

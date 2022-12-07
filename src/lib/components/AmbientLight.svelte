@@ -219,8 +219,11 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 				shadow_dom_el.innerText += `${aria[key]}`
 			}
 
-			// TODO  is this ok like this?
-			Object.assign(shadow_dom_el, aria)
+			try {
+				Object.assign(shadow_dom_el, aria)
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 

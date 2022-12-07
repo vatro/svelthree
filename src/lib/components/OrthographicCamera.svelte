@@ -300,8 +300,11 @@ If you use this approach you'll see a warning in the console if you define left,
 				shadow_dom_el.innerText += `${aria[key]}`
 			}
 
-			// TODO  is this ok like this?
-			Object.assign(shadow_dom_el, aria)
+			try {
+				Object.assign(shadow_dom_el, aria)
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 

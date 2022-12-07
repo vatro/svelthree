@@ -26,12 +26,20 @@ const create_shadow_dom_el = (
 
 	if (button) {
 		shadow_dom_el = document.createElement("button")
-		// TODO  is this ok like this?
-		Object.assign(shadow_dom_el, button)
+		// try...catch : If `Object.assign()` fails to set a property of `shadow_dom_el` because it is read-only, code should not stop executing.
+		try {
+			Object.assign(shadow_dom_el, button)
+		} catch (err) {
+			console.error(err)
+		}
 	} else if (link) {
 		shadow_dom_el = document.createElement("a")
-		// TODO  is this ok like this?
-		Object.assign(shadow_dom_el, link)
+		// try...catch : If `Object.assign()` fails to set a property of `shadow_dom_el` because it is read-only, code should not stop executing.
+		try {
+			Object.assign(shadow_dom_el, link)
+		} catch (err) {
+			console.error(err)
+		}
 	} else {
 		shadow_dom_el = document.createElement("div")
 	}
