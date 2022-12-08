@@ -2,7 +2,7 @@
 `accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
 svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
 -->
-<svelte:options accessors />
+<svelte:options accessors={false} />
 
 <!-- 
 @component
