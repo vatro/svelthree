@@ -673,7 +673,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			self.$on(type, callback)
 			if (interaction_comp) {
-				interaction_comp.update_listeners = true
+				interaction_comp.$set({ update_listeners: true })
 			} else {
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
@@ -710,7 +710,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 
 			if (interaction_comp) {
-				interaction_comp.update_listeners = true
+				interaction_comp.$set({ update_listeners: true })
 			} else {
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
@@ -728,82 +728,82 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export let on_click: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_click !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerup: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerdown: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerdown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerover: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerout: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointermove: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointermove !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointermoveover: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointermoveover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keydown: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keydown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keypress: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keypress !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keyup: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keyup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focus: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focus !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_blur: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_blur !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focusin: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focusin !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focusout: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focusout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_wheel: SvelthreeWheelEventHandler | undefined = undefined // ->  TODO  implement
 	$: if (on_wheel !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_wheelover: SvelthreeWheelEventHandler | undefined = undefined // -> TODO  implement
 	$: if (on_wheelover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */

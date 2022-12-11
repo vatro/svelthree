@@ -96,7 +96,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		for (let i = 0; i < modifiers_arr.length; i++) {
 			const modifier_name: string = modifiers_arr[i]
 			if (!SUPPORTED_MODIFIERS_SET.has(modifier_name as SvelthreeSupportedModifier)) {
-				console.error(`SvelthreeInteraction > ERROR: modifier '${modifier_name}'`)
+				console.error(`SVELTHREE > ${c_name} > ERROR: modifier '${modifier_name}'`)
 			} else if (!valid_modifiers.includes(modifier_name as SvelthreeSupportedModifier)) {
 				valid_modifiers.push(modifier_name as SvelthreeSupportedModifier)
 			}
@@ -451,19 +451,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
 	function has_prop_action(prop_action: string): boolean {
-		return !!parent[prop_action as keyof typeof parent]
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		return !!parent_state[prop_action]
 	}
 
 	function using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		return has_on_directive(event_name) || !!parent[`on_${event_name}`]
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		return has_on_directive(event_name) || !!parent_state[`on_${event_name}`]
 	}
 
 	function not_using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		return !has_on_directive(event_name) && !parent[`on_${event_name}`]
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		return !has_on_directive(event_name) && !parent_state[`on_${event_name}`]
 	}
 
 	function prop_action_is_simple(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		return typeof parent[`on_${event_name}`] === "function"
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		return typeof parent_state[`on_${event_name}`] === "function"
 	}
 
 	function prop_action_is_complex(prop_action_handler: SvelthreePropActionHandler): boolean {
@@ -490,7 +494,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// the component itself should emit the event ... isn't this already like this?
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
-		if (has_on_directive(event_name) || parent.link || parent.button) {
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		if (has_on_directive(event_name) || parent_state.link || parent_state.button) {
 			if (event_not_registered(event_name, used_pointer_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
@@ -502,7 +507,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent_state[`on_${event_name}`]
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_pointer_events_action)) {
@@ -521,7 +526,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "prop_action")
 				} else {
 					console.error(
-						`SVELTHREE > SvelthreeInteraction > add_pointer_listener > Cannot process prop action for event ${event_name}, doesn't match required form.`
+						`SVELTHREE > ${c_name} > add_pointer_listener : Cannot process prop action for event ${event_name}, doesn't match required form.`
 					)
 				}
 
@@ -598,7 +603,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (!remove_canvas_pointermove_listener) add_canvas_pointermove_listener()
 				break
 			default:
-				console.error(`SVELTHREE > SvelthreeInteraction > Pointer event '${event_name}' not implemented!`)
+				console.error(`SVELTHREE > ${c_name} > Pointer event '${event_name}' not implemented!`)
 				break
 		}
 	}
@@ -692,7 +697,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > check_pointer_moveover : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				`SVELTHREE > ${c_name} > check_pointer_moveover : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
 				{ shadow_dom_el }
 			)
 		}
@@ -740,7 +745,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > check_pointer_overout : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				`SVELTHREE > ${c_name} > check_pointer_overout : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
 				{ shadow_dom_el }
 			)
 		}
@@ -763,7 +768,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > check_pointer_pointerdown : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				`SVELTHREE > ${c_name} > check_pointer_pointerdown : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
 				{ shadow_dom_el }
 			)
 		}
@@ -786,7 +791,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > check_pointer_pointerup : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				`SVELTHREE > ${c_name} > check_pointer_pointerup : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
 				{ shadow_dom_el }
 			)
 		}
@@ -813,7 +818,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > check_pointer_click : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+				`SVELTHREE > ${c_name} > check_pointer_click : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
 				{ shadow_dom_el }
 			)
 		}
@@ -912,7 +917,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				break
 			default:
-				console.error(`SvelthreeInteraction > pointerevents_handler > no such 'render_mode' -> ${render_mode}!`)
+				console.error(
+					`SVELTHREE > ${c_name} > pointerevents_handler : no such 'render_mode' -> ${render_mode}!`
+				)
 				break
 		}
 	}
@@ -951,6 +958,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  FOCUS Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_focus_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name)
@@ -962,7 +971,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent_state[`on_${event_name}`]
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_focus_events_action)) {
@@ -982,7 +991,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_focus_listener(event_name, listener_options, "prop_action")
 				} else {
 					console.error(
-						`SVELTHREE > SvelthreeInteraction > add_focus_listener > Cannot process prop action for event ${event_name}, doesn't match required form.`
+						`SVELTHREE > ${c_name} > add_focus_listener : Cannot process prop action for event ${event_name}, doesn't match required form.`
 					)
 				}
 
@@ -1052,7 +1061,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				dispatch_focusevent_intersection_indep(evt)
 				break
 			default:
-				console.error(`SvelthreeInteraction > focusevents_handler > no such 'render_mode' -> ${render_mode}!`)
+				console.error(`SVELTHREE > ${c_name} > focusevents_handler : no such 'render_mode' -> ${render_mode}!`)
 				break
 		}
 	}
@@ -1078,6 +1087,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_keyboard_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name)
@@ -1090,7 +1101,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		const prop_action_handler: SvelthreePropActionHandler | undefined = parent[`on_${event_name}`]
+		const prop_action_handler: SvelthreePropActionHandler | undefined = parent_state[`on_${event_name}`]
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_keyboard_events_action)) {
@@ -1109,7 +1120,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_keyboard_listener(event_name, listener_options, "prop_action")
 				} else {
 					console.error(
-						`SVELTHREE > SvelthreeInteraction > add_keyboard_listener > Cannot process prop action for event ${event_name}, doesn't match required form.`
+						`SVELTHREE > ${c_name} > add_keyboard_listener : Cannot process prop action for event ${event_name}, doesn't match required form.`
 					)
 				}
 
@@ -1188,7 +1199,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					add_canvas_keypress_listener_directive()
 				break
 			default:
-				console.error(`SVELTHREE > SvelthreeInteraction > Keyboard event '${event_name}' not implemented!`)
+				console.error(`SVELTHREE > ${c_name} : Keyboard event '${event_name}' not implemented!`)
 				break
 		}
 	}
@@ -1275,7 +1286,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				canvas_component.default_keyboard_events_handler[evt.type](evt)
 			} else {
 				console.error(
-					"SVELTHREE > SvelthreeInteraction > keyboardevents_handler > Couldn't call 'canvas_component.default_keyboard_events_handler[evt.type](evt)', 'canvas_component' is not available!",
+					`SVELTHREE > ${c_name} > keyboardevents_handler : Couldn't call 'canvas_component.default_keyboard_events_handler[evt.type](evt)', 'canvas_component' is not available!`,
 					{ canvas_component }
 				)
 			}
@@ -1283,7 +1294,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
 		} else if (is_default_keyboard_handler_specified === null) {
 			console.error(
-				"SVELTHREE > SvelthreeInteraction > keyboardevents_handler > 'is_default_keyboard_handler_specified' is 'null', means 'canvas_component' is not available!",
+				`SVELTHREE > ${c_name} > keyboardevents_handler : 'is_default_keyboard_handler_specified' is 'null', means 'canvas_component' is not available!`,
 				{ canvas_component }
 			)
 		}
@@ -1301,7 +1312,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				break
 			default:
 				console.error(
-					`SvelthreeInteraction > keyboardevents_handler > no such 'render_mode' -> ${render_mode}!`
+					`SVELTHREE > ${c_name} > keyboardevents_handler : no such 'render_mode' -> ${render_mode}!`
 				)
 				break
 		}
@@ -1315,7 +1326,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			)
 		} else {
 			console.error(
-				"SVELTHREE > SvelthreeInteraction > default_keyboard_handler_specified : 'canvas_component' not available!",
+				`SVELTHREE > ${c_name} > default_keyboard_handler_specified : 'canvas_component' not available!`,
 				{ canvas_component }
 			)
 			return false
@@ -1422,6 +1433,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// COOL!  Multiple `on:` directives WILL be triggered as expected.
 
 	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interactionEnabled)) {
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+
 		r_added_on_init = true
 		update_listeners = false
 
@@ -1431,7 +1444,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// will be queued in mode "always"
 		// will be dispatsched immediately in mode "auto" -> see 'pointerevents_handler'
-		if (using_event("click") || parent.button || parent.link) add_pointer_listener("click", true)
+		if (using_event("click") || parent_state.button || parent_state.link) add_pointer_listener("click", true)
 		if (using_event("pointerup")) add_pointer_listener("pointerup", true)
 		if (using_event("pointerdown")) add_pointer_listener("pointerdown", true)
 		//if (using_event("pointerenter")) add_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
@@ -1462,7 +1475,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// --- REMOVE / UNREGISTER UNUSED EVENTS / LISTENERS ---
 
-		if (not_using_event("click") && !parent.button && !parent.link) completely_remove_pointer_listener("click")
+		if (not_using_event("click") && !parent_state.button && !parent_state.link)
+			completely_remove_pointer_listener("click")
 		if (not_using_event("pointerup")) completely_remove_pointer_listener("pointerup")
 		if (not_using_event("pointerdown")) completely_remove_pointer_listener("pointerdown")
 		//if (not_using_event("pointerenter")) completely_remove_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
@@ -1519,15 +1533,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * cursor will not change (_cursor changes on `interact: true` + `block: false` only_).
 	 */
 	function set_block_status(): void {
+		let parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+
 		//cursor will change on `interact: true` + `block: false`
 		if (verbose && log_dev)
 			console.debug(
-				"SvelthreeInteraction > set_block_status > used_pointer_events.size:",
+				`SVELTHREE > ${c_name} > set_block_status : used_pointer_events.size:`,
 				used_pointer_events.size
 			)
 		if (used_pointer_events.size === 0) {
 			// cursor will not change
-			parent.block = true
+			parent.$set({ block: true })
+			parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
 			if (obj) {
 				obj.userData.block = true
 				if (verbose && log_dev) {
@@ -1535,7 +1552,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 						`SVELTHREE > ${c_name} > set_block_status : parent.block, obj.userData.block -> true`,
 						{
 							parent,
-							parent_block: parent.block,
+							parent_block: parent_state.block,
 							obj_userData_block: obj.userData.block
 						}
 					)
@@ -1548,11 +1565,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			// cursor will change
-			parent.block = false
+			parent.$set({ block: true })
+			parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
 			if (verbose && log_dev) {
 				console.debug(`SVELTHREE > ${c_name} > set_block_status : parent.block -> false`, {
 					parent,
-					parent_block: parent.block
+					parent_block: parent_state.block
 				})
 			}
 			//obj.userData.block = false
@@ -1582,7 +1600,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > register_event : Cannot register '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				`SVELTHREE > > ${c_name} > register_event : Cannot register '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
 				{ canvas_component }
 			)
 		}
@@ -1657,7 +1675,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 				default:
 					console.error(
-						`SVELTHREE > SvelthreeInteraction > completely_remove_keyboard_listener > Keyboard event '${event_name}' not implemented!`
+						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Keyboard event '${event_name}' not implemented!`
 					)
 					break
 			}
@@ -1669,7 +1687,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler_directive as EventListener, true)
 			} else {
 				console.error(
-					`SVELTHREE > SvelthreeInteraction > completely_remove_keyboard_listener > Cannot remove listener from unavailable 'shadow_dom_el'!`,
+					`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
 					{ shadow_dom_el }
 				)
 			}
@@ -1687,7 +1705,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			canvas_component.unregister_canvas_listener(event_name)
 		} else {
 			console.error(
-				`SVELTHREE > unregister_keyboard_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				`SVELTHREE > ${c_name} > unregister_keyboard_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
 				{ canvas_component }
 			)
 		}
@@ -1709,7 +1727,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				shadow_dom_el.removeEventListener(event_name, focusevents_handler_directive as EventListener, false)
 			} else {
 				console.error(
-					`SVELTHREE > SvelthreeInteraction > completely_remove_focus_listener > Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+					`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
 					{ shadow_dom_el }
 				)
 			}
@@ -1748,7 +1766,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 				default:
 					console.error(
-						`SVELTHREE > SvelthreeInteraction > completely_remove_pointer_listener > Pointer event '${event_name}' not implemented!`
+						`SVELTHREE > ${c_name} > completely_remove_pointer_listener : Pointer event '${event_name}' not implemented!`
 					)
 					break
 			}
@@ -1760,7 +1778,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_directive as EventListener, true)
 			} else {
 				console.error(
-					`SVELTHREE > SvelthreeInteraction > completely_remove_pointer_listener > Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+					`SVELTHREE > ${c_name} > completely_remove_pointer_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
 					{ shadow_dom_el }
 				)
 			}
@@ -1786,7 +1804,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			console.error(
-				`SVELTHREE > unregister_pointer_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
+				`SVELTHREE > ${c_name} > unregister_pointer_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
 				{ canvas_component }
 			)
 		}
@@ -1804,22 +1822,30 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function dispatch_prop_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
 		const evt = new CustomEvent(e_type, { detail })
-		const action = parent[action_name as keyof typeof parent]
+		const parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+		const action = parent_state[action_name]
 
 		if (action) {
-			if (typeof parent[action_name as keyof typeof parent] === "function") {
+			if (typeof action === "function") {
 				action(evt)
-			} else if (parent[action_name as keyof typeof parent].length) {
-				action[0](evt)
+			} else if (Array.isArray(action)) {
+				if (typeof action[0] === "function") {
+					action[0](evt)
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > dispatch_prop_action : provided '${action_name}' action prop is not of valid type! First item in the provided Array should be a function!`,
+						{ action_name, action }
+					)
+				}
 			} else {
 				console.error(
-					`SVELTHREE > SvelthreeInteraction > dispatch_prop_action : provided '${action_name}' action prop is not of valid type!`,
+					`SVELTHREE > ${c_name} > dispatch_prop_action : provided '${action_name}' action prop is not of valid type!`,
 					{ action_name, action }
 				)
 			}
 		} else {
 			console.error(
-				`SVELTHREE > SvelthreeInteraction > dispatch_prop_action : '${action_name}' action prop is not available!`,
+				`SVELTHREE > ${c_name} > dispatch_prop_action : '${action_name}' action prop is not available!`,
 				{ action_name, action }
 			)
 		}

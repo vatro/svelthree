@@ -31,6 +31,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { SvelthreeAni } from "../ani"
 	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
+	import type { SvelteComponentDev } from "svelte/internal"
 	import { CubeCamera as THREE_CubeCamera } from "three"
 	import { WebGLCubeRenderTarget } from "three"
 	import type {
@@ -583,17 +584,65 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 				bind_tex.envMap = camera.renderTarget.texture
 			} else {
 				if (bind_pos) {
-					if (Object.hasOwn(bind_pos, "mat")) {
-						bind_pos["mat" as keyof typeof bind_pos].envMap = camera.renderTarget.texture
-					} else if (Object.hasOwn(bind_pos, "material")) {
-						bind_pos["material" as keyof typeof bind_pos].envMap = camera.renderTarget.texture
-						bind_pos["material" as keyof typeof bind_pos].needsUpdate = true
+					// set `envMap` if `bind_pos` is a component with `mat`or `material` defined
+					if (Object.hasOwn(bind_pos, "$$")) {
+						if (Object.hasOwn((bind_pos as SvelteComponentDev).$$, "mat")) {
+							// use `mat` to set `envMap` if the component has `mat` prop defined
+							const comp = bind_pos as SvelteComponentDev
+							const comp_state = comp.$capture_state() as unknown as { [key: string]: unknown }
+							const material = comp_state.material as MaterialWithEnvMap
+							if (Object.hasOwn(material, "envMap")) {
+								const mat = comp_state.mat as PropMat<MaterialWithEnvMap>
+								mat.envMap = camera.renderTarget.texture
+								comp.$set({ mat })
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (component) doesn't have an 'envMap' property!`,
+									{ bind_pos, material }
+								)
+							}
+						} else if (Object.hasOwn(bind_pos, "material")) {
+							// set `envMap` directly on `material` if the component has `material` prop defined
+							const comp = bind_pos as SvelteComponentDev
+							const comp_state = comp.$capture_state() as unknown as { [key: string]: unknown }
+							const material = comp_state.material as MaterialWithEnvMap
+							if (Object.hasOwn(material, "envMap")) {
+								material.envMap = camera.renderTarget.texture
+								material.needsUpdate = true
+								comp.$set({ material })
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (component) doesn't have an 'envMap' property!`,
+									{ bind_pos, material }
+								)
+							}
+						}
+					} else if (Object.hasOwn(bind_pos, "isMesh")) {
+						if (Object.hasOwn(bind_pos, "material")) {
+							// set `envMap` directly on `material` if the instance has `material` prop defined
+							const instance = bind_pos as Mesh
+							const material = instance.material as MaterialWithEnvMap
+							if (material) {
+								if (Object.hasOwn(material, "envMap")) {
+									material.envMap = camera.renderTarget.texture
+									material.needsUpdate = true
+								} else {
+									console.error(
+										`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (Mesh instance) doesn't have an 'envMap' property!`,
+										{ our_parent, material }
+									)
+								}
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : Cannot set 'envMap', 'bind_pos' (Mesh instance) has no 'material' defined!`,
+									{ bind_pos, material }
+								)
+							}
+						}
 					}
 				} else if (our_parent) {
-					if (Object.hasOwn(our_parent, "mat")) {
-						const mat = our_parent["mat" as keyof typeof our_parent] as PropMat<MaterialWithEnvMap>
-						mat.envMap = camera.renderTarget.texture
-					} else if (Object.hasOwn(our_parent, "material")) {
+					//`our_parent` is a three.js instance
+					if (Object.hasOwn(our_parent, "material")) {
 						const material = our_parent["material" as keyof typeof our_parent] as MaterialWithEnvMap
 						if (Object.hasOwn(material, "envMap")) {
 							material.envMap = camera.renderTarget.texture

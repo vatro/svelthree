@@ -4,6 +4,8 @@ import * as path from "path"
 const project_root_abs = process.cwd()
 const fns = []
 
+const using_accessors = false
+
 // --- CODE REPLACEMENT TASKS ---
 
 const replace_tasks = [
@@ -178,10 +180,15 @@ const get_process_comments_fn = (file_path) => {
 				const str_setter = `set ${prop_name}`
 				const regex_setter = new RegExp(str_setter)
 				const test_setter = content.match(regex_setter)
-				const acc_comment = comment.replace(
-					`/**`,
-					`/**\n\t * ◁▶ _svelthree-component accessor_  \n\t *  \n\t *`
-				)
+				let acc_comment
+				if (using_accessors) {
+					acc_comment = comment.replace(`/**`, `/**\n\t * ◁▶ _svelthree-component accessor_  \n\t *  \n\t *`)
+				} else {
+					acc_comment = comment.replace(
+						`/**`,
+						`/**\n\t * ◁▶ _svelthree-component method / read-only prop_  \n\t *  \n\t *`
+					)
+				}
 
 				if (test_setter) {
 					new_content = new_content.replace(`set ${prop_name}(_`, `${acc_comment}\n\tset ${prop_name}(_`)
@@ -200,7 +207,10 @@ const get_process_comments_fn = (file_path) => {
 			new_content = new_content.replace(/(\/\*\*accessor\*\/)(\r\n|\r|\n)( +)(\/\*\*)/gm, "$4")
 
 			// replace generated `/**accessor*/` with svelthree-accessors comment
+
 			new_content = new_content.replace(/\/\*\*accessor\*\//gs, "/** ◁▶ _svelthree-component accessor_ */")
+
+			//new_content = new_content.replace(/\/\*\*accessor\*\//gs, "/** ◁▶ _svelthree-component method_ */")
 
 			await fs.writeFile(file_path, new_content)
 		} catch (err) {
