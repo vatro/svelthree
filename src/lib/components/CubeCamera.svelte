@@ -468,9 +468,23 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 			camera_updated = true
 
+			// TODO  works, but review / make better
 			if (!bind_tex) {
-				const op = bound_pos as Mesh
-				const op_mat = op.material as MaterialWithEnvMap
+				// material of our parent (component or Mesh)
+				// TODO  what about Points?
+				let op_mat
+
+				if (bound_pos) {
+					if (Object.hasOwn(bound_pos, "$$")) {
+						const bound_comp = bound_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+						const bound_comp_state = bound_comp.$capture_state() as unknown as { [key: string]: unknown }
+						op_mat = bound_comp_state.material as MaterialWithEnvMap
+					} else {
+						const op = bound_pos as Mesh
+						op_mat = op.material as MaterialWithEnvMap
+					}
+				}
+
 				if (op_mat && Object.hasOwn(op_mat, "envMap")) {
 					op_mat.envMap = camera.renderTarget.texture
 				}
@@ -572,6 +586,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
+	// TODO  works, but review / make better
 	function update_texture_bindings() {
 		if (camera) {
 			if (bind_tex) {
