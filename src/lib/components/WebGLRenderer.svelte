@@ -796,7 +796,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					if (store.cubeCameras.length) {
 						for (let i = 0; i < store.cubeCameras.length; i++) {
 							const cubecam: CubeCamera = store.cubeCameras[i]
-							if (cubecam.dynamic) {
+							const cubecam_state = cubecam.$capture_state() as unknown as { [key: string]: unknown }
+							if (cubecam_state.dynamic) {
 								cubecam.update_cubecam()
 							}
 						}
@@ -814,7 +815,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				if (store.cubeCameras.length) {
 					for (let i = 0; i < store.cubeCameras.length; i++) {
 						const cubecam: CubeCamera = store.cubeCameras[i]
-						if (cubecam.dynamic) {
+						const cubecam_state = cubecam.$capture_state() as unknown as { [key: string]: unknown }
+						if (cubecam_state.dynamic) {
 							cubecam.update_cubecam()
 						}
 					}
