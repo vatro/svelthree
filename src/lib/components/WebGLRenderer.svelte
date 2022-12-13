@@ -989,6 +989,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
+	/** Returns current renderer mode: `"auto"` or `"always"`. */
+	export const get_mode = (): WebGLRendererMode => {
+		return mode
+	}
+
 	/** Returns the **three.js instance** of the renderer. */
 	export const get_renderer = (): WebGLRenderer => {
 		return renderer

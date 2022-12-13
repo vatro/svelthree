@@ -1162,7 +1162,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	)
 
 	const schedule_render_auto = (): void => {
-		if (store?.rendererComponent?.mode === "auto") {
+		if (store?.rendererComponent?.get_mode() === "auto") {
 			// prevent an additional component update by not accessing the `root_scene` prop directly.
 			if (root_scene_obj.value) {
 				root_scene_obj.value.userData.dirty = true

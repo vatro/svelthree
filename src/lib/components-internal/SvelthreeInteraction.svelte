@@ -866,7 +866,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		evt: PointerEvent,
 		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null = null
 	): void {
-		const render_mode = store?.rendererComponent?.mode
+		const render_mode = store?.rendererComponent?.get_mode()
 
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
@@ -1039,7 +1039,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		evt: FocusEvent,
 		cancel_or_stop_propagation_fn: (evt: PointerEvent | FocusEvent | KeyboardEvent) => void
 	): void {
-		const render_mode = store?.rendererComponent?.mode
+		const render_mode = store?.rendererComponent?.get_mode()
 
 		cancel_or_stop_propagation_fn(evt)
 
@@ -1267,7 +1267,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		evt: KeyboardEvent,
 		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null
 	): void {
-		const render_mode = store?.rendererComponent?.mode
+		const render_mode = store?.rendererComponent?.get_mode()
 
 		//  IMPORTANT  //
 		// any specified `default_keyboard_events_handler` for the received keyboard event
@@ -1504,17 +1504,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (obj) {
 			if (store) {
 				if (!obj.userData.block) {
-					if (store.rendererComponent?.mode === "always" && !remove_interaction_2_listener) {
+					if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_2_listener) {
 						add_interaction_2_listener()
 					}
 				} else {
-					if (store.rendererComponent?.mode === "always" && remove_interaction_2_listener) {
+					if (store.rendererComponent?.get_mode() === "always" && remove_interaction_2_listener) {
 						remove_interaction_2_listener()
 						remove_interaction_2_listener = null
 					}
 				}
 
-				if (store.rendererComponent?.mode === "always" && !remove_interaction_3_listener) {
+				if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_3_listener) {
 					add_interaction_3_listener()
 				}
 			}

@@ -121,7 +121,7 @@
 			}
 
 			// mode 'auto'
-			if (store.rendererComponent?.mode === "auto") {
+			if (store.rendererComponent?.get_mode() === "auto") {
 				if (auto === true) {
 					// schedule render every animation frame
 					rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))

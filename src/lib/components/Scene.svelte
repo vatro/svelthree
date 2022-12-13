@@ -1377,7 +1377,7 @@
 	)
 
 	const schedule_render_auto = (): void => {
-		if (store?.rendererComponent?.mode === "auto") {
+		if (store?.rendererComponent?.get_mode() === "auto") {
 			if (root_scene) {
 				// we're not the root scene (root_scene is not `null`)
 				// prevent an additional component update by not accessing the `root_scene` prop directly.
