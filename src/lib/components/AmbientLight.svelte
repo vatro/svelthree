@@ -1,10 +1,4 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors={false} />
-
-<!--
 @component
 **svelthree** _AmbientLight_ Component.
 AmbientLight cannot be used to cast shadows as it doesn't have a direction. Position is also irrelevant. See https://threejs.org/docs/#api/en/lights/AmbientLight.
