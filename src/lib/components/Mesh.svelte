@@ -696,13 +696,13 @@
 	export let interact: boolean | undefined | null = undefined
 
 	/**
-	Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
-	* This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
-	* 
-	* Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.  
-	* In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
-	* the object will automatically become an _interaction occluder / blocker_.
-   */
+	 * Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
+	 * This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
+	 *
+	 * Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.
+	 * In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
+	 * the object will automatically become an _interaction occluder / blocker_.
+	 */
 	export let block = false
 
 	const interaction_on_clear: {
