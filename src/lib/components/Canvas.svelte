@@ -65,8 +65,8 @@ This is a **svelthree** _Canvas_ Component.
 
 	// #region --- Optional Attributes
 
-	/** RECONSIDER  `name` attribute is currently unused, but could be somehow useful in future. */
-	// export let name: string = undefined
+	/** The `id` of the `Canvas` DOMElement. */
+	export let id = ""
 
 	export let style: string | undefined = undefined
 	let clazz: string | undefined = undefined
@@ -1063,7 +1063,7 @@ This is a **svelthree** _Canvas_ Component.
 	)
 </script>
 
-<canvas data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />
+<canvas {id} data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />
 <!-- IMPORTANT  any objects with 'tabindex' specified will receive focus -->
 <div bind:this={sh_root} data-kind="svelthree_shadow_dom_root" style="height: 0; width: 0; overflow: hidden;">
 	<slot />
