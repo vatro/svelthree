@@ -90,7 +90,7 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 *  TODO : this is just a basic implementation, not much tested ( _other use cases_ ) yet.
 	 * */
-	export let pointer_listener_options = { capture: true }
+	export let pointer_listener_options: { capture: boolean } = { capture: true }
 	const pointer_capture = pointer_listener_options.capture
 
 	/**
@@ -180,7 +180,7 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 *  TODO : this is just a basic implementation, not much tested ( _other use cases_ ) yet.
 	 * */
-	export let keyboard_listener_options = { capture: true }
+	export let keyboard_listener_options: { capture: boolean } = { capture: true }
 	const keyboard_capture = keyboard_listener_options.capture
 
 	/**
