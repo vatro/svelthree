@@ -292,8 +292,6 @@
 	 * />
 	 * ```
 	 * */
-	/*eslint @typescript-eslint/no-explicit-any: ["error", { "ignoreRestArgs": true }]*/
-	//export let afterLoaded: ((content_gltf: GLTF, ...args: any[]) => Promise<void>)[] | undefined = undefined
 	export let afterLoaded: GLTFAfterLoadedTask[] | undefined = undefined
 
 	async function process_afterLoaded() {

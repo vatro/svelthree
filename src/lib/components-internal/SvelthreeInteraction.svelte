@@ -54,7 +54,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const verbose: boolean = verbose_mode()
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
-	//export let log_rs = false
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = undefined
 
 	export let interactionEnabled: boolean | undefined
