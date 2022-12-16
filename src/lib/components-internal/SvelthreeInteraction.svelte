@@ -444,22 +444,22 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
 	function has_prop_action(prop_action: string): boolean {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
-		return !!parent_state[prop_action]
+		const parent_state = parent.state()
+		return !!parent_state[prop_action as keyof typeof parent_state]
 	}
 
 	function using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 		return has_on_directive(event_name) || !!parent_state[`on_${event_name}`]
 	}
 
 	function not_using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 		return !has_on_directive(event_name) && !parent_state[`on_${event_name}`]
 	}
 
 	function prop_action_is_simple(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 		return typeof parent_state[`on_${event_name}`] === "function"
 	}
 
@@ -487,7 +487,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// the component itself should emit the event ... isn't this already like this?
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 		if (has_on_directive(event_name) || parent_state.link || parent_state.button) {
 			if (event_not_registered(event_name, used_pointer_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name)
@@ -951,7 +951,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  FOCUS Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_focus_events_directive)) {
@@ -1080,7 +1080,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: SvelthreePropActionHandler }
+		const parent_state = parent.state()
 
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_keyboard_events_directive)) {
@@ -1426,7 +1426,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// COOL!  Multiple `on:` directives WILL be triggered as expected.
 
 	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interactionEnabled)) {
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+		const parent_state = parent.state()
 
 		r_added_on_init = true
 		update_listeners = false
@@ -1526,7 +1526,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * cursor will not change (_cursor changes on `interact: true` + `block: false` only_).
 	 */
 	function set_block_status(): void {
-		let parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+		let parent_state = parent.state()
 
 		//cursor will change on `interact: true` + `block: false`
 		if (verbose && log_dev)
@@ -1537,7 +1537,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (used_pointer_events.size === 0) {
 			// cursor will not change
 			parent.$set({ block: true })
-			parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+			parent_state = parent.state()
 			if (obj) {
 				obj.userData.block = true
 				if (verbose && log_dev) {
@@ -1559,7 +1559,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		} else {
 			// cursor will change
 			parent.$set({ block: true })
-			parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
+			parent_state = parent.state()
 			if (verbose && log_dev) {
 				console.debug(`SVELTHREE > ${c_name} > set_block_status : parent.block -> false`, {
 					parent,
@@ -1815,8 +1815,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function dispatch_prop_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
 		const evt = new CustomEvent(e_type, { detail })
-		const parent_state = parent.$capture_state() as unknown as { [key: string]: unknown }
-		const action = parent_state[action_name]
+		const parent_state = parent.state()
+		const action = parent_state[action_name as keyof typeof parent_state] as unknown
 
 		if (action) {
 			if (typeof action === "function") {

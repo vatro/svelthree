@@ -8,6 +8,56 @@ If you use this approach you'll see a warning in the console if you define left,
 - Use `params` attribute to initialize the camera and `props` attribute to set it's properties. 
 - Use `props` attribute only: Camera will be initialized with default constructor values and `props` attribute will set it's properties. 
 [ tbd ]  Link to Docs. -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./OrthographicCamera.svelte").default
+
+	export interface IStateOrthographicCamera {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly id: string | undefined
+		readonly camera: THREE_OrthographicCamera | undefined | null
+		readonly name: string | undefined
+		readonly aspect: boolean | undefined
+		readonly frustumSize: number | undefined
+		readonly params: ConstructorParameters<typeof THREE_OrthographicCamera> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly props: PropsOrthographicCamera | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly far: number | undefined
+		readonly near: number | undefined
+		readonly view: THREE_OrthographicCamera["view"] | undefined
+		readonly zoom: number | undefined
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -50,7 +100,6 @@ If you use this approach you'll see a warning in the console if you define left,
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./OrthographicCamera.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -1050,6 +1099,56 @@ If you use this approach you'll see a warning in the console if you define left,
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateOrthographicCamera> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					id,
+					camera,
+					name,
+					aspect,
+					frustumSize,
+					params,
+					tabindex,
+					aria,
+					mau,
+					matrix,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					far,
+					near,
+					view,
+					zoom,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

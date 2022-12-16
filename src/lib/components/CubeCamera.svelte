@@ -3,6 +3,66 @@
 **svelthree** _CubeCamera_ Component.
 Renders a `CubeMap` which can be used with **non-PBR** materials having an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236)).     
 [ tbd ]  Link to Docs. -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./CubeCamera.svelte").default
+
+	export interface IStateCubeCamera {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly dynamic: boolean
+		readonly bind_pos:
+			| MeshSvelthreeComponent<MeshAssignableMaterial>
+			| Object3DSvelthreeComponent
+			| Object3D
+			| undefined
+		readonly bind_pos_offset: Vector3 | undefined
+		readonly hide:
+			| (MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent | Object3D)[]
+			| undefined
+		readonly bind_tex: MeshPhongMaterial | MeshBasicMaterial | MeshLambertMaterial | undefined
+		readonly texture: CubeTexture | undefined
+		readonly is_floor: boolean
+		readonly camera: THREE_CubeCamera | undefined | null
+		readonly renderTarget: WebGLCubeRenderTarget | undefined
+		readonly name: string | undefined
+		readonly renderTargetParams: ConstructorParameters<typeof WebGLCubeRenderTarget> | undefined
+		readonly params: RemoveLast<ConstructorParameters<typeof THREE_CubeCamera>> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly renderTargetOptions: PropWebGLRenderTargetOptions | undefined
+		readonly renderTargetProps: PropsWebGLCubeRenderTarget | undefined
+		readonly props: PropsCubeCamera | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -61,7 +121,6 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./CubeCamera.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -477,7 +536,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 				if (bound_pos) {
 					if (Object.hasOwn(bound_pos, "$$")) {
 						const bound_comp = bound_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
-						const bound_comp_state = bound_comp.$capture_state() as unknown as { [key: string]: unknown }
+						const bound_comp_state = bound_comp.state()
 						op_mat = bound_comp_state.material as MaterialWithEnvMap
 					} else {
 						const op = bound_pos as Mesh
@@ -597,8 +656,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 					if (Object.hasOwn(bind_pos, "$$")) {
 						if (Object.hasOwn((bind_pos as SvelteComponentDev).$$, "mat")) {
 							// use `mat` to set `envMap` if the component has `mat` prop defined
-							const comp = bind_pos as SvelteComponentDev
-							const comp_state = comp.$capture_state() as unknown as { [key: string]: unknown }
+							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+							const comp_state = comp.state()
 							const material = comp_state.material as MaterialWithEnvMap
 							if (Object.hasOwn(material, "envMap")) {
 								const mat = comp_state.mat as PropMat<MaterialWithEnvMap>
@@ -612,8 +671,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 							}
 						} else if (Object.hasOwn(bind_pos, "material")) {
 							// set `envMap` directly on `material` if the component has `material` prop defined
-							const comp = bind_pos as SvelteComponentDev
-							const comp_state = comp.$capture_state() as unknown as { [key: string]: unknown }
+							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+							const comp_state = comp.state()
 							const material = comp_state.material as MaterialWithEnvMap
 							if (Object.hasOwn(material, "envMap")) {
 								material.envMap = camera.renderTarget.texture
@@ -1189,6 +1248,60 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateCubeCamera> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					dynamic,
+					bind_pos,
+					bind_pos_offset,
+					hide,
+					bind_tex,
+					texture,
+					is_floor,
+					camera,
+					renderTarget,
+					name,
+					renderTargetParams,
+					params,
+					tabindex,
+					aria,
+					mau,
+					matrix,
+					renderTargetOptions,
+					renderTargetProps,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

@@ -3,6 +3,78 @@
 **svelthree** _Mesh_ Component.
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./Mesh.svelte").default<MeshAssignableMaterial>
+
+	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
+
+	export interface IStateMesh {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly button: PropButton | undefined
+		readonly link: PropLink | undefined
+		readonly mesh: THREE_Mesh | undefined | null
+		readonly name: string | undefined
+		readonly material: MeshAssignableMaterial | undefined | null
+		readonly geometry: BufferGeometry | undefined | null
+		readonly params: ConstructorParameters<typeof THREE_Mesh> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly mat: PropMat<MeshAssignableMaterial> | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly props: PropsMesh | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly castShadow: boolean | undefined
+		readonly receiveShadow: boolean | undefined
+		readonly boxParams: RemoveFirst<BoxHelperParams> | undefined
+		readonly box: boolean | undefined
+		readonly interact: boolean | undefined | null
+		readonly block: boolean
+		readonly modifiers: SvelthreeModifiersProp | undefined
+		readonly on_click: SvelthreePointerEventHandler | undefined
+		readonly on_pointerup: SvelthreePointerEventHandler | undefined
+		readonly on_pointerdown: SvelthreePointerEventHandler | undefined
+		readonly on_pointerover: SvelthreePointerEventHandler | undefined
+		readonly on_pointerout: SvelthreePointerEventHandler | undefined
+		readonly on_pointermove: SvelthreePointerEventHandler | undefined
+		readonly on_pointermoveover: SvelthreePointerEventHandler | undefined
+		readonly on_keydown: SvelthreeKeyboardEventHandler | undefined
+		readonly on_keypress: SvelthreeKeyboardEventHandler | undefined
+		readonly on_keyup: SvelthreeKeyboardEventHandler | undefined
+		readonly on_focus: SvelthreeFocusEventHandler | undefined
+		readonly on_blur: SvelthreeFocusEventHandler | undefined
+		readonly on_focusin: SvelthreeFocusEventHandler | undefined
+		readonly on_focusout: SvelthreeFocusEventHandler | undefined
+		readonly on_wheel: SvelthreeWheelEventHandler | undefined
+		readonly on_wheelover: SvelthreeWheelEventHandler | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -122,7 +194,6 @@
 	export let geometry: BufferGeometry | undefined | null = undefined
 	let geometry_ref: BufferGeometry | undefined = undefined
 
-	type CurrentComponentType = import("./Mesh.svelte").default<AssignedMaterial>
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -618,7 +689,6 @@
 		mesh.userData.root_scene = root_scene
 	}
 
-	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> | undefined = undefined
 	/** Creates and adds a `BoxHelper`. */
 	export let box: boolean | undefined = undefined
@@ -1295,6 +1365,76 @@
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateMesh> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					button,
+					link,
+					mesh,
+					name,
+					material,
+					geometry,
+					params,
+					tabindex,
+					aria,
+					mau,
+					mat,
+					matrix,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					castShadow,
+					receiveShadow,
+					boxParams,
+					box,
+					interact,
+					block,
+					modifiers,
+					on_click,
+					on_pointerup,
+					on_pointerdown,
+					on_pointerover,
+					on_pointerout,
+					on_pointermove,
+					on_pointermoveover,
+					on_keydown,
+					on_keypress,
+					on_keyup,
+					on_focus,
+					on_blur,
+					on_focusin,
+					on_focusout,
+					on_wheel,
+					on_wheelover,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

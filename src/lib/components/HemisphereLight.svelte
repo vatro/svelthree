@@ -2,6 +2,43 @@
 @component
 **svelthree** _HemisphereLight_ Component.
 [ tbd ]  Link to Docs. -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./HemisphereLight.svelte").default
+
+	type HelperParams = ConstructorParameters<typeof HemisphereLightHelper>
+
+	export interface IStateHemisphereLight {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly light: THREE_HemisphereLight | undefined | null
+		readonly name: string | undefined
+		readonly params: ConstructorParameters<typeof THREE_HemisphereLight> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly props: PropsHemisphereLight | undefined
+		readonly color: Color | string | number | [r: number, g: number, b: number] | Vector3 | undefined
+		readonly groundColor: Color | string | number | [r: number, g: number, b: number] | Vector3 | undefined
+		readonly intensity: number | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly helperParams: RemoveFirst<HelperParams> | undefined
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -38,7 +75,6 @@
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./HemisphereLight.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -350,7 +386,6 @@
 		}
 	}
 
-	type HelperParams = ConstructorParameters<typeof HemisphereLightHelper>
 	export let helperParams: RemoveFirst<HelperParams> | undefined = undefined
 	export let helper: boolean | undefined = undefined
 
@@ -796,6 +831,48 @@
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateHemisphereLight> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					light,
+					name,
+					params,
+					tabindex,
+					aria,
+					mau,
+					props,
+					color,
+					groundColor,
+					intensity,
+					pos,
+					helperParams,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

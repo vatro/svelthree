@@ -3,6 +3,43 @@
 This is a **svelthree** _Canvas_ Component.  
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type SvelthreeDefaultKeyboardListenerHost = "window" | "canvas" | "document" | undefined
+	type CurrentComponentType = import("./Canvas.svelte").default
+	interface DefaultKeyboardEventsListener {
+		keydown?: (e: KeyboardEvent) => void
+		keyup?: (e: KeyboardEvent) => void
+		keypress?: (e: KeyboardEvent) => void
+	}
+
+	export interface IStateCanvas {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly id: string
+		readonly style: string | undefined
+		readonly change_cursor: boolean
+		readonly interactive: boolean | undefined
+		readonly pointer_listener_options: { capture: boolean }
+		readonly on_pointerevents: ((e: PointerEvent) => void) | undefined
+		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
+		readonly default_keyboardevents_listener: DefaultKeyboardEventsListener | undefined
+		readonly keyboard_listener_options: { capture: boolean }
+		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
+		readonly raycast: RaycastArray
+		readonly recursive: boolean
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	// #region --- Imports
 
@@ -37,7 +74,6 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./Canvas.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -109,8 +145,6 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	export let on_pointerevents: ((e: PointerEvent) => void) | undefined = undefined
 
-	type SvelthreeDefaultKeyboardListenerHost = "window" | "canvas" | "document" | undefined
-
 	/**
 	 * Specifies where to add `KeyboardEvent` listeners to.
 	 *
@@ -145,11 +179,6 @@ This is a **svelthree** _Canvas_ Component.
 	export let default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost = "window"
 	let keyboard_listeners_host: Window | Document | HTMLCanvasElement | undefined = undefined
 
-	interface DefaultKeyboardEventsListener {
-		keydown?: (e: KeyboardEvent) => void
-		keyup?: (e: KeyboardEvent) => void
-		keypress?: (e: KeyboardEvent) => void
-	}
 	/**
 	 * Allows specifying a different handlers for _global_ `"keydown"`, `"keyup"` and `"keypress"` events.
 	 * If defined, an additional listener will be added to the `default_keyboard_listeners_host` (_default: `window`_).
@@ -1061,6 +1090,42 @@ This is a **svelthree** _Canvas_ Component.
 					}
 			  }
 	)
+	export const state = (): Partial<IStateCanvas> => {
+		return {}
+	}
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					id,
+					style,
+					change_cursor,
+					interactive,
+					pointer_listener_options,
+					on_pointerevents,
+					default_keyboard_listeners_host,
+					default_keyboardevents_listener,
+					keyboard_listener_options,
+					on_keyboardevents,
+					raycast,
+					recursive,
+					tabindex,
+					aria,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
+	}
 </script>
 
 <canvas {id} data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />

@@ -3,6 +3,50 @@
 **svelthree** _DirectionalLight_ Component.
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./DirectionalLight.svelte").default
+
+	type HelperParams = ConstructorParameters<typeof DirectionalLightHelper>
+
+	export interface IStateDirectionalLight {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly light: THREE_DirectionalLight | undefined | null
+		readonly name: string | undefined
+		readonly params: ConstructorParameters<typeof THREE_DirectionalLight> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly target: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly mau: boolean | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly props: PropsDirectionalLight | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly color: Color | string | number | [r: number, g: number, b: number] | Vector3 | undefined
+		readonly intensity: number | undefined
+		readonly shadowMapSize: number | undefined
+		readonly shadowBias: number | undefined
+		readonly castShadow: boolean | undefined
+		readonly shadowProps: PropsDirectionalLightShadow | undefined
+		readonly shadowCameraProps: PropsOrthographicCamera | undefined
+		readonly helperParams: RemoveFirst<HelperParams> | undefined
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -49,7 +93,6 @@
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./DirectionalLight.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -450,7 +493,6 @@
 	/** **shorthand** attribute for setting properties of `light.shadow.camera` via an `Object Literal`. */
 	export let shadowCameraProps: PropsOrthographicCamera | undefined = undefined
 
-	type HelperParams = ConstructorParameters<typeof DirectionalLightHelper>
 	export let helperParams: RemoveFirst<HelperParams> | undefined = undefined
 	export let helper: boolean | undefined = undefined
 
@@ -974,6 +1016,55 @@
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateDirectionalLight> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					light,
+					name,
+					params,
+					tabindex,
+					aria,
+					target,
+					mau,
+					matrix,
+					props,
+					pos,
+					lookAt,
+					color,
+					intensity,
+					shadowMapSize,
+					shadowBias,
+					castShadow,
+					shadowProps,
+					shadowCameraProps,
+					helperParams,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 
