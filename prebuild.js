@@ -32,6 +32,16 @@ const create_acc_index = async (lib_path) => {
 	await fsp.writeFile(`${lib_path}/acc/index.ts`, new_content_index)
 }
 
+const create_acc_stores_index = async (lib_path) => {
+	const content_index = `export * from "../../stores"`
+	await fsp.writeFile(`${lib_path}/acc/stores/index.ts`, content_index)
+}
+
+const create_acc_utils_index = async (lib_path) => {
+	const content_index = `export * from "../../utils"`
+	await fsp.writeFile(`${lib_path}/acc/utils/index.ts`, content_index)
+}
+
 const do_prebuild = async () => {
 	console.log("🤖 SVELTHREE > prebuilding...")
 
@@ -40,6 +50,12 @@ const do_prebuild = async () => {
 
 	// create temp `acc` folder
 	await fsp.mkdir(`${lib_path}/acc`)
+
+	// create temp `acc/stores` folder
+	await fsp.mkdir(`${lib_path}/acc/stores`)
+
+	// create temp `acc/utils` folder
+	await fsp.mkdir(`${lib_path}/acc/utils`)
 
 	// `src/lib/acc/components` (copy all .svelte components from `src/lib/components`)
 	await fsp.mkdir(`${lib_path}/acc/components`)
@@ -62,6 +78,10 @@ const do_prebuild = async () => {
 
 	// create and edit src/lib/acc/index.ts
 	await create_acc_index(lib_path)
+	// create and edit src/lib/acc/stores/index.ts
+	await create_acc_stores_index(lib_path)
+	// create and edit src/lib/acc/utils/index.ts
+	await create_acc_utils_index(lib_path)
 
 	console.log("✔️  SVELTHREE > prebuild finished!")
 }
