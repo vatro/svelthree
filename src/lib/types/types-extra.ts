@@ -48,8 +48,22 @@ export type get_props<T> = OnlyWritableNonFunctionProps<T>
 export type RemoveFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : T
 export type RemoveLast<T extends unknown[]> = T extends [...infer H, unknown] ? H : T
 
-export type MeshAssignableMaterial = THREE.Material | THREE.Material[]
-export type PointsAssignableMaterial = THREE.Material | THREE.Material[] | THREE.PointsMaterial
+export type MeshAssignableMaterial =
+	| THREE.MeshBasicMaterial
+	| THREE.MeshDepthMaterial
+	| THREE.MeshDistanceMaterial
+	| THREE.MeshLambertMaterial
+	| THREE.MeshMatcapMaterial
+	| THREE.MeshNormalMaterial
+	| THREE.MeshPhongMaterial
+	| THREE.MeshPhysicalMaterial
+	| THREE.MeshStandardMaterial
+	| THREE.MeshToonMaterial
+	| THREE.RawShaderMaterial
+	| THREE.ShaderMaterial
+	| THREE.ShadowMaterial
+
+export type PointsAssignableMaterial = THREE.PointsMaterial | MeshAssignableMaterial
 
 // Animation
 
