@@ -64,6 +64,7 @@ export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types
 
 // misc
 export type {
+	AnySvelthreeComponent,
 	Targetable,
 	TargetableSvelthreeComponent,
 	SvelthreeLifecycleCallback,
