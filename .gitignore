@@ -12,9 +12,13 @@ node_modules
 /src/lib/components-check
 /src/lib/components-internal-check
 generate_svelthree_components.js
+generate_state_in_ungenerated_components.js
 
 # any routes
 src/routes/
 
 # app.html
 src/app.html
+
+# temporary `acc` folder while building (is removed after build)
+src/lib/acc
