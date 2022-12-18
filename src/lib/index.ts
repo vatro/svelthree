@@ -30,6 +30,9 @@ export type {
 	MeshMaterialWithEnvMap
 } from "./types/types-extra"
 
+// Interaction related
+export type { SvelthreeInteractableComponent, SvelthreeInteractionEvent } from "./types/types-extra"
+
 // `props` Object Literal types
 export type {
 	PropsObject3D,
