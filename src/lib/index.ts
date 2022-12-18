@@ -22,6 +22,14 @@ export { default as CubeCamera } from "./components/CubeCamera.svelte"
 export type { prop } from "./types/types-extra"
 export type { PropMat } from "./types/types-comp-props"
 
+// Material related
+export type {
+	MeshAssignableMaterial,
+	PointsAssignableMaterial,
+	MeshMaterialWithColor,
+	MeshMaterialWithEnvMap
+} from "./types/types-extra"
+
 // `props` Object Literal types
 export type {
 	PropsObject3D,
