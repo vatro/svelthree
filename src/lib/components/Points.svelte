@@ -8,7 +8,7 @@
 
 	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 
-	export interface IStatePoints {
+	export interface IStatePoints<M extends PointsAssignableMaterial> {
 		readonly log_all: boolean
 		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
 		readonly log_rs: boolean
@@ -18,13 +18,13 @@
 		readonly link: PropLink | undefined
 		readonly points: THREE_Points | undefined | null
 		readonly name: string | undefined
-		readonly material: PointsAssignableMaterial | undefined | null
+		readonly material: M | undefined | null
 		readonly geometry: BufferGeometry | undefined | null
 		readonly params: ConstructorParameters<typeof THREE_Points> | undefined
 		readonly tabindex: number | undefined
 		readonly aria: Partial<ARIAMixin> | undefined
 		readonly mau: boolean | undefined
-		readonly mat: PropMat<PointsAssignableMaterial> | undefined
+		readonly mat: PropMat<M> | undefined
 		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
 		readonly props: PropsPoints | undefined
 		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
@@ -1369,7 +1369,7 @@
 		}
 	}
 
-	export const state = (): Partial<IStatePoints> => {
+	export const state = (): Partial<IStatePoints<AssignedMaterial>> => {
 		return {}
 	}
 
