@@ -99,14 +99,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { Vector3 } from "three"
 	import type { CubeTexture, WebGLRenderer, Camera, Mesh } from "three"
-	import type {
-		Material,
-		MeshBasicMaterialParameters,
-		MeshPhongMaterial,
-		MeshBasicMaterial,
-		MeshLambertMaterial
-	} from "three"
-	import type { RemoveLast, MeshAssignableMaterial } from "../types/types-extra"
+	import type { MeshPhongMaterial, MeshBasicMaterial, MeshLambertMaterial } from "three"
+	import type { RemoveLast, MeshAssignableMaterial, MeshMaterialWithEnvMap } from "../types/types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 	import type { StoreBody } from "../types/types-extra"
@@ -485,10 +479,6 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
-	interface MaterialWithEnvMap extends Material {
-		envMap?: MeshBasicMaterialParameters["envMap"]
-	}
-
 	/** Called internally from WebGLRenderer component if `dynamic` is `true` (default). Can also be called directly if `dynamic` is `false`. */
 	export const update_cubecam = () => {
 		// TODO  FEATURE: There could be some logic if camera.parent is scene (&& NOT the root scene) traversing all objects in a scene,
@@ -537,10 +527,10 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 					if (Object.hasOwn(bound_pos, "$$")) {
 						const bound_comp = bound_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
 						const bound_comp_state = bound_comp.state()
-						op_mat = bound_comp_state.material as MaterialWithEnvMap
+						op_mat = bound_comp_state.material as MeshMaterialWithEnvMap
 					} else {
 						const op = bound_pos as Mesh
-						op_mat = op.material as MaterialWithEnvMap
+						op_mat = op.material as MeshMaterialWithEnvMap
 					}
 				}
 
@@ -658,9 +648,9 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 							// use `mat` to set `envMap` if the component has `mat` prop defined
 							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
 							const comp_state = comp.state()
-							const material = comp_state.material as MaterialWithEnvMap
+							const material = comp_state.material as MeshMaterialWithEnvMap
 							if (Object.hasOwn(material, "envMap")) {
-								const mat = comp_state.mat as PropMat<MaterialWithEnvMap>
+								const mat = comp_state.mat as PropMat<MeshMaterialWithEnvMap>
 								mat.envMap = camera.renderTarget.texture
 								comp.$set({ mat })
 							} else {
@@ -673,7 +663,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 							// set `envMap` directly on `material` if the component has `material` prop defined
 							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
 							const comp_state = comp.state()
-							const material = comp_state.material as MaterialWithEnvMap
+							const material = comp_state.material as MeshMaterialWithEnvMap
 							if (Object.hasOwn(material, "envMap")) {
 								material.envMap = camera.renderTarget.texture
 								material.needsUpdate = true
@@ -689,7 +679,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 						if (Object.hasOwn(bind_pos, "material")) {
 							// set `envMap` directly on `material` if the instance has `material` prop defined
 							const instance = bind_pos as Mesh
-							const material = instance.material as MaterialWithEnvMap
+							const material = instance.material as MeshMaterialWithEnvMap
 							if (material) {
 								if (Object.hasOwn(material, "envMap")) {
 									material.envMap = camera.renderTarget.texture
@@ -711,7 +701,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 				} else if (our_parent) {
 					//`our_parent` is a three.js instance
 					if (Object.hasOwn(our_parent, "material")) {
-						const material = our_parent["material" as keyof typeof our_parent] as MaterialWithEnvMap
+						const material = our_parent["material" as keyof typeof our_parent] as MeshMaterialWithEnvMap
 						if (Object.hasOwn(material, "envMap")) {
 							material.envMap = camera.renderTarget.texture
 						} else {
