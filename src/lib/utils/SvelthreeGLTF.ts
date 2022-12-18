@@ -10,7 +10,8 @@ import type {
 	SvelthreeGLTFTreeMap,
 	ISvelthreeGLTFTreeMapMember,
 	SvelthreeShadowDOMElement,
-	SvelthreeComponentShadowDOMChild
+	SvelthreeComponentShadowDOMChild,
+	MeshAssignableMaterial
 } from "../types/types-extra"
 
 export default class SvelthreeGLTF {
@@ -128,7 +129,7 @@ export default class SvelthreeGLTF {
 									target: dom_target,
 									props: {
 										geometry: item.mesh.geometry,
-										material: item.mesh.material,
+										material: item.mesh.material as MeshAssignableMaterial,
 										name: item.name
 									},
 									context
