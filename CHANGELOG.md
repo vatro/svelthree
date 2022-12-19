@@ -18,14 +18,14 @@ For the sake of general `svelthree`-acceptance, faster development and last but 
 
    _Remark:_ the `IState*` interfaces are being automatically generated for generated components. `Canvas` and `WebGLRenderer` interfaces need to be updated manually (atm).
 
-- **Changes due to `SvelteKit 1` and `sveltejs/package 1` releases**:
-  See https://kit.svelte.dev/docs/packaging
+- **Changes due to `SvelteKit 1` and `sveltejs/package 1` releases:**
 
+  see https://kit.svelte.dev/docs/packaging
   - All relative file imports are now fully specified, adhering to Node's ESM algorithm
   - Now using `import.meta.env.SSR` to make the library available to all Vite-based projects
-	- Changed comment / wording `SVELTEKIT SSR` to `SVELTEKIT CSR ONLY`
+  - Changed comment / wording `SVELTEKIT SSR` to `SVELTEKIT CSR ONLY`
   - Removed `$app\environment`
-  - Removed "svelthree/stores" alias from config (now using relatice path)
+  - Removed "svelthree/stores" alias from kit-config (_now using relative path_)
 
 **Various changes:**
 - Further optimized `Material` related types, also introducing new types `MeshMaterialWithColor` and `MeshMaterialWithEnvMap`.
@@ -34,8 +34,8 @@ For the sake of general `svelthree`-acceptance, faster development and last but 
 - Some type- and comment-fixes
 
 **Updated dependencies:**
-	- "@sveltejs/kit": "^1.0.1",
-	- "@sveltejs/package": "^1.0.1",
+  - "@sveltejs/kit": "^1.0.1"
+  - "@sveltejs/package": "^1.0.1"
   - "svelte": "^3.54.0" analog current `create-svelte` entry
     _though it could also be `^3.44.0`, but I'll stick to `create-svelte` since `svelthree`-starters will be based on it_
   - "three": "0.125.x - 0.147.x"
