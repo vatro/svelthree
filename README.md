@@ -39,7 +39,7 @@ Try `svelthree`, stay tuned 🚀 & leave a star! 😁👋
   ```
   "devDependencies": {
       ...
-      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.97.tgz",
+      "svelthree": "file:../some_directory/svelthree-1.0.0-next.0.98.tgz",
       ...
   }
   ```

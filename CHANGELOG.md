@@ -1,5 +1,48 @@
 # svelthree changelog
 
+## 1.0.0-next.0.98
+
+Switched to `default-svelte-first` approach. see [#196](https://github.com/vatro/svelthree/issues/196)
+
+For the sake of general `svelthree`-acceptance, faster development and last but not least: performance, [`svelte-accmod`](https://github.com/vatro/svelte-accmod)-first approach has been dropped for the upcoming `svelthree-1.0.0-next.1` release. `accessors` usage will not be recommended for various reasons which are yet to be nailed down in more detail (_basically the reasons why I created `svelte-accmod` in the first place_).
+
+**Most important changes:**
+- `svelthree`-package now contains **two component-versions**:
+  - one without any `<svelte:options />` element (**_accessors disabled_**): **default** `import { Foo } from "svelthree"`
+  - and one with `<svelte:options accessors />` element (**_accessors enabled_**): `import { Foo } from "svelthree/acc"` which will import **correctly / better typed** components.
+- the code has been **refactored not to use accessors-syntax** and is now using `$set` and the new component-method `state()` (_see below_) instead.
+- **new component method `state()`** has been introduced as an **alternative to accessor-getters**. It's available on initialization and is being used internally to access components' props (state) during initialization (before mounting). It's also the standard `svelthree`-method for getting component's props without using accessors, basically something like the `dev`-only method `.$capture_state()`, but with `.state()`:
+
+  - the returned Object (_state_) contains **only exported props**
+  - the returned Object (_state_) **is typed** (`interface IState*`)
+
+   _Remark:_ the `IState*` interfaces are being automatically generated for generated components. `Canvas` and `WebGLRenderer` interfaces need to be updated manually (atm).
+
+- **Changes due to `SvelteKit 1` and `sveltejs/package 1` releases**:
+  See https://kit.svelte.dev/docs/packaging
+
+  - All relative file imports are now fully specified, adhering to Node's ESM algorithm
+  - Now using `import.meta.env.SSR` to make the library available to all Vite-based projects
+	- Changed comment / wording `SVELTEKIT SSR` to `SVELTEKIT CSR ONLY`
+  - Removed `$app\environment`
+  - Removed "svelthree/stores" alias from config (now using relatice path)
+
+**Various changes:**
+- Further optimized `Material` related types, also introducing new types `MeshMaterialWithColor` and `MeshMaterialWithEnvMap`.
+- `CubeCamera` is now using the new `MeshMaterialWithEnvMap`
+- More types are being exported and can now be imported via `import type { Foo } from "svelthree"`
+- Some type- and comment-fixes
+
+**Updated dependencies:**
+	- "@sveltejs/kit": "^1.0.1",
+	- "@sveltejs/package": "^1.0.1",
+  - "svelte": "^3.54.0" analog current `create-svelte` entry
+    _though it could also be `^3.44.0`, but I'll stick to `create-svelte` since `svelthree`-starters will be based on it_
+  - "three": "0.125.x - 0.147.x"
+  - "@types/three": "0.125.x - 0.147.x" (_although currently no 0.147.x_)
+  - the rest of `devDependencies` to latest versions
+
+
 ## 1.0.0-next.0.97
 
 [_**major refactor**_] Refactored everything in `strict` mode, see pull-request [#185](https://github.com/vatro/svelthree/pull/185) and issue [#153](https://github.com/vatro/svelthree/issues/153). We're a **strictly typed** Svelte components library now! 🥳
