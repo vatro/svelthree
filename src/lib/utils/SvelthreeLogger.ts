@@ -1,14 +1,11 @@
-import LogCSS from "../constants/LogCSS"
-import type { AnySvelthreeComponent } from "svelthree/types/types-extra"
+import LogCSS from "../constants/LogCSS.js"
+import type { AnySvelthreeComponent } from "svelthree/types/types-extra.js"
 import type { get_current_component } from "svelte/internal"
 
 export type LogLC = { all?: boolean; om?: boolean; bu?: boolean; au?: boolean; od?: boolean }
 
 // Currently configuring logging of the 'PropUtils' class only.
 export type LogDEV = { all?: boolean; prop_utils?: boolean }
-
-// TODO  CONSIDER: some more possible logging options / keys ...
-//export type LogDEV = { all?: boolean; flow?: boolean; prop_utils?: boolean; wip?: boolean }
 
 function verbose_mode(): boolean {
 	if (import.meta.env.VITE_SVELTHREE_VERBOSE == "1") {

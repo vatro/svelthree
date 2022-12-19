@@ -39,34 +39,36 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeLifecycleCallback } from "../types/types-extra"
-	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
-	import { if$_instance_change } from "../logic/if$"
-	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
+	import type { SvelthreeLifecycleCallback } from "../types/types-extra.js"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra.js"
+	import { if$_instance_change } from "../logic/if$/index.js"
+	import {
+		remove_instance,
+		recreate_shadow_dom_el,
+		set_initial_userdata,
+		find_in_canvas
+	} from "../logic/shared/index.js"
 
-	import { svelthreeStores } from "svelthree/stores"
-	import { PropUtils, SvelthreeProps } from "../utils"
+	import { svelthreeStores } from "../stores/index.js"
+	import { PropUtils, SvelthreeProps } from "../utils/index.js"
 
-	import { SvelthreeAni } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani/index.js"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra.js"
 
 	import { AmbientLight as THREE_AmbientLight } from "three"
-	import type { PropsAmbientLight } from "../types/types-comp-props"
+	import type { PropsAmbientLight } from "../types/types-comp-props.js"
 	import type { Color, Vector3 } from "three"
 	import type { Object3D } from "three"
-	import { get_root_scene } from "../utils/SceneUtils"
+	import { get_root_scene } from "../utils/SceneUtils.js"
 
 	/**
-	 *  SVELTEKIT  SSR /
-	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
-	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
-	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 *  SVELTEKIT CSR ONLY /
+	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
+	 * and should run on CLIENT ONLY.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -155,7 +157,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", light)
 
-		// SVELTEKIT  SSR /
+		// SVELTEKIT CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -210,7 +212,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT  SSR /
+		// SVELTEKIT CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -438,7 +440,7 @@ AmbientLight cannot be used to cast shadows as it doesn't have a direction. Posi
 		light_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra.js"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

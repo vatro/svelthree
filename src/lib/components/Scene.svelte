@@ -80,57 +80,59 @@
 <script lang="ts">
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeLifecycleCallback } from "../types/types-extra"
-	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
-	import { if$_instance_change } from "../logic/if$"
-	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata, find_in_canvas } from "../logic/shared"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
+	import type { SvelthreeLifecycleCallback } from "../types/types-extra.js"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra.js"
+	import { if$_instance_change } from "../logic/if$/index.js"
+	import {
+		remove_instance,
+		recreate_shadow_dom_el,
+		set_initial_userdata,
+		find_in_canvas
+	} from "../logic/shared/index.js"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
 	import type { Object3D } from "three"
-	import type { Targetable } from "../types/types-extra"
+	import type { Targetable } from "../types/types-extra.js"
 
-	import { svelthreeStores } from "svelthree/stores"
-	import { PropUtils, SvelthreeProps } from "../utils"
+	import { svelthreeStores } from "../stores/index.js"
+	import { PropUtils, SvelthreeProps } from "../utils/index.js"
 
-	import { SvelthreeAni } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani/index.js"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra.js"
 
 	import SvelthreeInteraction from "../components-internal/SvelthreeInteraction.svelte"
-	import type { RaycastArray } from "../utils/RaycastArray"
+	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { InteractionEventDispatcher } from "../types/types-extra"
+	import type { InteractionEventDispatcher } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeModifiersProp } from "../types/types-extra"
+	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
 	import type {
 		SvelthreePointerEventHandler,
 		SvelthreeFocusEventHandler,
 		SvelthreeKeyboardEventHandler,
 		SvelthreeWheelEventHandler
-	} from "../types/types-extra"
+	} from "../types/types-extra.js"
 
 	import { BoxHelper } from "three"
-	import { get_root_scene } from "../utils/SceneUtils"
+	import { get_root_scene } from "../utils/SceneUtils.js"
 
 	import { Scene as THREE_Scene } from "three"
-	import type { PropsScene } from "../types/types-comp-props"
+	import type { PropsScene } from "../types/types-comp-props.js"
 	import type { FogBase, Color, Mapping, Texture } from "three"
 	import { EquirectangularReflectionMapping, TextureLoader } from "three"
-	import type { RemoveFirst } from "../types/types-extra"
-	import type { PropButton, PropLink } from "../types/types-comp-props"
+	import type { RemoveFirst } from "../types/types-extra.js"
+	import type { PropButton, PropLink } from "../types/types-comp-props.js"
 
 	/**
-	 *  SVELTEKIT  SSR /
-	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
-	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
-	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 *  SVELTEKIT CSR ONLY /
+	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
+	 * and should run on CLIENT ONLY.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -233,7 +235,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT  SSR /
+		// SVELTEKIT CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -254,7 +256,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT  SSR /
+		// SVELTEKIT CSR ONLY /
 		if (browser) create_shadow_dom()
 
 		if (!our_parent) {
@@ -649,7 +651,7 @@
 	function set_bg_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "bg_tex", bg_tex))
 
-		//  SVELTEKIT  SSR
+		//  SVELTEKIT CSR ONLY
 		if (browser) {
 			if (scene && bg_tex) {
 				const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
@@ -722,7 +724,7 @@
 	function set_env_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "env_tex", env_tex))
 
-		//  SVELTEKIT  SSR
+		//  SVELTEKIT CSR ONLY
 		if (browser) {
 			if (scene) {
 				if (env_tex) {
@@ -1173,7 +1175,7 @@
 		scene_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra.js"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

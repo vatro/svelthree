@@ -82,60 +82,57 @@
 
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext, setContext, tick } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import type { SvelthreeLifecycleCallback } from "../types/types-extra"
-	import type { SvelthreeShadowDOMElement } from "../types/types-extra"
+	import { c_rs, c_lc, c_mau, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
+	import type { SvelthreeLifecycleCallback } from "../types/types-extra.js"
+	import type { SvelthreeShadowDOMElement } from "../types/types-extra.js"
 
-	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata } from "../logic/shared"
+	import { remove_instance, recreate_shadow_dom_el, set_initial_userdata } from "../logic/shared/index.js"
 
 	import type { Euler, Matrix4, Quaternion, Vector3 } from "three"
-	import type { Targetable } from "../types/types-extra"
+	import type { Targetable } from "../types/types-extra.js"
 
-	import { svelthreeStores } from "svelthree/stores"
-	import { PropUtils, SvelthreeProps } from "../utils"
+	import { svelthreeStores } from "../stores/index.js"
+	import { PropUtils, SvelthreeProps } from "../utils/index.js"
 
-	import { SvelthreeAni } from "../ani"
-	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
+	import { SvelthreeAni } from "../ani/index.js"
+	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra.js"
 
 	import SvelthreeInteraction from "../components-internal/SvelthreeInteraction.svelte"
-	import type { RaycastArray } from "../utils/RaycastArray"
+	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { InteractionEventDispatcher } from "../types/types-extra"
+	import type { InteractionEventDispatcher } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeModifiersProp } from "../types/types-extra"
+	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
 	import type {
 		SvelthreePointerEventHandler,
 		SvelthreeFocusEventHandler,
 		SvelthreeKeyboardEventHandler,
 		SvelthreeWheelEventHandler
-	} from "../types/types-extra"
+	} from "../types/types-extra.js"
 
 	import { BoxHelper } from "three"
-	import { get_root_scene } from "../utils/SceneUtils"
+	import { get_root_scene } from "../utils/SceneUtils.js"
 
 	import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
 	import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 	import type { AnimationClip, Group, Camera, Mesh, Light } from "three"
-	import type { PropsLoadedGLTF } from "../types/types-comp-props"
+	import type { PropsLoadedGLTF } from "../types/types-comp-props.js"
 	import type { LoadingManager } from "three"
 	import { Object3D } from "three"
-	import type { RemoveFirst, GLTFAfterLoadedTask } from "../types/types-extra"
-	import type { PropButton, PropLink } from "../types/types-comp-props"
-	import { GLTF_afterLoaded, GLTF_utils } from "../utils"
+	import type { RemoveFirst, GLTFAfterLoadedTask } from "../types/types-extra.js"
+	import type { PropButton, PropLink } from "../types/types-comp-props.js"
+	import { GLTF_afterLoaded, GLTF_utils } from "../utils/index.js"
 
 	/**
-	 *  SVELTEKIT  SSR /
-	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
-	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
-	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 *  SVELTEKIT CSR ONLY /
+	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
+	 * and should run on CLIENT ONLY.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -235,7 +232,7 @@
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT  SSR /
+		// SVELTEKIT CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -319,7 +316,7 @@
 	}
 
 	// TODO  Do we want this to be reactive, so we can change the GLTF file on-the-fly?
-	// SVELTEKIT  SSR
+	// SVELTEKIT CSR ONLY
 	$: if (browser) {
 		if (url) {
 			doLoad()
@@ -960,7 +957,7 @@
 		container_uuid = null
 	}
 
-	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra"
+	import type { SvelthreeComponentShadowDOMChild } from "../types/types-extra.js"
 	const generated_children: SvelthreeComponentShadowDOMChild[] = []
 	const user_created_children: SvelthreeComponentShadowDOMChild[] = []
 

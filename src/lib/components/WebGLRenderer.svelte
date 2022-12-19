@@ -49,12 +49,12 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	import { get_current_component } from "svelte/internal"
 	import { Camera, PCFSoftShadowMap, Scene, WebGLRenderer, Vector2 } from "three"
 	import type { ShadowMapType, PerspectiveCamera, OrthographicCamera, WebGLRendererParameters } from "three"
-	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-	import { svelthreeStores } from "svelthree/stores"
-	import { SvelthreeProps } from "../utils"
+	import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+	import { svelthreeStores } from "../stores/index.js"
+	import { SvelthreeProps } from "../utils/index.js"
 
-	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
 	import type { Writable } from "svelte/store"
 	import type { default as Canvas } from "./Canvas.svelte"
 	import type { default as CubeCamera } from "./CubeCamera.svelte"
@@ -64,8 +64,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		WebGLRendererEventDetail,
 		SvelthreeLifecycleCallback,
 		StoreBody
-	} from "../types/types-extra"
-	import type { PropsWebGLRenderer } from "../types/types-comp-props"
+	} from "../types/types-extra.js"
+	import type { PropsWebGLRenderer } from "../types/types-comp-props.js"
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
@@ -88,7 +88,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	/**
 	 * svelthreeStore index (`sti`) spread via context.  \

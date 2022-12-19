@@ -185,7 +185,7 @@ import type { default as Scene } from "../components/Scene.svelte"
 import type { default as SpotLight } from "../components/SpotLight.svelte"
 import type { default as WebGLRenderer } from "../components/WebGLRenderer.svelte"
 
-import type { PropMat } from "./types-comp-props"
+import type { PropMat } from "./types-comp-props.js"
 
 export type AnySvelthreeComponent =
 	| AmbientLight
@@ -307,7 +307,7 @@ interface StoreCanvas {
 
 // $svelthreeStores body
 
-import type { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
+import type { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray.js"
 
 export type StoreBody = {
 	id: number | undefined
@@ -335,7 +335,7 @@ export type WebGLRendererMode = "auto" | "always"
 
 export type SvelthreeShadowDOMElement = HTMLDivElement | HTMLButtonElement | HTMLAnchorElement
 
-import type { PropsWebGLCubeRenderTarget, PropsOrbitControls } from "./types-comp-props"
+import type { PropsWebGLCubeRenderTarget, PropsOrbitControls } from "./types-comp-props.js"
 export type SvelthreePropsOwner =
 	| THREE.Object3D
 	| THREE.Material
@@ -532,7 +532,7 @@ import type {
 	FOCUS_EVENTS,
 	WHEEL_EVENTS,
 	WHEEL_LISTENER_TARGETS
-} from "../constants/Interaction"
+} from "../constants/Interaction.js"
 
 type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
 

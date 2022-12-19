@@ -10,12 +10,12 @@ import {
 	PropQuaternionX,
 	PropVector2X,
 	PropVector3X
-} from "./props"
+} from "./props/index.js"
 import { safe_not_equal, has_prop } from "svelte/internal"
-import Propeller from "./Propeller"
-import PropUtils from "./PropUtils"
-import type { ComplexValueType, SvelthreePropsOwner } from "../types/types-extra"
-import type { SvelthreePropsObjectLiteral } from "../types/types-comp-props"
+import Propeller from "./Propeller.js"
+import PropUtils from "./PropUtils.js"
+import type { ComplexValueType, SvelthreePropsOwner } from "../types/types-extra.js"
+import type { SvelthreePropsObjectLiteral } from "../types/types-comp-props.js"
 
 export type PropOrigin = "own" | "inherited"
 

@@ -11,9 +11,7 @@ const config = {
 		adapter: adapter(),
 
 		alias: {
-			"$app/env": "./src/lib/$app/env/index.ts",
-			"svelthree/stores": "./src/lib/stores/index.ts",
-			svelthree: "./src/lib/index.ts",
+			svelthree: "./src/lib/index.js",
 			"svelthree/*": "./src/lib/*"
 		}
 	},
@@ -23,8 +21,8 @@ const config = {
 		emitTypes: true,
 		// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 		exports: (filepath) => {
-			if (filepath.startsWith(`index.ts`)) return true
-			if (filepath.startsWith(`acc/index.ts`)) return true
+			if (filepath.startsWith(`index`)) return true
+			if (filepath.startsWith(`acc/index`)) return true
 			if (filepath.startsWith(`utils/index`)) return true
 			if (filepath.startsWith(`stores/index`)) return true
 		}

@@ -1,6 +1,6 @@
-import type SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory"
+import type SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory.js"
 import type { Object3D, Scene } from "three"
-import type { SvelthreeAnimation } from "../types/types-extra"
+import type { SvelthreeAnimation } from "../types/types-extra.js"
 
 export default class SvelthreeAnimationManager {
 	/** Generated animation-`Object Literal` (_interface `SvelthreeAnimation`_): result of `this.ani_obj_factory.create(...)`. */
@@ -71,7 +71,9 @@ export default class SvelthreeAnimationManager {
 		) */
 
 		try {
-			this.ani_obj.onStart()
+			if (this.ani_obj) {
+				this.ani_obj.onStart()
+			}
 		} catch (err) {
 			throw new Error("SVELTHREE Exception, " + err)
 		}

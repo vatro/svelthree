@@ -8,9 +8,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import type { SvelteComponentDev } from "svelte/internal"
 	import { get_current_component } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
-	import { svelthreeStores } from "svelthree/stores"
-	import { c_dev, c_lc_int, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
+	import { svelthreeStores } from "../stores/index.js"
+	import { c_dev, c_lc_int, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
 	import type {
 		PointerState,
 		SvelthreeShadowDOMElement,
@@ -20,7 +20,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeInteractableComponent,
 		SvelthreeInteractionEventDispatcher,
 		CanvasComponentEvent
-	} from "../types/types-extra"
+	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
 	import {
 		KEYBOARD_EVENTS,
@@ -28,7 +28,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		POINTER_EVENTS,
 		SUPPORTED_MODIFIERS_SET,
 		ADD_EVENT_LISTENER_OPTIONS_SET
-	} from "../constants/Interaction"
+	} from "../constants/Interaction.js"
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
@@ -38,7 +38,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeSupportedFocusEvent,
 		SvelthreeSupportedPointerEvent,
 		SvelthreePropActionHandler
-	} from "../types/types-extra"
+	} from "../types/types-extra.js"
 
 	/**
 	 * SVELTEKIT  SSR
@@ -48,7 +48,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	const c_name = get_comp_name(get_current_component())
 	const verbose: boolean = verbose_mode()

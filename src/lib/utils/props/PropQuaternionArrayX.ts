@@ -1,7 +1,7 @@
 import type { Quaternion } from "three"
 import { not_equal } from "svelte/internal"
-import { Propeller } from "./utils"
-import type { SvelthreePropsOwner } from "../../types/types-extra"
+import { Propeller } from "./utils.js"
+import type { SvelthreePropsOwner } from "../../types/types-extra.js"
 
 export default class PropQuaternionArrayX {
 	// previous value reference

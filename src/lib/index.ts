@@ -19,8 +19,8 @@ export { default as OrbitControls } from "./components/OrbitControls.svelte"
 export { default as CubeCamera } from "./components/CubeCamera.svelte"
 
 // generic type utilities
-export type { prop } from "./types/types-extra"
-export type { PropMat } from "./types/types-comp-props"
+export type { prop } from "./types/types-extra.js"
+export type { PropMat } from "./types/types-comp-props.js"
 
 // Material related
 export type {
@@ -28,10 +28,10 @@ export type {
 	PointsAssignableMaterial,
 	MeshMaterialWithColor,
 	MeshMaterialWithEnvMap
-} from "./types/types-extra"
+} from "./types/types-extra.js"
 
 // Interaction related
-export type { SvelthreeInteractableComponent, SvelthreeInteractionEvent } from "./types/types-extra"
+export type { SvelthreeInteractableComponent, SvelthreeInteractionEvent } from "./types/types-extra.js"
 
 // `props` Object Literal types
 export type {
@@ -53,10 +53,10 @@ export type {
 	PropsRectAreaLight,
 	PropsSpotLight,
 	PropsOrbitControls
-} from "./types/types-comp-props"
+} from "./types/types-comp-props.js"
 
 // `foo` Object Literal types
-export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types/types-comp-props"
+export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types/types-comp-props.js"
 
 // TODO  params
 
@@ -70,14 +70,14 @@ export type {
 	SvelthreeLifecycleCallback,
 	SvelthreeLifecycleCallbackAsync,
 	SvelthreeLifecycleCallbackSync
-} from "./types/types-extra"
+} from "./types/types-extra.js"
 
 // Animation related
-export type { SvelthreeAnimationFunction, SvelthreeAnimation } from "./types/types-extra"
+export type { SvelthreeAnimationFunction, SvelthreeAnimation } from "./types/types-extra.js"
 
 // GLTF related
 export type {
 	SvelthreeGLTFTreeMap,
 	ISvelthreeGLTFTreeMapMember,
 	GLTFSupportedSvelthreeComponents
-} from "./types/types-extra"
+} from "./types/types-extra.js"

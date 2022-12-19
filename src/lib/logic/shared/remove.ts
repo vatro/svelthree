@@ -1,5 +1,5 @@
 import type { Object3D } from "three"
-import type { AnySvelthreeComponent } from "../../types/types-extra"
+import type { AnySvelthreeComponent } from "../../types/types-extra.js"
 
 const remove_helper_of = (obj: Object3D): void => {
 	if (obj.userData.helper?.parent) {

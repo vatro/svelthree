@@ -1,5 +1,5 @@
 import type { Object3D } from "three"
-import type { AnySvelthreeComponent } from "../../types/types-extra"
+import type { AnySvelthreeComponent } from "../../types/types-extra.js"
 
 const set_initial_userdata = (instance: Object3D, comp: AnySvelthreeComponent) => {
 	instance.userData.initScale = instance.scale.x

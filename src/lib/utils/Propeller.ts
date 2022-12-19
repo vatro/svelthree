@@ -10,9 +10,9 @@ import type {
 	mapsize_value,
 	//background_value,
 	any_propeller_value
-} from "../types/types-extra"
-import PropUtils from "./PropUtils"
-import type { ComplexValueType, SvelthreePropsOwner, LightWithTarget } from "../types/types-extra"
+} from "../types/types-extra.js"
+import PropUtils from "./PropUtils.js"
+import type { ComplexValueType, SvelthreePropsOwner, LightWithTarget } from "../types/types-extra.js"
 
 /** ⚙️ `Propeller`'s `update` method redirects some `props` object properties to specific `PropUtils` update
  * methods and also allows special handling if needed when updating a specific `props` object's property.

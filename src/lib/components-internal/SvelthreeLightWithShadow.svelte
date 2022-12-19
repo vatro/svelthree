@@ -3,16 +3,16 @@
 This is an internal _SvelthreeLightWithShadow_ Component.
 -->
 <script lang="ts">
-	import type { LightWithShadow } from "../types/types-extra"
-	import { PropUtils, SvelthreeProps } from "../utils"
-	import type { LogDEV } from "../utils/SvelthreeLogger"
+	import type { LightWithShadow } from "../types/types-extra.js"
+	import { PropUtils, SvelthreeProps } from "../utils/index.js"
+	import type { LogDEV } from "../utils/SvelthreeLogger.js"
 	import type {
 		PropsPerspectiveCamera,
 		PropsOrthographicCamera,
 		PropsDirectionalLightShadow,
 		PropsPointLightShadow,
 		PropsSpotLightShadow
-	} from "../types/types-comp-props"
+	} from "../types/types-comp-props.js"
 
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
 

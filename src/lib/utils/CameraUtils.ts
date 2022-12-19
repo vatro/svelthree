@@ -1,5 +1,5 @@
 import type { OrthographicCamera, PerspectiveCamera } from "three"
-import { CameraValues } from "../constants"
+import { CameraValues } from "../constants/index.js"
 
 export default class CameraUtils {
 	// #region --- Orthographic Camera

@@ -1,6 +1,6 @@
 import type { Light, Material, Object3D, Scene, LightShadow } from "three"
 import { Color, Euler, Matrix4, Quaternion, Vector2, Vector3 } from "three"
-import type { ComplexValueType, LightWithShadow, LightWithTarget } from "../types/types-extra"
+import type { ComplexValueType, LightWithShadow, LightWithTarget } from "../types/types-extra.js"
 import type {
 	matrix_value,
 	pos_value,
@@ -12,9 +12,9 @@ import type {
 	mapsize_value,
 	//background_value,
 	any_proputils_value
-} from "../types/types-extra"
-import type { TargetableSvelthreeComponent, Targetable } from "../types/types-extra"
-import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger"
+} from "../types/types-extra.js"
+import type { TargetableSvelthreeComponent, Targetable } from "../types/types-extra.js"
+import { verbose_mode, log_prop_utils } from "../utils/SvelthreeLogger.js"
 
 /**
  * Collection of static utility methods which allow setting props to various values.

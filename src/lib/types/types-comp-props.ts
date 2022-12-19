@@ -13,7 +13,7 @@ import type {
 	matrix_value,
 	up_value,
 	mapsize_value
-} from "./types-extra"
+} from "./types-extra.js"
 
 import type {
 	Object3D,

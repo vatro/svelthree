@@ -1,4 +1,4 @@
-import type { RaycastArrayInput, RaycastArrayOutput } from "../types/types-extra"
+import type { RaycastArrayInput, RaycastArrayOutput } from "../types/types-extra.js"
 
 class RaycastArray_Base extends Array {
 	public head_path: string[] = ["userData"]

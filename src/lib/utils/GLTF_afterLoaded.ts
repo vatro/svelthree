@@ -1,8 +1,8 @@
 import type { Object3D, Group } from "three"
-import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
-import type { PropsMesh } from "../types/types-comp-props"
-import type { PropsAnyTHREEMeshMaterial, PropsAnyTHREELight } from "../types/types-extra"
-//import type { AnyTHREEMeshMaterial } from "../types/types-extra"
+import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
+import type { PropsMesh } from "../types/types-comp-props.js"
+import type { PropsAnyTHREEMeshMaterial, PropsAnyTHREELight } from "../types/types-extra.js"
+//import type { AnyTHREEMeshMaterial } from "../types/types-extra.js"
 
 export default class GLTF_afterLoaded {
 	// TODO  RECONSIDER  static for_all_cameras ?

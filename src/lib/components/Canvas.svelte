@@ -47,8 +47,8 @@ This is a **svelthree** _Canvas_ Component.
 	import { get_current_component } from "svelte/internal"
 	import { Raycaster, Vector2, Vector3 } from "three"
 	import type { Object3D } from "three"
-	import { svelthreeStores } from "svelthree/stores"
-	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray"
+	import { svelthreeStores } from "../stores/index.js"
+	import { SvelthreeStoreArray } from "../utils/SvelthreeStoreArray.js"
 	import type {
 		PointerState,
 		StoreBody,
@@ -56,13 +56,13 @@ This is a **svelthree** _Canvas_ Component.
 		CanvasComponentEventDispatcher,
 		AllIntersectionsResult,
 		SvelthreeInteractableComponent
-	} from "../types/types-extra"
-	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger"
-	import { RaycastArray } from "../utils/RaycastArray"
+	} from "../types/types-extra.js"
+	import { c_rs, c_lc, c_dev, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
+	import { RaycastArray } from "../utils/RaycastArray.js"
 	import { writable } from "svelte/store"
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeSupportedInteractionEvent, SvelthreeLifecycleCallback } from "../types/types-extra"
+	import type { SvelthreeSupportedInteractionEvent, SvelthreeLifecycleCallback } from "../types/types-extra.js"
 
 	/**
 	 * SVELTEKIT  SSR
@@ -72,7 +72,7 @@ This is a **svelthree** _Canvas_ Component.
 	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
 	 * The import below will work out-of-the-box in a SvelteKit setup.
 	 */
-	import { browser } from "$app/environment"
+	const browser = !import.meta.env.SSR
 
 	const self = get_current_component()
 	const c_name = get_comp_name(self)

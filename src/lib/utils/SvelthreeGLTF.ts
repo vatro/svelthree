@@ -1,5 +1,5 @@
 import { Euler, Vector3 } from "three"
-import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
+import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 // import currently supported components only
 import { default as Mesh } from "../components/Mesh.svelte"
@@ -12,7 +12,7 @@ import type {
 	SvelthreeShadowDOMElement,
 	SvelthreeComponentShadowDOMChild,
 	MeshAssignableMaterial
-} from "../types/types-extra"
+} from "../types/types-extra.js"
 
 export default class SvelthreeGLTF {
 	public tree: SvelthreeGLTFTreeMap = new Map<string, ISvelthreeGLTFTreeMapMember>()

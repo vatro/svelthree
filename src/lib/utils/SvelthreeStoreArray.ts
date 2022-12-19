@@ -1,4 +1,4 @@
-import type { SvelthreeStoreArrayItem } from "../types/types-extra"
+import type { SvelthreeStoreArrayItem } from "../types/types-extra.js"
 
 class SvelthreeStoreArray_Base extends Array {
 	public head_path?: string[] | undefined = undefined

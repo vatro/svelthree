@@ -40,17 +40,17 @@
 <script lang="ts">
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger"
-	import type { LogLC } from "../utils/SvelthreeLogger"
-	import type { SvelthreeLifecycleCallback } from "../types/types-extra"
+	import { c_rs, c_lc, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC } from "../utils/SvelthreeLogger.js"
+	import type { SvelthreeLifecycleCallback } from "../types/types-extra.js"
 
-	import { svelthreeStores } from "svelthree/stores"
-	import { SvelthreeProps } from "../utils"
+	import { svelthreeStores } from "../stores/index.js"
+	import { SvelthreeProps } from "../utils/index.js"
 
 	import type { Writable } from "svelte/store"
 
-	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-	import type { PropsOrbitControls } from "../types/types-comp-props"
+	import { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+	import type { PropsOrbitControls } from "../types/types-comp-props.js"
 	// TODO  implement correctly
 	//import { CameraHelper } from "three"
 	import type {

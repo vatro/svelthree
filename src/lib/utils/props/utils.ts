@@ -1,1 +1,1 @@
-export { default as Propeller } from "../Propeller"
+export { default as Propeller } from "../Propeller.js"

@@ -1,7 +1,7 @@
 import type { Scene, Object3D } from "three"
-import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
-import SvelthreeAnimationManager from "./SvelthreeAnimationManager"
-import SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory"
+import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra.js"
+import SvelthreeAnimationManager from "./SvelthreeAnimationManager.js"
+import SvelthreeAnimationObjectFactory from "./SvelthreeAnimationObjectFactory.js"
 
 export default class SvelthreeAni {
 	private ani_obj_factory: SvelthreeAnimationObjectFactory | undefined = undefined
