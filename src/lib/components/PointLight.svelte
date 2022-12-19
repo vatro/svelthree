@@ -1,14 +1,61 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors />
-
-<!--
 @component
 **svelthree** _PointLight_ Component.
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./PointLight.svelte").default
+
+	type HelperParams = ConstructorParameters<typeof PointLightHelper>
+
+	export interface IStatePointLight {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly light: THREE_PointLight | undefined | null
+		readonly name: string | undefined
+		readonly params: ConstructorParameters<typeof THREE_PointLight> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly props: PropsPointLight | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly color: Color | string | number | [r: number, g: number, b: number] | Vector3 | undefined
+		readonly intensity: number | undefined
+		readonly shadowMapSize: number | undefined
+		readonly shadowBias: number | undefined
+		readonly castShadow: boolean | undefined
+		readonly shadowProps: PropsPointLightShadow | undefined
+		readonly shadowCameraProps: PropsPerspectiveCamera | undefined
+		readonly helperParams: RemoveFirst<HelperParams> | undefined
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -50,7 +97,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./PointLight.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -450,7 +496,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	/** **shorthand** attribute for setting properties of `light.shadow.camera` via an `Object Literal`. */
 	export let shadowCameraProps: PropsPerspectiveCamera | undefined = undefined
 
-	type HelperParams = ConstructorParameters<typeof PointLightHelper>
 	export let helperParams: RemoveFirst<HelperParams> | undefined = undefined
 	export let helper: boolean | undefined = undefined
 
@@ -884,7 +929,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	)
 
 	const schedule_render_auto = (): void => {
-		if (store?.rendererComponent?.mode === "auto") {
+		if (store?.rendererComponent?.get_mode() === "auto") {
 			// prevent an additional component update by not accessing the `root_scene` prop directly.
 			if (root_scene_obj.value) {
 				root_scene_obj.value.userData.dirty = true
@@ -896,6 +941,57 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStatePointLight> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					light,
+					name,
+					params,
+					tabindex,
+					aria,
+					mau,
+					matrix,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					color,
+					intensity,
+					shadowMapSize,
+					shadowBias,
+					castShadow,
+					shadowProps,
+					shadowCameraProps,
+					helperParams,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

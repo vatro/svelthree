@@ -22,6 +22,17 @@ export { default as CubeCamera } from "./components/CubeCamera.svelte"
 export type { prop } from "./types/types-extra"
 export type { PropMat } from "./types/types-comp-props"
 
+// Material related
+export type {
+	MeshAssignableMaterial,
+	PointsAssignableMaterial,
+	MeshMaterialWithColor,
+	MeshMaterialWithEnvMap
+} from "./types/types-extra"
+
+// Interaction related
+export type { SvelthreeInteractableComponent, SvelthreeInteractionEvent } from "./types/types-extra"
+
 // `props` Object Literal types
 export type {
 	PropsObject3D,
@@ -53,6 +64,7 @@ export type { PropLink, PropButton, PropWebGLRenderTargetOptions } from "./types
 
 // misc
 export type {
+	AnySvelthreeComponent,
 	Targetable,
 	TargetableSvelthreeComponent,
 	SvelthreeLifecycleCallback,

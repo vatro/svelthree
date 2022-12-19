@@ -1,14 +1,68 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors />
-
-<!--
 @component
 **svelthree** _CubeCamera_ Component.
 Renders a `CubeMap` which can be used with **non-PBR** materials having an `.envMap` property. `CubeCamera` is currently not working with PBR materials like `MeshStandardMaterial` (see [22236](https://github.com/mrdoob/three.js/issues/22236)).     
 [ tbd ]  Link to Docs. -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./CubeCamera.svelte").default
+
+	export interface IStateCubeCamera {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly dynamic: boolean
+		readonly bind_pos:
+			| MeshSvelthreeComponent<MeshAssignableMaterial>
+			| Object3DSvelthreeComponent
+			| Object3D
+			| undefined
+		readonly bind_pos_offset: Vector3 | undefined
+		readonly hide:
+			| (MeshSvelthreeComponent<MeshAssignableMaterial> | Object3DSvelthreeComponent | Object3D)[]
+			| undefined
+		readonly bind_tex: MeshPhongMaterial | MeshBasicMaterial | MeshLambertMaterial | undefined
+		readonly texture: CubeTexture | undefined
+		readonly is_floor: boolean
+		readonly camera: THREE_CubeCamera | undefined | null
+		readonly renderTarget: WebGLCubeRenderTarget | undefined
+		readonly name: string | undefined
+		readonly renderTargetParams: ConstructorParameters<typeof WebGLCubeRenderTarget> | undefined
+		readonly params: RemoveLast<ConstructorParameters<typeof THREE_CubeCamera>> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly renderTargetOptions: PropWebGLRenderTargetOptions | undefined
+		readonly renderTargetProps: PropsWebGLCubeRenderTarget | undefined
+		readonly props: PropsCubeCamera | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly helper: boolean | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -31,6 +85,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { SvelthreeAni } from "../ani"
 	import type { SvelthreeAnimationFunction, SvelthreeAnimation } from "../types/types-extra"
 
+	import type { SvelteComponentDev } from "svelte/internal"
 	import { CubeCamera as THREE_CubeCamera } from "three"
 	import { WebGLCubeRenderTarget } from "three"
 	import type {
@@ -44,14 +99,8 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	import { get_root_scene } from "../utils/SceneUtils"
 	import { Vector3 } from "three"
 	import type { CubeTexture, WebGLRenderer, Camera, Mesh } from "three"
-	import type {
-		Material,
-		MeshBasicMaterialParameters,
-		MeshPhongMaterial,
-		MeshBasicMaterial,
-		MeshLambertMaterial
-	} from "three"
-	import type { RemoveLast, MeshAssignableMaterial } from "../types/types-extra"
+	import type { MeshPhongMaterial, MeshBasicMaterial, MeshLambertMaterial } from "three"
+	import type { RemoveLast, MeshAssignableMaterial, MeshMaterialWithEnvMap } from "../types/types-extra"
 	import type { default as MeshSvelthreeComponent } from "./Mesh.svelte"
 	import type { default as Object3DSvelthreeComponent } from "./Object3D.svelte"
 	import type { StoreBody } from "../types/types-extra"
@@ -66,7 +115,6 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	 */
 	import { browser } from "$app/environment"
 
-	type CurrentComponentType = import("./CubeCamera.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -431,10 +479,6 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
-	interface MaterialWithEnvMap extends Material {
-		envMap?: MeshBasicMaterialParameters["envMap"]
-	}
-
 	/** Called internally from WebGLRenderer component if `dynamic` is `true` (default). Can also be called directly if `dynamic` is `false`. */
 	export const update_cubecam = () => {
 		// TODO  FEATURE: There could be some logic if camera.parent is scene (&& NOT the root scene) traversing all objects in a scene,
@@ -473,9 +517,23 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 
 			camera_updated = true
 
+			// TODO  works, but review / make better
 			if (!bind_tex) {
-				const op = bound_pos as Mesh
-				const op_mat = op.material as MaterialWithEnvMap
+				// material of our parent (component or Mesh)
+				// TODO  what about Points?
+				let op_mat
+
+				if (bound_pos) {
+					if (Object.hasOwn(bound_pos, "$$")) {
+						const bound_comp = bound_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+						const bound_comp_state = bound_comp.state()
+						op_mat = bound_comp_state.material as MeshMaterialWithEnvMap
+					} else {
+						const op = bound_pos as Mesh
+						op_mat = op.material as MeshMaterialWithEnvMap
+					}
+				}
+
 				if (op_mat && Object.hasOwn(op_mat, "envMap")) {
 					op_mat.envMap = camera.renderTarget.texture
 				}
@@ -577,24 +635,73 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 		}
 	}
 
+	// TODO  works, but review / make better
 	function update_texture_bindings() {
 		if (camera) {
 			if (bind_tex) {
 				bind_tex.envMap = camera.renderTarget.texture
 			} else {
 				if (bind_pos) {
-					if (Object.hasOwn(bind_pos, "mat")) {
-						bind_pos["mat" as keyof typeof bind_pos].envMap = camera.renderTarget.texture
-					} else if (Object.hasOwn(bind_pos, "material")) {
-						bind_pos["material" as keyof typeof bind_pos].envMap = camera.renderTarget.texture
-						bind_pos["material" as keyof typeof bind_pos].needsUpdate = true
+					// set `envMap` if `bind_pos` is a component with `mat`or `material` defined
+					if (Object.hasOwn(bind_pos, "$$")) {
+						if (Object.hasOwn((bind_pos as SvelteComponentDev).$$, "mat")) {
+							// use `mat` to set `envMap` if the component has `mat` prop defined
+							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+							const comp_state = comp.state()
+							const material = comp_state.material as MeshMaterialWithEnvMap
+							if (Object.hasOwn(material, "envMap")) {
+								const mat = comp_state.mat as PropMat<MeshMaterialWithEnvMap>
+								mat.envMap = camera.renderTarget.texture
+								comp.$set({ mat })
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (component) doesn't have an 'envMap' property!`,
+									{ bind_pos, material }
+								)
+							}
+						} else if (Object.hasOwn(bind_pos, "material")) {
+							// set `envMap` directly on `material` if the component has `material` prop defined
+							const comp = bind_pos as MeshSvelthreeComponent<MeshAssignableMaterial>
+							const comp_state = comp.state()
+							const material = comp_state.material as MeshMaterialWithEnvMap
+							if (Object.hasOwn(material, "envMap")) {
+								material.envMap = camera.renderTarget.texture
+								material.needsUpdate = true
+								comp.$set({ material })
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (component) doesn't have an 'envMap' property!`,
+									{ bind_pos, material }
+								)
+							}
+						}
+					} else if (Object.hasOwn(bind_pos, "isMesh")) {
+						if (Object.hasOwn(bind_pos, "material")) {
+							// set `envMap` directly on `material` if the instance has `material` prop defined
+							const instance = bind_pos as Mesh
+							const material = instance.material as MeshMaterialWithEnvMap
+							if (material) {
+								if (Object.hasOwn(material, "envMap")) {
+									material.envMap = camera.renderTarget.texture
+									material.needsUpdate = true
+								} else {
+									console.error(
+										`SVELTHREE > ${c_name} > update_texture_bindings : the 'material' prop of 'bind_pos' (Mesh instance) doesn't have an 'envMap' property!`,
+										{ our_parent, material }
+									)
+								}
+							} else {
+								console.error(
+									`SVELTHREE > ${c_name} > update_texture_bindings : Cannot set 'envMap', 'bind_pos' (Mesh instance) has no 'material' defined!`,
+									{ bind_pos, material }
+								)
+							}
+						}
 					}
 				} else if (our_parent) {
-					if (Object.hasOwn(our_parent, "mat")) {
-						const mat = our_parent["mat" as keyof typeof our_parent] as PropMat<MaterialWithEnvMap>
-						mat.envMap = camera.renderTarget.texture
-					} else if (Object.hasOwn(our_parent, "material")) {
-						const material = our_parent["material" as keyof typeof our_parent] as MaterialWithEnvMap
+					//`our_parent` is a three.js instance
+					if (Object.hasOwn(our_parent, "material")) {
+						const material = our_parent["material" as keyof typeof our_parent] as MeshMaterialWithEnvMap
 						if (Object.hasOwn(material, "envMap")) {
 							material.envMap = camera.renderTarget.texture
 						} else {
@@ -1119,7 +1226,7 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 	)
 
 	const schedule_render_auto = (): void => {
-		if (store?.rendererComponent?.mode === "auto") {
+		if (store?.rendererComponent?.get_mode() === "auto") {
 			// prevent an additional component update by not accessing the `root_scene` prop directly.
 			if (root_scene_obj.value) {
 				root_scene_obj.value.userData.dirty = true
@@ -1131,6 +1238,60 @@ Renders a `CubeMap` which can be used with **non-PBR** materials having an `.env
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateCubeCamera> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					dynamic,
+					bind_pos,
+					bind_pos_offset,
+					hide,
+					bind_tex,
+					texture,
+					is_floor,
+					camera,
+					renderTarget,
+					name,
+					renderTargetParams,
+					params,
+					tabindex,
+					aria,
+					mau,
+					matrix,
+					renderTargetOptions,
+					renderTargetProps,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					helper,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

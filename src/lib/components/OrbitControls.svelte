@@ -1,14 +1,42 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors />
-
-<!--
 @component
 **svelthree** _OrbitControls_ Component.
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./OrbitControls.svelte").default
+
+	export interface IStateOrbitControls {
+		readonly log_all: boolean
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly orbitcontrols: THREE_OrbitControls | undefined | null
+		readonly warn: boolean
+		readonly cam:
+			| PerspectiveCamera
+			| OrthographicCamera
+			| THREE_PerspectiveCamera
+			| THREE_OrthographicCamera
+			| undefined
+		readonly dom_el: HTMLElement | Canvas | undefined
+		readonly props: PropsOrbitControls | undefined
+		readonly enabled: boolean
+		readonly target: Vector3 | undefined
+		readonly rotate: boolean
+		readonly auto: boolean
+		readonly auto_speed: number | undefined
+		readonly damping: boolean
+		readonly pan: boolean
+		readonly zoom: boolean
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import { beforeUpdate, onMount, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -34,7 +62,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	import type { default as OrthographicCamera } from "./OrthographicCamera.svelte"
 	import type { default as Canvas } from "../components/Canvas.svelte"
 
-	type CurrentComponentType = import("./OrbitControls.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -127,7 +154,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 
 			// mode 'auto'
-			if (store.rendererComponent?.mode === "auto") {
+			if (store.rendererComponent?.get_mode() === "auto") {
 				if (auto === true) {
 					// schedule render every animation frame
 					rAF.id = requestAnimationFrame(() => on_orbitcontrols_change(null))
@@ -494,4 +521,40 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 					}
 			  }
 	)
+
+	export const state = (): Partial<IStateOrbitControls> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_rs,
+					log_lc,
+					orbitcontrols,
+					warn,
+					cam,
+					dom_el,
+					props,
+					enabled,
+					target,
+					rotate,
+					auto,
+					auto_speed,
+					damping,
+					pan,
+					zoom,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
+	}
 </script>

@@ -1,14 +1,80 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors />
-
-<!--
 @component
 **svelthree** _Mesh_ Component.
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./Mesh.svelte").default<MeshAssignableMaterial>
+
+	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
+
+	export interface IStateMesh<M extends MeshAssignableMaterial> {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly log_mau: boolean
+		readonly button: PropButton | undefined
+		readonly link: PropLink | undefined
+		readonly mesh: THREE_Mesh | undefined | null
+		readonly name: string | undefined
+		readonly material: M | undefined | null
+		readonly geometry: BufferGeometry | undefined | null
+		readonly params: ConstructorParameters<typeof THREE_Mesh> | undefined
+		readonly tabindex: number | undefined
+		readonly aria: Partial<ARIAMixin> | undefined
+		readonly mau: boolean | undefined
+		readonly mat: PropMat<M> | undefined
+		readonly matrix: Matrix4 | Parameters<Matrix4["set"]> | undefined
+		readonly props: PropsMesh | undefined
+		readonly pos: Vector3 | Parameters<Vector3["set"]> | undefined
+		readonly rot:
+			| Euler
+			| Parameters<Euler["set"]>
+			| Quaternion
+			| Parameters<Quaternion["set"]>
+			| Vector3
+			| Parameters<Vector3["set"]>
+			| undefined
+		readonly quat: Quaternion | Parameters<Quaternion["set"]> | undefined
+		readonly scale: Vector3 | Parameters<Vector3["set"]> | number | undefined
+		readonly lookAt: Vector3 | Parameters<Vector3["set"]> | Targetable | undefined | null
+		readonly castShadow: boolean | undefined
+		readonly receiveShadow: boolean | undefined
+		readonly boxParams: RemoveFirst<BoxHelperParams> | undefined
+		readonly box: boolean | undefined
+		readonly interact: boolean | undefined | null
+		readonly block: boolean
+		readonly modifiers: SvelthreeModifiersProp | undefined
+		readonly on_click: SvelthreePointerEventHandler | undefined
+		readonly on_pointerup: SvelthreePointerEventHandler | undefined
+		readonly on_pointerdown: SvelthreePointerEventHandler | undefined
+		readonly on_pointerover: SvelthreePointerEventHandler | undefined
+		readonly on_pointerout: SvelthreePointerEventHandler | undefined
+		readonly on_pointermove: SvelthreePointerEventHandler | undefined
+		readonly on_pointermoveover: SvelthreePointerEventHandler | undefined
+		readonly on_keydown: SvelthreeKeyboardEventHandler | undefined
+		readonly on_keypress: SvelthreeKeyboardEventHandler | undefined
+		readonly on_keyup: SvelthreeKeyboardEventHandler | undefined
+		readonly on_focus: SvelthreeFocusEventHandler | undefined
+		readonly on_blur: SvelthreeFocusEventHandler | undefined
+		readonly on_focusin: SvelthreeFocusEventHandler | undefined
+		readonly on_focusout: SvelthreeFocusEventHandler | undefined
+		readonly on_wheel: SvelthreeWheelEventHandler | undefined
+		readonly on_wheelover: SvelthreeWheelEventHandler | undefined
+		readonly animation: SvelthreeAnimationFunction | undefined
+		readonly aniauto: boolean | undefined
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import type { Scene } from "three"
 
@@ -128,7 +194,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let geometry: BufferGeometry | undefined | null = undefined
 	let geometry_ref: BufferGeometry | undefined = undefined
 
-	type CurrentComponentType = import("./Mesh.svelte").default<AssignedMaterial>
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -624,7 +689,6 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 		mesh.userData.root_scene = root_scene
 	}
 
-	type BoxHelperParams = ConstructorParameters<typeof BoxHelper>
 	export let boxParams: RemoveFirst<BoxHelperParams> | undefined = undefined
 	/** Creates and adds a `BoxHelper`. */
 	export let box: boolean | undefined = undefined
@@ -702,13 +766,13 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	export let interact: boolean | undefined | null = undefined
 
 	/**
-	Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
-	* This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
-	* 
-	* Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.  
-	* In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
-	* the object will automatically become an _interaction occluder / blocker_.
-   */
+	 * Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
+	 * This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
+	 *
+	 * Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.
+	 * In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
+	 * the object will automatically become an _interaction occluder / blocker_.
+	 */
 	export let block = false
 
 	const interaction_on_clear: {
@@ -797,7 +861,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 			self.$on(type, callback)
 			if (interaction_comp) {
-				interaction_comp.update_listeners = true
+				interaction_comp.$set({ update_listeners: true })
 			} else {
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
@@ -834,7 +898,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 
 			if (interaction_comp) {
-				interaction_comp.update_listeners = true
+				interaction_comp.$set({ update_listeners: true })
 			} else {
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
@@ -852,82 +916,82 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 
 	export let on_click: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_click !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerup: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerdown: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerdown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerover: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointerout: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointerout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointermove: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointermove !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_pointermoveover: SvelthreePointerEventHandler | undefined = undefined
 	$: if (on_pointermoveover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keydown: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keydown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keypress: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keypress !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_keyup: SvelthreeKeyboardEventHandler | undefined = undefined
 	$: if (on_keyup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focus: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focus !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_blur: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_blur !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focusin: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focusin !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_focusout: SvelthreeFocusEventHandler | undefined = undefined
 	$: if (on_focusout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_wheel: SvelthreeWheelEventHandler | undefined = undefined // ->  TODO  implement
 	$: if (on_wheel !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	export let on_wheelover: SvelthreeWheelEventHandler | undefined = undefined // -> TODO  implement
 	$: if (on_wheelover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.update_listeners = true
+		interaction_comp.$set({ update_listeners: true })
 	}
 
 	/** Animation logic to be performed with the (three) object instance created by the component. */
@@ -1289,7 +1353,7 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 	)
 
 	const schedule_render_auto = (): void => {
-		if (store?.rendererComponent?.mode === "auto") {
+		if (store?.rendererComponent?.get_mode() === "auto") {
 			// prevent an additional component update by not accessing the `root_scene` prop directly.
 			if (root_scene_obj.value) {
 				root_scene_obj.value.userData.dirty = true
@@ -1301,6 +1365,76 @@ svelthree uses svelte-accmod, where accessors are always `true`, regardless of `
 			}
 			store.rendererComponent.schedule_render_auto(root_scene)
 		}
+	}
+
+	export const state = (): Partial<IStateMesh<AssignedMaterial>> => {
+		return {}
+	}
+
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					log_mau,
+					button,
+					link,
+					mesh,
+					name,
+					material,
+					geometry,
+					params,
+					tabindex,
+					aria,
+					mau,
+					mat,
+					matrix,
+					props,
+					pos,
+					rot,
+					quat,
+					scale,
+					lookAt,
+					castShadow,
+					receiveShadow,
+					boxParams,
+					box,
+					interact,
+					block,
+					modifiers,
+					on_click,
+					on_pointerup,
+					on_pointerdown,
+					on_pointerover,
+					on_pointerout,
+					on_pointermove,
+					on_pointermoveover,
+					on_keydown,
+					on_keypress,
+					on_keyup,
+					on_focus,
+					on_blur,
+					on_focusin,
+					on_focusout,
+					on_wheel,
+					on_wheelover,
+					animation,
+					aniauto,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateStart,
+					afterUpdateEnd,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
 	}
 </script>
 

@@ -26,7 +26,13 @@ class SvelthreeStoreArray_Base extends Array {
 			let prop_head: { [key: string]: unknown } | undefined
 
 			if (this.head_path?.length) {
-				prop_head = this[i][this.head_path[0]]
+				// Don't use accessor if `this[i]` is a component (see `CubeCamera`)
+				if (Object.hasOwn(this[i], "$$")) {
+					const comp_state = this[i].state()
+					prop_head = comp_state[this.head_path[0]]
+				} else {
+					prop_head = this[i][this.head_path[0]]
+				}
 
 				let j = 1
 				while (j < this.head_path.length) {

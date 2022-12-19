@@ -1,14 +1,49 @@
 <!--
-`accessors:true` hast to be set per component because of the svelte-language-server bug, otherwise accessors would be falsely detected as missing and highlighted as errors.
-svelthree uses svelte-accmod, where accessors are always `true`, regardless of `svelte:options`.  
--->
-<svelte:options accessors />
-
-<!-- 
 @component
 This is a **svelthree** _WebGLRenderer_ Component.  
 [ tbd ]  Link to Docs.
 -->
+<script context="module" lang="ts">
+	type CurrentComponentType = import("./WebGLRenderer.svelte").default
+
+	interface WebGLRendererInput {
+		canvas: Canvas
+		scene_id: string
+		cam_id: string
+	}
+
+	interface WebGLRendererOutput {
+		canvas: HTMLCanvasElement | HTMLElement
+	}
+
+	interface WebGLRendererOutputsQueueItem {
+		dom_element: HTMLCanvasElement
+		viewOffset?: number[]
+	}
+
+	export interface IStateWebGLRenderer {
+		readonly log_all: boolean
+		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
+		readonly log_rs: boolean
+		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly inputs: WebGLRendererInput[] | undefined
+		readonly outputs: WebGLRendererOutput[] | undefined
+		readonly params: { [P in keyof WebGLRendererParameters]: WebGLRendererParameters[P] } | undefined
+		readonly props: { [P in keyof PropsWebGLRenderer]: PropsWebGLRenderer[P] } | undefined
+		readonly shadowmap: boolean
+		readonly shadowmap_type: ShadowMapType
+		readonly xr: boolean | undefined
+		readonly mode: WebGLRendererMode
+		readonly enabled: boolean
+		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyStart: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyEnd: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly onDestroyReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly beforeUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+		readonly afterUpdateReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
+	}
+</script>
+
 <script lang="ts">
 	import { afterUpdate, beforeUpdate, onDestroy, createEventDispatcher, onMount, tick, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
@@ -32,7 +67,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	} from "../types/types-extra"
 	import type { PropsWebGLRenderer } from "../types/types-comp-props"
 
-	type CurrentComponentType = import("./WebGLRenderer.svelte").default
 	const self = get_current_component()
 	const c_name = get_comp_name(self)
 	/** svelthree component's type (e.g. `type` prop value of component `Foo` will be `'Foo'`) */
@@ -87,12 +121,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 	 */
 	let inside: boolean | undefined = undefined
 	$: inside = !!sti
-
-	interface WebGLRendererInput {
-		canvas: Canvas
-		scene_id: string
-		cam_id: string
-	}
 
 	/**
 	 * An array of configuration objects specifying `Canvas` components incl. `Scene` and `Camera` components' `id`s that should be rendered.
@@ -157,15 +185,6 @@ This is a **svelthree** _WebGLRenderer_ Component.
 
 			inputs_processed = true
 		}
-	}
-
-	interface WebGLRendererOutput {
-		canvas: HTMLCanvasElement | HTMLElement
-	}
-
-	interface WebGLRendererOutputsQueueItem {
-		dom_element: HTMLCanvasElement
-		viewOffset?: number[]
 	}
 
 	/** An array of `Canvas` components or `<canvas>` DOM elements to rendered to. */
@@ -802,7 +821,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					if (store.cubeCameras.length) {
 						for (let i = 0; i < store.cubeCameras.length; i++) {
 							const cubecam: CubeCamera = store.cubeCameras[i]
-							if (cubecam.dynamic) {
+							const cubecam_state = cubecam.state()
+							if (cubecam_state.dynamic) {
 								cubecam.update_cubecam()
 							}
 						}
@@ -820,7 +840,8 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				if (store.cubeCameras.length) {
 					for (let i = 0; i < store.cubeCameras.length; i++) {
 						const cubecam: CubeCamera = store.cubeCameras[i]
-						if (cubecam.dynamic) {
+						const cubecam_state = cubecam.state()
+						if (cubecam_state.dynamic) {
 							cubecam.update_cubecam()
 						}
 					}
@@ -995,6 +1016,11 @@ This is a **svelthree** _WebGLRenderer_ Component.
 		}
 	}
 
+	/** Returns current renderer mode: `"auto"` or `"always"`. */
+	export const get_mode = (): WebGLRendererMode => {
+		return mode
+	}
+
 	/** Returns the **three.js instance** of the renderer. */
 	export const get_renderer = (): WebGLRenderer => {
 		return renderer
@@ -1135,4 +1161,35 @@ This is a **svelthree** _WebGLRenderer_ Component.
 					}
 			  }
 	)
+	export const state = (): Partial<IStateWebGLRenderer> => {
+		return {}
+	}
+	if (!Object.hasOwn(self, "state")) {
+		Object.defineProperty(self, "state", {
+			value: () => {
+				return {
+					log_all,
+					log_dev,
+					log_rs,
+					log_lc,
+					inputs,
+					outputs,
+					params,
+					props,
+					shadowmap,
+					shadowmap_type,
+					xr,
+					mode,
+					enabled,
+					onMountReplace,
+					onDestroyStart,
+					onDestroyEnd,
+					onDestroyReplace,
+					beforeUpdateReplace,
+					afterUpdateReplace
+				}
+			},
+			writable: false
+		})
+	}
 </script>

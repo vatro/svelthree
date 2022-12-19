@@ -34,7 +34,9 @@ const clear_new_instance_managing_component = (
 	const managed_by_component: AnySvelthreeComponent | null =
 		(new_instance?.userData?.svelthreeComponent as AnySvelthreeComponent) || null
 	const same_component = managed_by_component === current_component
-	const same_instance = managed_by_component?.[instance_name as keyof AnySvelthreeComponent] === new_instance
+	const component_state = managed_by_component?.state()
+	const instance = component_state?.[instance_name as keyof typeof component_state]
+	const same_instance = instance === new_instance
 
 	if (managed_by_component && !same_component && same_instance) {
 		//console.warn('clear current managing component!')

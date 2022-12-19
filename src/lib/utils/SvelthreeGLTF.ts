@@ -10,7 +10,8 @@ import type {
 	SvelthreeGLTFTreeMap,
 	ISvelthreeGLTFTreeMapMember,
 	SvelthreeShadowDOMElement,
-	SvelthreeComponentShadowDOMChild
+	SvelthreeComponentShadowDOMChild,
+	MeshAssignableMaterial
 } from "../types/types-extra"
 
 export default class SvelthreeGLTF {
@@ -128,7 +129,7 @@ export default class SvelthreeGLTF {
 									target: dom_target,
 									props: {
 										geometry: item.mesh.geometry,
-										material: item.mesh.material,
+										material: item.mesh.material as MeshAssignableMaterial,
 										name: item.name
 									},
 									context
@@ -190,11 +191,11 @@ export default class SvelthreeGLTF {
 			const comp = item.svelthree_comp
 
 			if (comp) {
-				comp.scale = new Vector3().copy(item.obj.scale)
-				comp.pos = new Vector3().copy(item.obj.position)
-				comp.rot = new Euler().copy(item.obj.rotation)
-				comp.castShadow = item.obj.castShadow
-				comp.receiveShadow = item.obj.receiveShadow
+				comp.$set({ scale: new Vector3().copy(item.obj.scale) })
+				comp.$set({ pos: new Vector3().copy(item.obj.position) })
+				comp.$set({ rot: new Euler().copy(item.obj.rotation) })
+				comp.$set({ castShadow: item.obj.castShadow })
+				comp.$set({ receiveShadow: item.obj.receiveShadow })
 			} else {
 				console.error(
 					`SVELTHREE > utils > SvelthreeGLTF > create_component : invalid 'item.svelthree_comp' (comp) value!`,
