@@ -41,12 +41,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	} from "../types/types-extra.js"
 
 	/**
-	 * SVELTEKIT  SSR
-	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
-	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
-	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 *  SVELTEKIT  CSR ONLY /
+	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
+	 * and should run on CLIENT ONLY.
 	 */
 	const browser = !import.meta.env.SSR
 
