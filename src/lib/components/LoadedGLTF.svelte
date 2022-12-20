@@ -128,7 +128,7 @@
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils/index.js"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -232,7 +232,7 @@
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -316,7 +316,7 @@
 	}
 
 	// TODO  Do we want this to be reactive, so we can change the GLTF file on-the-fly?
-	// SVELTEKIT CSR ONLY
+	// SVELTEKIT  CSR ONLY
 	$: if (browser) {
 		if (url) {
 			doLoad()

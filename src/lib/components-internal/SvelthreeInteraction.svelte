@@ -1629,7 +1629,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		remove_all_pointer_listeners()
 		pointer_events_queue.length = 0
 
-		// SVELTEKIT  SSR  keyboard event listeners are being added to `window`.
+		//  SVELTEKIT  CSR ONLY  keyboard event listeners are being added to `window`.
 		if (browser) {
 			remove_all_keyboard_listeners()
 			keyboard_events_queue.length = 0

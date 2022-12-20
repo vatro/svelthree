@@ -128,7 +128,7 @@
 	import type { PropButton, PropLink } from "../types/types-comp-props.js"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -235,7 +235,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -256,7 +256,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 
 		if (!our_parent) {
@@ -651,7 +651,7 @@
 	function set_bg_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "bg_tex", bg_tex))
 
-		//  SVELTEKIT CSR ONLY
+		//  SVELTEKIT  CSR ONLY
 		if (browser) {
 			if (scene && bg_tex) {
 				const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
@@ -724,7 +724,7 @@
 	function set_env_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "env_tex", env_tex))
 
-		//  SVELTEKIT CSR ONLY
+		//  SVELTEKIT  CSR ONLY
 		if (browser) {
 			if (scene) {
 				if (env_tex) {
