@@ -1,21 +1,13 @@
-### IN CASE YOU'RE HERE BECAUSE YOU WERE LOOKING FOR SVELTE THREE SOMETHING:
-There's a (_pretty_) new three.js component library for Svelte: **[threlte website](https://threlte.xyz/) / [threlte repo](https://github.com/threlte/threlte)** which is (_atm_) more complete and polished compared to `svelthree`.
-
-Although `threlte`'s completeness and strong community support could demotivate me concerning further `svelthree` development, I'm going to continue working on `svelthree` because it's my baby and I love it 🥰. Also: the API / DX / capability is / will be different to `threlte` in quite a few ways, especially with `threlte 5` (_recent_) release moving in a completely different direction towards being basically a `Svelte`-version of `react-three-fiber`, and I think it's always good to have some alternatives.
-
-Anyways, I'm glad you're here! 🙂
-Try `svelthree`, stay tuned 🚀 & leave a star! 😁👋
-
----
-
-
 # svelthree
-
-#### Create three.js content with Svelte components.
+#### Create three.js content using Svelte components.
+| IMPORTANT REMARK |
+| -------|
+|`svelthree` is now **"default Svelte first"** (_not "`svelte-accmod` first" as before_), thus **`accessors`usage is not recommended** because of various reasons related to accessors updating components synchronously which can lead to unwanted behavior, bugs and perfomance issues. So if you're using component references and wish to set props programmatically, please use the default `$set` method instead, e.g. `comp_ref.$set({pos: [1,2,3]})`, which is asynchronous / scheduled. If you still want to access `svelthree`-components via `accessors` syntax, e.g. `comp_ref.pos = [1,2,3]`, please import accessors-enabled components from `svelthree/acc` which will then have correct / better type definitions.
+_I still like the developer experience with `svelte-accmod` a bit better, but it comes with some other, currently still unsolved issues and an inevitable perfomance loss compared to using the `$set` method. Although `svelthree` is now "default Svelte first", `svelte-accmod` is still something I'll get my hands on again in future._ |
 
 ---
 
-#### How to try latest svelthree NOW ?
+### How to try latest svelthree NOW ?
 
 - **clone the svelthree repo**
 
@@ -34,7 +26,7 @@ Try `svelthree`, stay tuned 🚀 & leave a star! 😁👋
 
 - **install the created svelthree-tarball**
 
-  e.g. in your existing Svelte-project add `"svelthree"` to `"devDependencies"` inside `package.json` file:
+  e.g. in your existing SvelteKit-project (see [`create-svelte`](https://www.npmjs.com/package/create-svelte)) add `"svelthree"` to `"devDependencies"` inside `package.json` file:
 
   ```
   "devDependencies": {
@@ -44,69 +36,53 @@ Try `svelthree`, stay tuned 🚀 & leave a star! 😁👋
   }
   ```
 
-  ... and **run** `npm i`  (*this will actually install svelthree*)
-
-  
-
-- **patch original (*installed*) Svelte to [svelte-accmod](https://github.com/vatro/svelte-accmod)**
-
-  run: `npx svelte-accmod-patch`
+  ... and **run** `npm i`  (*this will actually install `svelthree` and if not already installed: `three` incl. `@types/three`*)
   
 - Depending on your Svelte / SvelteKit project, you'll probably need to make some configuration changes (*svelthree-starters coming soon!*), but you're basically **ready to rumble!** 🚀
-
-
 ---
 
 
 
 ## 1.0.0-next.x DRAFT
 
-[Svelte](https://svelte.dev/) components library for declarative construction of reactive and reusable [three.js](https://threejs.org/) scene graphs using a modified version of Svelte *[svelte-accmod](https://github.com/vatro/svelte-accmod)* under the hood. 👨🏻‍💻 Please keep in mind that updates may come frequently and include breaking changes.
+Create [three.js](https://threejs.org/) content using [Svelte](https://svelte.dev/docs) components.
+
+👨🏻‍💻 Please keep in mind that updates may come frequently and include breaking changes.
 
 
 
 ### Install
 
-​	In your **Svelte** 3.44.2 - 3.49.0 project (also **SvelteKit**):
+​	In your **SvelteKit** project:
 
-- install **three.js** along with **three.js types** (*if available*):
+- install **three.js** along with **three.js types**
 
   ```
   npm i -D three @types/three
   ```
 
-- install **svelthree** and patch Svelte to **svelte-accmod**
+- install **svelthree**
 
   ```
   npm i -D svelthree@next
   ```
 
-  ```
-  npx svelte-accmod-patch
-  ```
-
-**Note:** If you don't install a specific Svelte or three.js version, the latest supported *Svelte* (svelte-accmod patched) and *three.js* versions will be automatically installed as *svelthree's* peer dependencies.
+**Note:** If you don't install a specific Svelte or three.js version, the latest supported *Svelte* and *three.js* (incl. types) versions will be automatically installed as *svelthree's* peer dependencies.
 
 
 
 
 ### Quickstart
-- ***todo**: create new svelthree-app-**rollup** template -> CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
-- ***todo**: create new svelthree-app-**vite** template -> CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
-- ***todo**: create new svelthree-app-**sveltekit** template -> SSR + CSR/SPA (publish after svelthree 1.0.0-next.1 release)*
 
-
+- ***todo**: create new svelthree-app (publish after svelthree 1.0.0-next.1 release)*
 
 ### General Usage
 
 - ***todo**: new Vercel hosted SvelteKit website with some cool examples*
 
+### Examples
 
-
-### REPL Usage
-
-***todo (?)**: with the new Vercel hosted SvelteKit website ->  implement REPL (not quite not sure about this though... probably just for people to play around, without login / saving?)*
-
+- ***todo**: new Vercel hosted SvelteKit website incl. REPL*
 
 
 ### Usage Example
@@ -118,30 +94,24 @@ Try `svelthree`, stay tuned 🚀 & leave a star! 😁👋
   import {
     Canvas,
     Scene,
-    Fog,
     PerspectiveCamera,
     DirectionalLight,
     AmbientLight,
-    BoxBufferGeometry,
     Mesh,
-    MeshStandardMaterial,
-    WebGLRenderer,
+    WebGLRenderer
   } from "svelthree";
+  
+  import { Fog, BoxGeometry, MeshStandardMaterial } from "three";
 
   const fog = new Fog(0xffffff, 3, 11);
-  const geometry = new BoxBufferGeometry(1, 1, 1);
+  const geometry = new BoxGeometry(1, 1, 1);
   const material = new MeshStandardMaterial();
  
 </script>
 
-<Canvas w={500} h={500}>
+<Canvas w={500} h={500} >
 
-  <Scene
-    id="scene1"
-    bg={0xf0f9ff}
-    props={{ fog }}
-    env_tex={{ url: '...' }}
-    >
+  <Scene id="scene1" bg={0xf0f9ff} props={{ fog }} env_tex={{ url: '...' }} >
 
     <PerspectiveCamera id="cam1" pos={[0, 0, 3]} lookAt={[0, 0, 0]} />
     <AmbientLight intensity={1.25} />
