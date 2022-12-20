@@ -876,13 +876,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					case "pointermove": {
 						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(evt)
 						queued_pointer_move_events[0] = queued_pointermove_event
-						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					case "pointermoveover": {
 						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(evt)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
-						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					default: {
