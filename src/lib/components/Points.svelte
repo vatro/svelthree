@@ -106,7 +106,7 @@
 	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { InteractionEventDispatcher } from "../types/types-extra.js"
+	import type { EventMapAllEventDetails } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
@@ -143,7 +143,7 @@
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 	export let log_mau: boolean = log_all
 
-	const dispatch_interaction = createEventDispatcher<InteractionEventDispatcher>()
+	const dispatch_interaction = createEventDispatcher<EventMapAllEventDetails>()
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
