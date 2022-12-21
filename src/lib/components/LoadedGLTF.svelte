@@ -102,7 +102,7 @@
 	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { InteractionEventDispatcher } from "../types/types-extra.js"
+	import type { EventMapAllEventDetails, EventMapAllEvents } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
@@ -128,7 +128,7 @@
 	import { GLTF_afterLoaded, GLTF_utils } from "../utils/index.js"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -148,7 +148,11 @@
 	export let log_mau: boolean = log_all
 
 	const dispatch = createEventDispatcher()
-	const dispatch_interaction = createEventDispatcher<InteractionEventDispatcher>()
+
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface $$Events extends EventMapAllEvents {}
+
+	const dispatch_interaction = createEventDispatcher<EventMapAllEventDetails>()
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
@@ -232,7 +236,7 @@
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -316,7 +320,7 @@
 	}
 
 	// TODO  Do we want this to be reactive, so we can change the GLTF file on-the-fly?
-	// SVELTEKIT CSR ONLY
+	// SVELTEKIT  CSR ONLY
 	$: if (browser) {
 		if (url) {
 			doLoad()

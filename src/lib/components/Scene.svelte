@@ -106,7 +106,7 @@
 	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { InteractionEventDispatcher } from "../types/types-extra.js"
+	import type { EventMapAllEventDetails, EventMapAllEvents } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
@@ -128,7 +128,7 @@
 	import type { PropButton, PropLink } from "../types/types-comp-props.js"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -151,7 +151,10 @@
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
 	export let log_mau: boolean = log_all
 
-	const dispatch_interaction = createEventDispatcher<InteractionEventDispatcher>()
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface $$Events extends EventMapAllEvents {}
+
+	const dispatch_interaction = createEventDispatcher<EventMapAllEventDetails>()
 
 	/** `id` is used to identify / assign a Scene to a 'WebGLRenderer' component.
 	 * `id` is **not needed if** a Scene component is a child of any Object3D (e.g. another Scene) in this case
@@ -235,7 +238,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -256,7 +259,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", scene)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 
 		if (!our_parent) {
@@ -651,7 +654,7 @@
 	function set_bg_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "bg_tex", bg_tex))
 
-		//  SVELTEKIT CSR ONLY
+		//  SVELTEKIT  CSR ONLY
 		if (browser) {
 			if (scene && bg_tex) {
 				const env_texture_loader = new TextureLoader().load(bg_tex.url, (tex) => {
@@ -724,7 +727,7 @@
 	function set_env_tex(): Texture | undefined | null {
 		if (verbose && log_rs) console.debug(...c_rs(c_name, "env_tex", env_tex))
 
-		//  SVELTEKIT CSR ONLY
+		//  SVELTEKIT  CSR ONLY
 		if (browser) {
 			if (scene) {
 				if (env_tex) {

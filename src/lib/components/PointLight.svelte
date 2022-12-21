@@ -93,7 +93,7 @@
 	import { get_root_scene } from "../utils/SceneUtils.js"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -186,7 +186,7 @@
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", light)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -241,7 +241,7 @@
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 

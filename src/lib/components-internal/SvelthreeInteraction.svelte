@@ -14,12 +14,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import type {
 		PointerState,
 		SvelthreeShadowDOMElement,
-		SvelthreeInteractionEventDetail,
 		RaycasterData,
 		AllIntersections,
 		SvelthreeInteractableComponent,
 		SvelthreeInteractionEventDispatcher,
-		CanvasComponentEvent
+		CanvasComponentEvent,
+		SvelthreeKeyboardEventDetail,
+		SvelthreePointerEventDetail,
+		SvelthreeFocusEventDetail,
+		SvelthreeInteractionEventDetail
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
 	import {
@@ -41,12 +44,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	} from "../types/types-extra.js"
 
 	/**
-	 * SVELTEKIT  SSR
-	 * `browser` is needed for the SvelteKit setup (SSR / CSR / SPA).
-	 * For non-SSR output in RollUp only and Vite only setups (CSR / SPA) we're just mimicing `$app/environment` where `browser = true`,
-	 * -> TS fix: `$app/environment` mapped to `src/$app/environment` via svelthree's `tsconfig.json`'s `path` property.
-	 * -> RollUp only setup: replace `$app/environment` with `../$app/environment`
-	 * The import below will work out-of-the-box in a SvelteKit setup.
+	 *  SVELTEKIT  CSR ONLY /
+	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
+	 * and should run on CLIENT ONLY.
 	 */
 	const browser = !import.meta.env.SSR
 
@@ -879,13 +879,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					case "pointermove": {
 						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(evt)
 						queued_pointer_move_events[0] = queued_pointermove_event
-						//queued_pointer_move_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					case "pointermoveover": {
-						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_indep(evt)
+						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_dep(evt)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
-						//queued_pointer_moveover_events[0] = () => dispatch_pointerevent_intersection_indep(evt)
 						break
 					}
 					default: {
@@ -921,14 +919,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_pointerevent_intersection_dep(evt: PointerEvent) {
 		const action_name = `on_${evt.type}`
 
-		const detail: SvelthreeInteractionEventDetail = {
+		const detail: SvelthreePointerEventDetail = {
 			evt,
 			obj,
 			comp: parent,
 			raycaster_data
 		}
 
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
@@ -936,13 +934,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_pointerevent_intersection_indep(evt: PointerEvent) {
 		const action_name = `on_${evt.type}`
 
-		const detail: SvelthreeInteractionEventDetail = {
+		const detail: SvelthreePointerEventDetail = {
 			evt,
 			obj,
 			comp: parent
 		}
 
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
@@ -1062,14 +1060,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_focusevent_intersection_indep(evt: FocusEvent) {
 		const action_name = `on_${evt.type}`
 
-		const detail: SvelthreeInteractionEventDetail = {
+		const detail: SvelthreeFocusEventDetail = {
 			evt,
 			obj,
 			comp: parent
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
@@ -1329,7 +1327,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function dispatch_keyboardevent_intersection_indep(evt: KeyboardEvent) {
 		const action_name = `on_${evt.type}`
 
-		const detail: SvelthreeInteractionEventDetail = {
+		const detail: SvelthreeKeyboardEventDetail = {
 			code: evt.code,
 			evt,
 			obj,
@@ -1337,7 +1335,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type, detail)
+		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
 		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
 	}
 
@@ -1629,7 +1627,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		remove_all_pointer_listeners()
 		pointer_events_queue.length = 0
 
-		// SVELTEKIT  SSR  keyboard event listeners are being added to `window`.
+		//  SVELTEKIT  CSR ONLY  keyboard event listeners are being added to `window`.
 		if (browser) {
 			remove_all_keyboard_listeners()
 			keyboard_events_queue.length = 0

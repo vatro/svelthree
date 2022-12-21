@@ -96,7 +96,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	import type { Writable } from "svelte/store"
 
 	/**
-	 *  SVELTEKIT CSR ONLY /
+	 *  SVELTEKIT  CSR ONLY /
 	 * Atm, all logic using 'document' or 'window' is wrapped in an 'if (browser)' check,
 	 * and should run on CLIENT ONLY.
 	 */
@@ -216,7 +216,7 @@ If you use this approach you'll see a warning in the console if you define left,
 		// share created object (three) instance to all children (slots) as 'parent'.
 		setContext("parent", camera)
 
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 
@@ -312,7 +312,7 @@ If you use this approach you'll see a warning in the console if you define left,
 	// - see https://github.com/vatro/svelthree/issues/103
 
 	$: if (our_parent_shadow_dom_el !== undefined) {
-		// SVELTEKIT CSR ONLY /
+		// SVELTEKIT  CSR ONLY /
 		if (browser) create_shadow_dom()
 	}
 

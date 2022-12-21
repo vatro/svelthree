@@ -497,26 +497,77 @@ export type RaycasterData = {
 	unprojected_point: THREE.Vector3
 }
 
-export type SvelthreeInteractionEventDetail = {
-	code?: KeyboardEvent["code"]
-	evt: PointerEvent | KeyboardEvent | FocusEvent
+interface InteractionEventDetail {
 	obj: THREE.Object3D | undefined | null
 	comp: SvelthreeInteractableComponent
+}
+
+export interface SvelthreePointerEventDetail extends InteractionEventDetail {
+	evt: PointerEvent
+	/** ☝️ Contains no `raycaster_data` for the `pointermove` Event */
 	raycaster_data?: RaycasterData
 }
 
-export type SvelthreeInteractionEvent = {
+export interface SvelthreeKeyboardEventDetail extends InteractionEventDetail {
+	code: KeyboardEvent["code"]
+	evt: KeyboardEvent
+}
+
+export interface SvelthreeFocusEventDetail extends InteractionEventDetail {
+	evt: FocusEvent
+}
+
+export interface SvelthreeWheelEventDetail {
+	evt: WheelEvent
+	obj: THREE.Object3D | undefined | null
+	comp: SvelthreeInteractableComponent
+}
+
+export type SvelthreeInteractionEventDetail = SvelthreePointerEventDetail | SvelthreeKeyboardEventDetail | SvelthreeFocusEventDetail | SvelthreeWheelEventDetail
+
+export type SvelthreeInteractionEvent<D> = {
 	type: string
-	detail: SvelthreeInteractionEventDetail
+	detail: D
 }
 
 import type { createEventDispatcher } from "svelte/internal"
 
-export type InteractionEventDispatcher = {
-	[key: string]: SvelthreeInteractionEventDetail
+type EventMapPointEvents = {
+	[key in ElementType<typeof POINTER_EVENTS>]: SvelthreePointerEvent
 }
 
-export type SvelthreeInteractionEventDispatcher = ReturnType<typeof createEventDispatcher<InteractionEventDispatcher>>
+type EventMapPointEventDetails = {
+	[key in ElementType<typeof POINTER_EVENTS>]: SvelthreePointerEventDetail
+}
+
+type EventMapKeyboardEvents = {
+	[key in ElementType<typeof KEYBOARD_EVENTS>]: SvelthreeKeyboardEvent
+}
+
+type EventMapKeyboardEventDetails = {
+	[key in ElementType<typeof KEYBOARD_EVENTS>]: SvelthreeKeyboardEventDetail
+}
+
+type EventMapFocusEvents = {
+	[key in ElementType<typeof FOCUS_EVENTS>]: SvelthreeFocusEvent
+}
+
+type EventMapFocusEventDetails = {
+	[key in ElementType<typeof FOCUS_EVENTS>]: SvelthreeFocusEventDetail
+}
+
+type EventMapWheelEvents = {
+	[key in ElementType<typeof WHEEL_EVENTS>]: SvelthreeWheelEvent
+}
+
+type EventMapWheelEventDetails = {
+	[key in ElementType<typeof WHEEL_EVENTS>]: SvelthreeWheelEventDetail
+}
+
+export type EventMapAllEvents = EventMapPointEvents & EventMapKeyboardEvents & EventMapFocusEvents & EventMapWheelEvents
+export type EventMapAllEventDetails = EventMapPointEventDetails & EventMapKeyboardEventDetails & EventMapFocusEventDetails & EventMapWheelEventDetails
+
+export type SvelthreeInteractionEventDispatcher = ReturnType<typeof createEventDispatcher<EventMapAllEventDetails>>
 
 import type { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 export type SvelthreeStoreArrayItem = THREE.Scene | THREE.PerspectiveCamera | THREE.OrthographicCamera | THREE.CubeCamera | THREE_OrbitControls
@@ -563,37 +614,40 @@ export type SvelthreeSupportedInteractionEvent =
 //"touchend",   ->  RECONSIDER  implement?
 //"touchcancel" ->  RECONSIDER  implement?
 
+type GetEventHandler<E, M> = [handler: (e: E) => void, modifiers?: Array<M>] | ((e: E) => void)
+
+export type SvelthreePointerEvent = SvelthreeInteractionEvent<SvelthreePointerEventDetail>
+export type SvelthreePointerEventModifier = SvelthreeSupportedModifier
+
+/** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
+export type SvelthreePointerEventHandler = GetEventHandler<SvelthreePointerEvent, SvelthreePointerEventModifier>
+
+export type SvelthreeFocusEvent = SvelthreeInteractionEvent<SvelthreeFocusEventDetail>
+export type SvelthreeFocusEventModifier = SvelthreeSupportedModifier
+
+/** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
+export type SvelthreeFocusEventHandler = GetEventHandler<SvelthreeFocusEvent, SvelthreeFocusEventModifier>
+
+export type SvelthreeKeyboardEvent = SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>
+export type SvelthreeKeyboardEventModifier = SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget
+
+/** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
+export type SvelthreeKeyboardEventHandler = GetEventHandler<SvelthreeKeyboardEvent, SvelthreeKeyboardEventModifier>
+
+export type SvelthreeWheelEvent = SvelthreeInteractionEvent<SvelthreeWheelEventDetail>
+export type SvelthreeWheelEventModifier = SvelthreeSupportedModifier | SvelthreeWheelListenerTarget
+
+/** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
+export type SvelthreeWheelEventHandler = GetEventHandler<SvelthreeWheelEvent, SvelthreeWheelEventModifier>
+
 export type SvelthreeModifiersProp =
 	| { all?: SvelthreeSupportedModifier[] }
 	| { [event_name in SvelthreeSupportedPointerEvent]?: Array<SvelthreeSupportedModifier> }
 	| { [event_name in SvelthreeSupportedFocusEvent]?: Array<SvelthreeSupportedModifier> }
-	| {
-			[event_name in SvelthreeSupportedKeyboardEvent]?: Array<SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget>
-	  }
-	| {
-			[event_name in SvelthreeSupportedWheelEvent]?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>
-	  }
+	| { [event_name in SvelthreeSupportedKeyboardEvent]?: Array<SvelthreeKeyboardEventModifier> }
+	| { [event_name in SvelthreeSupportedWheelEvent]?: Array<SvelthreeWheelEventModifier> }
 
-export type SvelthreeGenericEventHandler =
-	| [handler: (e: SvelthreeInteractionEvent) => void, modifiers?: Array<SvelthreeSupportedModifier>]
-	| ((e: SvelthreeInteractionEvent) => void)
-
-export type SvelthreePointerEventHandler = SvelthreeGenericEventHandler
-export type SvelthreeFocusEventHandler = SvelthreeGenericEventHandler
-export type SvelthreeKeyboardEventHandler =
-	| [handler: (e: SvelthreeInteractionEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget>]
-	| ((e: SvelthreeInteractionEvent) => void)
-
-export type SvelthreeWheelEventHandler =
-	| [handler: (e: CustomEvent) => void, modifiers?: Array<SvelthreeSupportedModifier | SvelthreeWheelListenerTarget>]
-	| ((e: SvelthreeInteractionEvent) => void)
-
-export type SvelthreePropActionHandler =
-	| SvelthreeGenericEventHandler
-	| SvelthreePointerEventHandler
-	| SvelthreeFocusEventHandler
-	| SvelthreeKeyboardEventHandler
-	| SvelthreeWheelEventHandler
+export type SvelthreePropActionHandler = SvelthreePointerEventHandler | SvelthreeFocusEventHandler | SvelthreeKeyboardEventHandler | SvelthreeWheelEventHandler
 /** An explicitly **asynchoronous** callback-function
  * ```ts
  * (comp: T) => Promise<unknown>

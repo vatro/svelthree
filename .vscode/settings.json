@@ -100,7 +100,7 @@
 			"overviewRulerColor": "grey"
 		},
 		{
-			"text": " SSR ",
+			"text": " CSR ONLY ",
 			"border": "2px solid #ff3e00",
 			"fontWeight": "bold",
 			"color": "#ffffff",

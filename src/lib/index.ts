@@ -31,7 +31,27 @@ export type {
 } from "./types/types-extra.js"
 
 // Interaction related
-export type { SvelthreeInteractableComponent, SvelthreeInteractionEvent } from "./types/types-extra.js"
+export type {
+	SvelthreeInteractableComponent,
+	SvelthreePointerEvent,
+	SvelthreePointerEventDetail,
+	SvelthreePointerEventHandler,
+	SvelthreePointerEventModifier,
+	SvelthreeFocusEvent,
+	SvelthreeFocusEventDetail,
+	SvelthreeFocusEventHandler,
+	SvelthreeFocusEventModifier,
+	SvelthreeKeyboardEvent,
+	SvelthreeKeyboardEventDetail,
+	SvelthreeKeyboardEventHandler,
+	SvelthreeKeyboardEventModifier,
+	SvelthreeWheelEvent,
+	SvelthreeWheelEventDetail,
+	SvelthreeWheelEventHandler,
+	SvelthreeWheelEventModifier,
+	SvelthreeModifiersProp,
+	SvelthreePropActionHandler
+} from "./types/types-extra.js"
 
 // `props` Object Literal types
 export type {
