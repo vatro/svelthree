@@ -102,7 +102,7 @@
 	import type { RaycastArray } from "../utils/RaycastArray.js"
 
 	import { createEventDispatcher } from "svelte"
-	import type { EventMapAllEventDetails } from "../types/types-extra.js"
+	import type { EventMapAllEventDetails, EventMapAllEvents } from "../types/types-extra.js"
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
@@ -148,6 +148,10 @@
 	export let log_mau: boolean = log_all
 
 	const dispatch = createEventDispatcher()
+
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface $$Events extends EventMapAllEvents {}
+
 	const dispatch_interaction = createEventDispatcher<EventMapAllEventDetails>()
 
 	let scene: Scene = getContext("scene")
