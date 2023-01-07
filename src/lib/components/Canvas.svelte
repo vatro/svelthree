@@ -285,7 +285,7 @@ This is a **svelthree** _Canvas_ Component.
 			;($svelthreeStores[sti] as StoreBody).raycaster = raycaster
 			$canvas_interactivity.enabled = true
 
-			if (store.renderer?.xr.enabled === false) {
+			if (non_xr()) {
 				start_updating_pointer()
 				add_interaction_0_listener()
 			}
@@ -294,6 +294,20 @@ This is a **svelthree** _Canvas_ Component.
 				console.info("SVELTHREE > Canvas : after Raycaster creation, store: ", store)
 			}
 		}
+	}
+
+	function non_xr(): boolean | null {
+		if (store) {
+			if (store.renderer) {
+				return !!(store.renderer.xr.enabled === false)
+			} else {
+				console.error("SVELTHREE > Canvas > non_xr : invalid 'store.renderer' value!", store.renderer)
+			}
+		} else {
+			console.error("SVELTHREE > Canvas > non_xr : invalid 'store' value!", store)
+		}
+
+		return null
 	}
 
 	// reactively remove raycaster
