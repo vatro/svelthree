@@ -7,7 +7,7 @@ export const SUPPORTED_ADD_EVENT_LISTENER_OPTIONS = [
 
 export const ADD_EVENT_LISTENER_OPTIONS_SET = new Set([...SUPPORTED_ADD_EVENT_LISTENER_OPTIONS])
 
-export const SUPPORTED_MODIFIERS = [
+export const STANDARD_MODIFIERS = [
 	"preventDefault",
 	"stopPropagation",
 	"capture",
@@ -18,7 +18,13 @@ export const SUPPORTED_MODIFIERS = [
 	"self"
 ] as const
 
-export const SUPPORTED_MODIFIERS_SET = new Set([...SUPPORTED_MODIFIERS])
+export const STANDARD_MODIFIERS_SET = new Set([...STANDARD_MODIFIERS])
+
+export const ALL_MODIFIERS = [
+	...STANDARD_MODIFIERS,
+] as const
+
+export const ALL_MODIFIERS_SET = new Set([...ALL_MODIFIERS])
 
 export const POINTER_EVENTS = [
 	"click",

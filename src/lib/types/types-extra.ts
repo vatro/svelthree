@@ -576,7 +576,8 @@ export type RaycastArrayOutput = THREE.Object3D[]
 
 import type {
 	SUPPORTED_ADD_EVENT_LISTENER_OPTIONS,
-	SUPPORTED_MODIFIERS,
+	STANDARD_MODIFIERS,
+	ALL_MODIFIERS,
 	POINTER_EVENTS,
 	KEYBOARD_EVENTS,
 	KEYBOARD_LISTENER_TARGETS,
@@ -589,7 +590,9 @@ type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<inf
 
 export type SupportedAddEventListenerOption = ElementType<typeof SUPPORTED_ADD_EVENT_LISTENER_OPTIONS>
 
-export type SvelthreeSupportedModifier = ElementType<typeof SUPPORTED_MODIFIERS>
+export type SvelthreeStandardEventModifier = ElementType<typeof STANDARD_MODIFIERS>
+
+export type SvelthreeEventModifier = ElementType<typeof ALL_MODIFIERS>
 
 export type SvelthreeSupportedPointerEvent = ElementType<typeof POINTER_EVENTS>
 
@@ -617,13 +620,13 @@ export type SvelthreeSupportedInteractionEvent =
 type GetEventHandler<E, M> = [handler: (e: E) => void, modifiers?: Array<M>] | ((e: E) => void)
 
 export type SvelthreePointerEvent = SvelthreeInteractionEvent<SvelthreePointerEventDetail>
-export type SvelthreePointerEventModifier = SvelthreeSupportedModifier
+export type SvelthreePointerEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreePointerEventHandler = GetEventHandler<SvelthreePointerEvent, SvelthreePointerEventModifier>
 
 export type SvelthreeFocusEvent = SvelthreeInteractionEvent<SvelthreeFocusEventDetail>
-export type SvelthreeFocusEventModifier = SvelthreeSupportedModifier
+export type SvelthreeFocusEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeFocusEventHandler = GetEventHandler<SvelthreeFocusEvent, SvelthreeFocusEventModifier>
@@ -641,9 +644,9 @@ export type SvelthreeWheelEventModifier = SvelthreeSupportedModifier | Svelthree
 export type SvelthreeWheelEventHandler = GetEventHandler<SvelthreeWheelEvent, SvelthreeWheelEventModifier>
 
 export type SvelthreeModifiersProp =
-	| { all?: SvelthreeSupportedModifier[] }
-	| { [event_name in SvelthreeSupportedPointerEvent]?: Array<SvelthreeSupportedModifier> }
-	| { [event_name in SvelthreeSupportedFocusEvent]?: Array<SvelthreeSupportedModifier> }
+	| { all?: SvelthreeStandardEventModifier[] }
+	| { [event_name in SvelthreeSupportedPointerEvent]?: Array<SvelthreeStandardEventModifier> }
+	| { [event_name in SvelthreeSupportedFocusEvent]?: Array<SvelthreeStandardEventModifier> }
 	| { [event_name in SvelthreeSupportedKeyboardEvent]?: Array<SvelthreeKeyboardEventModifier> }
 	| { [event_name in SvelthreeSupportedWheelEvent]?: Array<SvelthreeWheelEventModifier> }
 
