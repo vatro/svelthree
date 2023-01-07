@@ -652,7 +652,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			last_pointer_move.clientY = evt.clientY
 
 			// no check, no dispatch via shadow dom but also queue pointer move in "always" mode
-			pointerevents_handler(get_pointerevent_modified_clone(evt))
+			pointerevents_handler(get_pointerevent_modified_clone(evt), null)
 		}
 	}
 
@@ -882,13 +882,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
+		if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
+
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
 		switch (render_mode) {
 			case "always":
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
-
-				if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
 
 				switch (evt.type) {
 					case "pointermove": {
@@ -912,8 +912,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				break
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
-
-				if (cancel_or_stop_propagation_fn !== null) cancel_or_stop_propagation_fn(evt)
 
 				if (evt.type === "pointermove") {
 					dispatch_pointerevent_intersection_indep(evt)
