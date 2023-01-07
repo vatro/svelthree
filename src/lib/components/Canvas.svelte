@@ -16,9 +16,9 @@ This is a **svelthree** _Canvas_ Component.
 		readonly style: string | undefined
 		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
-		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
 		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
 		readonly defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost
+		readonly onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
 		readonly tabindex: number | undefined
@@ -138,7 +138,7 @@ This is a **svelthree** _Canvas_ Component.
 	/**
 	 *  TODO  new description
 	 */
-	export let on_keyboardevents: ((e: KeyboardEvent) => void) | undefined = undefined
+	export let onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined = undefined
 
 	const canvas_interactivity: Writable<{ enabled: boolean | undefined }> = writable({ enabled: interactive })
 	setContext("canvas_interactivity", canvas_interactivity)
@@ -626,7 +626,7 @@ This is a **svelthree** _Canvas_ Component.
 	function on_keyboard_event_listener(e: KeyboardEvent) {
 		// TODO  clarify: in Chrome `e.target` is always `document.body` regardless if we've added the listener to `window` or `document`.
 		if (e.target === document.body || e.target === document || e.target === c) {
-			if (on_keyboardevents && typeof on_keyboardevents === "function") on_keyboardevents(e)
+			if (onKeyboardEvent && typeof onKeyboardEvent === "function") onKeyboardEvent(e)
 			dispatch(`canvas_${e.type}`, { event: e })
 		}
 	}
@@ -992,9 +992,9 @@ This is a **svelthree** _Canvas_ Component.
 					style,
 					changeCursor,
 					interactive,
-					on_keyboardevents,
 					onPointerEvent,
 					defaultKeyboardEventListenerHost,
+					onKeyboardEvent,
 					raycast,
 					recursive,
 					tabindex,
