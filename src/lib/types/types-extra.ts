@@ -580,7 +580,6 @@ import type {
 	ALL_MODIFIERS,
 	POINTER_EVENTS,
 	KEYBOARD_EVENTS,
-	KEYBOARD_LISTENER_TARGETS,
 	FOCUS_EVENTS,
 	WHEEL_EVENTS,
 	WHEEL_LISTENER_TARGETS
@@ -597,8 +596,6 @@ export type SvelthreeEventModifier = ElementType<typeof ALL_MODIFIERS>
 export type SvelthreeSupportedPointerEvent = ElementType<typeof POINTER_EVENTS>
 
 export type SvelthreeSupportedKeyboardEvent = ElementType<typeof KEYBOARD_EVENTS>
-
-export type SvelthreeKeyboardListenerTarget = ElementType<typeof KEYBOARD_LISTENER_TARGETS>
 
 export type SvelthreeSupportedFocusEvent = ElementType<typeof FOCUS_EVENTS>
 
@@ -632,7 +629,7 @@ export type SvelthreeFocusEventModifier = SvelthreeStandardEventModifier
 export type SvelthreeFocusEventHandler = GetEventHandler<SvelthreeFocusEvent, SvelthreeFocusEventModifier>
 
 export type SvelthreeKeyboardEvent = SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>
-export type SvelthreeKeyboardEventModifier = SvelthreeSupportedModifier | SvelthreeKeyboardListenerTarget
+export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeKeyboardEventHandler = GetEventHandler<SvelthreeKeyboardEvent, SvelthreeKeyboardEventModifier>
