@@ -114,92 +114,31 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/**
-	 * Set listener options for all pointer listeners ( _internally_ ) bound directly to:
-	 * - the `<canvas>` element
-	 *
-	 *  TODO : this is just a basic implementation, not much tested ( _other use cases_ ) yet.
+	 *  TODO  new description
 	 * */
 	export let pointer_listener_options: { capture: boolean } = { capture: true }
 	const pointer_capture = pointer_listener_options.capture
 
 	/**
-	 * A function (_event handler_) which will be executed **_right before_** a **registered** (_used by an interactive component_) and
-	 * `click` **related** ( **!** ) `PointerEvent` gets internally dispatched (_spread_) via the `Canvas` component to any
-	 * interactive components using that event (_listening_).
-	 *
-	 * **Usage example**:
-	 * ```
-	 * on_pointerevents = { (e) => e.stopPropagation() }
-	 * ```
-	 * will prevent any `"click"`, `"pointerup"` or `"pointerdown"` events on the `<canvas>` element from bubbling up to it's parent DOM elements,
-	 * e.g. a **click** on a deeply nested svelthree-canvas will not trigger `"click"` handlers on it's parent DOM elements.
-	 *
-	 * ☝️ _This will **NOT** affect event propagation inside the **svelthree shadow dom tree** / any modifiers specified by the `modifiers` prop._
+	 *  TODO  new description
 	 */
 	export let on_pointerevents: ((e: PointerEvent) => void) | undefined = undefined
 
 	/**
-	 * Specifies where to add `KeyboardEvent` listeners to.
-	 *
-	 * ☝️ _Note on **`default_keyboardevents_listener` usage**: if you're using the `KeyboardEvent` modifier **`"self"`**,  \
-	 * you'll have to set `default_keyboard_listeners_host` to `"window"` or `"document"` in order for it to have effect._
-	 * ---
-	 * `"window"` (_default_)  \
-	 * will explicitly add `KeyboardEvent` listeners to the `window` object.  \
-	 * _in order for interactive components to react to keyboard input:_
-	 * - the `<canvas>` element **doesn't need** to be **focusable / have focus**.
-	 * - an **object** in a scene **doesn't need** to be **focusable / have focus**.
-	 *
-	 * _common usage scenario_:
-	 * - You want your svelthree-app to **always** react to keyboard input.
-	 * - You want to globally `.preventDefault()` some browser behavior on keyboard input.
-	 * ---
-	 * `"canvas"`  \
-	 * will explicitly add `KeyboardEvent` listeners to the `<canvas>` element.  \
-	 * _in order for interactive components to react to keyboard input:_
-	 * - ☝️ the `<canvas>` element **has to be focusable / have focus**.
-	 * - an **object** in a scene **doesn't need** to be **focusable / have focus**.
-	 *
-	 * _common usage scenario_:
-	 * - You want your svelthree-app to react to keyboard input only when the `<canvas>` element is focused.
-	 * - You want to `.preventDefault()` some browser behavior on keyboard input only if the `<canvas>` element is focused, but not for the rest of the page.
-	 * ---
-	 * `"document"`  \
-	 * will explicitly add `KeyboardEvent` listeners to the `document` object.  \
-	 * Same effect and usage scenarios as `"window"`.
-	 *
+	 *  TODO  new description
 	 */
 	export let default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost = "window"
 	let keyboard_listeners_host: Window | Document | HTMLCanvasElement | undefined = undefined
 
 
 	/**
-	 * Set listener options for all keyboard listeners ( _internally_ ) bound to either:
-	 *
-	 * _specified by the `default_keyboard_listeners_host` prop, default: `window`_
-	 * - the `window` object
-	 * - the `document` object
-	 * - the `<canvas>` element
-	 *
-	 *  TODO : this is just a basic implementation, not much tested ( _other use cases_ ) yet.
-	 * */
+	 *  TODO  new description
+	 */
 	const default_keyboardevent_listener_options: { capture: boolean } = { capture: true }
 	const keyboard_capture = default_keyboardevent_listener_options.capture
 
 	/**
-	 * A function (_event handler_) which will be executed **_right before_** a **registered** (_used by an interactive component_) `KeyboardEvent`
-	 * gets internally dispatched (_spread_) via the `Canvas` component to any interactive components using that event (_listening_).
-	 *
-	 * **Usage example**:
-	 * ```
-	 * on_keyboardevents = {(e) => {
-	 * 	if (e.type === "keydown" && e.code === "ArrowDown") e.preventDefault()
-	 * }}
-	 * ```
-	 * will prevent scrolling down (_default browser behavior_) when the `ArrowDown` key was pressed.
-	 *
-	 * ☝️ _This is an alternative to using the `default_keyboardevents_listener` prop which allows you specify
-	 * a different handler for `"keydown"`, `"keyup"` and `"keypress"` event._
+	 *  TODO  new description
 	 */
 	export let on_keyboardevents: ((e: KeyboardEvent) => void) | undefined = undefined
 
