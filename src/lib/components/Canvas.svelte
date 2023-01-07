@@ -6,11 +6,6 @@ This is a **svelthree** _Canvas_ Component.
 <script context="module" lang="ts">
 	type SvelthreeDefaultKeyboardListenerHost = "window" | "canvas" | "document" | undefined
 	type CurrentComponentType = import("./Canvas.svelte").default
-	interface DefaultKeyboardEventsListener {
-		keydown?: (e: KeyboardEvent) => void
-		keyup?: (e: KeyboardEvent) => void
-		keypress?: (e: KeyboardEvent) => void
-	}
 
 	export interface IStateCanvas {
 		readonly log_all: boolean
@@ -24,8 +19,6 @@ This is a **svelthree** _Canvas_ Component.
 		readonly pointer_listener_options: { capture: boolean }
 		readonly on_pointerevents: ((e: PointerEvent) => void) | undefined
 		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
-		readonly default_keyboardevents_listener: DefaultKeyboardEventsListener | undefined
-		readonly keyboard_listener_options: { capture: boolean }
 		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
@@ -179,25 +172,6 @@ This is a **svelthree** _Canvas_ Component.
 	export let default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost = "window"
 	let keyboard_listeners_host: Window | Document | HTMLCanvasElement | undefined = undefined
 
-	/**
-	 * Allows specifying a different handlers for _global_ `"keydown"`, `"keyup"` and `"keypress"` events.
-	 * If defined, an additional listener will be added to the `default_keyboard_listeners_host` (_default: `window`_).
-	 * 
-	 * ☝️ _if you're using the `KeyboardEvent` modifier **`"self"`**:  \
-	 * you have to set `default_keyboard_listeners_host` to `"window"` or `"document"`, otherwise `default_keyboardevents_listener` will have no effect!_
-	 * 
-	 * **Usage example**:
-	 * ```
-	 * default_keyboardevents_listener = {{
-        keydown: (e) => { if (e.code === "ArrowDown") e.preventDefault() }
-    }}
-	 * ```
-	 * will prevent scrolling down (_default browser behavior_) when the `ArrowDown` key was pressed.
-	 * 
-	 * ☝️ _This is an alternative to using the `on_keyboardevents` prop which allows you to specify a **single global (default)** `KeyboardEvent`
-	 * handler without adding a new listener to the `default_keyboard_listeners_host` (default: `window`)._
-	 */
-	export let default_keyboardevents_listener: DefaultKeyboardEventsListener | undefined = undefined
 
 	/**
 	 * Set listener options for all keyboard listeners ( _internally_ ) bound to either:
@@ -209,8 +183,8 @@ This is a **svelthree** _Canvas_ Component.
 	 *
 	 *  TODO : this is just a basic implementation, not much tested ( _other use cases_ ) yet.
 	 * */
-	export let keyboard_listener_options: { capture: boolean } = { capture: true }
-	const keyboard_capture = keyboard_listener_options.capture
+	const default_keyboardevent_listener_options: { capture: boolean } = { capture: true }
+	const keyboard_capture = default_keyboardevent_listener_options.capture
 
 	/**
 	 * A function (_event handler_) which will be executed **_right before_** a **registered** (_used by an interactive component_) `KeyboardEvent`

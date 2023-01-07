@@ -1279,29 +1279,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		//  IMPORTANT  //
-		// any specified `default_keyboard_events_handler` for the received keyboard event
-		// will override any present `preventDefault` and `stopPropagation` modifier prop setting.
-
-		// TODO  improve / simplify
-		const is_default_keyboard_handler_specified: boolean | null = default_keyboard_handler_specified(evt.type)
-		if (is_default_keyboard_handler_specified === true) {
-			if (canvas_component) {
-				canvas_component.default_keyboard_events_handler[evt.type](evt)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > keyboardevents_handler : Couldn't call 'canvas_component.default_keyboard_events_handler[evt.type](evt)', 'canvas_component' is not available!`,
-					{ canvas_component }
-				)
-			}
-		} else if (is_default_keyboard_handler_specified === false) {
-			if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
-		} else if (is_default_keyboard_handler_specified === null) {
-			console.error(
-				`SVELTHREE > ${c_name} > keyboardevents_handler : 'is_default_keyboard_handler_specified' is 'null', means 'canvas_component' is not available!`,
-				{ canvas_component }
-			)
-		}
+		if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
 
 		switch (render_mode) {
 			case "always": {
@@ -1319,21 +1297,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					`SVELTHREE > ${c_name} > keyboardevents_handler : no such 'render_mode' -> ${render_mode}!`
 				)
 				break
-		}
-	}
-
-	function default_keyboard_handler_specified(event_name: KeyboardEvent["type"]): boolean | null {
-		if (canvas_component) {
-			return (
-				canvas_component.default_keyboard_events_handler &&
-				canvas_component.default_keyboard_events_handler[event_name]
-			)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > default_keyboard_handler_specified : 'canvas_component' not available!`,
-				{ canvas_component }
-			)
-			return false
 		}
 	}
 
