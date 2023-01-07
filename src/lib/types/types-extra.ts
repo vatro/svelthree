@@ -581,8 +581,7 @@ import type {
 	POINTER_EVENTS,
 	KEYBOARD_EVENTS,
 	FOCUS_EVENTS,
-	WHEEL_EVENTS,
-	WHEEL_LISTENER_TARGETS
+	WHEEL_EVENTS
 } from "../constants/Interaction.js"
 
 type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
@@ -600,8 +599,6 @@ export type SvelthreeSupportedKeyboardEvent = ElementType<typeof KEYBOARD_EVENTS
 export type SvelthreeSupportedFocusEvent = ElementType<typeof FOCUS_EVENTS>
 
 export type SvelthreeSupportedWheelEvent = ElementType<typeof WHEEL_EVENTS>
-
-export type SvelthreeWheelListenerTarget = ElementType<typeof WHEEL_LISTENER_TARGETS>
 
 export type SvelthreeSupportedInteractionEvent =
 	| SvelthreeSupportedPointerEvent
@@ -635,7 +632,7 @@ export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier
 export type SvelthreeKeyboardEventHandler = GetEventHandler<SvelthreeKeyboardEvent, SvelthreeKeyboardEventModifier>
 
 export type SvelthreeWheelEvent = SvelthreeInteractionEvent<SvelthreeWheelEventDetail>
-export type SvelthreeWheelEventModifier = SvelthreeSupportedModifier | SvelthreeWheelListenerTarget
+export type SvelthreeWheelEventModifier = SvelthreeStandardEventModifier | "intersect"
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeWheelEventHandler = GetEventHandler<SvelthreeWheelEvent, SvelthreeWheelEventModifier>
