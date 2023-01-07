@@ -16,7 +16,6 @@ This is a **svelthree** _Canvas_ Component.
 		readonly style: string | undefined
 		readonly change_cursor: boolean
 		readonly interactive: boolean | undefined
-		readonly pointer_listener_options: { capture: boolean }
 		readonly on_pointerevents: ((e: PointerEvent) => void) | undefined
 		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
 		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
@@ -116,8 +115,8 @@ This is a **svelthree** _Canvas_ Component.
 	/**
 	 *  TODO  new description
 	 * */
-	export let pointer_listener_options: { capture: boolean } = { capture: true }
-	const pointer_capture = pointer_listener_options.capture
+	const default_pointerevent_listener_options: { capture: boolean } = { capture: true }
+	const pointer_capture = default_pointerevent_listener_options.capture
 
 	/**
 	 *  TODO  new description
@@ -285,8 +284,8 @@ This is a **svelthree** _Canvas_ Component.
 	let raycaster: Raycaster | null
 
 	$: if (c && !interactive) {
-		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_listener_options)
-		c.addEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_listener_options)
+		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, default_pointerevent_listener_options)
+		c.addEventListener("pointerleave", on_pointer_leave__not_interactive, default_pointerevent_listener_options)
 	}
 
 	// reactive create raycaster
@@ -354,7 +353,7 @@ This is a **svelthree** _Canvas_ Component.
 
 	function add_pointermove_listeners(): void {
 		// IMPORTANT  `pointermove` event listener is always needed except the `Canvas` component is not interactive.
-		c.addEventListener("pointermove", update_pointer_state, pointer_listener_options)
+		c.addEventListener("pointermove", update_pointer_state, default_pointerevent_listener_options)
 		add_interaction_1_listener()
 	}
 
@@ -364,8 +363,8 @@ This is a **svelthree** _Canvas_ Component.
 
 		add_pointermove_listeners()
 
-		c.addEventListener("pointerenter", on_pointer_enter, pointer_listener_options)
-		c.addEventListener("pointerleave", on_pointer_leave, pointer_listener_options)
+		c.addEventListener("pointerenter", on_pointer_enter, default_pointerevent_listener_options)
+		c.addEventListener("pointerleave", on_pointer_leave, default_pointerevent_listener_options)
 
 		c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 		c.removeEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_capture)
@@ -374,7 +373,7 @@ This is a **svelthree** _Canvas_ Component.
 	function on_pointer_enter(): void {
 		$pointer_over_canvas.status = true
 
-		c.addEventListener("pointerleave", on_pointer_leave, pointer_listener_options)
+		c.addEventListener("pointerleave", on_pointer_leave, default_pointerevent_listener_options)
 		add_pointermove_listeners()
 		c.removeEventListener("pointerenter", on_pointer_enter, pointer_capture)
 	}
@@ -382,7 +381,7 @@ This is a **svelthree** _Canvas_ Component.
 	function on_pointer_enter__not_interactive(): void {
 		$pointer_over_canvas.status = true
 
-		c.addEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_listener_options)
+		c.addEventListener("pointerleave", on_pointer_leave__not_interactive, default_pointerevent_listener_options)
 		c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 
 		if (change_cursor) {
@@ -393,7 +392,7 @@ This is a **svelthree** _Canvas_ Component.
 	function on_pointer_leave__not_interactive(): void {
 		$pointer_over_canvas.status = false
 
-		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_listener_options)
+		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, default_pointerevent_listener_options)
 		c.removeEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_capture)
 
 		if (change_cursor) set_cursor_style("default")
@@ -404,7 +403,7 @@ This is a **svelthree** _Canvas_ Component.
 
 		remove_pointermove_listeners()
 		c.removeEventListener("pointerleave", on_pointer_leave, pointer_capture)
-		c.addEventListener("pointerenter", on_pointer_enter, pointer_listener_options)
+		c.addEventListener("pointerenter", on_pointer_enter, default_pointerevent_listener_options)
 
 		if (change_cursor) set_cursor_style("default")
 	}
@@ -585,7 +584,13 @@ This is a **svelthree** _Canvas_ Component.
 						total: 1
 					})
 
-					c.addEventListener(event_name, on_pointer_event_listener as EventListener, pointer_listener_options)
+					//  POINTER Event  Listeners are added to the <canvas> DOM element by default ONLY. Canvas will capture them and dispatch the internal event.
+
+					c.addEventListener(
+						event_name,
+						on_pointer_event_listener as EventListener,
+						default_pointerevent_listener_options
+					)
 
 					break
 				case "keydown":
@@ -1018,7 +1023,6 @@ This is a **svelthree** _Canvas_ Component.
 					style,
 					change_cursor,
 					interactive,
-					pointer_listener_options,
 					on_pointerevents,
 					default_keyboard_listeners_host,
 					default_keyboardevents_listener,
