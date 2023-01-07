@@ -1,7 +1,8 @@
 export const SUPPORTED_ADD_EVENT_LISTENER_OPTIONS = [
 	"once",
 	"passive",
-	"capture"
+	"capture",
+	"nonpassive"
 	//"signal" ->  RECONSIDER  implement?
 ] as const
 
@@ -12,8 +13,8 @@ export const STANDARD_MODIFIERS = [
 	"stopPropagation",
 	"capture",
 	"once",
-	//"passive",    ->  TODO  implement
-	//"nonpassive", ->  TODO  implement
+	"passive", //->  TODO  implement
+	"nonpassive", //->  TODO  implement
 	//"trusted",    ->  RECONSIDER  implement?
 	"self"
 ] as const

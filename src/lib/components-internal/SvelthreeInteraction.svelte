@@ -332,8 +332,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
 
-		let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
 		let mods: Set<SvelthreeEventModifier> | undefined | null
+
+		// default
+		let opts: { [key in SupportedAddEventListenerOption]?: boolean } = {
+			capture: false,
+			passive: true, // IMPORTANT  `svelthree` default value
+			once: false
+		}
 
 		if (all && spec) {
 			mods = new Set([...all, ...spec])
@@ -344,10 +350,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (mods) {
 			mods.forEach((key) => {
 				if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
-					if (!opts) opts = {}
-					opts[key as SupportedAddEventListenerOption] = true
+					if (key !== "passive" && key !== "nonpassive") {
+						opts[key as SupportedAddEventListenerOption] = true
+					} else if (key === "nonpassive") {
+						opts.passive = false
+					}
 				}
 			})
+
+			// IMPORTANT  override `passive` if modifiers contain `preventDefault` and `passive` was set to `false` (via 'nonpassive' modifier)
+			if (mods.has("preventDefault")) {
+				if (opts.passive === false) {
+					opts.passive = true
+					console.warn(
+						`SVELTHREE > ${c_name} : The 'preventDefault' modifier cannot be used together with the 'nonpassive' modifier, 'svelthree' has set (forced) the listener-option 'passive' to 'true'`
+					)
+				}
+			}
 		}
 
 		return opts
