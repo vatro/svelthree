@@ -4,7 +4,7 @@ This is a **svelthree** _Canvas_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
-	type SvelthreeDefaultKeyboardListenerHost = "window" | "canvas" | "document" | undefined
+	type PropKeyboardEventListenerHost = "canvas" | "document" | "window" | undefined
 	type CurrentComponentType = import("./Canvas.svelte").default
 
 	export interface IStateCanvas {
@@ -16,9 +16,9 @@ This is a **svelthree** _Canvas_ Component.
 		readonly style: string | undefined
 		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
-		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
 		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
 		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
+		readonly defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
 		readonly tabindex: number | undefined
@@ -126,9 +126,8 @@ This is a **svelthree** _Canvas_ Component.
 	/**
 	 *  TODO  new description
 	 */
-	export let default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost = "window"
-	let keyboard_listeners_host: Window | Document | HTMLCanvasElement | undefined = undefined
-
+	export let defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost = "window"
+	let keyboard_listener_host: Window | Document | HTMLCanvasElement | undefined
 
 	/**
 	 *  TODO  new description
@@ -199,40 +198,26 @@ This is a **svelthree** _Canvas_ Component.
 	let c: HTMLCanvasElement
 
 	$: if (c) {
-		if (default_keyboard_listeners_host !== undefined) {
-			switch (default_keyboard_listeners_host) {
-				case "document":
-					keyboard_listeners_host = document
-					break
-				case "window":
-					keyboard_listeners_host = window
-					break
-				case "canvas":
-					keyboard_listeners_host = c
-					break
+		if (browser) {
+			if (defaultKeyboardEventListenerHost) {
+				keyboard_listener_host = get_host(defaultKeyboardEventListenerHost)
+			} else {
+				keyboard_listener_host = window
 			}
 		}
 	}
 
-	$: if (c && keyboard_listeners_host !== undefined && default_keyboardevents_listener !== undefined) {
-		if (default_keyboardevents_listener.keydown)
-			keyboard_listeners_host.addEventListener(
-				"keydown",
-				default_keyboardevents_listener.keydown as EventListener,
-				keyboard_listener_options
-			)
-		if (default_keyboardevents_listener.keyup)
-			keyboard_listeners_host.addEventListener(
-				"keyup",
-				default_keyboardevents_listener.keyup as EventListener,
-				keyboard_listener_options
-			)
-		if (default_keyboardevents_listener.keypress)
-			keyboard_listeners_host.addEventListener(
-				"keypress",
-				default_keyboardevents_listener.keypress as EventListener,
-				keyboard_listener_options
-			)
+	function get_host(host: "window" | "document" | "canvas"): Window | Document | HTMLCanvasElement | undefined {
+		switch (host) {
+			case "window":
+				return window
+			case "document":
+				return document
+			case "canvas":
+				return c
+			default:
+				return undefined
+		}
 	}
 
 	// IMPORTANT  reactive!
@@ -600,16 +585,16 @@ This is a **svelthree** _Canvas_ Component.
 						total: 1
 					})
 
-					if (keyboard_listeners_host) {
-						keyboard_listeners_host.addEventListener(
+					if (keyboard_listener_host) {
+						keyboard_listener_host.addEventListener(
 							event_name,
 							on_keyboard_event_listener as EventListener,
 							keyboard_listener_options
 						)
 					} else {
 						console.error(
-							"SVELTHREE > Canvas > register_canvas_listener : Couldn't register 'Canvas' keyboard-listener, 'keyboard_listeners_host' not available!",
-							{ keyboard_listeners_host }
+							"SVELTHREE > Canvas > register_canvas_listener : Couldn't register 'Canvas' keyboard-listener, 'keyboard_listener_host' not available!",
+							{ keyboard_listener_host }
 						)
 					}
 					break
@@ -717,7 +702,11 @@ This is a **svelthree** _Canvas_ Component.
 					case "keydown":
 					case "keyup":
 					case "keypress":
-						document.removeEventListener(event_name, on_keyboard_event_listener, keyboard_capture)
+						keyboard_listener_host?.removeEventListener(
+							event_name,
+							on_keyboard_event_listener as EventListener,
+							keyboard_capture
+						)
 						break
 					default:
 						break
@@ -809,18 +798,18 @@ This is a **svelthree** _Canvas_ Component.
 			c.removeEventListener("pointerdown", on_pointer_event_listener, pointer_capture)
 			c.removeEventListener("pointerup", on_pointer_event_listener, pointer_capture)
 
-			if (keyboard_listeners_host) {
-				keyboard_listeners_host.removeEventListener(
+			if (keyboard_listener_host) {
+				keyboard_listener_host.removeEventListener(
 					"keydown",
 					on_keyboard_event_listener as EventListener,
 					keyboard_capture
 				)
-				keyboard_listeners_host.removeEventListener(
+				keyboard_listener_host.removeEventListener(
 					"keyup",
 					on_keyboard_event_listener as EventListener,
 					keyboard_capture
 				)
-				keyboard_listeners_host.removeEventListener(
+				keyboard_listener_host.removeEventListener(
 					"keypress",
 					on_keyboard_event_listener as EventListener,
 					keyboard_capture
@@ -1023,11 +1012,11 @@ This is a **svelthree** _Canvas_ Component.
 					style,
 					changeCursor,
 					interactive,
-					default_keyboard_listeners_host,
 					default_keyboardevents_listener,
 					keyboard_listener_options,
 					on_keyboardevents,
 					onPointerEvent,
+					defaultKeyboardEventListenerHost,
 					raycast,
 					recursive,
 					tabindex,
