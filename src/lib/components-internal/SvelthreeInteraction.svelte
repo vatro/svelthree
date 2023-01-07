@@ -203,7 +203,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/**
 	 * [ _mode `always` only_ ]
-	 * Triggers `pointerover` / `pointerout` events -> even if the pointer is not moving, evt.g. if the pointer
+	 * Triggers `pointerover` / `pointerout` events -> even if the pointer is not moving, e.g. if the pointer
 	 * is over the `<canvas>` element an some interactive object intersects ( _animated_ ) the pointer
 	 * during animation rendering ( _raf_ ).
 	 *
@@ -267,7 +267,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		interaction3_execute_queued_keyboard_events()
 	}
 
-	/** [ _mode `always` only_ ] Executes any queue `focus` related events. */
+	/** [ _mode `always` only_ ] Executes any queued `focus` related events and resets the queue afterwards. */
 	function interaction3_execute_queued_focus_events(): void {
 		if (focus_events_queue.length) {
 			for (let i = 0; i < focus_events_queue.length; i++) {
@@ -277,7 +277,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	/** [ _mode `always` only_ ] Executes any queue `keyboard` related events. */
+	/** [ _mode `always` only_ ] Executes any queued `keyboard` related events and resets the queue afterwards. */
 	function interaction3_execute_queued_keyboard_events(): void {
 		if (keyboard_events_queue.length) {
 			for (let i = 0; i < keyboard_events_queue.length; i++) {
@@ -498,7 +498,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// IMPORTANT  LIMITATIONS:
 	// - if using directives  -> `once` should also be set as standard svelte modifier if set in modifiers-prop
 	// - `modifiers` prop will affect directives and actions if these are being mixed
-	// -  TODO  / CHECK evt.g. `on:click` without handler (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
+	// -  TODO  / CHECK e.g. `on:click` without handler (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
 	// the component itself should emit the event ... isn't this already like this?
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
@@ -848,7 +848,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// we do this because simply spreading the event object -> `{...e}`:
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
-		// also we cannot simply alter the value of `composed` via the event object like evt.g. `evt.composed = false`
+		// also we cannot simply alter the value of `composed` via the event object like e.g. `evt.composed = false`
 		for (const key in evt) {
 			if (key !== "path") {
 				event_init[key] = evt[key as keyof PointerEvent]
@@ -1154,9 +1154,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		if (modifiers_map?.get(event_name)?.has("self")) {
-			// listener is added directly to shadow dom.
+			// listener is added to the corresponding Shadow DOM element.
 			// The shadow dom element has to have focus in order to react to keyboard input.
-			//  IMPORTANT  MODIFIERS possible! evt.g. `preventDefault` modifier will have 'local' effect.
+			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
 			let listener: ((evt: KeyboardEvent) => void) | undefined = undefined
 			if (set_by === "prop_action") listener = keyboardevents_handler_action
 			if (set_by === "on_directive") listener = keyboardevents_handler_directive
@@ -1164,8 +1164,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			add_shadow_dom_keyboard_listener(event_name, listener_options, listener)
 		} else {
 			// <canvas> element is listening (listener attached to `window` or `document`) and spreading Keyboard events to all interactive
-			// components via an internal event, evt.g. `canvas_keydown`, just like pointer events.
-			//  IMPORTANT  NO MODIFIERS possible, evt.g. `preventDefault()` has to be called from inside some user defined global handler.
+			// components via an internal event, e.g. `canvas_keydown`, just like pointer events.
+			//  IMPORTANT  NO MODIFIERS possible, e.g. `preventDefault()` has to be called from inside some user defined global handler.
 			add_canvas_keyboard_listener(event_name, set_by)
 		}
 	}
@@ -1363,7 +1363,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 *
 	 * -  IMPORTANT  mode `"always"`:
 	 *   calling `evt.preventDefault()` / `evt.stopPropagation()` inside a handler **will have NO effect** ☝️,
-	 * because the was already emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
+	 * because the event was already emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
 	 * be set via `modifiers` prop in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
 	 *
 	 * -  IMPORTANT  mode `"auto"`:
@@ -1422,7 +1422,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	$: r_add_on_init = interactionEnabled && listeners
 	$: r_remove = !interactionEnabled && listeners
 
-	// Reactively add / remove pointer listeners, works with evt.g. (syntax):
+	// Reactively add / remove pointer listeners, works with e.g. (syntax):
 
 	// programmatically:
 	//   - add/re-add: `comp.on("click", do_on_click)`
