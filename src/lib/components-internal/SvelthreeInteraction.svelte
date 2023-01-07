@@ -5,7 +5,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 -->
 <script lang="ts">
 	import { onMount, beforeUpdate, afterUpdate, onDestroy, getContext } from "svelte"
-	import type { SvelteComponentDev } from "svelte/internal"
 	import { get_current_component } from "svelte/internal"
 	import { Object3D, Raycaster, Vector3 } from "three"
 	import { svelthreeStores } from "../stores/index.js"
@@ -305,13 +304,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	type HandlerSetBy = "on_directive" | "prop_action"
 
-	/** If the callbacks array of a certain directive (evt.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (evt.g. "click") will be removed. */
+	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
 	function has_on_directive(on_directive: string): boolean {
-		const has_directive_key: boolean = Object.keys((parent as SvelteComponentDev).$$.callbacks).includes(
-			on_directive
-		)
-		const directive_callbacks: SvelteComponentDev["$$"]["callbacks"][] | null = has_directive_key
-			? (parent as SvelteComponentDev).$$.callbacks[on_directive]
+		const has_directive_key: boolean = Object.keys(parent.$$.callbacks).includes(on_directive)
+		const directive_callbacks: typeof parent["$$"]["callbacks"][] | null = has_directive_key
+			? parent.$$.callbacks[on_directive]
 			: null
 
 		if (directive_callbacks?.length) {
