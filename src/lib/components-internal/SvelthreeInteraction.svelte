@@ -878,7 +878,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function pointerevents_handler(
 		evt: PointerEvent,
-		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null = null
+		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_action | null = null
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
@@ -1049,7 +1049,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function focusevents_handler(
 		evt: FocusEvent,
-		cancel_or_stop_propagation_fn: (evt: PointerEvent | FocusEvent | KeyboardEvent) => void
+		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_action
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
@@ -1277,7 +1277,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function keyboardevents_handler(
 		evt: KeyboardEvent,
-		cancel_or_stop_propagation_fn: ((evt: PointerEvent | FocusEvent | KeyboardEvent) => void) | null
+		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_action | null
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
