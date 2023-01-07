@@ -589,7 +589,7 @@ This is a **svelthree** _Canvas_ Component.
 						keyboard_listener_host.addEventListener(
 							event_name,
 							on_keyboard_event_listener as EventListener,
-							keyboard_listener_options
+							default_keyboardevent_listener_options
 						)
 					} else {
 						console.error(
@@ -815,26 +815,6 @@ This is a **svelthree** _Canvas_ Component.
 					keyboard_capture
 				)
 
-				if (default_keyboardevents_listener) {
-					if (default_keyboardevents_listener.keydown)
-						keyboard_listeners_host.removeEventListener(
-							"keydown",
-							default_keyboardevents_listener.keydown as EventListener,
-							keyboard_capture
-						)
-					if (default_keyboardevents_listener.keyup)
-						keyboard_listeners_host.removeEventListener(
-							"keyup",
-							default_keyboardevents_listener.keyup as EventListener,
-							keyboard_capture
-						)
-					if (default_keyboardevents_listener.keypress)
-						keyboard_listeners_host.removeEventListener(
-							"keypress",
-							default_keyboardevents_listener.keypress as EventListener,
-							keyboard_capture
-						)
-				}
 			} else {
 				// TODO  fail silently?
 			}
@@ -1012,8 +992,6 @@ This is a **svelthree** _Canvas_ Component.
 					style,
 					changeCursor,
 					interactive,
-					default_keyboardevents_listener,
-					keyboard_listener_options,
 					on_keyboardevents,
 					onPointerEvent,
 					defaultKeyboardEventListenerHost,
