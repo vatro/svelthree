@@ -814,7 +814,6 @@ This is a **svelthree** _Canvas_ Component.
 					on_keyboard_event_listener as EventListener,
 					keyboard_capture
 				)
-
 			} else {
 				// TODO  fail silently?
 			}
