@@ -14,7 +14,7 @@ This is a **svelthree** _Canvas_ Component.
 		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
 		readonly id: string
 		readonly style: string | undefined
-		readonly change_cursor: boolean
+		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
 		readonly on_pointerevents: ((e: PointerEvent) => void) | undefined
 		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
@@ -101,7 +101,7 @@ This is a **svelthree** _Canvas_ Component.
 	export { clazz as class }
 
 	/** If `true` (_default_) the cursor will change automatically (_e.g. over/out canvas DOM element, **interactive** objects or when using the `OrbitControls` component_). */
-	export let change_cursor = true
+	export let changeCursor = true
 
 	export let interactive: boolean | undefined = undefined
 	$: if (interactive !== undefined) {
@@ -384,7 +384,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.addEventListener("pointerleave", on_pointer_leave__not_interactive, default_pointerevent_listener_options)
 		c.removeEventListener("pointerenter", on_pointer_enter__not_interactive, pointer_capture)
 
-		if (change_cursor) {
+		if (changeCursor) {
 			if (store) store.orbitcontrols.length > 0 ? set_cursor_style("all-scroll") : set_cursor_style("default")
 		}
 	}
@@ -395,7 +395,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.addEventListener("pointerenter", on_pointer_enter__not_interactive, default_pointerevent_listener_options)
 		c.removeEventListener("pointerleave", on_pointer_leave__not_interactive, pointer_capture)
 
-		if (change_cursor) set_cursor_style("default")
+		if (changeCursor) set_cursor_style("default")
 	}
 
 	function on_pointer_leave(): void {
@@ -405,7 +405,7 @@ This is a **svelthree** _Canvas_ Component.
 		c.removeEventListener("pointerleave", on_pointer_leave, pointer_capture)
 		c.addEventListener("pointerenter", on_pointer_enter, default_pointerevent_listener_options)
 
-		if (change_cursor) set_cursor_style("default")
+		if (changeCursor) set_cursor_style("default")
 	}
 
 	function remove_pointermove_listeners(): void {
@@ -520,13 +520,13 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	export let recursive = true
 
-	/** Updates the `all_intersections.result` array and changes the pointer appearance if the `change_cursor` prop is set to `true`.*/
+	/** Updates the `all_intersections.result` array and changes the pointer appearance if the `changeCursor` prop is set to `true`.*/
 	function update_all_intersections_and_cursor(): void {
 		if (raycaster && interactive && $pointer_over_canvas.status === true && store?.activeCamera !== undefined) {
 			raycaster.setFromCamera(pointer_state.pos, store.activeCamera as THREE.Camera)
 			all_intersections.result = raycaster.intersectObjects(filtered_raycast.objects, recursive)
 
-			if (change_cursor) {
+			if (changeCursor) {
 				if (
 					all_intersections.result.length &&
 					all_intersections.result[0].object.userData.interact &&
@@ -1021,7 +1021,7 @@ This is a **svelthree** _Canvas_ Component.
 					log_lc,
 					id,
 					style,
-					change_cursor,
+					changeCursor,
 					interactive,
 					on_pointerevents,
 					default_keyboard_listeners_host,
