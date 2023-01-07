@@ -16,9 +16,9 @@ This is a **svelthree** _Canvas_ Component.
 		readonly style: string | undefined
 		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
-		readonly on_pointerevents: ((e: PointerEvent) => void) | undefined
 		readonly default_keyboard_listeners_host: SvelthreeDefaultKeyboardListenerHost
 		readonly on_keyboardevents: ((e: KeyboardEvent) => void) | undefined
+		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
 		readonly tabindex: number | undefined
@@ -121,7 +121,7 @@ This is a **svelthree** _Canvas_ Component.
 	/**
 	 *  TODO  new description
 	 */
-	export let on_pointerevents: ((e: PointerEvent) => void) | undefined = undefined
+	export let onPointerEvent: ((e: PointerEvent) => void) | undefined = undefined
 
 	/**
 	 *  TODO  new description
@@ -629,7 +629,7 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	function on_pointer_event_listener(e: PointerEvent) {
 		if (e.target === c) {
-			if (on_pointerevents && typeof on_pointerevents === "function") on_pointerevents(e)
+			if (onPointerEvent && typeof onPointerEvent === "function") onPointerEvent(e)
 			dispatch(`canvas_${e.type}`, { event: e })
 		}
 	}
@@ -1023,11 +1023,11 @@ This is a **svelthree** _Canvas_ Component.
 					style,
 					changeCursor,
 					interactive,
-					on_pointerevents,
 					default_keyboard_listeners_host,
 					default_keyboardevents_listener,
 					keyboard_listener_options,
 					on_keyboardevents,
+					onPointerEvent,
 					raycast,
 					recursive,
 					tabindex,
