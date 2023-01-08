@@ -349,7 +349,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (mods) {
 			mods.forEach((key) => {
-				if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
+				if (
+					ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption) ||
+					key === "nonpassive"
+				) {
 					if (key !== "passive" && key !== "nonpassive") {
 						opts[key as SupportedAddEventListenerOption] = true
 					} else if (key === "nonpassive") {
@@ -358,12 +361,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				}
 			})
 
-			// IMPORTANT  override `passive` if modifiers contain `preventDefault` and `passive` was set to `false` (via 'nonpassive' modifier)
+			// IMPORTANT  override `passive` if modifiers contain `preventDefault` and `passive` was set to `true`
 			if (mods.has("preventDefault")) {
-				if (opts.passive === false) {
-					opts.passive = true
+				if (opts.passive === true) {
+					opts.passive = false
 					console.warn(
-						`SVELTHREE > ${c_name} : The 'preventDefault' modifier cannot be used together with the 'nonpassive' modifier, 'svelthree' has set (forced) the listener-option 'passive' to 'true'`
+						`SVELTHREE > ${c_name} : The 'preventDefault' modifier cannot be used together with the 'passive' modifier, 'svelthree' has set (forced) the listener-option 'passive' to 'false'`
 					)
 				}
 			}
