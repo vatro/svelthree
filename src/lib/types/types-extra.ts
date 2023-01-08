@@ -517,10 +517,11 @@ export interface SvelthreeFocusEventDetail extends InteractionEventDetail {
 	evt: FocusEvent
 }
 
-export interface SvelthreeWheelEventDetail {
+export interface SvelthreeWheelEventDetail extends InteractionEventDetail {
 	evt: WheelEvent
-	obj: THREE.Object3D | undefined | null
 	comp: SvelthreeInteractableComponent
+	/** ☝️ Contains `raycaster_data` only if the 'intersect' modifier was used. */
+	raycaster_data?: RaycasterData
 }
 
 export type SvelthreeInteractionEventDetail = SvelthreePointerEventDetail | SvelthreeKeyboardEventDetail | SvelthreeFocusEventDetail | SvelthreeWheelEventDetail
@@ -632,7 +633,7 @@ export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier
 export type SvelthreeKeyboardEventHandler = GetEventHandler<SvelthreeKeyboardEvent, SvelthreeKeyboardEventModifier>
 
 export type SvelthreeWheelEvent = SvelthreeInteractionEvent<SvelthreeWheelEventDetail>
-export type SvelthreeWheelEventModifier = SvelthreeStandardEventModifier | "intersect"
+export type SvelthreeWheelEventModifier = SvelthreeStandardEventModifier | "intersect" | "global" | "global:document" | "global:window"
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeWheelEventHandler = GetEventHandler<SvelthreeWheelEvent, SvelthreeWheelEventModifier>

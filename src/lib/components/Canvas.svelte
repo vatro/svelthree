@@ -5,6 +5,7 @@ This is a **svelthree** _Canvas_ Component.
 -->
 <script context="module" lang="ts">
 	type PropKeyboardEventListenerHost = "canvas" | "document" | "window" | undefined
+	type PropWheelEventListenerHost = "canvas" | "document" | "window" | undefined
 	type CurrentComponentType = import("./Canvas.svelte").default
 
 	export interface IStateCanvas {
@@ -19,6 +20,8 @@ This is a **svelthree** _Canvas_ Component.
 		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
 		readonly defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost
 		readonly onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined
+		readonly defaultWheelEventListenerHost: PropWheelEventListenerHost
+		readonly onWheelEvent: ((e: WheelEvent) => void) | undefined
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
 		readonly tabindex: number | undefined
@@ -140,6 +143,17 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	export let onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined = undefined
 
+	/**  TODO  description */
+	export let defaultWheelEventListenerHost: PropWheelEventListenerHost = undefined
+	let wheel_listener_host: Window | Document | HTMLCanvasElement | undefined
+
+	/**  TODO  description */
+	const default_wheelevent_listener_options: { capture: boolean } = { capture: true }
+	const wheel_capture = default_wheelevent_listener_options.capture
+
+	/**  TODO  description */
+	export let onWheelEvent: ((e: WheelEvent) => void) | undefined = undefined
+
 	const canvas_interactivity: Writable<{ enabled: boolean | undefined }> = writable({ enabled: interactive })
 	setContext("canvas_interactivity", canvas_interactivity)
 	$: if (interactive !== undefined) $canvas_interactivity.enabled = interactive
@@ -203,6 +217,12 @@ This is a **svelthree** _Canvas_ Component.
 				keyboard_listener_host = get_host(defaultKeyboardEventListenerHost)
 			} else {
 				keyboard_listener_host = window
+			}
+
+			if (defaultWheelEventListenerHost) {
+				wheel_listener_host = get_host(defaultWheelEventListenerHost)
+			} else {
+				wheel_listener_host = c
 			}
 		}
 	}
@@ -612,8 +632,29 @@ This is a **svelthree** _Canvas_ Component.
 						)
 					}
 					break
+				case "wheel":
+					canvas_listeners.set(event_name, {
+						total: 1
+					})
+
+					if (wheel_listener_host) {
+						wheel_listener_host.addEventListener(
+							event_name,
+							on_wheel_event_listener as EventListener,
+							default_wheelevent_listener_options
+						)
+					} else {
+						console.error(
+							"SVELTHREE > Canvas > register_canvas_listener : Couldn't register 'Canvas' wheel-listener, 'wheel_listener_host' not available!",
+							{ wheel_listener_host }
+						)
+					}
+					break
 				default:
 					break
+
+				// IMPORTANT   FOCUS Event  Listeners not being registered / handled by the `Canvas` component.
+				//  FOCUS Event  Listeners are being added to the corresponding Shadow DOM element and dispatched immediatelly (mode:'auto') or queued (mode:'always') via Shadow DOM
 			}
 		} else {
 			// update event usage count.
@@ -639,10 +680,19 @@ This is a **svelthree** _Canvas_ Component.
 	 */
 	function on_keyboard_event_listener(e: KeyboardEvent) {
 		// TODO  clarify: in Chrome `e.target` is always `document.body` regardless if we've added the listener to `window` or `document`.
-		if (e.target === document.body || e.target === document || e.target === c) {
+		if (e.target === window || e.target === document.body || e.target === document || e.target === c) {
 			if (onKeyboardEvent && typeof onKeyboardEvent === "function") onKeyboardEvent(e)
 			dispatch(`canvas_${e.type}`, { event: e })
 		}
+	}
+
+	/**
+	 * Spread wheel event to all interactive components.
+	 * `SvelthreeInteraction` component will listen / react to this if it's using the wheel event.
+	 */
+	function on_wheel_event_listener(e: WheelEvent) {
+		if (onWheelEvent && typeof onWheelEvent === "function") onWheelEvent(e)
+		dispatch(`canvas_${e.type}`, { event: e })
 	}
 
 	/**
@@ -720,6 +770,13 @@ This is a **svelthree** _Canvas_ Component.
 							event_name,
 							on_keyboard_event_listener as EventListener,
 							keyboard_capture
+						)
+						break
+					case "wheel":
+						wheel_listener_host?.removeEventListener(
+							event_name,
+							on_wheel_event_listener as EventListener,
+							wheel_capture
 						)
 						break
 					default:
@@ -827,6 +884,16 @@ This is a **svelthree** _Canvas_ Component.
 					"keypress",
 					on_keyboard_event_listener as EventListener,
 					keyboard_capture
+				)
+			} else {
+				// TODO  fail silently?
+			}
+
+			if (wheel_listener_host) {
+				wheel_listener_host.removeEventListener(
+					"wheel",
+					on_wheel_event_listener as EventListener,
+					wheel_capture
 				)
 			} else {
 				// TODO  fail silently?
@@ -1008,6 +1075,8 @@ This is a **svelthree** _Canvas_ Component.
 					onPointerEvent,
 					defaultKeyboardEventListenerHost,
 					onKeyboardEvent,
+					defaultWheelEventListenerHost,
+					onWheelEvent,
 					raycast,
 					recursive,
 					tabindex,

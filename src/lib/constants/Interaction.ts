@@ -1,8 +1,7 @@
 export const SUPPORTED_ADD_EVENT_LISTENER_OPTIONS = [
 	"once",
 	"passive",
-	"capture",
-	"nonpassive"
+	"capture"
 	//"signal" ->  RECONSIDER  implement?
 ] as const
 
@@ -13,16 +12,20 @@ export const STANDARD_MODIFIERS = [
 	"stopPropagation",
 	"capture",
 	"once",
-	"passive", //->  TODO  implement
-	"nonpassive", //->  TODO  implement
+	"passive",
+	"nonpassive"
 	//"trusted",    ->  RECONSIDER  implement?
-	"self"
 ] as const
 
 export const STANDARD_MODIFIERS_SET = new Set([...STANDARD_MODIFIERS])
 
 export const ALL_MODIFIERS = [
 	...STANDARD_MODIFIERS,
+	"self", // -> keyboard event only ->  TODO  still not sure if the name is ok or how to name it alternatively -> ???
+	"intersect", // -> extra: atm  wheel event only
+	"global:document", // extra: atm wheel event only -> add listener directly to `document` -> should still redispatch event via shadow DOM, basically using `document` as canvas!
+	"global:window", // -> extra: atm wheel event only ->  add listener directly to `window` -> should still redispatch event via shadow DOM, basically using `window` as canvas!
+	"global" // -> extra: atm wheel only
 ] as const
 
 export const ALL_MODIFIERS_SET = new Set([...ALL_MODIFIERS])
@@ -49,6 +52,6 @@ export const KEYBOARD_LISTENER_TARGETS = ["window", "document", "self"] as const
 export const FOCUS_EVENTS = ["focus", "blur", "focusin", "focusout"] as const
 
 // TODO  implement wheel events
-export const WHEEL_EVENTS = ["wheel", "wheelover"] as const
+export const WHEEL_EVENTS = ["wheel"] as const
 
 export const WHEEL_LISTENER_TARGETS = ["window", "document", "self"] as const

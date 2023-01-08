@@ -764,7 +764,7 @@ This is a **svelthree** _WebGLRenderer_ Component.
 				// fire any queued pointer interactivity
 				await dispatch_render_event("interaction_2")
 
-				// fire any queued focus / keyboard interactivity
+				// fire any queued focus / keyboard / wheel interactivity
 				await dispatch_render_event("interaction_3")
 			}
 		}
