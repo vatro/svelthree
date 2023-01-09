@@ -585,6 +585,10 @@ import type {
 	WHEEL_EVENTS
 } from "../constants/Interaction.js"
 
+export type MapPropUserModifiers = Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeEventModifier>>
+export type MapActionUserModifiers = Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeEventModifier>>
+export type UserModifiersMap = MapPropUserModifiers | MapActionUserModifiers
+
 type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
 
 export type SupportedAddEventListenerOption = ElementType<typeof SUPPORTED_ADD_EVENT_LISTENER_OPTIONS>

@@ -23,7 +23,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeFocusEventDetail,
 		SvelthreeInteractionEventDetail,
 		SvelthreeSupportedWheelEvent,
-		SvelthreeWheelEventDetail
+		SvelthreeWheelEventDetail,
+		MapPropUserModifiers,
+		MapActionUserModifiers,
+		UserModifiersMap
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
 	import {
@@ -67,9 +70,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** `modifiers` prop of the parent component. */
 	export let modifiers: SvelthreeModifiersProp | undefined = undefined
-	const user_modifiers_prop = new Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeEventModifier>>()
-	const user_modifiers_action = new Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeEventModifier>>()
-	type UserModifiersMap = typeof user_modifiers_prop | typeof user_modifiers_action
 
 	// modifiers set by the `modifiers` prop
 	$: if (modifiers) {
@@ -96,6 +96,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		return new Set(valid_modifiers)
 	}
+	const user_modifiers_prop: MapPropUserModifiers = new Map()
+	const user_modifiers_action: MapActionUserModifiers = new Map()
 
 	let raycaster: Raycaster | undefined
 	$: raycaster = store?.raycaster
