@@ -959,7 +959,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/** intersection independent -> no raycaster_data! */
@@ -973,7 +973,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  FOCUS Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -1100,7 +1100,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -1336,7 +1336,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	// Similar to Pointer Event handling
@@ -1636,7 +1636,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection dependent -> has raycaster_data!
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	function dispatch_wheelevent_intersection_indep(evt: WheelEvent) {
@@ -1650,7 +1650,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_prop_action(action_name)) dispatch_prop_action(action_name, evt.type, detail)
+		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  CANCEL OR STOP PROPAGATION  */
@@ -2189,7 +2189,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		obj.userData.interact = false
 	}
 
-	function dispatch_prop_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
+	function dispatch_action(action_name: string, e_type: string, detail: SvelthreeInteractionEventDetail) {
 		const evt = new CustomEvent(e_type, { detail })
 		const parent_state = parent.state()
 		const action = parent_state[action_name as keyof typeof parent_state] as unknown
@@ -2202,21 +2202,21 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					action[0](evt)
 				} else {
 					console.error(
-						`SVELTHREE > ${c_name} > dispatch_prop_action : provided '${action_name}' action prop is not of valid type! First item in the provided Array should be a function!`,
+						`SVELTHREE > ${c_name} > dispatch_action : provided '${action_name}' action prop is not of valid type! First item in the provided Array should be a function!`,
 						{ action_name, action }
 					)
 				}
 			} else {
 				console.error(
-					`SVELTHREE > ${c_name} > dispatch_prop_action : provided '${action_name}' action prop is not of valid type!`,
+					`SVELTHREE > ${c_name} > dispatch_action : provided '${action_name}' action prop is not of valid type!`,
 					{ action_name, action }
 				)
 			}
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > dispatch_prop_action : '${action_name}' action prop is not available!`,
-				{ action_name, action }
-			)
+			console.error(`SVELTHREE > ${c_name} > dispatch_action : '${action_name}' action prop is not available!`, {
+				action_name,
+				action
+			})
 		}
 	}
 
