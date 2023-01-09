@@ -273,6 +273,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const used_pointer_events_action = new Set<string>([])
 	let used_pointer_events = new Set<string>([])
 
+	/** Dispatches a **cloned** `'pointerover'`/`'pointerout'` PointerEvent via the **shadow DOM element** accordingly. */
 	const check_pointer_overout = create_check_pointer_overout(
 		shadow_dom_el,
 		intersects,

@@ -1,5 +1,6 @@
 import type { SvelthreeShadowDOMElement } from "../../types/types-extra.js"
 
+/** (_Closure_) Manages / checks / sets the state of `pointer_is_over` / `pointer_is_out` and dispatches a **cloned** `PointerEvent` (`'pointerover'`/`'pointerout'`) via the **shadow DOM element** accordingly. */
 export const create_check_pointer_overout = (
 	shadow_dom_el: SvelthreeShadowDOMElement | undefined | null,
 	intersects: () => boolean,
