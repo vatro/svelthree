@@ -477,7 +477,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
-	function has_prop_action(prop_action: string): boolean {
+	function has_action(prop_action: string): boolean {
 		const parent_state = parent.state()
 		return !!parent_state[prop_action as keyof typeof parent_state]
 	}
