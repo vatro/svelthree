@@ -5,9 +5,9 @@ export const create_check_pointer_overout = (
 	shadow_dom_el: SvelthreeShadowDOMElement | undefined | null,
 	intersects: () => boolean,
 	used_pointer_events: Set<string>,
-	fn_clone_evt: (evt: PointerEvent, new_type: string | null) => PointerEvent
+	fn_clone_evt: (evt: PointerEvent, new_type: string | null) => PointerEvent,
+	c_name: string
 ) => {
-	const c_name = "SvelthreeInteraction"
 	let pointer_is_over = false
 	let pointer_is_out = true
 

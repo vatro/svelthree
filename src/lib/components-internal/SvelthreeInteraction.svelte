@@ -278,7 +278,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		shadow_dom_el,
 		intersects,
 		used_pointer_events,
-		get_pointerevent_modified_clone
+		get_pointerevent_modified_clone,
+		c_name
 	)
 
 	const used_keyboard_events_directive = new Set<string>([])
