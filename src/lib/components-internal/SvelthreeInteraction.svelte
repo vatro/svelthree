@@ -499,8 +499,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 
-		// update used pointer events
-		used_pointer_events = new Set([...used_pointer_events_directive, ...used_pointer_events_action])
+		// update used pointer events (without creating a new Set -> otherwise references to `used_pointer_events` would become invalid in Closures or Classes.)
+		used_pointer_events.clear()
+		used_pointer_events_directive.forEach((element) => used_pointer_events.add(element))
+		used_pointer_events_action.forEach((element) => used_pointer_events.add(element))
 	}
 
 	function set_pointer_listeners(
