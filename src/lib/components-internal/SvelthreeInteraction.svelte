@@ -29,13 +29,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		UserModifiersMap
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
-	import {
-		KEYBOARD_EVENTS,
-		FOCUS_EVENTS,
-		POINTER_EVENTS,
-		ADD_EVENT_LISTENER_OPTIONS_SET,
-		WHEEL_EVENTS
-	} from "../constants/Interaction.js"
+	import { KEYBOARD_EVENTS, FOCUS_EVENTS, POINTER_EVENTS, WHEEL_EVENTS } from "../constants/Interaction.js"
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
@@ -48,9 +42,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	} from "../types/types-extra.js"
 
 	import {
-		get_valid_modifiers_only,
 		set_modifiers_map_prop,
-		set_modifiers_map_action
+		set_modifiers_map_action,
+		get_listener_options_from_modifiers_prop,
+		get_listener_options_from_modifiers_arr
 	} from "../utils/interaction/modifier_utils.js"
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
@@ -329,102 +324,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	// ---  LISTENER OPTIONS AND MODIFIERS  UTILS ---
-
-	function get_listener_options_from_modifiers_prop(event_name: SvelthreeSupportedInteractionEvent):
-		| {
-				[key in SupportedAddEventListenerOption]?: boolean
-		  }
-		| undefined {
-		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
-		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
-
-		let mods: Set<SvelthreeEventModifier> | undefined | null
-
-		// default
-		let opts: { [key in SupportedAddEventListenerOption]?: boolean } = {
-			capture: false,
-			passive: true, // IMPORTANT  `svelthree` default value
-			once: false
-		}
-
-		if (all && spec) {
-			mods = new Set([...all, ...spec])
-		} else {
-			mods = all || spec
-		}
-
-		if (mods) {
-			mods.forEach((key) => {
-				if (
-					ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption) ||
-					key === "nonpassive"
-				) {
-					if (key !== "passive" && key !== "nonpassive") {
-						opts[key as SupportedAddEventListenerOption] = true
-					} else if (key === "nonpassive") {
-						opts.passive = false
-					}
-				}
-			})
-
-			// IMPORTANT  override `passive` if modifiers contain `preventDefault` and `passive` was set to `true`
-			if (mods.has("preventDefault")) {
-				if (opts.passive === true) {
-					opts.passive = false
-					console.warn(
-						`SVELTHREE > ${c_name} : The 'preventDefault' modifier cannot be used together with the 'passive' modifier, 'svelthree' has set (forced) the listener-option 'passive' to 'false'`
-					)
-				}
-			}
-		}
-
-		return opts
-	}
-
-	function get_listener_options_from_modifiers_arr(
-		event_name: SvelthreeSupportedInteractionEvent,
-		modifiers_arr: string[]
-	): { [key in SupportedAddEventListenerOption]?: boolean } | undefined {
-		if (user_modifiers_prop.has(event_name) || user_modifiers_prop.has("all")) {
-			const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
-			const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
-			const user = get_valid_modifiers_only(modifiers_arr)
-
-			let mods: Set<SvelthreeEventModifier> | undefined | null
-			let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
-
-			if (all && spec) {
-				mods = new Set([...all, ...spec, ...user])
-			} else {
-				mods = all || spec
-			}
-
-			if (mods) {
-				mods.forEach((key) => {
-					if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
-						if (!opts) opts = {}
-						opts[key as SupportedAddEventListenerOption] = true
-					}
-				})
-			}
-
-			return opts
-		} else {
-			const user = get_valid_modifiers_only(modifiers_arr)
-			let opts: { [key in SupportedAddEventListenerOption]?: boolean } | undefined = undefined
-
-			user.forEach((key) => {
-				if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption)) {
-					if (!opts) opts = {}
-					opts[key as SupportedAddEventListenerOption] = true
-				}
-			})
-
-			return opts
-		}
-	}
-
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
 	function has_action(prop_action: string): boolean {
@@ -474,7 +373,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		const parent_state = parent.state()
 		if (has_on_directive(event_name) || parent_state.link || parent_state.button) {
 			if (event_not_registered(event_name, used_pointer_events_directive)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name)
+				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "on_directive")
 
@@ -490,7 +389,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			if (event_not_registered(event_name, used_pointer_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
-					const listener_options = get_listener_options_from_modifiers_prop(event_name)
+					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 					set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
@@ -498,7 +397,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
-						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
+						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr, user_modifiers_prop)
 						: null
 					set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "prop_action")
 				} else {
@@ -860,7 +759,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_focus_events_directive)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name)
+				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_focus_listener(event_name, listener_options, "on_directive")
 				register_event(event_name, used_focus_events_directive)
@@ -875,7 +774,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			if (event_not_registered(event_name, used_focus_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
-					const listener_options = get_listener_options_from_modifiers_prop(event_name)
+					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 					set_focus_listener(event_name, listener_options, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
@@ -883,7 +782,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
-						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
+						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr, user_modifiers_prop)
 						: null
 
 					set_focus_listener(event_name, listener_options, "prop_action")
@@ -989,7 +888,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_keyboard_events_directive)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name)
+				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_keyboard_listener(event_name, listener_options, "on_directive")
 
@@ -1005,7 +904,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			if (event_not_registered(event_name, used_keyboard_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
-					const listener_options = get_listener_options_from_modifiers_prop(event_name)
+					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 					set_keyboard_listener(event_name, listener_options, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
@@ -1013,7 +912,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
-						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
+						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr, user_modifiers_prop)
 						: null
 					set_keyboard_listener(event_name, listener_options, "prop_action")
 				} else {
@@ -1223,7 +1122,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (has_on_directive(event_name)) {
 			if (event_not_registered(event_name, used_wheel_events_directive)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name)
+				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_wheel_listener(event_name, listener_options, true, "on_directive")
 
@@ -1239,7 +1138,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			if (event_not_registered(event_name, used_wheel_events_action)) {
 				if (prop_action_is_simple(event_name)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
-					const listener_options = get_listener_options_from_modifiers_prop(event_name)
+					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 					set_wheel_listener(event_name, listener_options, true, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
@@ -1247,7 +1146,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
-						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
+						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr, user_modifiers_prop)
 						: null
 					set_wheel_listener(event_name, listener_options, true, "prop_action")
 				} else {
