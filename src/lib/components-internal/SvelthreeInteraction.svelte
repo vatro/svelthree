@@ -65,6 +65,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	const store = $svelthreeStores[sti]
 
+	/** `modifiers` prop of the parent component. */
 	export let modifiers: SvelthreeModifiersProp | undefined = undefined
 	const user_modifiers_prop = new Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeEventModifier>>()
 	const user_modifiers_action = new Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeEventModifier>>()
