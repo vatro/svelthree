@@ -408,6 +408,15 @@
 			"borderRadius": "6px"
 		},
 		{
+			"text": " RENDER EVENT interaction_3 ",
+			"border": "2px solid #ff3e00",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px"
+		},
+		{
 			"text": " LISTENER MANAGEMENT ",
 			"border": "2px solid #ffff00",
 			"fontWeight": "bold",

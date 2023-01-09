@@ -50,6 +50,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
 	import { create_check_pointer_overout, create_check_pointer_moveover } from "../utils/interaction/pointerevents.js"
+	import { execute_queued_events, execute_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -190,25 +191,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** [ _mode `always` only_ ] Executes any queue `pointer` related events. */
 	function interaction2_execute_queued_pointer_events(): void {
-		// there'll always be only one (last) pointer move event
-		if (queued_pointer_move_events.length) {
-			queued_pointer_move_events[0]()
-			queued_pointer_move_events.length = 0
-		}
-
-		// there'll always be only one (last) pointer moveover event
-		if (queued_pointer_moveover_events.length) {
-			queued_pointer_moveover_events[0]()
-			queued_pointer_moveover_events.length = 0
-		}
-
-		if (pointer_events_queue.length) {
-			for (let i = 0; i < pointer_events_queue.length; i++) {
-				pointer_events_queue[i]()
-			}
-			pointer_events_queue.length = 0
-		}
+		execute_last_queued_event(queued_pointer_move_events)
+		execute_last_queued_event(queued_pointer_moveover_events)
+		execute_queued_events(pointer_events_queue)
 	}
+
+	//  RENDER EVENT interaction_3  ALWAYS  ->  IMPORTANT  In mode `always` ALL component / shadow dom EVENTS are queued!
 
 	/** [ _mode `always` only_ ] Removes `interaction_3` render event listener. */
 	let remove_interaction_3_listener: (() => void) | undefined | null
@@ -227,39 +215,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * - executes all / any queued focus / keyboard / wheel events ( _raf aligned_ ) on each rendered frame.
 	 */
 	function on_interaction_3(): void {
-		interaction3_execute_queued_focus_events()
-		interaction3_execute_queued_keyboard_events()
-		interaction3_execute_queued_wheel_events()
-	}
-
-	/** [ _mode `always` only_ ] Executes any queued `focus` related events and resets the queue afterwards. */
-	function interaction3_execute_queued_focus_events(): void {
-		if (focus_events_queue.length) {
-			for (let i = 0; i < focus_events_queue.length; i++) {
-				focus_events_queue[i]()
-			}
-			focus_events_queue.length = 0
-		}
-	}
-
-	/** [ _mode `always` only_ ] Executes any queued `keyboard` related events and resets the queue afterwards. */
-	function interaction3_execute_queued_keyboard_events(): void {
-		if (keyboard_events_queue.length) {
-			for (let i = 0; i < keyboard_events_queue.length; i++) {
-				keyboard_events_queue[i]()
-			}
-			keyboard_events_queue.length = 0
-		}
-	}
-
-	/** [ _mode `always` only_ ] Executes any queued `wheel` related events and resets the queue afterwards. */
-	function interaction3_execute_queued_wheel_events(): void {
-		if (wheel_events_queue.length) {
-			for (let i = 0; i < wheel_events_queue.length; i++) {
-				wheel_events_queue[i]()
-			}
-			wheel_events_queue.length = 0
-		}
+		execute_queued_events(focus_events_queue)
+		execute_queued_events(keyboard_events_queue)
+		execute_queued_events(wheel_events_queue)
 	}
 
 	// LISTENER MANAGEMENT //
