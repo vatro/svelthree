@@ -488,13 +488,13 @@ export type AllIntersections = {
 
 export type RaycasterData = {
 	/** `intersections` are of the same form as those returned by [`.intersectObject`](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject). */
-	intersection: { [P in keyof THREE.Intersection]: THREE.Intersection[P] }
+	intersection?: { [P in keyof THREE.Intersection]: THREE.Intersection[P] } | undefined
 	/** Current `Raycaster` `.ray`, e.g. useful properties: `ray.origin: Vector3` | `ray.direction: Vector3`. */
-	ray: THREE.Ray
+	ray?: THREE.Ray | undefined
 	/** The `Camera` used for raycasting. */
-	camera: THREE.Camera
+	camera?: THREE.Camera | undefined
 	/** Current pointer position ( _'point' / Vector3 position_ ) in 3d world space. */
-	unprojected_point: THREE.Vector3
+	unprojected_point?: THREE.Vector3 | undefined
 }
 
 interface InteractionEventDetail {

@@ -6,7 +6,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 <script lang="ts">
 	import { onMount, beforeUpdate, afterUpdate, onDestroy, getContext } from "svelte"
 	import { get_current_component } from "svelte/internal"
-	import { Object3D, Raycaster, Vector3 } from "three"
+	import type { Object3D, Raycaster } from "three"
 	import { svelthreeStores } from "../stores/index.js"
 	import { c_dev, c_lc_int, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
 	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
@@ -33,7 +33,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		KEYBOARD_EVENTS,
 		FOCUS_EVENTS,
 		POINTER_EVENTS,
-		ALL_MODIFIERS_SET,
 		ADD_EVENT_LISTENER_OPTIONS_SET,
 		WHEEL_EVENTS
 	} from "../constants/Interaction.js"
@@ -47,6 +46,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeSupportedPointerEvent,
 		SvelthreePropActionHandler
 	} from "../types/types-extra.js"
+
+	import {
+		get_valid_modifiers_only,
+		set_modifiers_map_prop,
+		set_modifiers_map_action
+	} from "../utils/interaction/modifier_utils.js"
+
+	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
+	import { create_check_pointer_overout } from "../utils/interaction/pointerevents.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -70,34 +78,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** `modifiers` prop of the parent component. */
 	export let modifiers: SvelthreeModifiersProp | undefined = undefined
-
-	// modifiers set by the `modifiers` prop
-	$: if (modifiers) {
-		for (const event_name_or_all in modifiers) {
-			const modifiers_arr: SvelthreeEventModifier[] = modifiers[event_name_or_all as keyof SvelthreeModifiersProp]
-			const valid_modifiers: Set<SvelthreeEventModifier> = get_valid_modifiers_only(modifiers_arr)
-
-			user_modifiers_prop.set(event_name_or_all as SvelthreeSupportedInteractionEvent | "all", valid_modifiers)
-		}
-	}
-
-	/** Filter out / use only supported modifiers. */
-	function get_valid_modifiers_only(modifiers_arr: string[]): Set<SvelthreeEventModifier> {
-		const valid_modifiers: SvelthreeEventModifier[] = []
-
-		for (let i = 0; i < modifiers_arr.length; i++) {
-			const modifier_name: string = modifiers_arr[i]
-			if (!ALL_MODIFIERS_SET.has(modifier_name as SvelthreeEventModifier)) {
-				console.error(`SVELTHREE > ${c_name} > ERROR: modifier '${modifier_name}'`)
-			} else if (!valid_modifiers.includes(modifier_name as SvelthreeEventModifier)) {
-				valid_modifiers.push(modifier_name as SvelthreeEventModifier)
-			}
-		}
-
-		return new Set(valid_modifiers)
-	}
 	const user_modifiers_prop: MapPropUserModifiers = new Map()
 	const user_modifiers_action: MapActionUserModifiers = new Map()
+	$: if (modifiers) set_modifiers_map_prop(user_modifiers_prop, modifiers)
 
 	let raycaster: Raycaster | undefined
 	$: raycaster = store?.raycaster
@@ -107,26 +90,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const pointer: PointerState = getContext("pointer")
 
 	const all_intersections: AllIntersections = getContext("all_intersections")
-
-	let raycaster_data: RaycasterData
-
-	function intersects(): boolean {
-		if (raycaster && all_intersections) {
-			if (all_intersections.result.length && all_intersections.result[0].object === obj) {
-				raycaster_data = {
-					intersection: all_intersections.result[0],
-					ray: raycaster.ray,
-					camera: raycaster.camera,
-					unprojected_point: new Vector3(pointer.pos.x, pointer.pos.y, 0).unproject(raycaster.camera)
-				}
-
-				return true
-			} else {
-				return false
-			}
-		} else {
-			return false
-		}
+	const raycaster_data: RaycasterData = {}
+	const intersects = (): boolean => {
+		return get_intersects_and_set_raycaster_data(raycaster, all_intersections, obj, raycaster_data, pointer)
 	}
 
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
@@ -307,6 +273,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const used_pointer_events_action = new Set<string>([])
 	let used_pointer_events = new Set<string>([])
 
+	const check_pointer_overout = create_check_pointer_overout(
+		shadow_dom_el,
+		intersects,
+		used_pointer_events,
+		get_pointerevent_modified_clone
+	)
+
 	const used_keyboard_events_directive = new Set<string>([])
 	const used_keyboard_events_action = new Set<string>([])
 	let used_keyboard_events = new Set<string>([])
@@ -436,47 +409,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function update_prop_action_modifiers(
-		event_name: SvelthreeSupportedInteractionEvent,
-		modifiers_arr: SvelthreeEventModifier[] | null
-	): void {
-		const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
-		const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
-		const user = modifiers_arr ? get_valid_modifiers_only(modifiers_arr) : null
-
-		let mods: Set<SvelthreeEventModifier> | undefined = undefined
-
-		if (all && spec) {
-			if (user) {
-				mods = new Set([...all, ...spec, ...user])
-			} else {
-				mods = new Set([...all, ...spec])
-			}
-		} else {
-			if (all) {
-				if (user) {
-					mods = new Set([...all, ...user])
-				} else {
-					mods = new Set([...all])
-				}
-			} else if (spec) {
-				if (user) {
-					mods = new Set([...spec, ...user])
-				} else {
-					mods = new Set([...spec])
-				}
-			} else if (!all && !spec) {
-				if (user) mods = new Set([...user])
-			}
-		}
-
-		if (mods) {
-			user_modifiers_action.set(event_name, mods)
-		} else {
-			// TODO  do nothing / silent?
-		}
-	}
-
 	// ---  LISTENER MANAGEMENT  UTILS ---
 
 	function has_action(prop_action: string): boolean {
@@ -541,13 +473,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_pointer_events_action)) {
 				if (prop_action_is_simple(event_name)) {
-					update_prop_action_modifiers(event_name, null)
+					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
 					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
-					update_prop_action_modifiers(event_name, modifiers_arr)
+					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
 						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
@@ -742,42 +674,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom element
 				check_pointer_overout(evt.detail.event)
 		)
-	}
-
-	let pointer_is_over = false
-	let pointer_is_out = true
-
-	/**
-	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
-	 */
-	function check_pointer_overout(evt: PointerEvent) {
-		if (shadow_dom_el) {
-			if (intersects()) {
-				if (!pointer_is_over) {
-					pointer_is_over = true
-					pointer_is_out = false
-
-					if (used_pointer_events.has("pointerover")) {
-						shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointerover"))
-					}
-				}
-			} else {
-				if (!pointer_is_out) {
-					pointer_is_out = true
-					pointer_is_over = false
-
-					if (used_pointer_events.has("pointerout")) {
-						shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointerout"))
-					}
-				}
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_pointer_overout : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
-		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointerdown` -> `pointerdown`
@@ -1001,13 +897,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_focus_events_action)) {
 				if (prop_action_is_simple(event_name)) {
-					update_prop_action_modifiers(event_name, null)
+					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_focus_listener(event_name, listener_options, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
 					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
-					update_prop_action_modifiers(event_name, modifiers_arr)
+					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
 						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
@@ -1131,13 +1027,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_keyboard_events_action)) {
 				if (prop_action_is_simple(event_name)) {
-					update_prop_action_modifiers(event_name, null)
+					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_keyboard_listener(event_name, listener_options, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
 					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
-					update_prop_action_modifiers(event_name, modifiers_arr)
+					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
 						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
@@ -1365,13 +1261,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_wheel_events_action)) {
 				if (prop_action_is_simple(event_name)) {
-					update_prop_action_modifiers(event_name, null)
+					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name)
 
 					set_wheel_listener(event_name, listener_options, true, "prop_action")
 				} else if (prop_action_is_complex(prop_action_handler)) {
 					const modifiers_arr = get_prop_action_modifiers(prop_action_handler)
-					update_prop_action_modifiers(event_name, modifiers_arr)
+					set_modifiers_map_action(event_name, modifiers_arr, user_modifiers_prop, user_modifiers_action)
 
 					const listener_options = modifiers_arr
 						? get_listener_options_from_modifiers_arr(event_name, modifiers_arr)
