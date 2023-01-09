@@ -54,7 +54,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	} from "../utils/interaction/modifier_utils.js"
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
-	import { create_check_pointer_overout } from "../utils/interaction/pointerevents.js"
+	import { create_check_pointer_overout, create_check_pointer_moveover } from "../utils/interaction/pointerevents.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -276,6 +276,20 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/** Dispatches a **cloned** `'pointerover'`/`'pointerout'` PointerEvent via the **shadow DOM element**. */
 	const check_pointer_overout = create_check_pointer_overout(
 		shadow_dom_el,
+		intersects,
+		used_pointer_events,
+		get_pointerevent_modified_clone,
+		c_name
+	)
+
+	/**
+	 * Dispatches a **cloned** `'pointermoveover'` PointerEvent via the **shadow DOM element**.
+	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
+	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 */
+	const check_pointer_moveover = create_check_pointer_moveover(
+		shadow_dom_el,
+		pointer_over_canvas,
 		intersects,
 		used_pointer_events,
 		get_pointerevent_modified_clone,
@@ -625,47 +639,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				// check before dispatching 'pointermoveover' component event via shadow dom element
 				check_pointer_moveover(evt.detail.event as PointerEvent)
 		)
-	}
-
-	const last_pointer_moveover: {
-		clientX: number | undefined
-		clientY: number | undefined
-	} = {
-		clientX: undefined,
-		clientY: undefined
-	}
-
-	function pointer_has_not_moved_moveover(evt: PointerEvent): boolean {
-		return last_pointer_moveover.clientX === evt.clientX && last_pointer_moveover.clientY === evt.clientY
-	}
-
-	/**
-	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
-	 */
-	function check_pointer_moveover(evt: PointerEvent) {
-		//  IMPORTANT  -> `pointermoveover` is not a standard DOM event, so it will not bubble up back to the `<canvas>` element!
-		if (shadow_dom_el) {
-			if ($pointer_over_canvas.status === true) {
-				if (
-					intersects() &&
-					used_pointer_events.has("pointermoveover") &&
-					!pointer_has_not_moved_moveover(evt)
-				) {
-					// `check_pointer_move` & `check_pointer_moveover` use the same `pointerevent` so we have to separate `last_pointer_...`
-					last_pointer_moveover.clientX = evt.clientX
-					last_pointer_moveover.clientY = evt.clientY
-
-					// immediatelly dispatch component event via shadow dom element
-					shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt, "pointermoveover"))
-				}
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_pointer_moveover : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
-		}
 	}
 
 	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointerover` / `pointerout`
