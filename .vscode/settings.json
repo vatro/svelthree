@@ -300,7 +300,25 @@
 			"borderRadius": "6px"
 		},
 		{
+			"text": " CANVAS Component WHEEL Event -> SHADOW DOM Event ",
+			"border": "2px solid #ffffff",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px"
+		},
+		{
 			"text": " GLOBAL Keyboard Event -> CANVAS Component Keyboard Event ",
+			"border": "2px solid #ffffff",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px"
+		},
+		{
+			"text": " GLOBAL Wheel Event -> CANVAS Component Wheel Event ",
 			"border": "2px solid #ffffff",
 			"fontWeight": "normal",
 			"color": "#ffffff",
