@@ -601,19 +601,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				switch (evt.type) {
 					case "pointermove": {
-						const queued_pointermove_event = () => dispatch_pointerevent_intersection_indep(evt)
+						const queued_pointermove_event = () => process_pointerevent_intersection_indep(evt)
 						queued_pointer_move_events[0] = queued_pointermove_event
 						break
 					}
 					case "pointermoveover": {
-						const queued_pointermoveover_event = () => dispatch_pointerevent_intersection_dep(evt)
+						const queued_pointermoveover_event = () => process_pointerevent_intersection_dep(evt)
 						queued_pointer_moveover_events[0] = queued_pointermoveover_event
 						break
 					}
 					default: {
-						const queued_pointer_event = () => dispatch_pointerevent_intersection_dep(evt)
+						const queued_pointer_event = () => process_pointerevent_intersection_dep(evt)
 						pointer_events_queue.push(queued_pointer_event)
-						//pointer_events_queue.push(() => dispatch_pointerevent_intersection_dep(evt))
+						//pointer_events_queue.push(() => process_pointerevent_intersection_dep(evt))
 						break
 					}
 				}
@@ -623,9 +623,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 
 				if (evt.type === "pointermove") {
-					dispatch_pointerevent_intersection_indep(evt)
+					process_pointerevent_intersection_indep(evt)
 				} else {
-					dispatch_pointerevent_intersection_dep(evt)
+					process_pointerevent_intersection_dep(evt)
 				}
 
 				break
@@ -638,7 +638,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/** intersection dependent -> has raycaster_data! */
-	function dispatch_pointerevent_intersection_dep(evt: PointerEvent) {
+	function process_pointerevent_intersection_dep(evt: PointerEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreePointerEventDetail = {
@@ -654,7 +654,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/** intersection independent -> no raycaster_data! */
-	function dispatch_pointerevent_intersection_indep(evt: PointerEvent) {
+	function process_pointerevent_intersection_indep(evt: PointerEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreePointerEventDetail = {
@@ -767,13 +767,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		switch (render_mode) {
 			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
-				const queued_focus_event = () => dispatch_focusevent_intersection_indep(evt)
+				const queued_focus_event = () => process_focusevent_intersection_indep(evt)
 				focus_events_queue.push(queued_focus_event)
 				break
 			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
-				dispatch_focusevent_intersection_indep(evt)
+				process_focusevent_intersection_indep(evt)
 				break
 			default:
 				console.error(`SVELTHREE > ${c_name} > focusevents_handler : no such 'render_mode' -> ${render_mode}!`)
@@ -781,7 +781,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function dispatch_focusevent_intersection_indep(evt: FocusEvent) {
+	function process_focusevent_intersection_indep(evt: FocusEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreeFocusEventDetail = {
@@ -1001,13 +1001,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		switch (render_mode) {
 			case "always": {
 				// QUEUED EVENT DISPATCHING: dispatch our custom event / execute handler on next render (raf aligned)
-				const queued_keyboard_event = () => dispatch_keyboardevent_intersection_indep(evt)
+				const queued_keyboard_event = () => process_keyboardevent_intersection_indep(evt)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
 			}
 			case "auto":
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
-				dispatch_keyboardevent_intersection_indep(evt)
+				process_keyboardevent_intersection_indep(evt)
 				break
 			default:
 				console.error(
@@ -1017,7 +1017,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function dispatch_keyboardevent_intersection_indep(evt: KeyboardEvent) {
+	function process_keyboardevent_intersection_indep(evt: KeyboardEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreeKeyboardEventDetail = {
@@ -1293,10 +1293,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				let queued_wheel_event = undefined
 				if (on_intersect) {
 					if (raycaster && intersects()) {
-						queued_wheel_event = () => dispatch_wheelevent_intersection_dep(evt)
+						queued_wheel_event = () => process_wheelevent_intersection_dep(evt)
 					}
 				} else {
-					queued_wheel_event = () => dispatch_wheelevent_intersection_indep(evt)
+					queued_wheel_event = () => process_wheelevent_intersection_indep(evt)
 				}
 				if (queued_wheel_event) wheel_events_queue.push(queued_wheel_event)
 				break
@@ -1305,10 +1305,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
 				if (on_intersect) {
 					if (raycaster && intersects()) {
-						dispatch_wheelevent_intersection_dep(evt)
+						process_wheelevent_intersection_dep(evt)
 					}
 				} else {
-					dispatch_wheelevent_intersection_dep(evt)
+					process_wheelevent_intersection_dep(evt)
 				}
 				break
 			}
@@ -1318,7 +1318,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function dispatch_wheelevent_intersection_dep(evt: WheelEvent) {
+	function process_wheelevent_intersection_dep(evt: WheelEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreeWheelEventDetail = {
@@ -1333,7 +1333,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
-	function dispatch_wheelevent_intersection_indep(evt: WheelEvent) {
+	function process_wheelevent_intersection_indep(evt: WheelEvent) {
 		const on_prop_name = `on_${evt.type}`
 
 		const detail: SvelthreeWheelEventDetail = {
