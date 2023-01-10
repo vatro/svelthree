@@ -53,7 +53,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { execute_queued_events, execute_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 	import {
 		has_on_directive,
-		has_action,
+		has_on_prop,
 		using_event,
 		not_using_event,
 		prop_action_is_simple,
@@ -651,7 +651,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/** intersection independent -> no raycaster_data! */
@@ -665,7 +665,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  FOCUS Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -792,7 +792,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -1029,7 +1029,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent))
 			dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	// Similar to Pointer Event handling
@@ -1329,7 +1329,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection dependent -> has raycaster_data!
 		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	function dispatch_wheelevent_intersection_indep(evt: WheelEvent) {
@@ -1343,7 +1343,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_prop(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  CANCEL OR STOP PROPAGATION  */

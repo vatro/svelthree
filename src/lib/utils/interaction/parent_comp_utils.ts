@@ -24,7 +24,7 @@ export const has_on_directive = (on_directive: string, comp: SvelthreeInteractab
 }
 
 /** Checks if a `svelthree`-component has `on_<event_name>`action. */
-export const has_action = (prop_action: string, comp: SvelthreeInteractableComponent): boolean => {
+export const has_on_prop = (prop_action: string, comp: SvelthreeInteractableComponent): boolean => {
 	const comp_state = comp.state()
 	return !!comp_state[prop_action as keyof typeof comp_state]
 }
