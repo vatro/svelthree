@@ -4,10 +4,10 @@ import type {
 	SvelthreeSupportedInteractionEvent
 } from "../../types/types-extra.js"
 
-/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
+/** If the callbacks array of a certain `on:<event_name>`-directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
 export const has_on_directive = (on_directive: string, comp: SvelthreeInteractableComponent): boolean => {
-	const has_directive_key: boolean = Object.keys(comp.$$.callbacks).includes(on_directive)
-	const directive_callbacks: typeof comp["$$"]["callbacks"][] | null = has_directive_key
+	const has_on_directive_key: boolean = Object.keys(comp.$$.callbacks).includes(on_directive)
+	const directive_callbacks: typeof comp["$$"]["callbacks"][] | null = has_on_directive_key
 		? comp.$$.callbacks[on_directive]
 		: null
 
