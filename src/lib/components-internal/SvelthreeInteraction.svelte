@@ -1181,9 +1181,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	//   - add/re-add: `comp.on("click", do_on_click)`
 	//   - disable/remove: `comp.onx("click", onClick)`
 
-	// dom directive:
-	//   - add: `<Mesh on:click={do_on_click} />
-	//   - disable/remove: `comp.onx("click", do_on_click)` or not adding to dom in the first place
+	// markup `on:`-directive:
+	//   - add: `<Mesh on:click={(e) => do_on_click(e)} /> or `<Mesh on:click={do_on_click} />
+	//   - disable/remove: `comp.onx("click", do_on_click)` or not adding to the markup in the first place
 
 	// COOL!  Multiple `on:` directives WILL be triggered as expected.
 
