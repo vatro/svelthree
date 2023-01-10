@@ -89,7 +89,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let raycaster: Raycaster | undefined
 	$: raycaster = store?.raycaster
 
-	export let dispatch_interaction: SvelthreeInteractionEventDispatcher
+	export let dispatch_on_directive: SvelthreeInteractionEventDispatcher
 
 	const pointer: PointerState = getContext("pointer")
 
@@ -648,7 +648,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			raycaster_data
 		}
 
-		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
+		if (has_on_directive(evt.type, parent))
+			dispatch_on_directive(evt.type as SvelthreeSupportedPointerEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
@@ -662,7 +663,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			comp: parent
 		}
 
-		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
+		if (has_on_directive(evt.type, parent))
+			dispatch_on_directive(evt.type as SvelthreeSupportedPointerEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
@@ -789,7 +791,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_on_directive(evt.type as SvelthreeSupportedFocusEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
@@ -1027,7 +1029,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent))
-			dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
+			dispatch_on_directive(evt.type as SvelthreeSupportedKeyboardEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
@@ -1327,7 +1329,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection dependent -> has raycaster_data!
-		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_on_directive(evt.type as SvelthreeSupportedWheelEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
@@ -1341,7 +1343,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_on_directive(evt.type as SvelthreeSupportedWheelEvent, detail)
 		if (has_on_prop(on_prop_name, parent)) call_on_prop_handler(on_prop_name, evt.type, detail)
 	}
 
