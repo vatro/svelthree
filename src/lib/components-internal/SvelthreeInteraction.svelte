@@ -23,7 +23,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeFocusEventDetail,
 		SvelthreeSupportedWheelEvent,
 		SvelthreeWheelEventDetail,
-		MapPropModifiers,
+		MapPropModifiers
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
 	import { KEYBOARD_EVENTS, FOCUS_EVENTS, POINTER_EVENTS, WHEEL_EVENTS } from "../constants/Interaction.js"
@@ -33,22 +33,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		SvelthreeModifiersProp,
 		SvelthreeSupportedKeyboardEvent,
 		SvelthreeSupportedFocusEvent,
-		SvelthreeSupportedPointerEvent,
+		SvelthreeSupportedPointerEvent
 	} from "../types/types-extra.js"
 
 	import {
 		set_modifiers_map_prop,
-		get_listener_options_from_modifiers_prop,
+		get_listener_options_from_modifiers_prop
 	} from "../utils/interaction/modifier_utils.js"
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
 	import { create_check_pointer_overout, create_check_pointer_moveover } from "../utils/interaction/pointerevents.js"
 	import { execute_queued_events, execute_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
-	import {
-		has_on_directive,
-		using_event,
-		not_using_event,
-	} from "../utils/interaction/parent_comp_utils.js"
+	import { has_on_directive, using_event, not_using_event } from "../utils/interaction/parent_comp_utils.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -579,7 +575,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection dependent -> has raycaster_data! */
 	function process_pointerevent_intersection_dep(evt: PointerEvent) {
-
 		const detail: SvelthreePointerEventDetail = {
 			evt,
 			obj,
@@ -593,7 +588,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/** intersection independent -> no raycaster_data! */
 	function process_pointerevent_intersection_indep(evt: PointerEvent) {
-
 		const detail: SvelthreePointerEventDetail = {
 			evt,
 			obj,
@@ -609,7 +603,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  FOCUS Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
-
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_focus_events_on_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
@@ -682,7 +675,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function process_focusevent_intersection_indep(evt: FocusEvent) {
-
 		const detail: SvelthreeFocusEventDetail = {
 			evt,
 			obj,
@@ -700,7 +692,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
-
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_keyboard_events_on_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
@@ -764,17 +755,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_canvas_keyboard_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		switch (event_name) {
 			case "keydown":
-				
-				if (!remove_canvas_keydown_listener_on_directive)
-					add_canvas_keydown_listener_on_directive()
+				if (!remove_canvas_keydown_listener_on_directive) add_canvas_keydown_listener_on_directive()
 				break
 			case "keyup":
-				if (!remove_canvas_keyup_listener_on_directive)
-					add_canvas_keyup_listener_on_directive()
+				if (!remove_canvas_keyup_listener_on_directive) add_canvas_keyup_listener_on_directive()
 				break
 			case "keypress":
-				if (!remove_canvas_keypress_listener_on_directive)
-					add_canvas_keypress_listener_on_directive()
+				if (!remove_canvas_keypress_listener_on_directive) add_canvas_keypress_listener_on_directive()
 				break
 			default:
 				console.error(`SVELTHREE > ${c_name} : Keyboard event '${event_name}' not implemented!`)
@@ -848,7 +835,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function process_keyboardevent_intersection_indep(evt: KeyboardEvent) {
-
 		const detail: SvelthreeKeyboardEventDetail = {
 			code: evt.code,
 			evt,
@@ -866,7 +852,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	//  WHEEL Event  CANVAS Component WHEEL Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
 
 	function add_wheel_listener(event_name: SvelthreeSupportedWheelEvent): void {
-
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_wheel_events_on_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
@@ -1099,7 +1084,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function process_wheelevent_intersection_dep(evt: WheelEvent) {
-
 		const detail: SvelthreeWheelEventDetail = {
 			evt,
 			obj,
@@ -1112,7 +1096,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function process_wheelevent_intersection_indep(evt: WheelEvent) {
-
 		const detail: SvelthreeWheelEventDetail = {
 			evt,
 			obj,
