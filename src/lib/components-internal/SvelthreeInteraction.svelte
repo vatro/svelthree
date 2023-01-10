@@ -51,6 +51,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
 	import { create_check_pointer_overout, create_check_pointer_moveover } from "../utils/interaction/pointerevents.js"
 	import { execute_queued_events, execute_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
+	import {
+		has_on_directive,
+		has_action,
+		using_event,
+		not_using_event,
+		prop_action_is_simple,
+		prop_action_is_complex
+	} from "../utils/interaction/parent_comp_utils.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -263,54 +271,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	type HandlerSetBy = "on_directive" | "prop_action"
 
-	/** If the callbacks array of a certain directive (e.g. `on:click`) is emtpy or all callbacks are nullish, the corresponding event listener (e.g. "click") will be removed. */
-	function has_on_directive(on_directive: string): boolean {
-		const has_directive_key: boolean = Object.keys(parent.$$.callbacks).includes(on_directive)
-		const directive_callbacks: typeof parent["$$"]["callbacks"][] | null = has_directive_key
-			? parent.$$.callbacks[on_directive]
-			: null
-
-		if (directive_callbacks?.length) {
-			for (let i = 0; i < directive_callbacks.length; i++) {
-				if (directive_callbacks[i]) {
-					return true
-				}
-			}
-			return false
-		} else {
-			return false
-		}
-	}
-
-	// ---  LISTENER MANAGEMENT  UTILS ---
-
-	function has_action(prop_action: string): boolean {
-		const parent_state = parent.state()
-		return !!parent_state[prop_action as keyof typeof parent_state]
-	}
-
-	function using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.state()
-		return has_on_directive(event_name) || !!parent_state[`on_${event_name}`]
-	}
-
-	function not_using_event(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.state()
-		return !has_on_directive(event_name) && !parent_state[`on_${event_name}`]
-	}
-
-	function prop_action_is_simple(event_name: SvelthreeSupportedInteractionEvent): boolean {
-		const parent_state = parent.state()
-		return typeof parent_state[`on_${event_name}`] === "function"
-	}
-
-	function prop_action_is_complex(prop_action_handler: SvelthreePropActionHandler): boolean {
-		return (
-			!!(prop_action_handler as Array<unknown>).length &&
-			!!(typeof (prop_action_handler as Array<unknown>)[0] === "function")
-		)
-	}
-
 	function get_prop_action_modifiers(
 		prop_action_handler: SvelthreePropActionHandler
 	): SvelthreeEventModifier[] | null {
@@ -329,7 +289,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_pointer_listener(event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
 		const parent_state = parent.state()
-		if (has_on_directive(event_name) || parent_state.link || parent_state.button) {
+		if (has_on_directive(event_name, parent) || parent_state.link || parent_state.button) {
 			if (event_not_registered(event_name, used_pointer_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -345,7 +305,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_pointer_events_action)) {
-				if (prop_action_is_simple(event_name)) {
+				if (prop_action_is_simple(event_name, parent)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -690,8 +650,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			raycaster_data
 		}
 
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/** intersection independent -> no raycaster_data! */
@@ -704,8 +664,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			comp: parent
 		}
 
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedPointerEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  FOCUS Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -715,7 +675,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
 		const parent_state = parent.state()
 
-		if (has_on_directive(event_name)) {
+		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_focus_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -730,7 +690,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_focus_events_action)) {
-				if (prop_action_is_simple(event_name)) {
+				if (prop_action_is_simple(event_name, parent)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -831,8 +791,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedFocusEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
@@ -844,7 +804,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
 		const parent_state = parent.state()
 
-		if (has_on_directive(event_name)) {
+		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_keyboard_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -860,7 +820,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_keyboard_events_action)) {
-				if (prop_action_is_simple(event_name)) {
+				if (prop_action_is_simple(event_name, parent)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -1067,8 +1027,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent))
+			dispatch_interaction(evt.type as SvelthreeSupportedKeyboardEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	// Similar to Pointer Event handling
@@ -1078,7 +1039,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_wheel_listener(event_name: SvelthreeSupportedWheelEvent): void {
 		const parent_state = parent.state()
 
-		if (has_on_directive(event_name)) {
+		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_wheel_events_directive)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -1094,7 +1055,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		if (prop_action_handler) {
 			if (event_not_registered(event_name, used_wheel_events_action)) {
-				if (prop_action_is_simple(event_name)) {
+				if (prop_action_is_simple(event_name, parent)) {
 					set_modifiers_map_action(event_name, null, user_modifiers_prop, user_modifiers_action)
 					const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
@@ -1367,8 +1328,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection dependent -> has raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	function dispatch_wheelevent_intersection_indep(evt: WheelEvent) {
@@ -1381,8 +1342,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		// intersection independent -> no raycaster_data!
-		if (has_on_directive(evt.type)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
-		if (has_action(action_name)) dispatch_action(action_name, evt.type, detail)
+		if (has_on_directive(evt.type, parent)) dispatch_interaction(evt.type as SvelthreeSupportedWheelEvent, detail)
+		if (has_action(action_name, parent)) dispatch_action(action_name, evt.type, detail)
 	}
 
 	/*  CANCEL OR STOP PROPAGATION  */
@@ -1483,18 +1444,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		// will be queued in mode "always"
 		// will be dispatsched immediately in mode "auto" -> see 'pointerevents_handler'
-		if (using_event("click") || parent_state.button || parent_state.link) add_pointer_listener("click", true)
-		if (using_event("pointerup")) add_pointer_listener("pointerup", true)
-		if (using_event("pointerdown")) add_pointer_listener("pointerdown", true)
+		if (using_event("click", parent) || parent_state.button || parent_state.link)
+			add_pointer_listener("click", true)
+		if (using_event("pointerup", parent)) add_pointer_listener("pointerup", true)
+		if (using_event("pointerdown", parent)) add_pointer_listener("pointerdown", true)
 		//if (using_event("pointerenter")) add_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
 		//if (using_event("pointerleave")) add_pointer_listener("pointerleave") ->  DEPRECATED  same as 'pointerout'
 
 		// pointer events depending on 'pointermove' listener
-		if (using_event("pointerover")) add_pointer_listener("pointerover", true)
-		if (using_event("pointerout")) add_pointer_listener("pointerout", true)
+		if (using_event("pointerover", parent)) add_pointer_listener("pointerover", true)
+		if (using_event("pointerout", parent)) add_pointer_listener("pointerout", true)
 
-		if (using_event("pointermoveover")) add_pointer_listener("pointermoveover", true)
-		if (using_event("pointermove")) add_pointer_listener("pointermove", false)
+		if (using_event("pointermoveover", parent)) add_pointer_listener("pointermoveover", true)
+		if (using_event("pointermove", parent)) add_pointer_listener("pointermove", false)
 
 		// DEPRECATED  RECONSIDER  -> do we need / want these / which use cases?
 		//if (using_event("gotpointercapture")) add_pointer_listener("gotpointercapture")
@@ -1502,34 +1464,34 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		//if (using_event("pointercancel")) add_pointer_listener("pointercancel")
 
 		// keyboard events
-		if (using_event("keydown")) add_keyboard_listener("keydown")
-		if (using_event("keypress")) add_keyboard_listener("keypress")
-		if (using_event("keyup")) add_keyboard_listener("keyup")
+		if (using_event("keydown", parent)) add_keyboard_listener("keydown")
+		if (using_event("keypress", parent)) add_keyboard_listener("keypress")
+		if (using_event("keyup", parent)) add_keyboard_listener("keyup")
 
 		// focus events
-		if (using_event("focus")) add_focus_listener("focus") // doesn't bubble
-		if (using_event("blur")) add_focus_listener("blur") // doesn't bubble
-		if (using_event("focusin")) add_focus_listener("focusin") // bubbles
-		if (using_event("focusout")) add_focus_listener("focusout") // bubbles
+		if (using_event("focus", parent)) add_focus_listener("focus") // doesn't bubble
+		if (using_event("blur", parent)) add_focus_listener("blur") // doesn't bubble
+		if (using_event("focusin", parent)) add_focus_listener("focusin") // bubbles
+		if (using_event("focusout", parent)) add_focus_listener("focusout") // bubbles
 
 		// wheel event
-		if (using_event("wheel")) add_wheel_listener("wheel")
+		if (using_event("wheel", parent)) add_wheel_listener("wheel")
 
 		// --- REMOVE / UNREGISTER UNUSED EVENTS / LISTENERS ---
 
-		if (not_using_event("click") && !parent_state.button && !parent_state.link)
+		if (not_using_event("click", parent) && !parent_state.button && !parent_state.link)
 			completely_remove_pointer_listener("click")
-		if (not_using_event("pointerup")) completely_remove_pointer_listener("pointerup")
-		if (not_using_event("pointerdown")) completely_remove_pointer_listener("pointerdown")
+		if (not_using_event("pointerup", parent)) completely_remove_pointer_listener("pointerup")
+		if (not_using_event("pointerdown", parent)) completely_remove_pointer_listener("pointerdown")
 		//if (not_using_event("pointerenter")) completely_remove_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
 		//if (not_using_event("pointerleave")) completely_remove_pointer_listener("pointerleave") ->  DEPRECATED  same as 'pointerover'
 
 		// pointer events depending on 'pointermove' listener
-		if (not_using_event("pointerover")) completely_remove_pointer_listener("pointerover")
-		if (not_using_event("pointerout")) completely_remove_pointer_listener("pointerout")
-		if (not_using_event("pointermoveover")) completely_remove_pointer_listener("pointermoveover")
+		if (not_using_event("pointerover", parent)) completely_remove_pointer_listener("pointerover")
+		if (not_using_event("pointerout", parent)) completely_remove_pointer_listener("pointerout")
+		if (not_using_event("pointermoveover", parent)) completely_remove_pointer_listener("pointermoveover")
 
-		if (not_using_event("pointermove")) completely_remove_pointer_listener("pointermove")
+		if (not_using_event("pointermove", parent)) completely_remove_pointer_listener("pointermove")
 
 		// DEPRECATED  RECONSIDER  -> do we need / want these / which use cases?
 		//if (not_using_event("gotpointercapture")) completely_remove_pointer_listener("gotpointercapture")
@@ -1537,18 +1499,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		//if (not_using_event("pointercancel")) completely_remove_pointer_listener("pointercancel")
 
 		// keyboard events (listener added to window)
-		if (not_using_event("keydown")) completely_remove_keyboard_listener("keydown")
-		if (not_using_event("keypress")) completely_remove_keyboard_listener("keypress")
-		if (not_using_event("keyup")) completely_remove_keyboard_listener("keyup")
+		if (not_using_event("keydown", parent)) completely_remove_keyboard_listener("keydown")
+		if (not_using_event("keypress", parent)) completely_remove_keyboard_listener("keypress")
+		if (not_using_event("keyup", parent)) completely_remove_keyboard_listener("keyup")
 
 		// focus events
-		if (not_using_event("focus")) completely_remove_focus_listener("focus")
-		if (not_using_event("blur")) completely_remove_focus_listener("blur")
-		if (not_using_event("focusin")) completely_remove_focus_listener("focusin")
-		if (not_using_event("focusout")) completely_remove_focus_listener("focusout")
+		if (not_using_event("focus", parent)) completely_remove_focus_listener("focus")
+		if (not_using_event("blur", parent)) completely_remove_focus_listener("blur")
+		if (not_using_event("focusin", parent)) completely_remove_focus_listener("focusin")
+		if (not_using_event("focusout", parent)) completely_remove_focus_listener("focusout")
 
 		// wheel event
-		if (not_using_event("wheel")) completely_remove_focus_listener("wheel")
+		if (not_using_event("wheel", parent)) completely_remove_focus_listener("wheel")
 
 		set_block_status()
 
