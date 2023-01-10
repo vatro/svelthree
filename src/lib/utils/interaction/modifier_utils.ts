@@ -5,6 +5,7 @@ import type {
 	SupportedAddEventListenerOption,
 	SvelthreeEventModifier,
 	SvelthreeModifiersProp,
+	SvelthreeOnPropHandler,
 	SvelthreeSupportedInteractionEvent
 } from "../../types/types-extra.js"
 
@@ -24,6 +25,14 @@ export const get_valid_modifiers_only = (modifiers_arr: string[]): Set<Svelthree
 	}
 
 	return new Set(valid_modifiers)
+}
+
+/** Returns the second item of an `on_prop_handler: SvelthreeOnPropHandler` which should be an Array of user specified `modifiers: SvelthreeEventModifier[]`. */
+// TODO  type check the second item and log errors.
+export const get_on_prop_modifiers = (on_prop_handler: SvelthreeOnPropHandler): SvelthreeEventModifier[] | null => {
+	return (on_prop_handler as Array<unknown>).length > 1
+		? ((on_prop_handler as Array<unknown>)[1] as SvelthreeEventModifier[])
+		: null
 }
 
 /** Adds entries to the `user_modifiers_prop` Map, by mapping the `modifiers` prop to: `event_name` / `all` => `modifier[]` (_**only valid modifiers!**_) */

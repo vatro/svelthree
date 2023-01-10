@@ -33,7 +33,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
-		SvelthreeEventModifier,
 		SvelthreeModifiersProp,
 		SvelthreeSupportedKeyboardEvent,
 		SvelthreeSupportedFocusEvent,
@@ -45,7 +44,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		set_modifiers_map_prop,
 		set_modifiers_map_on_prop,
 		get_listener_options_from_modifiers_prop,
-		get_listener_options_from_modifiers_arr
+		get_listener_options_from_modifiers_arr,
+		get_on_prop_modifiers
 	} from "../utils/interaction/modifier_utils.js"
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
@@ -270,12 +270,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let used_wheel_events = new Set<string>([])
 
 	type HandlerSetBy = "on_directive" | "on_prop"
-
-	function get_on_prop_modifiers(on_prop_handler: SvelthreeOnPropHandler): SvelthreeEventModifier[] | null {
-		return (on_prop_handler as Array<unknown>).length > 1
-			? ((on_prop_handler as Array<unknown>)[1] as SvelthreeEventModifier[])
-			: null
-	}
 
 	//  POINTER Event  CANVAS Component POINTER Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
 
