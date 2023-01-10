@@ -586,8 +586,8 @@ import type {
 } from "../constants/Interaction.js"
 
 export type MapPropUserModifiers = Map<SvelthreeSupportedInteractionEvent | "all", Set<SvelthreeEventModifier>>
-export type MapActionUserModifiers = Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeEventModifier>>
-export type UserModifiersMap = MapPropUserModifiers | MapActionUserModifiers
+export type MapOnPropUserModifiers = Map<SvelthreeSupportedInteractionEvent, Set<SvelthreeEventModifier>>
+export type UserModifiersMap = MapPropUserModifiers | MapOnPropUserModifiers
 
 type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
 
@@ -649,7 +649,7 @@ export type SvelthreeModifiersProp =
 	| { [event_name in SvelthreeSupportedKeyboardEvent]?: Array<SvelthreeKeyboardEventModifier> }
 	| { [event_name in SvelthreeSupportedWheelEvent]?: Array<SvelthreeWheelEventModifier> }
 
-export type SvelthreePropActionHandler = SvelthreePointerEventHandler | SvelthreeFocusEventHandler | SvelthreeKeyboardEventHandler | SvelthreeWheelEventHandler
+export type SvelthreeOnPropHandler = SvelthreePointerEventHandler | SvelthreeFocusEventHandler | SvelthreeKeyboardEventHandler | SvelthreeWheelEventHandler
 /** An explicitly **asynchoronous** callback-function
  * ```ts
  * (comp: T) => Promise<unknown>

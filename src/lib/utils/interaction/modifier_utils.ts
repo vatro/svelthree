@@ -1,6 +1,6 @@
 import { ADD_EVENT_LISTENER_OPTIONS_SET, ALL_MODIFIERS_SET } from "../../constants/Interaction.js"
 import type {
-	MapActionUserModifiers,
+	MapOnPropUserModifiers,
 	MapPropUserModifiers,
 	SupportedAddEventListenerOption,
 	SvelthreeEventModifier,
@@ -40,14 +40,14 @@ export const set_modifiers_map_prop = (
 }
 
 /**
- * Adds entries to the `user_modifiers_action` Map while also taking the specified `modifiers.all` modifiers into account,
- * maps the `modifiers` specified in an "action" prop to: `event_name` => `modifier[]` (_**only valid modifiers** incl. `modifiers.all`!_)
+ * Adds entries to the `user_modifiers_on_prop` Map while also taking the specified `modifiers.all` modifiers into account,
+ * maps the `modifiers` specified in an "on_prop" to: `event_name` => `modifier[]` (_**only valid modifiers** incl. `modifiers.all`!_)
  */
-export const set_modifiers_map_action = (
+export const set_modifiers_map_on_prop = (
 	event_name: SvelthreeSupportedInteractionEvent,
 	modifiers_arr: SvelthreeEventModifier[] | null,
 	user_modifiers_prop: MapPropUserModifiers,
-	user_modifiers_action: MapActionUserModifiers
+	user_modifiers_on_prop: MapOnPropUserModifiers
 ): void => {
 	const all = user_modifiers_prop.has("all") ? user_modifiers_prop.get("all") : null
 	const spec = user_modifiers_prop.has(event_name) ? user_modifiers_prop.get(event_name) : null
@@ -80,7 +80,7 @@ export const set_modifiers_map_action = (
 	}
 
 	if (mods) {
-		user_modifiers_action.set(event_name, mods)
+		user_modifiers_on_prop.set(event_name, mods)
 	} else {
 		// TODO  do nothing / silent?
 	}

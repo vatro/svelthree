@@ -50,7 +50,7 @@ export type {
 	SvelthreeWheelEventHandler,
 	SvelthreeWheelEventModifier,
 	SvelthreeModifiersProp,
-	SvelthreePropActionHandler
+	SvelthreeOnPropHandler
 } from "./types/types-extra.js"
 
 // `props` Object Literal types

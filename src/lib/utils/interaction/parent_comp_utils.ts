@@ -1,6 +1,6 @@
 import type {
 	SvelthreeInteractableComponent,
-	SvelthreePropActionHandler,
+	SvelthreeOnPropHandler,
 	SvelthreeSupportedInteractionEvent
 } from "../../types/types-extra.js"
 
@@ -23,13 +23,13 @@ export const has_on_directive = (on_directive: string, comp: SvelthreeInteractab
 	}
 }
 
-/** Checks if a `svelthree`-component has `on_<event_name>`action. */
-export const has_on_prop = (prop_action: string, comp: SvelthreeInteractableComponent): boolean => {
+/** Checks if a `svelthree`-component has `on_<event_name>`prop. */
+export const has_on_prop = (on_prop: string, comp: SvelthreeInteractableComponent): boolean => {
 	const comp_state = comp.state()
-	return !!comp_state[prop_action as keyof typeof comp_state]
+	return !!comp_state[on_prop as keyof typeof comp_state]
 }
 
-/** Retruns `true` if `on:<event_name>`-directive or `on_<event_name>`-action was defined on a `svelthree`-component. */
+/** Retruns `true` if `on:<event_name>`-directive or `on_<event_name>`-prop was defined on a `svelthree`-component. */
 export const using_event = (
 	event_name: SvelthreeSupportedInteractionEvent,
 	comp: SvelthreeInteractableComponent
@@ -38,7 +38,7 @@ export const using_event = (
 	return has_on_directive(event_name, comp) || !!comp_state[`on_${event_name}`]
 }
 
-/** Retruns `true` if none of both `on:<event_name>`-directive and `on_<event_name>`-action was defined on a `svelthree`-component. */
+/** Retruns `true` if none of both `on:<event_name>`-directive and `on_<event_name>`-prop was defined on a `svelthree`-component. */
 export const not_using_event = (
 	event_name: SvelthreeSupportedInteractionEvent,
 	comp: SvelthreeInteractableComponent
@@ -47,8 +47,8 @@ export const not_using_event = (
 	return !has_on_directive(event_name, comp) && !comp_state[`on_${event_name}`]
 }
 
-/** Retruns `true` if `svelthree`-component's `on_<event_name>`-action was defined as a simple callback-function (not Array, no `modifiers`-Array). */
-export const prop_action_is_simple = (
+/** Retruns `true` if `svelthree`-component's `on_<event_name>`-prop was defined as a simple callback-function (not Array, no `modifiers`-Array). */
+export const on_prop_is_simple = (
 	event_name: SvelthreeSupportedInteractionEvent,
 	comp: SvelthreeInteractableComponent
 ): boolean => {
@@ -56,11 +56,10 @@ export const prop_action_is_simple = (
 	return typeof comp_state[`on_${event_name}`] === "function"
 }
 
-/** Retruns `true` if `svelthree`-component's `on_<event_name>`-action was defined as an Array with a callback-function as first item. */
+/** Retruns `true` if `svelthree`-component's `on_<event_name>`-prop was defined as an Array with a callback-function as first item. */
 // TODO  make the check more precise and log errors.
-export const prop_action_is_complex = (prop_action_handler: SvelthreePropActionHandler): boolean => {
+export const on_prop_is_complex = (on_prop_handler: SvelthreeOnPropHandler): boolean => {
 	return (
-		!!(prop_action_handler as Array<unknown>).length &&
-		!!(typeof (prop_action_handler as Array<unknown>)[0] === "function")
+		!!(on_prop_handler as Array<unknown>).length && !!(typeof (on_prop_handler as Array<unknown>)[0] === "function")
 	)
 }
