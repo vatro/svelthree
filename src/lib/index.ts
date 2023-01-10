@@ -35,22 +35,17 @@ export type {
 	SvelthreeInteractableComponent,
 	SvelthreePointerEvent,
 	SvelthreePointerEventDetail,
-	SvelthreePointerEventHandler,
 	SvelthreePointerEventModifier,
 	SvelthreeFocusEvent,
 	SvelthreeFocusEventDetail,
-	SvelthreeFocusEventHandler,
 	SvelthreeFocusEventModifier,
 	SvelthreeKeyboardEvent,
 	SvelthreeKeyboardEventDetail,
-	SvelthreeKeyboardEventHandler,
 	SvelthreeKeyboardEventModifier,
 	SvelthreeWheelEvent,
 	SvelthreeWheelEventDetail,
-	SvelthreeWheelEventHandler,
 	SvelthreeWheelEventModifier,
-	SvelthreeModifiersProp,
-	SvelthreeOnPropHandler
+	SvelthreeModifiersProp
 } from "./types/types-extra.js"
 
 // `props` Object Literal types

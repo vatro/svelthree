@@ -48,22 +48,6 @@
 		readonly interact: boolean | undefined | null
 		readonly block: boolean
 		readonly modifiers: SvelthreeModifiersProp | undefined
-		readonly on_click: SvelthreePointerEventHandler | undefined
-		readonly on_pointerup: SvelthreePointerEventHandler | undefined
-		readonly on_pointerdown: SvelthreePointerEventHandler | undefined
-		readonly on_pointerover: SvelthreePointerEventHandler | undefined
-		readonly on_pointerout: SvelthreePointerEventHandler | undefined
-		readonly on_pointermove: SvelthreePointerEventHandler | undefined
-		readonly on_pointermoveover: SvelthreePointerEventHandler | undefined
-		readonly on_keydown: SvelthreeKeyboardEventHandler | undefined
-		readonly on_keypress: SvelthreeKeyboardEventHandler | undefined
-		readonly on_keyup: SvelthreeKeyboardEventHandler | undefined
-		readonly on_focus: SvelthreeFocusEventHandler | undefined
-		readonly on_blur: SvelthreeFocusEventHandler | undefined
-		readonly on_focusin: SvelthreeFocusEventHandler | undefined
-		readonly on_focusout: SvelthreeFocusEventHandler | undefined
-		readonly on_wheel: SvelthreeWheelEventHandler | undefined
-		readonly on_wheelover: SvelthreeWheelEventHandler | undefined
 		readonly animation: SvelthreeAnimationFunction | undefined
 		readonly aniauto: boolean | undefined
 		readonly onMountReplace: SvelthreeLifecycleCallback<CurrentComponentType> | undefined
@@ -110,12 +94,6 @@
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
-	import type {
-		SvelthreePointerEventHandler,
-		SvelthreeFocusEventHandler,
-		SvelthreeKeyboardEventHandler,
-		SvelthreeWheelEventHandler
-	} from "../types/types-extra.js"
 
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils.js"
@@ -1018,86 +996,6 @@
 	/** Interaction modifiers. */
 	export let modifiers: SvelthreeModifiersProp | undefined = undefined
 
-	export let on_click: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_click !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointerup: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointerup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointerdown: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointerdown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointerover: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointerover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointerout: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointerout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointermove: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointermove !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_pointermoveover: SvelthreePointerEventHandler | undefined = undefined
-	$: if (on_pointermoveover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_keydown: SvelthreeKeyboardEventHandler | undefined = undefined
-	$: if (on_keydown !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_keypress: SvelthreeKeyboardEventHandler | undefined = undefined
-	$: if (on_keypress !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_keyup: SvelthreeKeyboardEventHandler | undefined = undefined
-	$: if (on_keyup !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_focus: SvelthreeFocusEventHandler | undefined = undefined
-	$: if (on_focus !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_blur: SvelthreeFocusEventHandler | undefined = undefined
-	$: if (on_blur !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_focusin: SvelthreeFocusEventHandler | undefined = undefined
-	$: if (on_focusin !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_focusout: SvelthreeFocusEventHandler | undefined = undefined
-	$: if (on_focusout !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_wheel: SvelthreeWheelEventHandler | undefined = undefined // ->  TODO  implement
-	$: if (on_wheel !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
-	export let on_wheelover: SvelthreeWheelEventHandler | undefined = undefined // -> TODO  implement
-	$: if (on_wheelover !== undefined && interaction_comp && shadow_dom_el) {
-		interaction_comp.$set({ update_listeners: true })
-	}
-
 	/** Animation logic to be performed with the (three) object instance created by the component. */
 	export let animation: SvelthreeAnimationFunction | undefined = undefined
 
@@ -1523,22 +1421,6 @@
 					interact,
 					block,
 					modifiers,
-					on_click,
-					on_pointerup,
-					on_pointerdown,
-					on_pointerover,
-					on_pointerout,
-					on_pointermove,
-					on_pointermoveover,
-					on_keydown,
-					on_keypress,
-					on_keyup,
-					on_focus,
-					on_blur,
-					on_focusin,
-					on_focusout,
-					on_wheel,
-					on_wheelover,
 					animation,
 					aniauto,
 					onMountReplace,
