@@ -618,25 +618,33 @@ export type SvelthreeSupportedInteractionEvent =
 
 type GetEventHandler<E, M> = [handler: (e: E) => void, modifiers?: Array<M>] | ((e: E) => void)
 
-export type SvelthreePointerEvent = SvelthreeInteractionEvent<SvelthreePointerEventDetail>
+export type SvelthreePointerEvent = {
+	[P in keyof SvelthreeInteractionEvent<SvelthreePointerEventDetail>]: SvelthreeInteractionEvent<SvelthreePointerEventDetail>[P]
+}
 export type SvelthreePointerEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreePointerEventHandler = GetEventHandler<SvelthreePointerEvent, SvelthreePointerEventModifier>
 
-export type SvelthreeFocusEvent = SvelthreeInteractionEvent<SvelthreeFocusEventDetail>
+export type SvelthreeFocusEvent = {
+	[P in keyof SvelthreeInteractionEvent<SvelthreeFocusEventDetail>]: SvelthreeInteractionEvent<SvelthreeFocusEventDetail>[P]
+}
 export type SvelthreeFocusEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeFocusEventHandler = GetEventHandler<SvelthreeFocusEvent, SvelthreeFocusEventModifier>
 
-export type SvelthreeKeyboardEvent = SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>
+export type SvelthreeKeyboardEvent = {
+	[P in keyof SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>]: SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>[P]
+}
 export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
 export type SvelthreeKeyboardEventHandler = GetEventHandler<SvelthreeKeyboardEvent, SvelthreeKeyboardEventModifier>
 
-export type SvelthreeWheelEvent = SvelthreeInteractionEvent<SvelthreeWheelEventDetail>
+export type SvelthreeWheelEvent = {
+	[P in keyof SvelthreeInteractionEvent<SvelthreeWheelEventDetail>]: SvelthreeInteractionEvent<SvelthreeWheelEventDetail>[P]
+}
 export type SvelthreeWheelEventModifier = SvelthreeStandardEventModifier | "intersect" | "global" | "global:document" | "global:window"
 
 /** Event handler can be a function `(e) => {...}` or an array containing a function + an array of modifiers, e.g. `[(e) => {...}, ["preventDefault"]]`. */
