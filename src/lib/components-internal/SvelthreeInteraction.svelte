@@ -1280,47 +1280,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * cursor will not change (_cursor changes on `interact: true` + `block: false` only_).
 	 */
 	function set_block_status(): void {
-		let parent_state = parent.state()
-
 		//cursor will change on `interact: true` + `block: false`
-		if (verbose && log_dev)
-			console.debug(
-				`SVELTHREE > ${c_name} > set_block_status : used_pointer_events.size:`,
-				used_pointer_events.size
-			)
 		if (used_pointer_events.size === 0) {
 			// cursor will not change
 			parent.$set({ block: true })
-			parent_state = parent.state()
-			if (obj) {
-				obj.userData.block = true
-				if (verbose && log_dev) {
-					console.debug(
-						`SVELTHREE > ${c_name} > set_block_status : parent.block, obj.userData.block -> true`,
-						{
-							parent,
-							parent_block: parent_state.block,
-							obj_userData_block: obj.userData.block
-						}
-					)
-				}
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > set_block_status : Couldn't set 'obj.userData.block' to 'true', invalid 'obj' value!`,
-					{ obj }
-				)
-			}
 		} else {
 			// cursor will change
 			parent.$set({ block: false })
-			parent_state = parent.state()
-			if (verbose && log_dev) {
-				console.debug(`SVELTHREE > ${c_name} > set_block_status : parent.block -> false`, {
-					parent,
-					parent_block: parent_state.block
-				})
-			}
-			//obj.userData.block = false
 		}
 	}
 
