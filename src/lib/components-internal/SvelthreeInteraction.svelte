@@ -1170,7 +1170,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// COOL!  Multiple `on:` directives WILL be triggered as expected.
 
-	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interactionEnabled)) {
+	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interactionEnabled)) do_update_listeners()
+
+	const do_update_listeners = () => {
 		const parent_state = parent.state()
 
 		r_added_on_init = true
