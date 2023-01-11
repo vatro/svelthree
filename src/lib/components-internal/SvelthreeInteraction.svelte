@@ -1310,7 +1310,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		} else {
 			// cursor will change
-			parent.$set({ block: true })
+			parent.$set({ block: false })
 			parent_state = parent.state()
 			if (verbose && log_dev) {
 				console.debug(`SVELTHREE > ${c_name} > set_block_status : parent.block -> false`, {
