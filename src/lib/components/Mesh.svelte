@@ -790,15 +790,15 @@
 
 	$: interactive = $canvas_interactivity.enabled
 
-	let interactionEnabled: boolean | undefined = undefined
-	$: interactionEnabled = !!interactive && !!interact
+	let interaction_enabled: boolean | undefined = undefined
+	$: interaction_enabled = !!interactive && !!interact
 
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
 	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
 	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
-	$: if (interactionEnabled && raycast && !block && mesh) {
+	$: if (interaction_enabled && raycast && !block && mesh) {
 		if (!raycast.includes(mesh)) {
 			mesh.userData.block = false
 			raycast.push(mesh)
@@ -810,7 +810,7 @@
 	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
 	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
 	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && block && mesh) {
+	$: if (!interaction_enabled && raycast && block && mesh) {
 		if (!raycast.includes(mesh)) {
 			mesh.userData.block = true
 			raycast.push(mesh)
@@ -821,7 +821,7 @@
 
 	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
 	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && !block && mesh) {
+	$: if (!interaction_enabled && raycast && !block && mesh) {
 		if (raycast.includes(mesh)) {
 			raycast.splice(mesh.userData.index_in_raycast, 1)
 			mesh.userData.block = false
@@ -1344,7 +1344,7 @@
 		{dispatch_on_directive}
 		obj={mesh}
 		parent={self}
-		{interactionEnabled}
+		{interaction_enabled}
 		{log_dev}
 		{log_lc}
 	/>

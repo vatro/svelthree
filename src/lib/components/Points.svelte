@@ -792,15 +792,15 @@
 
 	$: interactive = $canvas_interactivity.enabled
 
-	let interactionEnabled: boolean | undefined = undefined
-	$: interactionEnabled = !!interactive && !!interact
+	let interaction_enabled: boolean | undefined = undefined
+	$: interaction_enabled = !!interactive && !!interact
 
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
 	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
 	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
-	$: if (interactionEnabled && raycast && !block && points) {
+	$: if (interaction_enabled && raycast && !block && points) {
 		if (!raycast.includes(points)) {
 			points.userData.block = false
 			raycast.push(points)
@@ -812,7 +812,7 @@
 	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
 	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
 	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && block && points) {
+	$: if (!interaction_enabled && raycast && block && points) {
 		if (!raycast.includes(points)) {
 			points.userData.block = true
 			raycast.push(points)
@@ -823,7 +823,7 @@
 
 	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
 	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
-	$: if (!interactionEnabled && raycast && !block && points) {
+	$: if (!interaction_enabled && raycast && !block && points) {
 		if (raycast.includes(points)) {
 			raycast.splice(points.userData.index_in_raycast, 1)
 			points.userData.block = false
@@ -1346,7 +1346,7 @@
 		{dispatch_on_directive}
 		obj={points}
 		parent={self}
-		{interactionEnabled}
+		{interaction_enabled}
 		{log_dev}
 		{log_lc}
 	/>

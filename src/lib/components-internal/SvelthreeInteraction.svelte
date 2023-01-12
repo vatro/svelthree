@@ -59,7 +59,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = undefined
 
-	export let interactionEnabled: boolean | undefined
+	export let interaction_enabled: boolean | undefined
 	export let parent: SvelthreeInteractableComponent
 	export let sti: number = getContext("store_index")
 	export let obj: Object3D | undefined | null
@@ -102,7 +102,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// --- Reactively add listeners ---
 
-	$: if (c && shadow_dom_el && raycaster && interactionEnabled && obj && !obj.userData.interact) {
+	$: if (c && shadow_dom_el && raycaster && interaction_enabled && obj && !obj.userData.interact) {
 		obj.userData.interact = true
 		listeners = true
 	}
@@ -1155,8 +1155,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	let r_added_on_init = false
 	// reactive listener management checks
-	$: r_add_on_init = interactionEnabled && listeners
-	$: r_remove = !interactionEnabled && listeners
+	$: r_add_on_init = interaction_enabled && listeners
+	$: r_remove = !interaction_enabled && listeners
 
 	// Reactively add / remove pointer listeners, works with e.g. (syntax):
 
@@ -1170,7 +1170,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// COOL!  Multiple `on:` directives WILL be triggered as expected.
 
-	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interactionEnabled)) do_update_listeners()
+	$: if ((r_add_on_init && !r_added_on_init) || (update_listeners && interaction_enabled)) do_update_listeners()
 
 	const do_update_listeners = () => {
 		const parent_state = parent.state()
@@ -1328,7 +1328,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  REMOVING AND UNREGISTERING  */
 
-	/* reactively removes all listeners if interactionEnabled (interactive && interact) is false */
+	/* reactively removes all listeners if interaction_enabled (interactive && interact) is false */
 	$: if (r_remove) remove_all_listeners()
 
 	export const remove_all_listeners = (): void => {
@@ -1587,7 +1587,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	// disable interaction (reactive)
-	$: if (c && raycaster && !interactionEnabled && obj && obj.userData.interact) {
+	$: if (c && raycaster && !interaction_enabled && obj && obj.userData.interact) {
 		remove_all_listeners()
 		obj.userData.interact = false
 	}
