@@ -94,6 +94,7 @@
 
 	import type { Writable } from "svelte/store"
 	import type { SvelthreeModifiersProp } from "../types/types-extra.js"
+	import type { SvelthreeOnFunction, SvelthreeOnXFunction } from "../types/types-extra.js"
 
 	import { BoxHelper } from "three"
 	import { get_root_scene } from "../utils/SceneUtils.js"
@@ -931,13 +932,13 @@
 
 	/**
 	 * **svelthree** replacement for [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
-	 * but it doesn't return a function for removal of the listener (_like Svelte native does_), instead use `.onx(type, callback)` syntax.
+	 * but is typed, asynchronous and it doesn't return a function for removal of the listener (_like the default Svelte one does_), instead use `.onx(type, callback)` syntax.
 	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export const on = async (type: any, callback: any): Promise<void> => {
+	export const on: SvelthreeOnFunction = async (type, callback): Promise<boolean> => {
 		if (interact) {
 			if (!interaction_comp || !shadow_dom_el) await tick()
 
@@ -948,23 +949,27 @@
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
 				})
+				return false
 			}
 		} else {
 			console.error(
 				"SVELTHREE > Mesh > on : You can call the '.on(...)' function with interactive components only! Component's 'interact' prop has to be 'true'."
 			)
+			return false
 		}
+
+		return true
 	}
 
 	/**
 	 * **svelthree** replacement for the _event listener removal function_ returned by [`$on`](https://svelte.dev/docs#run-time-client-side-component-api-$on), does basically the same,
 	 * needed for **reactive** interaction listener management -> _internal svelthree functionality_. It additionaly allows programmatic removal of all callbacks of a certain type and
-	 * programmatic removal of 'forwarding' directives (no handlers) like `on:click`.
+	 * programmatic removal of 'forwarding' directives (no callbacks) like `on:click`.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export const onx = async (type: any, callback: any): Promise<void> => {
+	export const onx: SvelthreeOnXFunction = async (type, callback): Promise<boolean> => {
 		if (interact) {
 			if (!interaction_comp || !shadow_dom_el) await tick()
 
@@ -974,7 +979,7 @@
 				if (index !== -1) cbacks.splice(index, 1)
 			} else {
 				// allows e.g. onx("click") -> will remove all callbacks and the callback type itself
-				// this way we can also programatically delete 'forwarding' directives (no handlers) like `on:click`
+				// this way we can also programatically delete 'forwarding' directives (no callbacks) like `on:click`
 				self.$$.callbacks[type].length = 0
 				delete self.$$.callbacks[type]
 			}
@@ -985,12 +990,16 @@
 				console.error("SVELTHREE > Mesh > on : Couldn't update listeners, 'interaction_comp' not available!", {
 					interaction_comp
 				})
+				return false
 			}
 		} else {
 			console.error(
 				"SVELTHREE > Mesh > onx : You can call the '.onx(...)' function with interactive components only! Component's 'interact' prop has to be 'true'!"
 			)
+			return false
 		}
+
+		return true
 	}
 
 	/** Interaction modifiers. */

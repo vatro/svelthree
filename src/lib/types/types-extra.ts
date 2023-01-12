@@ -568,6 +568,24 @@ type EventMapWheelEventDetails = {
 export type EventMapAllEvents = EventMapPointEvents & EventMapKeyboardEvents & EventMapFocusEvents & EventMapWheelEvents
 export type EventMapAllEventDetails = EventMapPointEventDetails & EventMapKeyboardEventDetails & EventMapFocusEventDetails & EventMapWheelEventDetails
 
+type CallbackMapPointerEvents = {
+	[key in ElementType<typeof POINTER_EVENTS>]: (e: SvelthreePointerEvent) => unknown
+}
+
+type CallbackMapKeyboardEvents = {
+	[key in ElementType<typeof KEYBOARD_EVENTS>]: (e: SvelthreeKeyboardEvent) => unknown
+}
+
+type CallbackMapFocusEvents = {
+	[key in ElementType<typeof FOCUS_EVENTS>]: (e: SvelthreeFocusEvent) => unknown
+}
+
+type CallbackMapWheelEvents = {
+	[key in ElementType<typeof WHEEL_EVENTS>]: (e: SvelthreeWheelEvent) => unknown
+}
+
+type CallbackMapAllEvents = CallbackMapPointerEvents & CallbackMapKeyboardEvents & CallbackMapFocusEvents & CallbackMapWheelEvents
+
 export type SvelthreeInteractionEventDispatcher = ReturnType<typeof createEventDispatcher<EventMapAllEventDetails>>
 
 import type { OrbitControls as THREE_OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
@@ -694,3 +712,13 @@ export type SvelthreeLifecycleCallbackSync<T = AnySvelthreeComponent> = (comp: T
  *
  */
 export type SvelthreeLifecycleCallback<T = AnySvelthreeComponent> = SvelthreeLifecycleCallbackSync<T> | SvelthreeLifecycleCallbackAsync<T>
+
+export type SvelthreeOnFunction = <T extends SvelthreeSupportedInteractionEvent>(
+	type: T,
+	callback: CallbackMapAllEvents[T extends keyof CallbackMapAllEvents ? T : never]
+) => Promise<boolean>
+
+export type SvelthreeOnXFunction = <T extends SvelthreeSupportedInteractionEvent>(
+	type: T,
+	callback?: CallbackMapAllEvents[T extends keyof CallbackMapAllEvents ? T : never]
+) => Promise<boolean>
