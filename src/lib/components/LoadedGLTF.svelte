@@ -622,12 +622,19 @@
 	export let interact: boolean | undefined | null = undefined
 
 	/**
-	 * Adds component's three.js object instance to the `raycast` array even if it's not set to `interact` ( _no interaction listeners_ ).
-	 * This way the object acts as a pure _interaction occluder / blocker_ -> will be detected / intersected by `Raycaster`'s ray.
+	 * _default: `false`_
 	 *
-	 * Setting the `block` prop makes sense only if the `interact` prop is not set / set to `false`.
-	 * In case `interact` prop is set / set to `true`, but no e.g. `on:<event_name>` directives or `on_<event_name>` internal actions are set,
-	 * the object will automatically become an _interaction occluder / blocker_.
+	 * If `true`: adds the created three.js object instance to the `raycast` Array, even if the component was not set to `interact`.
+	 * This way, the created three.js object instance will act as a pure _**interaction occluder / blocker**_ -> will be detected / intersected by `Raycaster`'s Ray and _block_
+	 * any other objects being occluded by it from being intersected, thus from being interactive / triggering interaction events, despite the fact the created three.js object instance
+	 * itself does not `interact`.
+	 *
+	 * Also, if `true`, `cursor` will not change to `pointer` on hover, even if `changeCursor` was set to `true`.
+	 *
+	 * ☝️ Setting the `block` prop (to `true`) **makes only sense** if the **`interact` prop was set to `false` / not set at all**.
+	 * If `interact` prop was set to `true`, `block` prop value will be **managed and overriden by the `SvelthreeInteraction` component**:
+	 * - `false` if any pointer-dependant (_pointer & wheel events_) interaction was defined, like e.g. `on:click={(e)=>{...})}` or `on:wheel={(e)=>{...})}` (_without `global` modifier_).
+	 * - `true` if no pointer-dependant (_pointer & wheel events_) interaction was defined or no pointer-events and wheel-events with `global` modifier.
 	 */
 	export let block = false
 
@@ -668,35 +675,55 @@
 	//  IMPORTANT  not reactive
 	const raycast: RaycastArray = getContext("raycast")
 
-	// Reactively DISABLE raycasting to the created three.js instance. Only `interact` is set and `block` is false (default).
-	// + `block` will be changed automatically based on pointer listeners total count via `SvelthreeInteraction` component.
+	// INTERACTIVE
+	// The created three.js object instance will be raycasted (`interact`: true), and `cursor` will change to pointer (`block === false`) if `changeCursor` is `true`
+	// ☝️ `block` value managed / set by the `SvelthreeInteracton` component.
 	$: if (interaction_enabled && raycast && !block && container) {
+		// `block` === `false` -> `cursor` will change to `pointer` on hover (see `Canvas.update_all_intersections_and_cursor()`)
+		container.userData.block = block
+
+		// Enable raycasting of the object (add it to `raycast`-Array)
 		if (!raycast.includes(container)) {
-			container.userData.block = false
 			raycast.push(container)
-		} else {
-			container.userData.block = false
 		}
 	}
 
-	// Reactively ENABLE raycasting to the created three.js instance -> 'interaction occluder / blocker'.
-	// Only `block` is set / `true` but no `interact` / set to `false`. Since `interact` is `false`,
-	// `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
+	// INTERACTIVE OCCLUDER / BLOCKER
+	// The created three.js object instance will be raycasted (`interact`: true), but `cursor` will NOT change to pointer (`block === false`) if `changeCursor` is `true`
+	// `block` : `true` -> cursor will NOT change to pointer if `changeCursor` is `true`
+	// ☝️ `block` value managed / set by the `SvelthreeInteracton` component.
+	$: if (interaction_enabled && raycast && block && container) {
+		// `block === false` -> `cursor` will change to `pointer` on hover (see `Canvas.update_all_intersections_and_cursor()`)
+		container.userData.block = block
+
+		// Enable raycasting of the created three.js object instance (add it to raycast-Array if needed).
+		if (!raycast.includes(container)) {
+			raycast.push(container)
+		}
+	}
+
+	// NON-INTERACTIVE OCCLUDER / BLOCKER
+	// The created three.js object instance will be raycasted, even though it was not set to interact (`interact`: false).
 	$: if (!interaction_enabled && raycast && block && container) {
+		// `block === true` -> `cursor` will NOT change to `pointer` on hover (see `Canvas.update_all_intersections_and_cursor()`)
+		container.userData.block = block
+
+		// Enable raycasting of the created three.js object instance (add it to the `raycast`-Array if needed), even though it was not set to interact (`interact`: false).
 		if (!raycast.includes(container)) {
-			container.userData.block = true
 			raycast.push(container)
-		} else {
-			container.userData.block = true
 		}
 	}
 
-	// Reactively DISABLE raycasting to the created three.js instance. Neither `block` nor `interact` are set / are both `false`.
-	// Since `interact` is `false`, `block` will NOT be changed via `SvelthreeInteraction` component (not rendered).
+	// NON-INTERACTIVE
+	// The created three.js object instance will NOT be raycasted, will be ignored by the Racaster-ray. Has no effect on `cursor` change.
 	$: if (!interaction_enabled && raycast && !block && container) {
+		// `block === false` will have no effect on `cursor` change since we're removing the object from the `raycast`-Array in the next step.
+		// This is just to correctly update the value of `.userData.block`.
+		container.userData.block = block
+
+		// Disable raycasting of the object (remove it from the 'raycast'-Array).
 		if (raycast.includes(container)) {
 			raycast.splice(container.userData.index_in_raycast, 1)
-			container.userData.block = false
 		}
 	}
 

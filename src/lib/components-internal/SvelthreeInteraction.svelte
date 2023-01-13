@@ -1275,18 +1275,30 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/**
-	 * Changes component's `block` status based on pointer listeners' total count.
-	 * If no pointer listeners are set, `block` will be set to `true`, means
-	 * cursor will not change (_cursor changes on `interact: true` + `block: false` only_).
+	 * Changes component's `block` status.
 	 */
 	function set_block_status(): void {
-		//cursor will change on `interact: true` + `block: false`
-		if (used_pointer_events.size === 0) {
-			// cursor will not change
+		if (used_pointer_events.size === 0 && (used_wheel_events.size === 0 || has_global_wheel_event())) {
+			// cursor will not change even if `Canvas.changeCursor === true`
 			parent.$set({ block: true })
-		} else {
-			// cursor will change
+		} else if (used_pointer_events.size > 0 || (used_wheel_events.size > 0 && !has_global_wheel_event())) {
+			// cursor will change if `Canvas.changeCursor === true`
 			parent.$set({ block: false })
+		}
+	}
+
+	function has_global_wheel_event(): boolean {
+		let has_global = false
+
+		if (used_wheel_events.size > 0) {
+			if (user_modifiers_prop.get("all")?.has("global")) {
+				has_global = true
+			} else if (user_modifiers_prop.get("wheel")?.has("global")) {
+				has_global = true
+			}
+			return has_global
+		} else {
+			return false
 		}
 	}
 
