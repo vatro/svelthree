@@ -874,15 +874,25 @@
 		if (interact) {
 			if (!interaction_comp || !shadow_dom_el) await tick()
 
-			const cbacks = self.$$.callbacks[type]
-			if (callback) {
+			if (type && callback) {
+				// remove one specific callback
+				const cbacks = self.$$.callbacks[type]
 				const index = cbacks.indexOf(callback)
 				if (index !== -1) cbacks.splice(index, 1)
-			} else {
+			} else if (type && !callback) {
 				// allows e.g. onx("click") -> will remove all callbacks and the callback type itself
 				// this way we can also programatically delete 'forwarding' directives (no callbacks) like `on:click`
-				self.$$.callbacks[type].length = 0
+				const cbacks = self.$$.callbacks[type]
+				cbacks.splice(0, cbacks.length)
 				delete self.$$.callbacks[type]
+			} else if (!type && !callback) {
+				// allows onx() -> will remove all callbacks and all callback types
+				// this way we can also programatically delete 'forwarding' directives (no callbacks) like `on:click`
+				for (const event_type in self.$$.callbacks) {
+					const event_type_cbacks = self.$$.callbacks[event_type]
+					event_type_cbacks.splice(0, event_type_cbacks.length)
+					delete self.$$.callbacks[event_type]
+				}
 			}
 
 			if (interaction_comp) {

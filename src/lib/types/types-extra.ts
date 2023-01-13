@@ -719,6 +719,6 @@ export type SvelthreeOnFunction = <T extends SvelthreeSupportedInteractionEvent>
 ) => Promise<boolean>
 
 export type SvelthreeOnXFunction = <T extends SvelthreeSupportedInteractionEvent>(
-	type: T,
+	type?: T,
 	callback?: CallbackMapAllEvents[T extends keyof CallbackMapAllEvents ? T : never]
 ) => Promise<boolean>
