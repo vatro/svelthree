@@ -42,7 +42,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	} from "../utils/interaction/modifier_utils.js"
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
-	import { create_check_pointer_overout, create_check_pointer_moveover } from "../utils/interaction/pointerevents.js"
+	import PointerEventManager from "../utils/interaction/PointerEventManager.js"
 	import { execute_queued_events, execute_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 	import { has_on_directive, using_event, not_using_event } from "../utils/interaction/parent_comp_utils.js"
 
@@ -119,7 +119,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			// dispatch `pointerout` if the last object pointer was over before
 			// exiting the canvas, was an interactive and a non-blocking one.
 			if (!obj.userData.block) {
-				check_pointer_overout(pointer.event)
+				m_pointer.shadowdom_dispatch.overout(pointer.event)
 			}
 		}
 	}
@@ -169,7 +169,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
 	function interaction2_check_pointer_overout(evt: PointerEvent): void {
-		check_pointer_overout(evt)
+		m_pointer.shadowdom_dispatch.overout(evt)
 	}
 
 	/**
@@ -179,7 +179,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
 	function interaction2_check_pointer_move_moveover(evt: PointerEvent) {
-		check_pointer_moveover(evt)
+		m_pointer.shadowdom_dispatch.moveover(evt)
 	}
 
 	/** [ _mode `always` only_ ] Executes any queue `pointer` related events. */
@@ -218,26 +218,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const used_pointer_events_on_directive = new Set<string>([])
 	let used_pointer_events = new Set<string>([])
 
-	/** Dispatches a **cloned** `'pointerover'`/`'pointerout'` PointerEvent via the **shadow DOM element**. */
-	const check_pointer_overout = create_check_pointer_overout(
-		shadow_dom_el,
-		intersects,
-		used_pointer_events,
-		get_pointerevent_modified_clone,
-		c_name
-	)
-
-	/**
-	 * Dispatches a **cloned** `'pointermoveover'` PointerEvent via the **shadow DOM element**.
-	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
-	 */
-	const check_pointer_moveover = create_check_pointer_moveover(
-		shadow_dom_el,
+	/** Conditionally **dispatches** a **cloned** `PointerEvent` ether via the **shadow DOM element** or directly via 'pointerevents_handler'. */
+	const m_pointer = new PointerEventManager(
 		pointer_over_canvas,
+		shadow_dom_el,
 		intersects,
 		used_pointer_events,
-		get_pointerevent_modified_clone,
+		pointerevents_handler,
 		c_name
 	)
 
@@ -308,11 +295,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  */
 	/*
-        `Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
-        Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
-            - mode `auto`: all internal canvas ( POINTER ) events get redispatched immediatelly via SHADOW DOM ( any resulting changes will trigger a new render )
-            - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
-    */
+	`Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
+	 Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
+	 - mode `auto`: all internal canvas ( POINTER ) events get redispatched immediatelly via SHADOW DOM ( any resulting changes will trigger a new render )
+	 - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
+  */
 
 	/** Pointer events are being provided (re-dispatched) by the Canvas component. */
 	function add_canvas_pointer_listener(event_name: SvelthreeSupportedInteractionEvent): void {
@@ -324,7 +311,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (!remove_canvas_pointerup_listener) add_canvas_pointerup_listener()
 				break
 			case "pointerdown":
-				if (!add_canvas_pointerdown_listener) add_canvas_pointerdown_listener()
+				if (!remove_canvas_pointerdown_listener) add_canvas_pointerdown_listener()
 				break
 			case "pointerout":
 			case "pointerover":
@@ -342,177 +329,55 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointermove`
-
 	const queued_pointer_move_events: (() => void)[] = []
 
 	let remove_canvas_pointermove_listener: (() => void) | undefined
 	function add_canvas_pointermove_listener(): void {
 		remove_canvas_pointermove_listener = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
-			// check before dispatching 'pointermove' component event directly (not via shadow dom element)
-			check_pointer_move(evt.detail.event as PointerEvent)
+			m_pointer.handle_directly.move(evt.detail.event as PointerEvent)
 		)
 	}
 
-	const last_pointer_move: {
-		clientX: number | undefined
-		clientY: number | undefined
-	} = {
-		clientX: undefined,
-		clientY: undefined
-	}
-
-	function pointer_has_not_moved_move(evt: PointerEvent): boolean {
-		return last_pointer_move.clientX === evt.clientX && last_pointer_move.clientY === evt.clientY
-	}
-
-	function check_pointer_move(evt: PointerEvent) {
-		if (
-			used_pointer_events.has("pointermove") &&
-			$pointer_over_canvas.status === true &&
-			!pointer_has_not_moved_move(evt)
-		) {
-			// `check_pointer_move` & `check_pointer_moveover` use the same `pointerevent`
-			// so we have to separate `last_pointer_...`
-			last_pointer_move.clientX = evt.clientX
-			last_pointer_move.clientY = evt.clientY
-
-			// no check, no dispatch via shadow dom but also queue pointer move in "always" mode
-			pointerevents_handler(get_pointerevent_modified_clone(evt), null)
-		}
-	}
-
 	const queued_pointer_moveover_events: (() => void)[] = []
-
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointermoveover`
 
 	let remove_canvas_pointermoveover_listener: (() => void) | undefined
 	function add_canvas_pointermoveover_listener(): void {
 		remove_canvas_pointermoveover_listener = canvas_component?.$on(
 			"canvas_pointermove",
-			(evt: CanvasComponentEvent) =>
-				// check before dispatching 'pointermoveover' component event via shadow dom element
-				check_pointer_moveover(evt.detail.event as PointerEvent)
+			(evt: CanvasComponentEvent) => m_pointer.shadowdom_dispatch.moveover(evt.detail.event as PointerEvent)
 		)
 	}
-
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointermove` -> `pointerover` / `pointerout`
 
 	let remove_canvas_pointeroverout_listener: (() => void) | undefined
 	function add_canvas_pointeroverout_listener(): void {
 		remove_canvas_pointeroverout_listener = canvas_component?.$on(
 			"canvas_pointermove",
-			(evt: { detail: { event: PointerEvent } }) =>
-				// check before dispatching 'pointerover' or 'pointerout' component event via shadow dom element
-				check_pointer_overout(evt.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.overout(evt.detail.event)
 		)
 	}
-
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointerdown` -> `pointerdown`
 
 	let remove_canvas_pointerdown_listener: (() => void) | undefined
 	function add_canvas_pointerdown_listener(): void {
 		remove_canvas_pointerdown_listener = canvas_component?.$on(
 			"canvas_pointerdown",
-			(evt: { detail: { event: PointerEvent } }) => check_pointer_pointerdown(evt.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.pointerdown(evt.detail.event)
 		)
 	}
-
-	function check_pointer_pointerdown(evt: PointerEvent) {
-		if (shadow_dom_el) {
-			if (intersects()) {
-				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_pointer_pointerdown : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
-		}
-	}
-
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_pointerup` -> `pointerup`
 
 	let remove_canvas_pointerup_listener: (() => void) | undefined
 	function add_canvas_pointerup_listener(): void {
 		remove_canvas_pointerup_listener = canvas_component?.$on(
 			"canvas_pointerup",
-			(evt: { detail: { event: PointerEvent } }) => check_pointer_pointerup(evt.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.pointerup(evt.detail.event)
 		)
 	}
-
-	function check_pointer_pointerup(evt: PointerEvent) {
-		if (shadow_dom_el) {
-			if (intersects()) {
-				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_pointer_pointerup : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
-		}
-	}
-
-	//  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  `canvas_click` -> `click`
 
 	let remove_canvas_click_listener: (() => void) | undefined
 	function add_canvas_click_listener(): void {
 		remove_canvas_click_listener = canvas_component?.$on(
 			"canvas_click",
-			(evt: { detail: { event: PointerEvent } }) => check_pointer_click(evt.detail.event)
+			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.click(evt.detail.event)
 		)
-	}
-
-	/**
-	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
-	 */
-	function check_pointer_click(evt: PointerEvent) {
-		if (shadow_dom_el) {
-			if (raycaster && intersects()) {
-				shadow_dom_el.dispatchEvent(get_pointerevent_modified_clone(evt))
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_pointer_click : Cannot dispatch PointerEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
-		}
-	}
-
-	/**
-	 *  POINTER Event  ONLY
-	 *
-	 * Clone original pointer events and re-type them if needed,in order to re-dispatch them via shadow dom.
-	 * - 'click' -> get's cloned as it is.
-	 * - 'pointerover' and 'pointerout' -> 'pointermove' event gets re-typed to 'pointerover' or 'pointerout'.
-	 *
-	 * We need to do this, because we cannot re-dispatch the same pointer event that occured on the <canvas>  \
-	 * element through some other DOM / shadow DOM element.
-	 *
-	 */
-	function get_pointerevent_modified_clone(evt: PointerEvent, new_type: string | null = null): PointerEvent {
-		const event_init: { [key: string]: unknown } = { composed: undefined }
-
-		// we do this because simply spreading the event object -> `{...e}`:
-		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
-		// also we cannot simply alter the value of `composed` via the event object like e.g. `evt.composed = false`
-		for (const key in evt) {
-			if (key !== "path") {
-				event_init[key] = evt[key as keyof PointerEvent]
-			}
-		}
-
-		//  IMPORTANT  Setting `composed` to false:
-		// prevents propagation of the event (dispatched via a shadow element) to outer light dom.
-		// see: https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
-		event_init.composed = false
-
-		const cloned_and_modified_event: PointerEvent = new_type
-			? new PointerEvent(new_type, event_init)
-			: new PointerEvent(evt.type, event_init)
-		return cloned_and_modified_event
 	}
 
 	/*  POINTER Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
