@@ -38,7 +38,7 @@ export default class PointerEventManager {
 	) {}
 
 	/** Conditionally dispatch a **cloned** PointerEvent via the **shadow DOM element**. */
-	public shadowdom_dispatch = {
+	public shadow_dom = {
 		/** Conditionally dispatch a **cloned** `pointerover` / `pointerout` PointerEvent via the **shadow DOM element**. */
 		overout: this.overout.bind(this),
 		/** Conditionally dispatch a **cloned** `pointermoveover` PoinerEvent via the **shadow DOM element**. */
@@ -52,7 +52,7 @@ export default class PointerEventManager {
 	}
 
 	/** Handle directly via `pointerevents_handler` (_not dispatching via shadow DOM Element_) */
-	public handle_directly = {
+	public handler = {
 		move: this.move.bind(this)
 	}
 

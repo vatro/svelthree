@@ -119,7 +119,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			// dispatch `pointerout` if the last object pointer was over before
 			// exiting the canvas, was an interactive and a non-blocking one.
 			if (!obj.userData.block) {
-				m_pointer.shadowdom_dispatch.overout(pointer.event)
+				m_pointer.shadow_dom.overout(pointer.event)
 			}
 		}
 	}
@@ -169,7 +169,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
 	function interaction2_check_pointer_overout(evt: PointerEvent): void {
-		m_pointer.shadowdom_dispatch.overout(evt)
+		m_pointer.shadow_dom.overout(evt)
 	}
 
 	/**
@@ -179,7 +179,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
 	 */
 	function interaction2_check_pointer_move_moveover(evt: PointerEvent) {
-		m_pointer.shadowdom_dispatch.moveover(evt)
+		m_pointer.shadow_dom.moveover(evt)
 	}
 
 	/** [ _mode `always` only_ ] Executes any queue `pointer` related events. */
@@ -305,23 +305,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_canvas_pointer_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		switch (event_name) {
 			case "click":
-				if (!remove_canvas_click_listener) add_canvas_click_listener()
+				if (!canvas_click_off) canvas_click_on()
 				break
 			case "pointerup":
-				if (!remove_canvas_pointerup_listener) add_canvas_pointerup_listener()
+				if (!canvas_pointerup_off) canvas_pointerup_on()
 				break
 			case "pointerdown":
-				if (!remove_canvas_pointerdown_listener) add_canvas_pointerdown_listener()
+				if (!canvas_pointerdown_off) canvas_pointerdown_on()
 				break
 			case "pointerout":
 			case "pointerover":
-				if (!remove_canvas_pointeroverout_listener) add_canvas_pointeroverout_listener()
+				if (!canvas_pointeroverout_off) canvas_pointeroverout_on()
 				break
 			case "pointermoveover":
-				if (!remove_canvas_pointermoveover_listener) add_canvas_pointermoveover_listener()
+				if (!canvas_pointermoveover_off) canvas_pointermoveover_on()
 				break
 			case "pointermove":
-				if (!remove_canvas_pointermove_listener) add_canvas_pointermove_listener()
+				if (!canvas_pointermove_off) canvas_pointermove_on()
 				break
 			default:
 				console.error(`SVELTHREE > ${c_name} > Pointer event '${event_name}' not implemented!`)
@@ -331,52 +331,47 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	const queued_pointer_move_events: (() => void)[] = []
 
-	let remove_canvas_pointermove_listener: (() => void) | undefined
-	function add_canvas_pointermove_listener(): void {
-		remove_canvas_pointermove_listener = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
-			m_pointer.handle_directly.move(evt.detail.event as PointerEvent)
+	let canvas_pointermove_off: (() => void) | undefined
+	function canvas_pointermove_on(): void {
+		canvas_pointermove_off = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
+			m_pointer.handler.move(evt.detail.event as PointerEvent)
 		)
 	}
 
 	const queued_pointer_moveover_events: (() => void)[] = []
 
-	let remove_canvas_pointermoveover_listener: (() => void) | undefined
-	function add_canvas_pointermoveover_listener(): void {
-		remove_canvas_pointermoveover_listener = canvas_component?.$on(
-			"canvas_pointermove",
-			(evt: CanvasComponentEvent) => m_pointer.shadowdom_dispatch.moveover(evt.detail.event as PointerEvent)
+	let canvas_pointermoveover_off: (() => void) | undefined
+	function canvas_pointermoveover_on(): void {
+		canvas_pointermoveover_off = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
+			m_pointer.shadow_dom.moveover(evt.detail.event as PointerEvent)
 		)
 	}
 
-	let remove_canvas_pointeroverout_listener: (() => void) | undefined
-	function add_canvas_pointeroverout_listener(): void {
-		remove_canvas_pointeroverout_listener = canvas_component?.$on(
-			"canvas_pointermove",
-			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.overout(evt.detail.event)
+	let canvas_pointeroverout_off: (() => void) | undefined
+	function canvas_pointeroverout_on(): void {
+		canvas_pointeroverout_off = canvas_component?.$on("canvas_pointermove", (evt: CanvasComponentEvent) =>
+			m_pointer.shadow_dom.overout(evt.detail.event as PointerEvent)
 		)
 	}
 
-	let remove_canvas_pointerdown_listener: (() => void) | undefined
-	function add_canvas_pointerdown_listener(): void {
-		remove_canvas_pointerdown_listener = canvas_component?.$on(
-			"canvas_pointerdown",
-			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.pointerdown(evt.detail.event)
+	let canvas_pointerdown_off: (() => void) | undefined
+	function canvas_pointerdown_on(): void {
+		canvas_pointerdown_off = canvas_component?.$on("canvas_pointerdown", (evt: CanvasComponentEvent) =>
+			m_pointer.shadow_dom.pointerdown(evt.detail.event as PointerEvent)
 		)
 	}
 
-	let remove_canvas_pointerup_listener: (() => void) | undefined
-	function add_canvas_pointerup_listener(): void {
-		remove_canvas_pointerup_listener = canvas_component?.$on(
-			"canvas_pointerup",
-			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.pointerup(evt.detail.event)
+	let canvas_pointerup_off: (() => void) | undefined
+	function canvas_pointerup_on(): void {
+		canvas_pointerup_off = canvas_component?.$on("canvas_pointerup", (evt: CanvasComponentEvent) =>
+			m_pointer.shadow_dom.pointerup(evt.detail.event as PointerEvent)
 		)
 	}
 
-	let remove_canvas_click_listener: (() => void) | undefined
-	function add_canvas_click_listener(): void {
-		remove_canvas_click_listener = canvas_component?.$on(
-			"canvas_click",
-			(evt: { detail: { event: PointerEvent } }) => m_pointer.shadowdom_dispatch.click(evt.detail.event)
+	let canvas_click_off: (() => void) | undefined
+	function canvas_click_on(): void {
+		canvas_click_off = canvas_component?.$on("canvas_click", (evt: CanvasComponentEvent) =>
+			m_pointer.shadow_dom.click(evt.detail.event as PointerEvent)
 		)
 	}
 
@@ -1394,23 +1389,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (event_is_registered(event_name, used_pointer_events)) {
 			switch (event_name) {
 				case "click":
-					if (remove_canvas_click_listener) remove_canvas_click_listener()
+					if (canvas_click_off) canvas_click_off()
 					break
 				case "pointerup":
-					if (remove_canvas_pointerup_listener) remove_canvas_pointerup_listener()
+					if (canvas_pointerup_off) canvas_pointerup_off()
 					break
 				case "pointerdown":
-					if (remove_canvas_pointerdown_listener) remove_canvas_pointerdown_listener()
+					if (canvas_pointerdown_off) canvas_pointerdown_off()
 					break
 				case "pointerout":
 				case "pointerover":
-					if (remove_canvas_pointeroverout_listener) remove_canvas_pointeroverout_listener()
+					if (canvas_pointeroverout_off) canvas_pointeroverout_off()
 					break
 				case "pointermoveover":
-					if (remove_canvas_pointermoveover_listener) remove_canvas_pointermoveover_listener()
+					if (canvas_pointermoveover_off) canvas_pointermoveover_off()
 					break
 				case "pointermove":
-					if (remove_canvas_pointermove_listener) remove_canvas_pointermove_listener()
+					if (canvas_pointermove_off) canvas_pointermove_off()
 					break
 				default:
 					console.error(
