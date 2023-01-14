@@ -218,7 +218,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const used_pointer_events_on_directive = new Set<string>([])
 	let used_pointer_events = new Set<string>([])
 
-	/** Conditionally **dispatches** a **cloned** `PointerEvent` ether via the **shadow DOM element** or directly via 'pointerevents_handler'. */
+	/** Conditionally **dispatches** a **cloned** `PointerEvent` either via the **shadow DOM Element** first or via **immediate invoking** of the  `pointerevents_handler`. */
 	const m_pointer = new PointerEventManager(
 		pointer_over_canvas,
 		shadow_dom_el,

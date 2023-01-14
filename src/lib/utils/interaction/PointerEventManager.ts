@@ -2,7 +2,7 @@ import type { Writable } from "svelte/store"
 import type { SvelthreeShadowDOMElement } from "../../types/types-extra.js"
 import { get } from "svelte/store"
 
-/** **Manages / checks** the state of the **pointer** and conditionally **dispatches** corresponding **cloned** `PointerEvent`s via the **shadow DOM element**. */
+/** **Manages / checks** the state of the **pointer**. Contains methods for conditional **dispatching** of corresponding **cloned** `PointerEvent`s via the **shadow DOM Element** first or via immediate invoking of the `pointerevents_handler`. */
 export default class PointerEventManager {
 	private pointer_is_over = false
 	private pointer_is_out = true
@@ -37,7 +37,7 @@ export default class PointerEventManager {
 		private c_name: string
 	) {}
 
-	/** Conditionally dispatch a **cloned** PointerEvent via the **shadow DOM element**. */
+	/** `PointerEventManager` methods dispatching a **cloned** PointerEvent via the **Shadow DOM Element** first, which will then immediatelly invoke `pointerevents_handler`. */
 	public shadow_dom = {
 		/** Conditionally dispatch a **cloned** `pointerover` / `pointerout` PointerEvent via the **shadow DOM element**. */
 		overout: this.overout.bind(this),
@@ -51,12 +51,12 @@ export default class PointerEventManager {
 		click: this.click.bind(this)
 	}
 
-	/** Handle directly via `pointerevents_handler` (_not dispatching via shadow DOM Element_) */
+	/** `PointerEventManager` methods invoking `pointerevents_handler` immediatelly (_without dispatching via Shadow DOM Element first_) */
 	public handler = {
 		move: this.move.bind(this)
 	}
 
-	/** Conditionally dispatches a **cloned** `'pointerover'`/`'pointerout'` PointerEvent via the **shadow DOM element**. */
+	/** Conditionally dispatches a **cloned** `'pointerover'`/`'pointerout'` PointerEvent via the *Shadow DOM Element**. */
 	private overout(evt: PointerEvent) {
 		if (this.shadow_dom_el) {
 			if (this.intersects()) {
