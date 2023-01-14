@@ -468,7 +468,7 @@ export type WebGLRendererComponentEventDispatcher = {
 }
 
 type CanvasEventDetail = {
-	event: PointerEvent | KeyboardEvent | FocusEvent
+	event: PointerEvent | KeyboardEvent | FocusEvent | WheelEvent
 }
 
 export type CanvasComponentEventDispatcher = {
