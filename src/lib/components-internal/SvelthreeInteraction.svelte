@@ -946,9 +946,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * `evt.preventDefault()` / `evt.stopPropagation()` **CAN** but **do NOT HAVE TO** be set via `modifiers` prop
 	 * in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
 	 */
-	function cancel_or_stop_propagation_on_directive(
-		evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent
-	): void {
+	function cancel_or_stop_propagation(evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent): void {
 		if (
 			user_modifiers_prop.get("all")?.has("preventDefault") ||
 			user_modifiers_prop.get(evt.type as SvelthreeSupportedInteractionEvent)?.has("preventDefault")
