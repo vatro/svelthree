@@ -134,60 +134,25 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	//  RENDER EVENT interaction_2  ALWAYS  ->  IMPORTANT  In mode `always` ALL component / shadow dom EVENTS are queued!
 
-	/** [ _mode `always` only_ ] Removes `interaction_2` render event listener. */
 	let remove_interaction_2_listener: (() => void) | undefined | null
 
 	/**
-	 * [ _mode `always` only_ ] Adds `interaction_2` render event listener -> `on_interaction_2()` callback will
-	 * invoke all / any queued events ( _raf aligned_ ) and trigger `pointerover` / `pointerout` events -> even
-	 * if the pointer is not moving.
+	 * [ _mode `always` only_ ]
+	 * - invoke `pointerover` / `pointerout` events -> even if the pointer is not moving.
+	 * - invoke `moveover` events.
+	 * - invoke all / any queued pointer events ( _raf aligned_ ) on each rendered frame.
 	 */
 	function add_interaction_2_listener(): void {
-		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", on_interaction_2)
-	}
+		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", () => {
+			if (pointer.event) {
+				m_pointer.shadow_dom.overout(pointer.event)
+				m_pointer.shadow_dom.moveover(pointer.event)
+			}
 
-	/**
-	 * [ _mode `always` only_ ]
-	 * - invokes all / any queued pointer events ( _raf aligned_ ) on each rendered frame.
-	 * - triggers `pointerover` / `pointerout` events -> even if the pointer is not moving.
-	 */
-	function on_interaction_2(): void {
-		// `pointer.event` is the last `pointermove` event detected / saved by the `Canvas` component
-		if (pointer.event) {
-			interaction2_check_pointer_overout(pointer.event)
-			interaction2_check_pointer_move_moveover(pointer.event)
-		}
-
-		interaction2_invoke_queued_pointer_events()
-	}
-
-	/**
-	 * [ _mode `always` only_ ]
-	 * Triggers `pointerover` / `pointerout` events -> even if the pointer is not moving, e.g. if the pointer
-	 * is over the `<canvas>` element an some interactive object intersects ( _animated_ ) the pointer
-	 * during animation rendering ( _raf_ ).
-	 *
-	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 */
-	function interaction2_check_pointer_overout(evt: PointerEvent): void {
-		m_pointer.shadow_dom.overout(evt)
-	}
-
-	/**
-	 * [ _mode `always` only_ ]
-	 * Triggers `pointermove` / `pointermoveover` events.
-	 *
-	 * `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 */
-	function interaction2_check_pointer_move_moveover(evt: PointerEvent) {
-		m_pointer.shadow_dom.moveover(evt)
-	}
-
-	/** [ _mode `always` only_ ] Executes any queue `pointer` related events. */
-	function interaction2_invoke_queued_pointer_events(): void {
-		invoke_last_queued_event(queued_pointer_move_events)
-		invoke_last_queued_event(queued_pointer_moveover_events)
-		invoke_queued_events(pointer_events_queue)
+			invoke_last_queued_event(queued_pointer_move_events)
+			invoke_last_queued_event(queued_pointer_moveover_events)
+			invoke_queued_events(pointer_events_queue)
+		})
 	}
 
 	//  RENDER EVENT interaction_3  ALWAYS  ->  IMPORTANT  In mode `always` ALL component / shadow dom EVENTS are queued!
