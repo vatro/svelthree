@@ -366,10 +366,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  POINTER Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-
-	function pointerevents_handler(
-		evt: PointerEvent,
-	): void {
+	function pointerevents_handler(evt: PointerEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
 		cancel_or_stop_propagation(evt)
@@ -482,7 +479,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
-
 
 	function focusevents_handler(evt: FocusEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
@@ -628,7 +624,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
-
 
 	function keyboardevents_handler(evt: KeyboardEvent, can_cancel_or_stop_propagation = true): void {
 		const render_mode = store?.rendererComponent?.get_mode()
