@@ -369,9 +369,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  POINTER Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function pointerevents_handler(evt: PointerEvent): void {
-		pointerevents_handler(evt, cancel_or_stop_propagation_on_directive)
-	}
 
 	function pointerevents_handler(
 		evt: PointerEvent,
@@ -493,9 +490,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function focusevents_handler(evt: FocusEvent): void {
-		focusevents_handler(evt, cancel_or_stop_propagation_on_directive)
-	}
 
 	function focusevents_handler(
 		evt: FocusEvent,
@@ -648,9 +642,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function keyboardevents_handler(evt: KeyboardEvent): void {
-		keyboardevents_handler(evt, cancel_or_stop_propagation_on_directive)
-	}
 
 	function keyboardevents_handler(
 		evt: KeyboardEvent,
