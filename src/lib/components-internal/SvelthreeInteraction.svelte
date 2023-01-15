@@ -215,8 +215,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	// LISTENER MANAGEMENT //
-
-	const used_pointer_events_on_directive = new Set<string>([])
 	let used_pointer_events = new Set<string>([])
 
 	/** Conditionally **dispatches** a **cloned** `PointerEvent` either via the **shadow DOM Element** first or via **immediate invoking** of the  `pointerevents_handler`. */
@@ -229,13 +227,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		c_name
 	)
 
-	const used_keyboard_events_on_directive = new Set<string>([])
 	let used_keyboard_events = new Set<string>([])
 
-	const used_focus_events_on_directive = new Set<string>([])
 	let used_focus_events = new Set<string>([])
 
-	const used_wheel_events_on_directive = new Set<string>([])
 	let used_wheel_events = new Set<string>([])
 
 	//  POINTER Event  CANVAS Component POINTER Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
@@ -248,20 +243,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
 		const parent_state = parent.state()
 		if (has_on_directive(event_name, parent) || parent_state.link || parent_state.button) {
-			if (event_not_registered(event_name, used_pointer_events_on_directive)) {
+			if (event_not_registered(event_name, used_pointer_events)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom)
 
-				register_event(event_name, used_pointer_events_on_directive)
+				register_event(event_name, used_pointer_events)
 			} else {
-				//console.warn(`'${event_name}' already registered in 'used_pointer_events_on_directive'!`)
+				//console.warn(`'${event_name}' already registered!`)
 			}
 		}
-
-		// update used pointer events (without creating a new Set -> otherwise references to `used_pointer_events` would become invalid in Closures or Classes.)
-		used_pointer_events.clear()
-		used_pointer_events_on_directive.forEach((element) => used_pointer_events.add(element))
 	}
 
 	function set_pointer_listeners(
@@ -465,19 +456,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
 		if (has_on_directive(event_name, parent)) {
-			if (event_not_registered(event_name, used_focus_events_on_directive)) {
+			if (event_not_registered(event_name, used_focus_events)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_focus_listener(event_name, listener_options)
-				register_event(event_name, used_focus_events_on_directive)
+				register_event(event_name, used_focus_events)
 			} else {
-				//console.warn(`'${event_name}' already registered in 'used_pointer_events_on_directive'!`)
+				//console.warn(`'${event_name}' already registered!`)
 			}
 		}
-
-		// update used wheel events (without creating a new Set -> otherwise references to `used_wheel_events` would become invalid in Closures or Classes.)
-		used_focus_events.clear()
-		used_focus_events_on_directive.forEach((element) => used_focus_events.add(element))
 	}
 
 	function set_focus_listener(
@@ -555,20 +542,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
 		if (has_on_directive(event_name, parent)) {
-			if (event_not_registered(event_name, used_keyboard_events_on_directive)) {
+			if (event_not_registered(event_name, used_keyboard_events)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_keyboard_listener(event_name, listener_options)
 
-				register_event(event_name, used_keyboard_events_on_directive)
+				register_event(event_name, used_keyboard_events)
 			} else {
-				//console.warn(`'${event_name}' already registered in 'used_pointer_events_on_directive'!`)
+				//console.warn(`'${event_name}' already registered!`)
 			}
 		}
-
-		// update used keyboard events (without creating a new Set -> otherwise references to `used_keyboard_events` would become invalid in Closures or Classes.)
-		used_keyboard_events.clear()
-		used_keyboard_events_on_directive.forEach((element) => used_keyboard_events.add(element))
 	}
 
 	function set_keyboard_listener(
@@ -715,20 +698,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_wheel_listener(event_name: SvelthreeSupportedWheelEvent): void {
 		if (has_on_directive(event_name, parent)) {
-			if (event_not_registered(event_name, used_wheel_events_on_directive)) {
+			if (event_not_registered(event_name, used_wheel_events)) {
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_wheel_listener(event_name, listener_options, true)
 
-				register_event(event_name, used_wheel_events_on_directive)
+				register_event(event_name, used_wheel_events)
 			} else {
-				//console.warn(`'${event_name}' already registered in 'used_pointer_events_on_directive'!`)
+				//console.warn(`'${event_name}' already registered!`)
 			}
 		}
-
-		// update used wheel events (without creating a new Set -> otherwise references to `used_wheel_events` would become invalid in Closures or Classes.)
-		used_wheel_events.clear()
-		used_wheel_events_on_directive.forEach((element) => used_wheel_events.add(element))
 	}
 
 	function set_wheel_listener(
@@ -1334,7 +1313,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function unregister_keyboard_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_keyboard_events_on_directive)
 		delete_event_from_set(event_name, used_keyboard_events)
 
 		if (canvas_component) {
@@ -1348,7 +1326,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function unregister_wheel_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_wheel_events_on_directive)
 		delete_event_from_set(event_name, used_wheel_events)
 
 		if (canvas_component) {
@@ -1384,7 +1361,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function unregister_focus_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_focus_events_on_directive)
 		delete_event_from_set(event_name, used_focus_events)
 	}
 
@@ -1437,7 +1413,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	function unregister_pointer_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_pointer_events_on_directive)
 		delete_event_from_set(event_name, used_pointer_events)
 
 		if (canvas_component) {
