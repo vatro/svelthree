@@ -369,11 +369,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function pointerevents_handler(
 		evt: PointerEvent,
-		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_on_directive | null = null
 	): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
+		cancel_or_stop_propagation(evt)
 
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
@@ -485,13 +484,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
 
-	function focusevents_handler(
-		evt: FocusEvent,
-		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_on_directive
-	): void {
+	function focusevents_handler(evt: FocusEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		cancel_or_stop_propagation_fn(evt)
+		cancel_or_stop_propagation(evt)
 
 		switch (render_mode) {
 			case "always": {
@@ -607,7 +603,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			"canvas_keydown",
 			(evt: CanvasComponentEvent) =>
 				// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-				keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
+				keyboardevents_handler(evt.detail.event as KeyboardEvent, false)
 		)
 	}
 
@@ -617,7 +613,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_canvas_keyup_listener_on_directive(): void {
 		remove_canvas_keyup_listener_on_directive = canvas_component?.$on("canvas_keyup", (evt: CanvasComponentEvent) =>
 			// global keyboard listener -> we cancel nothing! so we can use the standard handler directly!
-			keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
+			keyboardevents_handler(evt.detail.event as KeyboardEvent, false)
 		)
 	}
 
@@ -627,20 +623,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_canvas_keypress_listener_on_directive(): void {
 		remove_canvas_keypress_listener_on_directive = canvas_component?.$on(
 			"canvas_keypress",
-			(evt: CanvasComponentEvent) => keyboardevents_handler(evt.detail.event as KeyboardEvent, null)
+			(evt: CanvasComponentEvent) => keyboardevents_handler(evt.detail.event as KeyboardEvent, false)
 		)
 	}
 
 	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
 
-	function keyboardevents_handler(
-		evt: KeyboardEvent,
-		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_on_directive | null
-	): void {
+	function keyboardevents_handler(evt: KeyboardEvent, can_cancel_or_stop_propagation = true): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
+		if (can_cancel_or_stop_propagation) cancel_or_stop_propagation(evt)
 
 		switch (render_mode) {
 			case "always": {
@@ -802,14 +795,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (raycaster && intersects()) {
 					// this is the last chance to use prevent default on the original event!
 					// COOL!  this will affect both "global" and "non global" path
-					cancel_or_stop_propagation_on_directive(evt)
+					cancel_or_stop_propagation(evt)
 					// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
 					shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
 				}
 			} else {
 				// this is the last chance to use prevent default on the original event!
 				// COOL!  this will affect both "global" and "non global" path
-				cancel_or_stop_propagation_on_directive(evt)
+				cancel_or_stop_propagation(evt)
 				// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
 				shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
 			}
@@ -857,23 +850,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  WHEEL Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
 	function wheel_handler_intersect(evt: WheelEvent) {
-		wheelevent_handler(evt, cancel_or_stop_propagation_on_directive, true)
+		wheelevent_handler(evt, true)
 	}
 
 	function wheel_handler(evt: WheelEvent) {
-		wheelevent_handler(evt, cancel_or_stop_propagation_on_directive, false)
+		wheelevent_handler(evt, false)
 	}
 
 	/*  WHEEL Event   GLOBAL Wheel Event -> CANVAS Component Wheel Event  `canvas_wheel` -> `wheel` */
 
-	function wheelevent_handler(
-		evt: WheelEvent,
-		cancel_or_stop_propagation_fn: typeof cancel_or_stop_propagation_on_directive | null = null,
-		on_intersect: boolean
-	): void {
+	function wheelevent_handler(evt: WheelEvent, on_intersect: boolean): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		if (cancel_or_stop_propagation_fn) cancel_or_stop_propagation_fn(evt)
+		cancel_or_stop_propagation(evt)
 
 		switch (render_mode) {
 			case "always": {
