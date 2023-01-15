@@ -2,7 +2,7 @@ import type { Writable } from "svelte/store"
 import type { SvelthreeShadowDOMElement } from "../../types/types-extra.js"
 import { get } from "svelte/store"
 
-/** **Manages / checks** the state of the **pointer**. Contains methods for conditional **dispatching** of corresponding **cloned** `PointerEvent`s via the **shadow DOM Element** first or via immediate invoking of the `pointerevents_handler`. */
+/** **Manages / checks** the state of the **pointer**. Contains methods for conditional **dispatching** of corresponding **cloned** `PointerEvent`s via the **shadow DOM Element** first or via immediate invoking of the `on_pointer`. */
 export default class PointerEventManager {
 	private pointer_is_over = false
 	private pointer_is_out = true
@@ -28,7 +28,7 @@ export default class PointerEventManager {
 		private shadow_dom_el: SvelthreeShadowDOMElement | undefined | null,
 		private intersects: () => boolean,
 		private used_pointer_events: Set<string>,
-		private pointerevents_handler: (
+		private on_pointer: (
 			evt: PointerEvent,
 			cancel_or_stop_propagation_fn?:
 				| ((evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent) => void)
@@ -37,7 +37,8 @@ export default class PointerEventManager {
 		private c_name: string
 	) {}
 
-	/** `PointerEventManager` methods dispatching a **cloned** PointerEvent via the **Shadow DOM Element** first, which will then immediatelly invoke `pointerevents_handler`. */
+	/** `PointerEventManager` methods **dispatching** a **cloned** `PointerEvent` via the **Shadow DOM Element** first,
+	 * which will then immediatelly invoke `on_pointer`, previously added as a Shadow DOM PointerEvent-**Listener**. */
 	public shadow_dom = {
 		/** Conditionally dispatch a **cloned** `pointerover` / `pointerout` PointerEvent via the **shadow DOM element**. */
 		overout: this.overout.bind(this),
@@ -51,8 +52,8 @@ export default class PointerEventManager {
 		click: this.click.bind(this)
 	}
 
-	/** `PointerEventManager` methods invoking `pointerevents_handler` immediatelly (_without dispatching via Shadow DOM Element first_) */
-	public handler = {
+	/** `PointerEventManager` methods **invoking** `on_pointer` as **Callback immediatelly** (_without dispatching via Shadow DOM Element first_) */
+	public callback = {
 		move: this.move.bind(this)
 	}
 
@@ -171,7 +172,7 @@ export default class PointerEventManager {
 			this.last_pointer_move.clientY = evt.clientY
 
 			// no check, no dispatch via shadow dom but also queued in "always" mode
-			this.pointerevents_handler(this.clone_evt(evt), null)
+			this.on_pointer(this.clone_evt(evt), null)
 		}
 	}
 
