@@ -125,7 +125,7 @@
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
 	interface $$Events extends EventMapAllEvents {}
 
-	const dispatch_on_directive = createEventDispatcher<EventMapAllEventDetails>()
+	const comp_interaction_dispatcher = createEventDispatcher<EventMapAllEventDetails>()
 
 	let scene: Scene = getContext("scene")
 	const sti: number = getContext("store_index")
@@ -1380,7 +1380,7 @@
 		bind:this={interaction_comp}
 		{shadow_dom_el}
 		{modifiers}
-		{dispatch_on_directive}
+		{comp_interaction_dispatcher}
 		obj={points}
 		parent={self}
 		{interaction_enabled}

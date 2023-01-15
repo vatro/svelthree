@@ -133,7 +133,7 @@
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
 	interface $$Events extends EventMapAllEvents {}
 
-	const dispatch_on_directive = createEventDispatcher<EventMapAllEventDetails>()
+	const comp_interaction_dispatcher = createEventDispatcher<EventMapAllEventDetails>()
 
 	/** `id` is used to identify / assign a Scene to a 'WebGLRenderer' component.
 	 * `id` is **not needed if** a Scene component is a child of any Object3D (e.g. another Scene) in this case
@@ -1491,7 +1491,7 @@
 		bind:this={interaction_comp}
 		{shadow_dom_el}
 		{modifiers}
-		{dispatch_on_directive}
+		{comp_interaction_dispatcher}
 		obj={scene}
 		parent={self}
 		{interaction_enabled}
