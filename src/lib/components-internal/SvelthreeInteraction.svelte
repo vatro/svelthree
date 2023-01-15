@@ -261,7 +261,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		dispatch_via_shadow_dom: boolean
 	) {
 		let listener: ((evt: PointerEvent) => void) | undefined = undefined
-		listener = pointerevents_handler_on_directive
+		listener = pointerevents_handler
 
 		//  IMPORTANT  only `pointermove` event is NOT being re-dispatched via shadow dom!
 		if (dispatch_via_shadow_dom) {
@@ -369,7 +369,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  POINTER Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function pointerevents_handler_on_directive(evt: PointerEvent): void {
+	function pointerevents_handler(evt: PointerEvent): void {
 		pointerevents_handler(evt, cancel_or_stop_propagation_on_directive)
 	}
 
@@ -472,7 +472,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null
 	) {
 		let listener: ((evt: FocusEvent) => void) | undefined = undefined
-		listener = focusevents_handler_on_directive
+		listener = focusevents_handler
 
 		add_shadow_dom_focus_listeners(event_name, listener_options, listener)
 	}
@@ -493,7 +493,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function focusevents_handler_on_directive(evt: FocusEvent): void {
+	function focusevents_handler(evt: FocusEvent): void {
 		focusevents_handler(evt, cancel_or_stop_propagation_on_directive)
 	}
 
@@ -569,7 +569,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
 			//  IMPORTANT  This won't work if 'defaultKeyboardEventListenerHost' was set to 'canvas' -->
 			let listener: ((evt: KeyboardEvent) => void) | undefined = undefined
-			listener = keyboardevents_handler_on_directive
+			listener = keyboardevents_handler
 
 			// IMPORTANT  this is only possible because shadow DOM element can have focus! + keyboard events are pointer / mouse independant!
 			// IMPORTANT  if would e.g. do the same wit wheel event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
@@ -648,7 +648,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function keyboardevents_handler_on_directive(evt: KeyboardEvent): void {
+	function keyboardevents_handler(evt: KeyboardEvent): void {
 		keyboardevents_handler(evt, cancel_or_stop_propagation_on_directive)
 	}
 
@@ -723,7 +723,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		let is_global = !!modifiers_map?.get(event_name)?.has("global")
 
 		let listener: ((evt: WheelEvent) => void) | undefined = undefined
-		listener = on_intersect ? wheel_handler_on_directive_intersect : wheel_handler_on_directive
+		listener = on_intersect ? wheel_handler_intersect : wheel_handler
 
 		if (is_global) {
 			// always dispatch via shadow DOM element
@@ -874,11 +874,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  WHEEL Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	function wheel_handler_on_directive_intersect(evt: WheelEvent) {
+	function wheel_handler_intersect(evt: WheelEvent) {
 		wheelevent_handler(evt, cancel_or_stop_propagation_on_directive, true)
 	}
 
-	function wheel_handler_on_directive(evt: WheelEvent) {
+	function wheel_handler(evt: WheelEvent) {
 		wheelevent_handler(evt, cancel_or_stop_propagation_on_directive, false)
 	}
 
@@ -1254,16 +1254,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 
 			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(
-					event_name,
-					keyboardevents_handler_on_directive as EventListener,
-					false
-				)
-				shadow_dom_el.removeEventListener(
-					event_name,
-					keyboardevents_handler_on_directive as EventListener,
-					true
-				)
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, keyboardevents_handler as EventListener, true)
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
@@ -1289,18 +1281,10 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 
 			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(event_name, wheel_handler_on_directive as EventListener, false)
-				shadow_dom_el.removeEventListener(event_name, wheel_handler_on_directive as EventListener, true)
-				shadow_dom_el.removeEventListener(
-					event_name,
-					wheel_handler_on_directive_intersect as EventListener,
-					false
-				)
-				shadow_dom_el.removeEventListener(
-					event_name,
-					wheel_handler_on_directive_intersect as EventListener,
-					true
-				)
+				shadow_dom_el.removeEventListener(event_name, wheel_handler as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, wheel_handler as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, wheel_handler_intersect as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, wheel_handler_intersect as EventListener, true)
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
@@ -1348,8 +1332,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function completely_remove_focus_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		if (event_is_registered(event_name, used_focus_events)) {
 			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(event_name, focusevents_handler_on_directive as EventListener, true)
-				shadow_dom_el.removeEventListener(event_name, focusevents_handler_on_directive as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, focusevents_handler as EventListener, false)
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
@@ -1395,12 +1379,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 
 			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(
-					event_name,
-					pointerevents_handler_on_directive as EventListener,
-					false
-				)
-				shadow_dom_el.removeEventListener(event_name, pointerevents_handler_on_directive as EventListener, true)
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler as EventListener, false)
+				shadow_dom_el.removeEventListener(event_name, pointerevents_handler as EventListener, true)
 			} else {
 				console.error(
 					`SVELTHREE > ${c_name} > completely_remove_pointer_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
