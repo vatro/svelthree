@@ -260,12 +260,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
 		dispatch_via_shadow_dom: boolean
 	) {
-		let listener: ((evt: PointerEvent) => void) | undefined = undefined
-		listener = pointerevents_handler
-
 		//  IMPORTANT  only `pointermove` event is NOT being re-dispatched via shadow dom!
 		if (dispatch_via_shadow_dom) {
-			add_shadow_dom_pointer_listener(event_name, listener_options, listener)
+			add_shadow_dom_pointer_listener(event_name, listener_options, pointerevents_handler)
 		}
 
 		add_canvas_pointer_listener(event_name)
@@ -468,10 +465,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		event_name: SvelthreeSupportedFocusEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null
 	) {
-		let listener: ((evt: FocusEvent) => void) | undefined = undefined
-		listener = focusevents_handler
-
-		add_shadow_dom_focus_listeners(event_name, listener_options, listener)
+		add_shadow_dom_focus_listeners(event_name, listener_options, focusevents_handler)
 	}
 
 	function add_shadow_dom_focus_listeners(
@@ -562,12 +556,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			// The shadow dom element has to have focus in order to react to keyboard input.
 			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
 			//  IMPORTANT  This won't work if 'defaultKeyboardEventListenerHost' was set to 'canvas' -->
-			let listener: ((evt: KeyboardEvent) => void) | undefined = undefined
-			listener = keyboardevents_handler
-
 			// IMPORTANT  this is only possible because shadow DOM element can have focus! + keyboard events are pointer / mouse independant!
 			// IMPORTANT  if would e.g. do the same wit wheel event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
-			add_shadow_dom_keyboard_listener(event_name, listener_options, listener)
+			add_shadow_dom_keyboard_listener(event_name, listener_options, keyboardevents_handler)
 		} else {
 			// <canvas> element is listening (listener attached to `window` or `document`) and spreading Keyboard events to all interactive
 			// components via an internal event, e.g. `canvas_keydown`, just like pointer events.
