@@ -169,12 +169,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * [ _mode `always` only_ ]
 	 * Invoke all / any **queued** `focus`, `keyboard` or `wheel` component / shadow dom Events ( _raf aligned_ ) on each rendered frame.
 	 */
-	 function add_interaction_3_listener(): void {
+	function add_interaction_3_listener(): void {
 		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", () => {
 			invoke_queued_events(focus_events_queue)
 			invoke_queued_events(keyboard_events_queue)
 			invoke_queued_events(wheel_events_queue)
-		})}
+		})
+	}
 
 	// LISTENER MANAGEMENT //
 	let used_pointer_events = new Set<string>([])
