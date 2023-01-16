@@ -155,14 +155,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		})
 	}
 
-	//  RENDER EVENT interaction_3  ALWAYS  ->  IMPORTANT  In mode `always` ALL component / shadow dom EVENTS are queued!
+	//  RENDER EVENT interaction_3  ALWAYS  //
+	//  IMPORTANT  In mode `always` ALL component Events are queued!
 
-	/** [ _mode `always` only_ ] Removes `interaction_3` render event listener. */
 	let remove_interaction_3_listener: (() => void) | undefined | null
 
 	/**
 	 * [ _mode `always` only_ ]
-	 * - invokes all / any queued focus / keyboard / wheel events ( _raf aligned_ ) on each rendered frame.
+	 * Invoke all / any **queued** `focus`, `keyboard` or `wheel` component / shadow dom Events ( _raf aligned_ ) on each rendered frame.
 	 */
 	 function add_interaction_3_listener(): void {
 		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", () => {
