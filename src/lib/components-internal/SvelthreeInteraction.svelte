@@ -177,7 +177,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		})
 	}
 
-	// LISTENER MANAGEMENT //
+	//  LISTENER MANAGEMENT  //
+
 	let used_pointer_events = new Set<string>([])
 
 	/** Conditionally **dispatches** a **cloned** `PointerEvent` either via the **shadow DOM Element** first or via **immediate invoking** of the `on_pointer`. */
