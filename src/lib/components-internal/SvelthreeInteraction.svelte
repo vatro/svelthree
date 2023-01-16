@@ -127,51 +127,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	//  RENDER EVENT interaction_2  ALWAYS  //
-	//  IMPORTANT  In mode `always` ALL component Events are queued!
-
-	let remove_interaction_2_listener: (() => void) | undefined | null
-
-	/**
-	 * [ _mode `always` only_ ]
-	 * - invoke `pointerover` / `pointerout` events -> even if the pointer is not moving.
-	 * - invoke `moveover` events.
-	 * - invoke all / any queued `pointer` events ( _raf aligned_ ) on each rendered frame.
-	 */
-	function add_interaction_2_listener(): void {
-		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", () => {
-			// Check for `pointerover`/`pointerout` and `moveover` states and queue corresponding
-			// events even if the pointer didn't actively move, but the object maybe did.
-			// `pointer.event` is / will be the last `pointermove` event detected.
-			if (pointer.event) {
-				m_pointer.shadow_dom.overout(pointer.event)
-				m_pointer.shadow_dom.moveover(pointer.event)
-			}
-
-			// invoke any queued events
-			invoke_last_queued_event(queued_pointer_move_events)
-			invoke_last_queued_event(queued_pointer_moveover_events)
-			invoke_queued_events(pointer_events_queue)
-		})
-	}
-
-	//  RENDER EVENT interaction_3  ALWAYS  //
-	//  IMPORTANT  In mode `always` ALL component Events are queued!
-
-	let remove_interaction_3_listener: (() => void) | undefined | null
-
-	/**
-	 * [ _mode `always` only_ ]
-	 * Invoke all / any **queued** `focus`, `keyboard` or `wheel` component / shadow dom Events ( _raf aligned_ ) on each rendered frame.
-	 */
-	function add_interaction_3_listener(): void {
-		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", () => {
-			invoke_queued_events(focus_events_queue)
-			invoke_queued_events(keyboard_events_queue)
-			invoke_queued_events(wheel_events_queue)
-		})
-	}
-
 	//  LISTENER MANAGEMENT  //
 
 	const pointer_events_queue: (() => void)[] = []
@@ -1060,6 +1015,51 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			// cursor will change if `Canvas.changeCursor === true`
 			parent.$set({ block: false })
 		}
+	}
+
+	//  RENDER EVENT interaction_2  ALWAYS  //
+	//  IMPORTANT  In mode `always` ALL component Events are queued!
+
+	let remove_interaction_2_listener: (() => void) | undefined | null
+
+	/**
+	 * [ _mode `always` only_ ]
+	 * - invoke `pointerover` / `pointerout` events -> even if the pointer is not moving.
+	 * - invoke `moveover` events.
+	 * - invoke all / any queued `pointer` events ( _raf aligned_ ) on each rendered frame.
+	 */
+	function add_interaction_2_listener(): void {
+		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", () => {
+			// Check for `pointerover`/`pointerout` and `moveover` states and queue corresponding
+			// events even if the pointer didn't actively move, but the object maybe did.
+			// `pointer.event` is / will be the last `pointermove` event detected.
+			if (pointer.event) {
+				m_pointer.shadow_dom.overout(pointer.event)
+				m_pointer.shadow_dom.moveover(pointer.event)
+			}
+
+			// invoke any queued events
+			invoke_last_queued_event(queued_pointer_move_events)
+			invoke_last_queued_event(queued_pointer_moveover_events)
+			invoke_queued_events(pointer_events_queue)
+		})
+	}
+
+	//  RENDER EVENT interaction_3  ALWAYS  //
+	//  IMPORTANT  In mode `always` ALL component Events are queued!
+
+	let remove_interaction_3_listener: (() => void) | undefined | null
+
+	/**
+	 * [ _mode `always` only_ ]
+	 * Invoke all / any **queued** `focus`, `keyboard` or `wheel` component / shadow dom Events ( _raf aligned_ ) on each rendered frame.
+	 */
+	function add_interaction_3_listener(): void {
+		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", () => {
+			invoke_queued_events(focus_events_queue)
+			invoke_queued_events(keyboard_events_queue)
+			invoke_queued_events(wheel_events_queue)
+		})
 	}
 
 	function has_global_wheel_event(): boolean {
