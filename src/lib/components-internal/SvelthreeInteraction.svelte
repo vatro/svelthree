@@ -127,7 +127,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	//  LISTENER MANAGEMENT  //
+	//  POINTER Event  //
 
 	const pointer_events_queue: (() => void)[] = []
 	let used_pointer_events = new Set<string>([])
@@ -141,8 +141,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		on_pointer,
 		c_name
 	)
-
-	//  POINTER Event  CANVAS Component POINTER Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
 
 	// IMPORTANT  LIMITATIONS:
 	// - if using directives  -> `once` should also be set as standard svelte modifier if set in modifiers-prop
@@ -191,7 +189,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	/*  POINTER Event   CANVAS Component POINTER Event -> SHADOW DOM Event  */
 	/*
 	`Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
 	 Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
