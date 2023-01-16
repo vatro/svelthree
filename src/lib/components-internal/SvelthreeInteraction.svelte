@@ -128,6 +128,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	//  POINTER Event  //
+	/*
+	`Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
+	 Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
+	 - mode `auto`: all internal canvas ( POINTER ) events get redispatched immediatelly via SHADOW DOM ( any resulting changes will trigger a new render )
+	 - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
+  */
 
 	const pointer_events_queue: (() => void)[] = []
 	let used_pointer_events = new Set<string>([])
@@ -188,13 +194,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 		}
 	}
-
-	/*
-	`Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
-	 Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
-	 - mode `auto`: all internal canvas ( POINTER ) events get redispatched immediatelly via SHADOW DOM ( any resulting changes will trigger a new render )
-	 - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
-  */
 
 	/** Pointer events are being provided (re-dispatched) by the Canvas component. */
 	function add_canvas_pointer_listener(event_name: SvelthreeSupportedInteractionEvent): void {
