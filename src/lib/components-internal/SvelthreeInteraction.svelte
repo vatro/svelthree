@@ -89,11 +89,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
 	const canvas_component = store?.canvas.svelthreeComponent
 
-	const pointer_events_queue: (() => void)[] = []
-	const keyboard_events_queue: (() => void)[] = []
-	const focus_events_queue: (() => void)[] = []
-	const wheel_events_queue: (() => void)[] = []
-
 	let c: HTMLElement
 	$: c = $canvas_dom.element
 
@@ -179,6 +174,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	//  LISTENER MANAGEMENT  //
 
+	const pointer_events_queue: (() => void)[] = []
 	let used_pointer_events = new Set<string>([])
 
 	/** Conditionally **dispatches** a **cloned** `PointerEvent` either via the **shadow DOM Element** first or via **immediate invoking** of the `on_pointer` function. */
@@ -190,12 +186,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		on_pointer,
 		c_name
 	)
-
-	let used_keyboard_events = new Set<string>([])
-
-	let used_focus_events = new Set<string>([])
-
-	let used_wheel_events = new Set<string>([])
 
 	//  POINTER Event  CANVAS Component POINTER Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
 
@@ -415,6 +405,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  FOCUS Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
+	const focus_events_queue: (() => void)[] = []
+	let used_focus_events = new Set<string>([])
+
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_focus_events)) {
@@ -490,6 +483,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/*  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
 	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
+
+	const keyboard_events_queue: (() => void)[] = []
+	let used_keyboard_events = new Set<string>([])
 
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
 		if (has_on_directive(event_name, parent)) {
@@ -634,6 +630,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// Similar to Pointer Event handling
 
 	//  WHEEL Event  CANVAS Component WHEEL Event -> SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  //
+
+	const wheel_events_queue: (() => void)[] = []
+	let used_wheel_events = new Set<string>([])
 
 	function add_wheel_listener(event_name: SvelthreeSupportedWheelEvent): void {
 		if (has_on_directive(event_name, parent)) {
