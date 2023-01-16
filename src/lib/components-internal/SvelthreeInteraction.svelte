@@ -161,23 +161,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	let remove_interaction_3_listener: (() => void) | undefined | null
 
 	/**
-	 * [ _mode `always` only_ ] Adds `interaction_3` render event listener -> `on_interaction_3()` callback will
-	 * invoke all / any queued focus / keyboard events ( _raf aligned_ ) and trigger `pointerover` / `pointerout` events -> even
-	 * if the pointer is not moving.
-	 */
-	function add_interaction_3_listener(): void {
-		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", on_interaction_3)
-	}
-
-	/**
 	 * [ _mode `always` only_ ]
 	 * - invokes all / any queued focus / keyboard / wheel events ( _raf aligned_ ) on each rendered frame.
 	 */
-	function on_interaction_3(): void {
-		invoke_queued_events(focus_events_queue)
-		invoke_queued_events(keyboard_events_queue)
-		invoke_queued_events(wheel_events_queue)
-	}
+	 function add_interaction_3_listener(): void {
+		remove_interaction_3_listener = store?.rendererComponent?.$on("interaction_3", () => {
+			invoke_queued_events(focus_events_queue)
+			invoke_queued_events(keyboard_events_queue)
+			invoke_queued_events(wheel_events_queue)
+		})}
 
 	// LISTENER MANAGEMENT //
 	let used_pointer_events = new Set<string>([])
