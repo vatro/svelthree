@@ -352,9 +352,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			comp_interaction_dispatcher(evt.type as SvelthreeSupportedPointerEvent, detail)
 	}
 
-	/*  FOCUS Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
-
-	/*  FOCUS Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
+	//  FOCUS Event  //
 
 	const focus_events_queue: (() => void)[] = []
 	let used_focus_events = new Set<string>([])
@@ -393,8 +391,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	/*  FOCUS Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
-
+	/** ### +++  FOCUS Event   Shadow DOM Listener  +++ */
 	function on_focus(evt: FocusEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
@@ -424,7 +421,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			comp: parent
 		}
 
-		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent))
 			comp_interaction_dispatcher(evt.type as SvelthreeSupportedFocusEvent, detail)
 	}
