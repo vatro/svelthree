@@ -45,6 +45,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import PointerEventManager from "../utils/interaction/PointerEventManager.js"
 	import { invoke_queued_events, invoke_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 	import { has_on_directive, using_event, not_using_event } from "../utils/interaction/parent_comp_utils.js"
+	import {
+		event_not_registered,
+		event_is_registered,
+		register_event,
+		unregister_pointer_event,
+		unregister_focus_event,
+		unregister_keyboard_event,
+		unregister_wheel_event,
+		cancel_or_stop_propagation
+	} from "../utils/interaction/event_utils.js"
 
 	/**
 	 *  SVELTEKIT  CSR ONLY /
@@ -161,7 +171,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom)
 
-				register_event(event_name, used_pointer_events)
+				register_event(event_name, used_pointer_events, canvas_component)
 			} else {
 				//console.warn(`'${event_name}' already registered!`)
 			}
@@ -283,7 +293,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function on_pointer(evt: PointerEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		cancel_or_stop_propagation(evt)
+		cancel_or_stop_propagation(evt, user_modifiers_prop)
 
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
@@ -363,7 +373,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
 
 				set_focus_listener(event_name, listener_options)
-				register_event(event_name, used_focus_events)
+				register_event(event_name, used_focus_events, canvas_component)
 			} else {
 				//console.warn(`'${event_name}' already registered!`)
 			}
@@ -395,7 +405,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function on_focus(evt: FocusEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		cancel_or_stop_propagation(evt)
+		cancel_or_stop_propagation(evt, user_modifiers_prop)
 
 		switch (render_mode) {
 			case "always": {
@@ -441,7 +451,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				set_keyboard_listener(event_name, listener_options)
 
-				register_event(event_name, used_keyboard_events)
+				register_event(event_name, used_keyboard_events, canvas_component)
 			} else {
 				//console.warn(`'${event_name}' already registered!`)
 			}
@@ -542,7 +552,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function on_keyboard(evt: KeyboardEvent, can_cancel_or_stop_propagation = true): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		if (can_cancel_or_stop_propagation) cancel_or_stop_propagation(evt)
+		if (can_cancel_or_stop_propagation) cancel_or_stop_propagation(evt, user_modifiers_prop)
 
 		switch (render_mode) {
 			case "always": {
@@ -588,7 +598,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				set_wheel_listener(event_name, listener_options, true)
 
-				register_event(event_name, used_wheel_events)
+				register_event(event_name, used_wheel_events, canvas_component)
 			} else {
 				//console.warn(`'${event_name}' already registered!`)
 			}
@@ -705,14 +715,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (raycaster && intersects()) {
 					// this is the last chance to use prevent default on the original event!
 					// COOL!  this will affect both "global" and "non global" path
-					cancel_or_stop_propagation(evt)
+					cancel_or_stop_propagation(evt, user_modifiers_prop)
 					// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
 					shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
 				}
 			} else {
 				// this is the last chance to use prevent default on the original event!
 				// COOL!  this will affect both "global" and "non global" path
-				cancel_or_stop_propagation(evt)
+				cancel_or_stop_propagation(evt, user_modifiers_prop)
 				// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
 				shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
 			}
@@ -772,7 +782,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function on_wheel(evt: WheelEvent, on_intersect: boolean): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		cancel_or_stop_propagation(evt)
+		cancel_or_stop_propagation(evt, user_modifiers_prop)
 
 		switch (render_mode) {
 			case "always": {
@@ -828,46 +838,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		// intersection independent -> no raycaster_data!
 		if (has_on_directive(evt.type, parent))
 			comp_interaction_dispatcher(evt.type as SvelthreeSupportedWheelEvent, detail)
-	}
-
-	/*  CANCEL OR STOP PROPAGATION  */
-
-	// TODO  check the comments below concerning 'default Svelte first' approach, still valid?
-
-	/**
-	 * -  IMPORTANT  mode `"always"`:
-	 *   calling `evt.preventDefault()` / `evt.stopPropagation()` inside a callback **will have NO effect** ☝️,
-	 * because the event was already emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
-	 * be set via `modifiers` prop in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
-	 *
-	 * -  IMPORTANT  mode `"auto"`:
-	 *   calling `evt.preventDefault()` inside a callback **will have effect** ☝️, means
-	 * `evt.preventDefault()` / `evt.stopPropagation()` **CAN** but **do NOT HAVE TO** be set via `modifiers` prop
-	 * in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
-	 */
-	function cancel_or_stop_propagation(evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent): void {
-		if (
-			user_modifiers_prop.get("all")?.has("preventDefault") ||
-			user_modifiers_prop.get(evt.type as SvelthreeSupportedInteractionEvent)?.has("preventDefault")
-		) {
-			prevent_default(evt)
-		}
-		if (
-			user_modifiers_prop.get("all")?.has("stopPropagation") ||
-			user_modifiers_prop.get(evt.type as SvelthreeSupportedInteractionEvent)?.has("stopPropagation")
-		) {
-			stop_propagation(evt)
-		}
-	}
-
-	function prevent_default(evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent) {
-		if (verbose && log_dev) console.info(...c_dev(c_name, "prevent_default!"))
-		evt.preventDefault()
-	}
-
-	function stop_propagation(evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent) {
-		if (verbose && log_dev) console.info(...c_dev(c_name, "stop_propagation!"))
-		evt.stopPropagation()
 	}
 
 	/*  ADDING AND REGISTERING  */
@@ -1069,42 +1039,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 	}
 
-	function register_event(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
-		if (canvas_component) {
-			if (!target_set.has(event_name)) {
-				target_set.add(event_name)
-
-				// register specific events on the <canvas> element (some pointer, all keyboard events and wheel event)
-				switch (event_name) {
-					case "click":
-					case "pointerdown":
-					case "pointerup":
-					case "keydown":
-					case "keyup":
-					case "keypress":
-					case "wheel":
-						canvas_component.register_canvas_listener(event_name)
-						break
-					default:
-						break
-				}
-			}
-		} else {
-			console.error(
-				`SVELTHREE > > ${c_name} > register_event : Cannot register '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
-				{ canvas_component }
-			)
-		}
-	}
-
-	function event_not_registered(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
-		return !target_set.has(event_name)
-	}
-
-	function event_is_registered(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
-		return target_set.has(event_name)
-	}
-
 	/*  REMOVING AND UNREGISTERING  */
 
 	/* reactively removes all listeners if interaction_enabled (interactive && interact) is false */
@@ -1187,7 +1121,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				)
 			}
 
-			unregister_keyboard_event(event_name)
+			unregister_keyboard_event(event_name, used_keyboard_events, canvas_component)
 		}
 	}
 
@@ -1216,33 +1150,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				)
 			}
 
-			unregister_wheel_event(event_name)
-		}
-	}
-
-	function unregister_keyboard_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_keyboard_events)
-
-		if (canvas_component) {
-			canvas_component.unregister_canvas_listener(event_name)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > unregister_keyboard_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
-				{ canvas_component }
-			)
-		}
-	}
-
-	function unregister_wheel_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_wheel_events)
-
-		if (canvas_component) {
-			canvas_component.unregister_canvas_listener(event_name)
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > unregister_wheel_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
-				{ canvas_component }
-			)
+			unregister_wheel_event(event_name, used_wheel_events, canvas_component)
 		}
 	}
 
@@ -1264,12 +1172,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					{ shadow_dom_el }
 				)
 			}
-			unregister_focus_event(event_name)
+			unregister_focus_event(event_name, used_focus_events)
 		}
-	}
-
-	function unregister_focus_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_focus_events)
 	}
 
 	// remove unused but registered (were used) listener
@@ -1312,33 +1216,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				)
 			}
 
-			unregister_pointer_event(event_name)
+			unregister_pointer_event(event_name, used_pointer_events, canvas_component)
 		}
-	}
-
-	function unregister_pointer_event(event_name: SvelthreeSupportedInteractionEvent) {
-		delete_event_from_set(event_name, used_pointer_events)
-
-		if (canvas_component) {
-			switch (event_name) {
-				case "click":
-				case "pointerdown":
-				case "pointerup":
-					canvas_component.unregister_canvas_listener(event_name)
-					break
-				default:
-					break
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > unregister_pointer_event : Cannot unregister '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
-				{ canvas_component }
-			)
-		}
-	}
-
-	function delete_event_from_set(event_name: SvelthreeSupportedInteractionEvent, target_set: Set<string>) {
-		if (target_set.has(event_name)) target_set.delete(event_name)
 	}
 
 	// disable interaction (reactive)
