@@ -137,6 +137,8 @@
 	const sti: number = getContext("store_index")
 	const store = $svelthreeStores[sti]
 
+	const shadow_dom_enabled: boolean = getContext("shadow_dom_enabled")
+
 	/** The (three) instance that was shared to this component as it's 'parent' which can be either another instance / object or a scene / root scene. */
 	let our_parent: Object3D | undefined = undefined
 

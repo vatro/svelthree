@@ -1,3 +1,5 @@
+import type { SupportedAddEventListenerOption } from "../types/types-extra.js"
+
 export const SUPPORTED_ADD_EVENT_LISTENER_OPTIONS = [
 	"once",
 	"passive",
@@ -55,3 +57,9 @@ export const FOCUS_EVENTS = ["focus", "blur", "focusin", "focusout"] as const
 export const WHEEL_EVENTS = ["wheel"] as const
 
 export const WHEEL_LISTENER_TARGETS = ["window", "document", "self"] as const
+
+export const DEFAULT_DOM_LISTENER_OPTIONS: { [key in SupportedAddEventListenerOption]: boolean } = {
+	capture: false,
+	passive: true, // IMPORTANT  `svelthree` default value
+	once: false
+}

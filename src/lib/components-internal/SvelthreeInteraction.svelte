@@ -26,7 +26,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		MapPropModifiers
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
-	import { KEYBOARD_EVENTS, FOCUS_EVENTS, WHEEL_EVENTS } from "../constants/Interaction.js"
+	import {
+		KEYBOARD_EVENTS,
+		FOCUS_EVENTS,
+		WHEEL_EVENTS,
+		DEFAULT_DOM_LISTENER_OPTIONS
+	} from "../constants/Interaction.js"
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
@@ -95,6 +100,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	const canvas_dom: Writable<{ element: HTMLCanvasElement }> = getContext("canvas_dom")
 	const pointer_over_canvas: Writable<{ status: boolean }> = getContext("pointer_over_canvas")
+	const shadow_dom_enabled: boolean = getContext("shadow_dom_enabled")
 	const canvas_component = store?.canvas.svelthreeComponent
 
 	let c: HTMLElement
@@ -106,7 +112,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	// --- Reactively add listeners ---
 
-	$: if (c && shadow_dom_el && raycaster && interaction_enabled && obj && !obj.userData.interact) {
+	$: if (
+		c &&
+		shadow_dom_enabled === !!shadow_dom_el &&
+		raycaster &&
+		interaction_enabled &&
+		obj &&
+		!obj.userData.interact
+	) {
 		obj.userData.interact = true
 		listeners = true
 	}
@@ -159,6 +172,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		on_pointer,
 		parent,
 		canvas_component,
+		shadow_dom_enabled,
 		c_name
 	)
 
@@ -204,7 +218,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					default: {
 						const queued_pointer_event = () => process_pointerevent_intersection_dep(evt)
 						pointer_events_queue.push(queued_pointer_event)
-						//pointer_events_queue.push(() => process_pointerevent_intersection_dep(evt))
 						break
 					}
 				}
@@ -258,35 +271,52 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
 		if (has_on_directive(event_name, parent)) {
-			if (event_not_registered(event_name, used_focus_events)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
+			if (shadow_dom_enabled) {
+				if (event_not_registered(event_name, used_focus_events)) {
+					const listener_options =
+						get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop) ||
+						DEFAULT_DOM_LISTENER_OPTIONS
 
-				set_focus_listener(event_name, listener_options)
-				register_event(event_name, used_focus_events, canvas_component)
+					set_focus_listener(event_name, listener_options)
+					register_event(event_name, used_focus_events, canvas_component)
+				} else {
+					//console.warn(`'${event_name}' already registered!`)
+				}
 			} else {
-				//console.warn(`'${event_name}' already registered!`)
+				console.error(
+					`SVELTHREE > ${c_name} > add_focus_listener > Cannot add 'FocusEvent' ShadowDOM-Listener, ShadowDOM disabled / ShadowDOM-Element not available!`,
+					{ shadow_dom_enabled, shadow_dom_el }
+				)
 			}
 		}
 	}
 
 	function set_focus_listener(
 		event_name: SvelthreeSupportedFocusEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean }
 	) {
 		add_shadow_dom_focus_listeners(event_name, listener_options, on_focus)
 	}
 
 	function add_shadow_dom_focus_listeners(
 		event_name: SvelthreeSupportedInteractionEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		listener: ((evt: FocusEvent) => void) | undefined
 	): void {
-		if (shadow_dom_el && listener) {
-			if (listener_options) {
+		if (shadow_dom_el) {
+			if (listener) {
 				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
 			} else {
-				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+				console.error(
+					`SVELTHREE > ${c_name} > add_shadow_dom_focus_listeners > Cannot add 'FocusEvent' ShadowDOM-Listener, Listener not available!`,
+					{ listener }
+				)
 			}
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > add_shadow_dom_focus_listeners > Cannot add 'FocusEvent' ShadowDOM-Listener, ShadowDOM-Element not available!`,
+				{ shadow_dom_enabled, shadow_dom_el }
+			)
 		}
 	}
 
@@ -336,7 +366,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_keyboard_events)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
+				const listener_options =
+					get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop) ||
+					DEFAULT_DOM_LISTENER_OPTIONS
 
 				set_keyboard_listener(event_name, listener_options)
 
@@ -349,7 +381,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function set_keyboard_listener(
 		event_name: SvelthreeSupportedKeyboardEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean }
 	) {
 		let modifiers_map: MapPropModifiers | undefined = undefined
 		modifiers_map = user_modifiers_prop
@@ -363,7 +395,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			//  IMPORTANT  This won't work if 'defaultKeyboardEventListenerHost' was set to 'canvas' -->
 			// IMPORTANT  this is only possible because shadow DOM element can have focus! + keyboard events are pointer / mouse independant!
 			// IMPORTANT  if would e.g. do the same wit wheel event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
-			add_shadow_dom_keyboard_listener(event_name, listener_options, on_keyboard)
+			if (shadow_dom_el) {
+				add_shadow_dom_keyboard_listener(event_name, listener_options, on_keyboard)
+			} else {
+				console.error(
+					`SVELTHREE > ${c_name} > set_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener (using the 'self'-modifier), ShadowDOM-Element not available!`,
+					{ shadow_dom_enabled, shadow_dom_el }
+				)
+			}
 		} else {
 			// <canvas> element is listening (listener attached to `window` or `document`) and spreading Keyboard events to all interactive
 			// components via an internal event, e.g. `canvas_keydown`, just like pointer events.
@@ -374,15 +413,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_shadow_dom_keyboard_listener(
 		event_name: SvelthreeSupportedInteractionEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		listener: ((evt: KeyboardEvent) => void) | undefined
 	): void {
-		if (shadow_dom_el && listener) {
-			if (listener_options) {
+		if (shadow_dom_el) {
+			if (listener) {
 				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
 			} else {
-				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+				console.error(
+					`SVELTHREE > ${c_name} > add_shadow_dom_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener, Listener not available!`,
+					{ listener }
+				)
 			}
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > add_shadow_dom_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener while using the 'self'-modifier, ShadowDOM-Element not available!`,
+				{ shadow_dom_enabled, shadow_dom_el }
+			)
 		}
 	}
 
@@ -483,20 +530,22 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function add_wheel_listener(event_name: SvelthreeSupportedWheelEvent): void {
 		if (has_on_directive(event_name, parent)) {
 			if (event_not_registered(event_name, used_wheel_events)) {
-				const listener_options = get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop)
+				const listener_options =
+					get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop) ||
+					DEFAULT_DOM_LISTENER_OPTIONS
 
 				set_wheel_listener(event_name, listener_options, true)
 
 				register_event(event_name, used_wheel_events, canvas_component)
 			} else {
-				//console.warn(`'${event_name}' already registered!`)
+				//console.warn(`'${event_name}' already registered!`)if()
 			}
 		}
 	}
 
 	function set_wheel_listener(
 		event_name: SvelthreeSupportedWheelEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		dispatch_via_shadow_dom: boolean
 	) {
 		let modifiers_map: MapPropModifiers | undefined = undefined
@@ -510,42 +559,24 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener = on_intersect ? on_wheel_intersection_dep : on_wheel_intersection_indep
 
 		if (is_global) {
-			// always dispatch via shadow DOM element
-			if (dispatch_via_shadow_dom) {
+			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
+			if (shadow_dom_enabled && dispatch_via_shadow_dom) {
 				add_shadow_dom_wheel_listener(event_name, listener_options, listener)
 			}
+			// add listener directly to window or  TODO  -> document
+			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
 
-			// add listener directly to window or document
-			if (listener_options) {
-				// trigger listener directly
-				//window.addEventListener(event_name, listener as EventListener, listener_options)
-
-				// dispatch via shadow DOM Element
-				// TODO  trigger onKeyboardEvent if specified! (like the function in Canvas)
-				window.addEventListener(
-					event_name,
-					(evt: WheelEvent) => {
-						// TODO  works, but check -> implement correctly
-						//cancel_or_stop_propagation_on_directive(evt)
-						check_wheel(evt, on_intersect)
-					},
-					listener_options
-				)
-			} else {
-				// trigger listener directly
-				//window.addEventListener(event_name, listener as EventListener)
-
-				// dispatch via shadow DOM Element
-				// TODO  trigger onKeyboardEvent if specified! (like the function in Canvas)
-				window.addEventListener(event_name, (evt: WheelEvent) => {
-					// TODO  works, but check -> implement correctly
-					//cancel_or_stop_propagation_on_directive(evt)
+			// TODO  trigger onKeyboardEvent if specified! (like the function in Canvas)
+			window.addEventListener(
+				event_name,
+				(evt: WheelEvent) => {
 					check_wheel(evt, on_intersect)
-				})
-			}
+				},
+				listener_options
+			)
 		} else {
-			// always dispatch via shadow DOM element
-			if (dispatch_via_shadow_dom) {
+			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
+			if (shadow_dom_enabled && dispatch_via_shadow_dom) {
 				add_shadow_dom_wheel_listener(event_name, listener_options, listener)
 			}
 			add_canvas_wheel_listener(event_name, on_intersect)
@@ -554,15 +585,23 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	function add_shadow_dom_wheel_listener(
 		event_name: SvelthreeSupportedInteractionEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean } | undefined | null,
+		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		listener: ((evt: WheelEvent) => void) | undefined
 	): void {
-		if (shadow_dom_el && listener) {
-			if (listener_options) {
+		if (shadow_dom_el) {
+			if (listener) {
 				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
 			} else {
-				shadow_dom_el.addEventListener(event_name, listener as EventListener)
+				console.error(
+					`SVELTHREE > ${c_name} > add_shadow_dom_wheel_listener > Cannot add 'WheelEvent' ShadowDOM-Listener, Listener not available!`,
+					{ listener }
+				)
 			}
+		} else {
+			console.error(
+				`SVELTHREE > ${c_name} > add_shadow_dom_wheel_listener > Cannot add 'WheelEvent' ShadowDOM-Listener, ShadowDOM-Element not available!`,
+				{ shadow_dom_enabled, shadow_dom_el }
+			)
 		}
 	}
 
@@ -599,27 +638,34 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
 	 */
 	function check_wheel(evt: WheelEvent, on_intersect: boolean) {
-		if (shadow_dom_el) {
-			if (on_intersect) {
-				if (raycaster && intersects()) {
-					// this is the last chance to use prevent default on the original event!
-					// COOL!  this will affect both "global" and "non global" path
-					cancel_or_stop_propagation(evt, user_modifiers_prop)
-					// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
+		// this is the last chance to use prevent default on the original event!
+		// COOL!  this will affect both "global" and "non global" path
+		cancel_or_stop_propagation(evt, user_modifiers_prop)
+
+		// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
+		if (shadow_dom_enabled) {
+			if (shadow_dom_el) {
+				if (on_intersect) {
+					if (raycaster && intersects()) {
+						shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
+					}
+				} else {
 					shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
 				}
 			} else {
-				// this is the last chance to use prevent default on the original event!
-				// COOL!  this will affect both "global" and "non global" path
-				cancel_or_stop_propagation(evt, user_modifiers_prop)
-				// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
-				shadow_dom_el.dispatchEvent(get_wheelevent_modified_clone(evt))
+				console.error(
+					`SVELTHREE > ${c_name} > check_wheel : Cannot dispatch WheelEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
+					{ shadow_dom_enabled, shadow_dom_el }
+				)
 			}
 		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > check_wheel : Cannot dispatch WheelEvent '${evt.type}' via unavailable 'shadow_dom_el'!`,
-				{ shadow_dom_el }
-			)
+			if (on_intersect) {
+				if (raycaster && intersects()) {
+					on_wheel_intersection_dep(evt)
+				}
+			} else {
+				on_wheel_intersection_indep(evt)
+			}
 		}
 	}
 
@@ -956,14 +1002,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, false)
-				shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, true)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
-					{ shadow_dom_el }
-				)
+			if (shadow_dom_enabled) {
+				if (shadow_dom_el) {
+					shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, false)
+					shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, true)
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
+						{ shadow_dom_el }
+					)
+				}
 			}
 
 			unregister_keyboard_event(event_name, used_keyboard_events, canvas_component)
@@ -983,16 +1031,18 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 			}
 
-			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_indep as EventListener, false)
-				shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_indep as EventListener, true)
-				shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_dep as EventListener, false)
-				shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_dep as EventListener, true)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
-					{ shadow_dom_el }
-				)
+			if (shadow_dom_enabled) {
+				if (shadow_dom_el) {
+					shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_indep as EventListener, false)
+					shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_indep as EventListener, true)
+					shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_dep as EventListener, false)
+					shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_dep as EventListener, true)
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
+						{ shadow_dom_el }
+					)
+				}
 			}
 
 			unregister_wheel_event(event_name, used_wheel_events, canvas_component)
@@ -1008,14 +1058,16 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	// remove unused but registered (were used) listeners
 	function completely_remove_focus_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		if (event_is_registered(event_name, used_focus_events)) {
-			if (shadow_dom_el) {
-				shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, true)
-				shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, false)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
-					{ shadow_dom_el }
-				)
+			if (shadow_dom_enabled) {
+				if (shadow_dom_el) {
+					shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, true)
+					shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, false)
+				} else {
+					console.error(
+						`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+						{ shadow_dom_el }
+					)
+				}
 			}
 			unregister_focus_event(event_name, used_focus_events)
 		}

@@ -131,6 +131,8 @@
 	const sti: number = getContext("store_index")
 	const store = $svelthreeStores[sti]
 
+	const shadow_dom_enabled: boolean = getContext("shadow_dom_enabled")
+
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.
 	 * It's being set to `false` on initialization if an (_already created_) threejs object instance was provided,
@@ -233,7 +235,9 @@
 		setContext("parent", mesh)
 
 		// SVELTEKIT  CSR ONLY /
-		if (browser) create_shadow_dom()
+		if (browser) {
+			if (shadow_dom_enabled) create_shadow_dom()
+		}
 	}
 
 	//  CREATION  ONCE  AFTER  INITIALIZATION //

@@ -15,6 +15,7 @@ This is a **svelthree** _Canvas_ Component.
 		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
 		readonly id: string
 		readonly style: string | undefined
+		readonly useShadowDom: boolean
 		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
 		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
@@ -81,6 +82,10 @@ This is a **svelthree** _Canvas_ Component.
 	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = log_all ? { all: true } : undefined
 	export let log_rs: boolean = log_all
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = log_all ? { all: true } : undefined
+
+	/** (default: `true`) Create a ShadowDOM root-`div`-Element and corresponding ShadowDOM-`div`-Elements for each created `Scene` and `Object3D`. */
+	export let useShadowDom = true
+	setContext("shadow_dom_enabled", useShadowDom)
 
 	// #endregion
 
@@ -1070,6 +1075,7 @@ This is a **svelthree** _Canvas_ Component.
 					log_lc,
 					id,
 					style,
+					useShadowDom,
 					changeCursor,
 					interactive,
 					onPointerEvent,
@@ -1096,6 +1102,10 @@ This is a **svelthree** _Canvas_ Component.
 
 <canvas {id} data-kind="svelthree_canvas" bind:this={c} width={w} height={h} {style} class={clazz} />
 <!-- IMPORTANT  any objects with 'tabindex' specified will receive focus -->
-<div bind:this={sh_root} data-kind="svelthree_shadow_dom_root" style="height: 0; width: 0; overflow: hidden;">
+{#if useShadowDom}
+	<div bind:this={sh_root} data-kind="svelthree_shadow_dom_root" style="height: 0; width: 0; overflow: hidden;">
+		<slot />
+	</div>
+{:else}
 	<slot />
-</div>
+{/if}

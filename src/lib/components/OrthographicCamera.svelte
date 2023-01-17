@@ -131,6 +131,8 @@ If you use this approach you'll see a warning in the console if you define left,
 	const sti: number = getContext("store_index")
 	const store = $svelthreeStores[sti]
 
+	const shadow_dom_enabled: boolean = getContext("shadow_dom_enabled")
+
 	/** [ **feature**: allow providing (_injection_) of (_already created_) threejs object instances ].
 	 * `create` is an internal indicator for how the component's corresponding threejs object instance has to be / has been created.
 	 * It's being set to `false` on initialization if an (_already created_) threejs object instance was provided,
@@ -217,7 +219,9 @@ If you use this approach you'll see a warning in the console if you define left,
 		setContext("parent", camera)
 
 		// SVELTEKIT  CSR ONLY /
-		if (browser) create_shadow_dom()
+		if (browser) {
+			if (shadow_dom_enabled) create_shadow_dom()
+		}
 	}
 
 	/** Alternative to setting `frustumSize = { 1 }`. Setting `aspect:boolean` (e.g. `aspect = { true }` or just adding `aspect`) will internally set `frustumSize = 1 ` resulting in **reactive aspect updates** on canvas dimensions change. */

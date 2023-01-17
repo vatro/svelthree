@@ -1,4 +1,8 @@
-import { ADD_EVENT_LISTENER_OPTIONS_SET, ALL_MODIFIERS_SET } from "../../constants/Interaction.js"
+import {
+	ADD_EVENT_LISTENER_OPTIONS_SET,
+	ALL_MODIFIERS_SET,
+	DEFAULT_DOM_LISTENER_OPTIONS
+} from "../../constants/Interaction.js"
 import type {
 	MapPropModifiers,
 	SupportedAddEventListenerOption,
@@ -61,11 +65,7 @@ const get_opts = (
 	source_set: Set<SvelthreeEventModifier>
 ): { [key in SupportedAddEventListenerOption]?: boolean } | undefined => {
 	// default
-	const opts: { [key in SupportedAddEventListenerOption]?: boolean } = {
-		capture: false,
-		passive: true, // IMPORTANT  `svelthree` default value
-		once: false
-	}
+	const opts: { [key in SupportedAddEventListenerOption]?: boolean } = { ...DEFAULT_DOM_LISTENER_OPTIONS }
 
 	source_set.forEach((key) => {
 		if (ADD_EVENT_LISTENER_OPTIONS_SET.has(key as SupportedAddEventListenerOption) || key === "nonpassive") {
