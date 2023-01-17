@@ -8,8 +8,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { get_current_component } from "svelte/internal"
 	import type { Object3D, Raycaster } from "three"
 	import { svelthreeStores } from "../stores/index.js"
-	import { c_dev, c_lc_int, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
-	import type { LogLC, LogDEV } from "../utils/SvelthreeLogger.js"
+	import { c_lc_int, verbose_mode, get_comp_name } from "../utils/SvelthreeLogger.js"
+	import type { LogLC } from "../utils/SvelthreeLogger.js"
 	import type {
 		PointerState,
 		SvelthreeShadowDOMElement,
@@ -66,7 +66,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const c_name = get_comp_name(get_current_component())
 	const verbose: boolean = verbose_mode()
 
-	export let log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined = undefined
 	export let log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined = undefined
 
 	export let interaction_enabled: boolean | undefined

@@ -1261,7 +1261,6 @@
 		obj={container}
 		parent={self}
 		{interaction_enabled}
-		{log_dev}
 		{log_lc}
 	/>
 {/if}
