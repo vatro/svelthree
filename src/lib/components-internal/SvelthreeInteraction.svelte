@@ -161,7 +161,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/**
 	 * **Adds / removes** `PointerEvent` related **Listeners** and conditionally **dispatches** a **cloned** `PointerEvent`
-	 * either via the **shadow DOM Element** first or via **immediate invoking** of the `on_pointer` function.
+	 * either via the **shadow DOM Element** first (_before invoking `on_pointer` function_) or via **immediate invoking** of the `on_pointer` function.
 	 */
 	const m_pointer = new PointerEventManager(
 		pointer_over_canvas,
