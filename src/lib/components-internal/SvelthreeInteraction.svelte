@@ -156,7 +156,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
   */
 
-	/** A Collection of used `PointerEvent`-names / types updated by the `PointerEventManager`. */
+	/** A Collection of used `PointerEvent`-names / types -> updated by the `PointerEventManager`. */
 	let used_pointer_events = new Set<string>([])
 
 	/**
