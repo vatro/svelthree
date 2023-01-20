@@ -42,12 +42,12 @@ export default class PointerEventManager {
 		clientY: undefined
 	}
 
-	private canvas_pointermove_off: (() => void) | undefined
-	private canvas_pointermoveover_off: (() => void) | undefined
-	private canvas_pointeroverout_off: (() => void) | undefined
-	private canvas_pointerdown_off: (() => void) | undefined
-	private canvas_pointerup_off: (() => void) | undefined
-	private canvas_click_off: (() => void) | undefined
+	private canvas_pointermove_off: (() => void) | undefined | null
+	private canvas_pointermoveover_off: (() => void) | undefined | null
+	private canvas_pointeroverout_off: (() => void) | undefined | null
+	private canvas_pointerdown_off: (() => void) | undefined | null
+	private canvas_pointerup_off: (() => void) | undefined | null
+	private canvas_click_off: (() => void) | undefined | null
 
 	constructor(
 		private pointer_over_canvas: Writable<{ status: boolean }>,
@@ -263,23 +263,41 @@ export default class PointerEventManager {
 		if (event_is_registered(event_name, this.used_pointer_events)) {
 			switch (event_name) {
 				case "click":
-					if (this.canvas_click_off) this.canvas_click_off()
+					if (this.canvas_click_off) {
+						this.canvas_click_off()
+						this.canvas_click_off = null
+					}
 					break
 				case "pointerup":
-					if (this.canvas_pointerup_off) this.canvas_pointerup_off()
+					if (this.canvas_pointerup_off) {
+						this.canvas_pointerup_off()
+						this.canvas_pointerup_off = null
+					}
 					break
 				case "pointerdown":
-					if (this.canvas_pointerdown_off) this.canvas_pointerdown_off()
+					if (this.canvas_pointerdown_off) {
+						this.canvas_pointerdown_off()
+						this.canvas_pointerdown_off = null
+					}
 					break
 				case "pointerout":
 				case "pointerover":
-					if (this.canvas_pointeroverout_off) this.canvas_pointeroverout_off()
+					if (this.canvas_pointeroverout_off) {
+						this.canvas_pointeroverout_off()
+						this.canvas_pointeroverout_off = null
+					}
 					break
 				case "pointermoveover":
-					if (this.canvas_pointermoveover_off) this.canvas_pointermoveover_off()
+					if (this.canvas_pointermoveover_off) {
+						this.canvas_pointermoveover_off()
+						this.canvas_pointermoveover_off = null
+					}
 					break
 				case "pointermove":
-					if (this.canvas_pointermove_off) this.canvas_pointermove_off()
+					if (this.canvas_pointermove_off) {
+						this.canvas_pointermove_off()
+						this.canvas_pointermove_off = null
+					}
 					break
 				default:
 					console.error(
