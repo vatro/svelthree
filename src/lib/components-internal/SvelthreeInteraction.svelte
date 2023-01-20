@@ -876,22 +876,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		set_block_status()
 
-		if (obj) {
-			if (store) {
-				if (!obj.userData.block) {
-					if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_2_listener) {
-						add_interaction_2_listener()
-					}
-				} else {
-					if (store.rendererComponent?.get_mode() === "always" && remove_interaction_2_listener) {
-						remove_interaction_2_listener()
-						remove_interaction_2_listener = null
-					}
-				}
-
-				if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_3_listener) {
-					add_interaction_3_listener()
-				}
+		if (store) {
+			if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_3_listener) {
+				add_interaction_3_listener()
 			}
 		}
 	}
@@ -903,9 +890,20 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (used_pointer_events.size === 0 && (used_wheel_events.size === 0 || has_global_wheel_event())) {
 			// cursor will not change even if `Canvas.changeCursor === true`
 			parent.$set({ block: true })
+			if (store) {
+				if (store.rendererComponent?.get_mode() === "always" && remove_interaction_2_listener) {
+					remove_interaction_2_listener()
+					remove_interaction_2_listener = null
+				}
+			}
 		} else if (used_pointer_events.size > 0 || (used_wheel_events.size > 0 && !has_global_wheel_event())) {
 			// cursor will change if `Canvas.changeCursor === true`
 			parent.$set({ block: false })
+			if (store) {
+				if (store.rendererComponent?.get_mode() === "always" && !remove_interaction_2_listener) {
+					add_interaction_2_listener()
+				}
+			}
 		}
 	}
 
