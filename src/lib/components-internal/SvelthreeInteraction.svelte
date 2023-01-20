@@ -190,7 +190,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/**
 	 * **Adds / removes** `PointerEvent` related **Listeners** which conditionally:
 	 * - **dispatch** a **synthetic** `PointerEvent` via the **ShadowDOM-Element** first -> Listener invokes `on_pointer(evt)` function (_`evt` is **synthetic**_).
-	 * - **immediate invoking** of the `on_pointer(evt)` function (_`evt` can be **synthetic** / the original Event_).
+	 * - **immediate invoking** of the `on_pointer(evt)` function (_`evt` can be **synthetic** / the **original** Event_).
 	 */
 	const m_pointer = new PointerEventManager(
 		pointer_over_canvas,
