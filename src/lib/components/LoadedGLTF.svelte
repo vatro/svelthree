@@ -137,8 +137,6 @@
 	const sti: number = getContext("store_index")
 	const store = $svelthreeStores[sti]
 
-	const shadow_dom_enabled: boolean = getContext("shadow_dom_enabled")
-
 	/** The (three) instance that was shared to this component as it's 'parent' which can be either another instance / object or a scene / root scene. */
 	let our_parent: Object3D | undefined = undefined
 
@@ -738,6 +736,7 @@
 	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 * ☝️ _This is an **asynchronous** function which should ideally be **awaited**!_
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const on: SvelthreeOnFunction = async (type, callback): Promise<boolean> => {
@@ -769,6 +768,7 @@
 	 * programmatic removal of 'forwarding' directives (no callbacks) like `on:click`.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 * ☝️ _This is an **asynchronous** function which should ideally be **awaited**!_
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const onx: SvelthreeOnXFunction = async (type, callback): Promise<boolean> => {
