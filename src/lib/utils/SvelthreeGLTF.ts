@@ -14,6 +14,8 @@ import type {
 	MeshAssignableMaterial
 } from "../types/types-extra.js"
 
+type SvelthreeDOMTarget = SvelthreeShadowDOMElement | ShadowRoot | HTMLElement
+
 export default class SvelthreeGLTF {
 	public tree: SvelthreeGLTFTreeMap = new Map<string, ISvelthreeGLTFTreeMapMember>()
 
@@ -86,6 +88,10 @@ export default class SvelthreeGLTF {
 		return parent_component["$$"].context
 	}
 
+	async get_dom_target(parent_component: SvelthreeComponentShadowDOMChild): Promise<SvelthreeDOMTarget> {
+		return parent_component.get_shadow_dom_el() || document.createElement("svelthree-target-dom-element")
+	}
+
 	/** Generates `svelthree`-components due to the parsed (_see `SvelthreeGLTF.parse()`_) hierarchy-tree-map and
 	 * adds the constructed `svelthree`-components-tree to the specified `svelthree`-target-component.
 	 */
@@ -99,14 +105,14 @@ export default class SvelthreeGLTF {
 			async (): Promise<void> => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				let context: Map<any, any> | undefined
-				let dom_target: SvelthreeShadowDOMElement | ShadowRoot | undefined | null
+				let dom_target: SvelthreeDOMTarget | undefined
 				let parent_component: SvelthreeComponentShadowDOMChild | undefined
 
 				if (item.parent_uuid) {
 					parent_component = await this.get_parent_component(item.parent_uuid)
 					if (parent_component) {
 						context = await this.get_parent_context(parent_component)
-						dom_target = parent_component.get_shadow_dom_el()
+						dom_target = await this.get_dom_target(parent_component)
 					} else {
 						console.error(
 							`SVELTHREE > utils > SvelthreeGLTF > create_component : invalid 'parent_component' value!`,
@@ -116,8 +122,7 @@ export default class SvelthreeGLTF {
 				} else {
 					// the object has no parent, means it's the root object
 					parent_component = target_component
-					dom_target = parent_component.get_shadow_dom_el()
-					context = parent_component["$$"].context
+					dom_target = await this.get_dom_target(parent_component)
 				}
 
 				if (dom_target && item && context && parent_component) {
