@@ -114,17 +114,7 @@ const delete_event_from_set = (event_name: SvelthreeSupportedInteractionEvent, t
 
 // TODO  check the comments below concerning 'default Svelte first' approach, still valid?
 
-/**
- * -  IMPORTANT  mode `"always"`:
- *   calling `evt.preventDefault()` / `evt.stopPropagation()` inside a callback **will have NO effect** ☝️,
- * because the event was already emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
- * be set via `modifiers` prop in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
- *
- * -  IMPORTANT  mode `"auto"`:
- *   calling `evt.preventDefault()` inside a callback **will have effect** ☝️, means
- * `evt.preventDefault()` / `evt.stopPropagation()` **CAN** but **do NOT HAVE TO** be set via `modifiers` prop
- * in order to cancel event's default (DOM) action or stop propagation at the exact same moment it occured.
- */
+/** Check if `preventDefault` and/or `stopPropagation` modifiers were specified and if so cancel Event / stop Event propagation. */
 const cancel_or_stop_propagation = (
 	evt: PointerEvent | FocusEvent | KeyboardEvent | WheelEvent,
 	user_modifiers_prop: MapPropModifiers
