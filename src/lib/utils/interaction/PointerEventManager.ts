@@ -11,11 +11,17 @@ import type {
 type CanvasComponent = import("../../components/Canvas.svelte").default
 import { get } from "svelte/store"
 import { has_on_directive, using_event, not_using_event } from "./parent_comp_utils.js"
-import { event_not_registered, event_is_registered, register_event, unregister_pointer_event, cancel_or_stop_propagation } from "./event_utils.js"
+import {
+	event_not_registered,
+	event_is_registered,
+	register_event,
+	unregister_pointer_event,
+	cancel_or_stop_propagation
+} from "./event_utils.js"
 import { get_listener_options_from_modifiers_prop } from "./modifier_utils.js"
 import { DEFAULT_DOM_LISTENER_OPTIONS, POINTER_EVENTS } from "../../constants/Interaction.js"
 
-/** **Manages / checks** the state of the **pointer**. Contains methods for conditional **dispatching** of corresponding **cloned** `PointerEvent`s via the **shadow DOM Element** first or via immediate invoking of the `on_pointer`. */
+/** **Manages / checks** the state of the **pointer**. Contains methods for conditional **dispatching** of corresponding **cloned** `PointerEvent`s via the **ShadowDOM-Element** first or via immediate invoking of the `on_pointer`. */
 export default class PointerEventManager {
 	private pointer_is_over = false
 	private pointer_is_out = true
@@ -61,22 +67,22 @@ export default class PointerEventManager {
 		private c_name: string
 	) {}
 
-	/** `PointerEventManager` methods that CAN ( TODO  -> if `useShadowDom === `true`) **dispatch** a **cloned** `PointerEvent` via the **Shadow DOM Element** first,
-	 * which will then immediatelly invoke `on_pointer`, previously added as a Shadow DOM PointerEvent-**Listener** ( TODO  -> if `useShadowDom === `true`). */
+	/** `PointerEventManager` methods that CAN ( TODO  -> if `useShadowDom === `true`) **dispatch** a **cloned** `PointerEvent` via the **ShadowDOM-Element** first,
+	 * which will then immediatelly invoke `on_pointer`, previously added as a ShadowDOM-Element PointerEvent-**Listener** ( TODO  -> if `useShadowDom === `true`). */
 	public shadow_dom = {
-		/** Conditionally dispatch a **cloned** `pointerover` / `pointerout` PointerEvent via the **shadow DOM element**. */
+		/** Conditionally dispatch a **cloned** `pointerover` / `pointerout` PointerEvent via the **ShadowDOM-Element**. */
 		overout: this.overout.bind(this),
-		/** Conditionally dispatch a **cloned** `pointermoveover` PoinerEvent via the **shadow DOM element**. */
+		/** Conditionally dispatch a **cloned** `pointermoveover` PoinerEvent via the **ShadowDOM-Element**. */
 		moveover: this.moveover.bind(this),
-		/** Conditionally dispatch a **cloned** `pointerdown` PoinerEvent via the **shadow DOM element**. */
+		/** Conditionally dispatch a **cloned** `pointerdown` PoinerEvent via the **ShadowDOM-Element**. */
 		pointerdown: this.pointerdown.bind(this),
-		/** Conditionally dispatch a **cloned** `pointerup` PoinerEvent via the **shadow DOM element**. */
+		/** Conditionally dispatch a **cloned** `pointerup` PoinerEvent via the **ShadowDOM-Element**. */
 		pointerup: this.pointerup.bind(this),
-		/** Conditionally dispatch a **cloned** `click` PoinerEvent via the **shadow DOM element**. */
+		/** Conditionally dispatch a **cloned** `click` PoinerEvent via the **ShadowDOM-Element**. */
 		click: this.click.bind(this)
 	}
 
-	/** `PointerEventManager` methods **invoking** `on_pointer` as **Callback immediatelly** (_without dispatching via Shadow DOM Element first_) */
+	/** `PointerEventManager` methods **invoking** `on_pointer` as **callback immediatelly** (_without dispatching via ShadowDOM-Element first_) */
 	public callback = {
 		move: this.move.bind(this)
 	}
@@ -94,7 +100,7 @@ export default class PointerEventManager {
 		//if (using_event("pointerenter")) add_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
 		//if (using_event("pointerleave")) add_pointer_listener("pointerleave") ->  DEPRECATED  same as 'pointerout'
 
-		// pointer events depending on 'pointermove' listener
+		// pointer events depending on 'pointermove' Listener
 		if (using_event("pointerover", this.parent)) this.add_listener("pointerover", true)
 		if (using_event("pointerout", this.parent)) this.add_listener("pointerout", true)
 
@@ -116,7 +122,7 @@ export default class PointerEventManager {
 		//if (not_using_event("pointerenter")) completely_remove_pointer_listener("pointerenter") ->  DEPRECATED  same as 'pointerover'
 		//if (not_using_event("pointerleave")) completely_remove_pointer_listener("pointerleave") ->  DEPRECATED  same as 'pointerover'
 
-		// pointer events depending on 'pointermove' listener
+		// pointer events depending on 'pointermove' Listener
 		if (not_using_event("pointerover", this.parent)) this.remove_listener("pointerover")
 		if (not_using_event("pointerout", this.parent)) this.remove_listener("pointerout")
 		if (not_using_event("pointermoveover", this.parent)) this.remove_listener("pointermoveover")
@@ -130,9 +136,9 @@ export default class PointerEventManager {
 	}
 
 	// IMPORTANT  LIMITATIONS:
-	// - if using directives  -> `once` should also be set as standard svelte modifier if set in modifiers-prop
+	// -  TOFIX  / CHECK (is this inevitable?): `once` should also be set as standard svelte modifier if set in modifiers-prop
 	// -  TODO  / CHECK e.g. `on:click` without callback (forwarding) -> https://svelte.dev/docs#template-syntax-element-directives
-	// the component itself should emit the event ... isn't this already like this?
+	// the component itself should emit the Event ... isn't this already like this?
 	public add_listener = (event_name: SvelthreeSupportedPointerEvent, dispatch_via_shadow_dom: boolean): void => {
 		// IMPORTANT  HACKY but simple: links and buttons are being handled as directives concerning modifiers etc.!
 		const parent_state = this.parent.state()
@@ -155,7 +161,7 @@ export default class PointerEventManager {
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		dispatch_via_shadow_dom: boolean
 	) {
-		//  IMPORTANT  only `pointermove` event is NOT being re-dispatched via shadow dom!
+		//  IMPORTANT  only `pointermove` Event is NOT being re-dispatched via shadow dom!
 		if (this.shadow_dom_enabled && dispatch_via_shadow_dom) {
 			this.add_shadow_dom_pointer_listener(event_name, listener_options, this.on_pointer)
 		}
@@ -185,7 +191,7 @@ export default class PointerEventManager {
 		}
 	}
 
-	/** Pointer events are being provided (re-dispatched) by the Canvas component. */
+	/** Listen to internal `PointerEvent` related Events dispatched by the `Canvas` component. */
 	private add_canvas_pointer_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		switch (event_name) {
 			case "click":
@@ -209,7 +215,7 @@ export default class PointerEventManager {
 				break
 			default:
 				console.error(
-					`SVELTHREE > ${this.c_name} > PointerEventManager > add_canvas_pointer_listener : Pointer event '${event_name}' not implemented!`
+					`SVELTHREE > ${this.c_name} > PointerEventManager > add_canvas_pointer_listener : PointerEvent '${event_name}' not implemented!`
 				)
 				break
 		}
@@ -252,7 +258,7 @@ export default class PointerEventManager {
 		)
 	}
 
-	/** Removes unused but registered (was used) listener. */
+	/** Removes unused but registered (was used) Listener. */
 	private remove_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		if (event_is_registered(event_name, this.used_pointer_events)) {
 			switch (event_name) {
@@ -277,7 +283,7 @@ export default class PointerEventManager {
 					break
 				default:
 					console.error(
-						`SVELTHREE > ${this.c_name} > PointerEventManager > completely_remove_pointer_listener : Pointer event '${event_name}' not implemented!`
+						`SVELTHREE > ${this.c_name} > PointerEventManager > completely_remove_pointer_listener : PointerEvent '${event_name}' not implemented!`
 					)
 					break
 			}
@@ -288,7 +294,7 @@ export default class PointerEventManager {
 					this.shadow_dom_el.removeEventListener(event_name, this.on_pointer as EventListener, true)
 				} else {
 					console.error(
-						`SVELTHREE > ${this.c_name} > PointerEventManager > completely_remove_pointer_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+						`SVELTHREE > ${this.c_name} > PointerEventManager > completely_remove_pointer_listener : Cannot remove '${event_name}' Listener from unavailable 'shadow_dom_el'!`,
 						{ shadow_dom_el: this.shadow_dom_el }
 					)
 				}
@@ -345,10 +351,13 @@ export default class PointerEventManager {
 		}
 	}
 
-	/** Events dispatched via Shadow DOM need to be cloned. */
+	/** Events dispatched via ShadowDOM-Element need to be cloned. */
 	private dispatch_via_shadow_dom(evt: PointerEvent, clone_type?: string) {
 		if (this.shadow_dom_el) {
-			// Events dispatched via Shadow DOM need to be cloned.
+			// apply any `preventDefault` and/or `stopPropagation` modifiers before cloning the Event.
+			cancel_or_stop_propagation(evt, this.user_modifiers_prop)
+
+			// Events dispatched via ShadowDOM-Element need to be cloned.
 			const cloned_evt: PointerEvent = clone_type ? this.clone_evt(evt, clone_type) : this.clone_evt(evt)
 			this.shadow_dom_el.dispatchEvent(cloned_evt)
 		} else {
@@ -360,8 +369,8 @@ export default class PointerEventManager {
 	}
 
 	/** Conditionally dispatches a 'pointerover'`/`'pointerout'` PointerEvent -> _`'canvas_pointermove'` dependant_.
-	 * - mode `always`: `evt` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component, see `SvelthreeInteraction.add_interaction_2_listener`.
-	 * - mode `auto`: `evt` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * - mode `always`: `evt` ( _`pointer.event`_ ) is the last `pointermove` Event detected / saved by the `Canvas` component, see `SvelthreeInteraction.add_interaction_2_listener`.
+	 * - mode `auto`: `evt` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` Event dispatched by the `Canvas` component.
 	 */
 	private overout(evt: PointerEvent) {
 		if (this.intersects()) {
@@ -392,14 +401,14 @@ export default class PointerEventManager {
 	}
 
 	/**
-	 * Conditionally dispatches a **cloned** `'pointermoveover'` PointerEvent -> _`'canvas_pointermove'` dependant_.
-	 * - mode `always`: `evt` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component, see `SvelthreeInteraction.add_interaction_2_listener`.
-	 * - mode `auto`: `evt` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * Conditionally dispatches a `'pointermoveover'` PointerEvent -> _`'canvas_pointermove'` dependant_.
+	 * - mode `always`: `evt` ( _`pointer.event`_ ) is the last `pointermove` Event detected / saved by the `Canvas` component, see `SvelthreeInteraction.add_interaction_2_listener`.
+	 * - mode `auto`: `evt` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` Event dispatched by the `Canvas` component.
 	 */
 	private moveover(evt: PointerEvent) {
 		//  IMPORTANT  -> `pointermoveover` is not a standard DOM event, so it will not bubble up back to the `<canvas>` element!
 
-		// using `get` -> avoid subscribing to a store inside a closure.
+		// using `get` -> avoid subscribing
 		if (get(this.pointer_over_canvas).status === true) {
 			const search_type = "pointermoveover"
 			const clone_type = search_type
@@ -440,7 +449,7 @@ export default class PointerEventManager {
 			this.last_pointer_move.clientX = evt.clientX
 			this.last_pointer_move.clientY = evt.clientY
 
-			// Cannot be dispacthed via Shadow DOM Element -> immediatelly invoke `on_pointer`.
+			// Cannot be dispatched via ShadowDOM-Element -> immediatelly invoke `on_pointer`.
 			this.on_pointer(evt)
 		}
 	}
@@ -455,20 +464,19 @@ export default class PointerEventManager {
 	}
 
 	/**
-	 * Clone original pointer events and re-type them if needed,in order to re-dispatch them via shadow dom.
-	 * - 'click' -> get's cloned as it is.
-	 * - 'pointerover' and 'pointerout' -> 'pointermove' event gets re-typed to 'pointerover' or 'pointerout'.
+	 * **Clone** original `PointerEvent`s and **re-type** them if needed, in order to dispatch them via ShadowDOM-Element.
+	 * - `click` -> **same type**.
+	 * - `pointerover`, `pointerout` and `pointermoveover` -> **re-typed** `pointermove`.
 	 *
-	 * We need to do this, because we cannot re-dispatch the same pointer event that occured on the <canvas>  \
-	 * element through some other DOM / shadow DOM element.
-	 *
+	 * We need to do this, because we cannot re-dispatch the original `PointerEvent` that already occured on the `<canvas>` DOM Element
+	 * through some other DOM / ShadowDOM-Element.
 	 */
 	clone_evt(evt: PointerEvent, new_type: string | null = null): PointerEvent {
 		const event_init: { [key: string]: unknown } = { composed: undefined }
 
-		// we do this because simply spreading the event object -> `{...e}`:
+		// simply spreading the Event object -> `{...e}` doesn't work:
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
-		// also we cannot simply alter the value of `composed` via the event object like e.g. `evt.composed = false`
+		// + we cannot simply alter the value of `composed` via e.g. `evt.composed = false`
 		for (const key in evt) {
 			if (key !== "path") {
 				event_init[key] = evt[key as keyof PointerEvent]
@@ -476,7 +484,7 @@ export default class PointerEventManager {
 		}
 
 		//  IMPORTANT  Setting `composed` to false:
-		// prevents propagation of the event (dispatched via a shadow element) to outer light dom.
+		// prevents propagation of the Event (dispatched via a ShadowDOM-Element) to outer light dom.
 		// see: https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
 		event_init.composed = false
 
