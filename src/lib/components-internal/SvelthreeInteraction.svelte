@@ -196,8 +196,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	function on_pointer(evt: PointerEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		cancel_or_stop_propagation(evt, user_modifiers_prop)
-
 		// TODO  `gotpointercapture`, `lostpointercapture` & `pointercancel` events usage needs to be explored!
 
 		switch (render_mode) {

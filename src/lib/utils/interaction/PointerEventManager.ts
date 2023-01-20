@@ -11,7 +11,7 @@ import type {
 type CanvasComponent = import("../../components/Canvas.svelte").default
 import { get } from "svelte/store"
 import { has_on_directive, using_event, not_using_event } from "./parent_comp_utils.js"
-import { event_not_registered, event_is_registered, register_event, unregister_pointer_event } from "./event_utils.js"
+import { event_not_registered, event_is_registered, register_event, unregister_pointer_event, cancel_or_stop_propagation } from "./event_utils.js"
 import { get_listener_options_from_modifiers_prop } from "./modifier_utils.js"
 import { DEFAULT_DOM_LISTENER_OPTIONS, POINTER_EVENTS } from "../../constants/Interaction.js"
 
@@ -307,23 +307,38 @@ export default class PointerEventManager {
 	// --- DISPATCH / PRE-DISPATCH LOGIC ---
 
 	/**
-	 * - `shadow_dom_enabled: true` (_`shadow_dom_el` should be available_) -> Dispatch via Shadow DOM Element first (_invoke `on_pointer` as Listener_)
+	 * - `shadow_dom_enabled: true` (_`shadow_dom_el` should be available_) -> Dispatch via ShadowDOM-Element first (_invoke `on_pointer` as Listener_)
 	 * - `shadow_dom_enabled: false` (_`shadow_dom_el` should not be available_) -> Invoke `on_pointer` immediatelly.
 	 *
-	 * Events that need to / will be cloned:
-	 * - Generally any Events dispatched via the Shadow DOM Element.
-	 * - All `pointermove`-dependant Events: `pointerover` / `pointerout` and `pointermoveover`.
+	 * Events that need to be **cloned** / will be **synthetic**:
+	 * - Generally any Events dispatched via the ShadowDOM-Element.
+	 * - All `pointermove`-**dependant** Events: `pointerover` / `pointerout` and `pointermoveover`,
+	 * the `pointermove`Event itself will **always** be the **original** Event.
 	 */
 	private hybrid_dispatch(evt: PointerEvent, clone_type?: string) {
 		if (this.shadow_dom_enabled) {
 			// always cloned event
 			this.dispatch_via_shadow_dom(evt, clone_type)
 		} else {
-			// all `pointermove`-dependant Events need to be cloned.
 			if (clone_type) {
+				// *** Canceling has to happen on original Event before cloning. ***
+				// All synthetic Events have `isTrusted: false`, means they'll not trigger default actions anyway.
+				// If we don't cancel the original Event here, the default action will still be triggered (by the original Event).
+
+				// *** What about render-mode `auto` / `always` differencies? ***
+				// There are NO differencies! `on_pointer` does:
+				// - `mode: always` -> wraps ANY Event received in a function and puts it in the queue
+				// - `mode: auto` -> processes ANY Event received immediatelly
+
+				// apply any `preventDefault` and/or `stopPropagation` modifiers before cloning the Event.
+				cancel_or_stop_propagation(evt, this.user_modifiers_prop)
+
 				const cloned_evt: PointerEvent = this.clone_evt(evt, clone_type)
 				this.on_pointer(cloned_evt)
 			} else {
+				// apply any `preventDefault` and/or `stopPropagation` modifiers
+				cancel_or_stop_propagation(evt, this.user_modifiers_prop)
+
 				// process original event
 				this.on_pointer(evt)
 			}
