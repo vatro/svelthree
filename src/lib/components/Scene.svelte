@@ -969,6 +969,7 @@
 	 * Needed for **reactive** interaction listener management -> _internal svelthree functionality_.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 * ☝️ _This is an **asynchronous** function which should ideally be **awaited**!_
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const on: SvelthreeOnFunction = async (type, callback): Promise<boolean> => {
@@ -1000,6 +1001,7 @@
 	 * programmatic removal of 'forwarding' directives (no callbacks) like `on:click`.
 	 *
 	 * ☝️ _Can be used with **interactive components only** -> `interact` prop has to be `true`._
+	 * ☝️ _This is an **asynchronous** function which should ideally be **awaited**!_
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export const onx: SvelthreeOnXFunction = async (type, callback): Promise<boolean> => {
