@@ -150,18 +150,47 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	//  POINTER Event  //
 	/*
-	`Canvas` component emits (spreads) internal canvas ( POINTER ) events to all interactive components.
-	 Interactive components listen to those internal canvas ( POINTER ) events and schedule their redispatch via SHADOW DOM:
-	 - mode `auto`: all internal canvas ( POINTER ) events get redispatched immediatelly via SHADOW DOM ( any resulting changes will trigger a new render )
-	 - mode `always`: all internal canvas ( POINTER ) events get queued / will be redispatched via SHADOW DOM on the next render ( _raf_ )
+		The `Canvas` component emits (spreads) internal `Canvas`-Events to all interactive components.
+		
+		Interactive components are listening to those internal (`$on`) `Canvas`-Events and are invoking
+		corresponding callbacks (see `PointerEventManager`).
+		
+		These callbacks control if / when / how the occured PointerEvent will be sent to the `on_pointer`
+		function for **final processing** (_queued or immediate dispatching of the component Event via `comp_interaction_dispatcher`_).
+		This can happen through (conditional / immediate):
+
+		- Dispatching the (cloned) PointerEvent via the ShadowDOM-Element first (only if `shadow_dom_enabled: true`) -> Listener invokes `on_pointer`.
+		- Immediate invoking of the `on_pointer` function (always if `shadow_dom_enabled: false`)
+
+		⚠️ Concerning `preventDefault()` / `stopPropagation()` usage in component Event callbacks (_if not already applied via `modifiers`prop_):
+
+			- render-mode `"always"`:
+ 				calling `evt.preventDefault()` / `evt.stopPropagation()` inside a component Event callback **will have NO effect**,
+				because the event has already been emitted at some point during the animation, so `evt.preventDefault()` / `evt.stopPropagation()` **HAVE TO**
+				be set via `modifiers` prop in order to cancel Event's default action or stop Event's propagation at the moment it was emitted / before it was queued.
+ 
+			- render-mode `"auto"`:
+				- calling `evt.stopPropagation()` inside a component Event callback **WILL have effect**.
+				- calling `evt.preventDefault()` inside a component Event callback **COULD have effect**:
+
+					- `.preventDefault()` will be USELESS if the original Event is synthetic:
+						- `pointerover` / `pointerout` and `pointermoveover` (`pointermove`-DEPENDANT) Events are **always** synthetic
+						- if `shadow_dom_enabled: true` **all** events will be synthetic (_except the `pointermove` Event which will never be synthetic_)
+
+					- `.preventDefault()` will have effect for the `pointermove` Event (_which will **never** be synthetic_)!
+
+			 IMPORTANT  CONCLUSION:
+		 	- ⚠️ render-mode `"always"`: use `modifiers` prop!
+			- ⚠️ render-mode `"auto"`: RECOMMENDED: use `modifiers` prop in order to avoid confusion!
   */
 
 	/** A Collection of used `PointerEvent`-names / types -> updated by the `PointerEventManager`. */
 	let used_pointer_events = new Set<string>([])
 
 	/**
-	 * **Adds / removes** `PointerEvent` related **Listeners** and conditionally **dispatches** a **cloned** `PointerEvent`
-	 * either via the **shadow DOM Element** first (_before invoking `on_pointer` function_) or via **immediate invoking** of the `on_pointer` function.
+	 * **Adds / removes** `PointerEvent` related **Listeners** which conditionally:
+	 * - **dispatch** a **synthetic** `PointerEvent` via the **ShadowDOM-Element** first -> Listener invokes `on_pointer(evt)` function (_`evt` is **synthetic**_).
+	 * - **immediate invoking** of the `on_pointer(evt)` function (_`evt` can be **synthetic** / the original Event_).
 	 */
 	const m_pointer = new PointerEventManager(
 		pointer_over_canvas,
@@ -181,7 +210,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	const queued_pointer_moveover_events: (() => void)[] = []
 
 	/**
-	 * ### +++  POINTER Event   internal Callback / Shadow DOM Listener  +++
+	 * ### +++  POINTER Event   internal callback / Shadow DOM Listener  +++
 	 *
 	 * ☝️ _How / when this function is being invoked is controlled by the `PointerEventManager`._
 	 *
@@ -190,8 +219,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * - **intersection dependant** or **intersection independendant**
 	 *
 	 * Acts as:
-	 * - internal `canvas_component.$on`-**Callback**
+	 * - internal `canvas_component.$on`-**callback**
 	 * - Shadow DOM Events **Listener**
+	 *
+	 * ⚠️ `evt` can be a **synthetic** Event or the **original** Event.
+	 * In BOTH cases any `preventDefault` / `stopPropagation` modifiers have already been applied (_see `PointerEventManager.hybrid_dispatch(...)`_):
+	 * the original Event has been canceled and/or propagation stopped.
 	 */
 	function on_pointer(evt: PointerEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
@@ -200,7 +233,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		switch (render_mode) {
 			case "always":
-				// QUEUED EVENT DISPATCHING: dispatch our custom event / invoke callback on next render (raf aligned)
+				// QUEUED COMPONENT EVENT DISPATCHING
+				// dispatch `CustomEvent` -> invoke `on:<event_name>`-callback on next render (raf aligned)
 
 				switch (evt.type) {
 					case "pointermove": {
@@ -222,7 +256,8 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 				break
 			case "auto":
-				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
+				// IMMEDIATE COMPONENT EVENT DISPATCHING
+				// immediatelly dispatch `CustomEvent` -> invoke `on:<event_name>`-callback immediatelly
 
 				if (evt.type === "pointermove") {
 					process_pointerevent_intersection_indep(evt)
@@ -326,7 +361,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		switch (render_mode) {
 			case "always": {
-				// QUEUED EVENT DISPATCHING: dispatch our custom event / invoke callback on next render (raf aligned)
+				// QUEUED EVENT DISPATCHING: dispatch our CustomEvent / invoke callback on next render (raf aligned)
 				const queued_focus_event = () => process_focusevent_intersection_indep(evt)
 				focus_events_queue.push(queued_focus_event)
 				break
@@ -354,7 +389,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
-	/*  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
+	/*  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
 
 	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
 
@@ -385,14 +420,14 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		modifiers_map = user_modifiers_prop
 
 		if (modifiers_map?.get(event_name)?.has("self")) {
-			// shadow DOM element is directly listening to either `window` or `document` keyboard event -> NOT managed by canvas!
+			// ShadowDOM-Element is directly listening to either `window` or `document` keyboard Event -> NOT managed by canvas!
 
-			// listener is added to the corresponding Shadow DOM element.
+			// Listener is added to the corresponding ShadowDOM-Element.
 			// The shadow dom element has to have focus in order to react to keyboard input.
 			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
 			//  IMPORTANT  This won't work if 'defaultKeyboardEventListenerHost' was set to 'canvas' -->
-			// IMPORTANT  this is only possible because shadow DOM element can have focus! + keyboard events are pointer / mouse independant!
-			// IMPORTANT  if would e.g. do the same wit wheel event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
+			//  IMPORTANT  this is only possible because ShadowDOM-Element can have focus! + keyboard events are pointer / mouse independant!
+			//  IMPORTANT  if would e.g. do the same wit wheel Event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
 			if (shadow_dom_el) {
 				add_shadow_dom_keyboard_listener(event_name, listener_options, on_keyboard)
 			} else {
@@ -444,34 +479,34 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (!remove_canvas_keypress_listener_on_directive) add_canvas_keypress_listener_on_directive()
 				break
 			default:
-				console.error(`SVELTHREE > ${c_name} : Keyboard event '${event_name}' not implemented!`)
+				console.error(`SVELTHREE > ${c_name} : KeyboardEvent '${event_name}' not implemented!`)
 				break
 		}
 	}
 
-	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_keydown` -> `keydown`
+	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_keydown` -> `keydown`
 
 	let remove_canvas_keydown_listener_on_directive: (() => void) | undefined
 	function add_canvas_keydown_listener_on_directive(): void {
 		remove_canvas_keydown_listener_on_directive = canvas_component?.$on(
 			"canvas_keydown",
 			(evt: CanvasComponentEvent) =>
-				// global keyboard listener -> we cancel nothing! so we can use the standard callback directly!
+				// global keyboard Listener -> we cancel nothing! so we can use the standard callback directly!
 				on_keyboard(evt.detail.event as KeyboardEvent, false)
 		)
 	}
 
-	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_keyup` -> `keyup`
+	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_keyup` -> `keyup`
 
 	let remove_canvas_keyup_listener_on_directive: (() => void) | undefined
 	function add_canvas_keyup_listener_on_directive(): void {
 		remove_canvas_keyup_listener_on_directive = canvas_component?.$on("canvas_keyup", (evt: CanvasComponentEvent) =>
-			// global keyboard listener -> we cancel nothing! so we can use the standard callback directly!
+			// global keyboard Listener -> we cancel nothing! so we can use the standard callback directly!
 			on_keyboard(evt.detail.event as KeyboardEvent, false)
 		)
 	}
 
-	//  KEYBOARD Event   GLOBAL Keyboard Event -> CANVAS Component Keyboard Event  `canvas_press` -> `keypress`
+	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_press` -> `keypress`
 
 	let remove_canvas_keypress_listener_on_directive: (() => void) | undefined
 	function add_canvas_keypress_listener_on_directive(): void {
@@ -490,7 +525,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		switch (render_mode) {
 			case "always": {
-				// QUEUED EVENT DISPATCHING: dispatch our custom event / invoke callback on next render (raf aligned)
+				// QUEUED EVENT DISPATCHING: dispatch our CustomEvent / invoke callback on next render (raf aligned)
 				const queued_keyboard_event = () => process_keyboardevent_intersection_indep(evt)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
@@ -549,7 +584,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		let modifiers_map: MapPropModifiers | undefined = undefined
 		modifiers_map = user_modifiers_prop
 
-		// "intersect" modifier -> dispatch wheel event only if pointer intersects the object
+		// "intersect" modifier -> dispatch wheel Event only if pointer intersects the object
 		let on_intersect = !!modifiers_map?.get(event_name)?.has("intersect")
 		let is_global = !!modifiers_map?.get(event_name)?.has("global")
 
@@ -557,12 +592,12 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		listener = on_intersect ? on_wheel_intersection_dep : on_wheel_intersection_indep
 
 		if (is_global) {
-			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
+			// can be dispatched via ShadowDOM-Element /  TODO  -> always try to dispatch via ShadowDOM-Element?
 			if (shadow_dom_enabled && dispatch_via_shadow_dom) {
 				add_shadow_dom_wheel_listener(event_name, listener_options, listener)
 			}
-			// add listener directly to window or  TODO  -> document
-			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
+			// add Listener directly to window or  TODO  -> document
+			// can be dispatched via ShadowDOM-Element /  TODO  -> always try to dispatch via ShadowDOM-Element?
 
 			// TODO  trigger onKeyboardEvent if specified! (like the function in Canvas)
 			window.addEventListener(
@@ -573,7 +608,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				listener_options
 			)
 		} else {
-			// can be dispatched via shadow DOM element /  TODO  -> always try to dispatch via shadow DOM element?
+			// can be dispatched via ShadowDOM-Element /  TODO  -> always try to dispatch via ShadowDOM-Element?
 			if (shadow_dom_enabled && dispatch_via_shadow_dom) {
 				add_shadow_dom_wheel_listener(event_name, listener_options, listener)
 			}
@@ -617,7 +652,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 				if (!remove_canvas_wheel_listener) add_canvas_wheelevent_listener(on_intersect)
 				break
 			default:
-				console.error(`SVELTHREE > ${c_name} > Wheel event '${event_name}' not implemented!`)
+				console.error(`SVELTHREE > ${c_name} > WheelEvent '${event_name}' not implemented!`)
 				break
 		}
 	}
@@ -632,15 +667,15 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	/**
-	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` event detected / saved by the `Canvas` component.
-	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` event dispatched by the `Canvas` component.
+	 * - mode `always`: `e` ( _`pointer.event`_ ) is the last `pointermove` Event detected / saved by the `Canvas` component.
+	 * - mode `auto`: `e` ( _`evt.detail.event`_ ) is the `pointervent` passed as detail of the `canvas_pointermove` Event dispatched by the `Canvas` component.
 	 */
 	function check_wheel(evt: WheelEvent, on_intersect: boolean) {
 		// this is the last chance to use prevent default on the original event!
 		// COOL!  this will affect both "global" and "non global" path
 		cancel_or_stop_propagation(evt, user_modifiers_prop)
 
-		// TODO  Does it even make sense to re-dispatch wheel event via shadow DOM?! What's the use case?!
+		// TODO  Does it even make sense to re-dispatch wheel Event via ShadowDOM-Element?! What's the use case?!
 		if (shadow_dom_enabled) {
 			if (shadow_dom_el) {
 				if (on_intersect) {
@@ -670,19 +705,19 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	/**
 	 *  WHEEL Event  cloning
 	 *
-	 * Clone original wheel event and re-type it if needed, in order to re-dispatch it via shadow dom.
+	 * Clone original wheel Event and re-type it if needed, in order to re-dispatch it via shadow dom.
 	 * - 'wheel' -> get's cloned as it is, doesn't get re-typed.
 	 *
-	 * We need to do this, because we cannot re-dispatch the same wheel event that occured on the <canvas> \
-	 * element through some other DOM / shadow DOM element.
+	 * We need to do this, because we cannot re-dispatch the same wheel Event that occured on the <canvas> \
+	 * element through some other DOM / ShadowDOM-Element.
 	 *
 	 */
 	function get_wheelevent_modified_clone(evt: WheelEvent, new_type: string | null = null): WheelEvent {
 		const event_init: { [key: string]: unknown } = { composed: undefined }
 
-		// we do this because simply spreading the event object -> `{...e}`:
+		// we do this because simply spreading the Event object -> `{...e}`:
 		// "The spread operator only copies an object's own enumerable properties, not properties found higher on the prototype chain."
-		// also we cannot simply alter the value of `composed` via the event object like e.g. `evt.composed = false`
+		// also we cannot simply alter the value of `composed` via the Event object like e.g. `evt.composed = false`
 		for (const key in evt) {
 			if (key !== "path") {
 				event_init[key] = evt[key as keyof WheelEvent]
@@ -690,7 +725,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		}
 
 		//  IMPORTANT  Setting `composed` to false:
-		// prevents propagation of the event (dispatched via a shadow element) to outer light dom.
+		// prevents propagation of the Event (dispatched via a shadow element) to outer light dom.
 		// see: https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
 		event_init.composed = false
 
@@ -710,7 +745,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		on_wheel(evt, false)
 	}
 
-	/*  WHEEL Event   GLOBAL Wheel Event -> CANVAS Component Wheel Event  `canvas_wheel` -> `wheel` */
+	/*  WHEEL Event   GLOBAL WheelEvent -> CANVAS Component WheelEvent  `canvas_wheel` -> `wheel` */
 
 	function on_wheel(evt: WheelEvent, on_intersect: boolean): void {
 		const render_mode = store?.rendererComponent?.get_mode()
@@ -719,7 +754,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		switch (render_mode) {
 			case "always": {
-				// QUEUED EVENT DISPATCHING: dispatch our custom event / invoke callback on next render (raf aligned)
+				// QUEUED EVENT DISPATCHING: dispatch our CustomEvent / invoke callback on next render (raf aligned)
 				let queued_wheel_event = undefined
 				if (on_intersect) {
 					if (raycaster && intersects()) {
@@ -775,11 +810,11 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	/*  ADDING AND REGISTERING  */
 
-	/** for `SvelthreeInteraction` component's reactive listener management only */
+	/** for `SvelthreeInteraction` component's reactive Listener management only */
 	export let update_listeners = false
 
 	let r_added_on_init = false
-	// reactive listener management checks
+	// reactive Listener management checks
 	$: r_add_on_init = interaction_enabled && listeners
 	$: r_remove = !interaction_enabled && listeners
 
@@ -889,7 +924,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		remove_interaction_2_listener = store?.rendererComponent?.$on("interaction_2", () => {
 			// Check for `pointerover`/`pointerout` and `moveover` states and queue corresponding
 			// events even if the pointer didn't actively move, but the object maybe did.
-			// `pointer.event` is / will be the last `pointermove` event detected.
+			// `pointer.event` is / will be the last `pointermove` Event detected.
 			if (pointer.event) {
 				m_pointer.shadow_dom.overout(pointer.event)
 				m_pointer.shadow_dom.moveover(pointer.event)
@@ -956,7 +991,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		m_pointer.remove_all_listeners()
 		pointer_events_queue.length = 0
 
-		//  SVELTEKIT  CSR ONLY  keyboard event listeners are being added to `window`.
+		//  SVELTEKIT  CSR ONLY  keyboard Event listeners are being added to `window`.
 		if (browser) {
 			remove_all_keyboard_listeners()
 			keyboard_events_queue.length = 0
@@ -995,7 +1030,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 				default:
 					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Keyboard event '${event_name}' not implemented!`
+						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : KeyboardEvent '${event_name}' not implemented!`
 					)
 					break
 			}
@@ -1006,7 +1041,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, true)
 				} else {
 					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
+						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove Listener from unavailable 'shadow_dom_el'!`,
 						{ shadow_dom_el }
 					)
 				}
@@ -1024,7 +1059,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					break
 				default:
 					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Wheel event '${event_name}' not implemented!`
+						`SVELTHREE > ${c_name} > completely_remove_wheel_listener : WheelEvent '${event_name}' not implemented!`
 					)
 					break
 			}
@@ -1037,7 +1072,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					shadow_dom_el.removeEventListener(event_name, on_wheel_intersection_dep as EventListener, true)
 				} else {
 					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Cannot remove listener from unavailable 'shadow_dom_el'!`,
+						`SVELTHREE > ${c_name} > completely_remove_wheel_listener : Cannot remove Listener from unavailable 'shadow_dom_el'!`,
 						{ shadow_dom_el }
 					)
 				}
@@ -1062,7 +1097,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 					shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, false)
 				} else {
 					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' listener from unavailable 'shadow_dom_el'!`,
+						`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' Listener from unavailable 'shadow_dom_el'!`,
 						{ shadow_dom_el }
 					)
 				}
