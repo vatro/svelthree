@@ -215,7 +215,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 *
 	 * Acts as:
 	 * - internal `canvas_component.$on`-**callback**
-	 * - Shadow DOM Events **Listener**
+	 * - ShadowDOM-Event-**Listener**
 	 *
 	 * ⚠️ `evt` can be a **synthetic** Event or the **original** Event.
 	 * In BOTH cases any `preventDefault` / `stopPropagation` modifiers have already been applied (_see `PointerEventManager.hybrid_dispatch(...)`_):
