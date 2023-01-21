@@ -147,7 +147,7 @@ export default class PointerEventManager {
 				const listener_options =
 					get_listener_options_from_modifiers_prop(event_name, this.user_modifiers_prop) ||
 					DEFAULT_DOM_LISTENER_OPTIONS
-				this.set_pointer_listeners(event_name, listener_options, dispatch_via_shadow_dom)
+				this.set_listeners(event_name, listener_options, dispatch_via_shadow_dom)
 
 				register_event(event_name, this.used_pointer_events, this.canvas_component)
 			} else {
@@ -156,20 +156,20 @@ export default class PointerEventManager {
 		}
 	}
 
-	private set_pointer_listeners(
+	private set_listeners(
 		event_name: SvelthreeSupportedPointerEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		dispatch_via_shadow_dom: boolean
 	) {
 		//  IMPORTANT  only `pointermove` Event is NOT being re-dispatched via shadow dom!
 		if (this.shadow_dom_enabled && dispatch_via_shadow_dom) {
-			this.add_shadow_dom_pointer_listener(event_name, listener_options, this.on_pointer)
+			this.add_shadow_dom_listener(event_name, listener_options, this.on_pointer)
 		}
 
-		this.add_canvas_pointer_listener(event_name)
+		this.add_canvas_listener(event_name)
 	}
 
-	private add_shadow_dom_pointer_listener(
+	private add_shadow_dom_listener(
 		event_name: SvelthreeSupportedInteractionEvent,
 		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
 		listener: ((evt: PointerEvent) => void) | undefined
@@ -179,20 +179,20 @@ export default class PointerEventManager {
 				this.shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
 			} else {
 				console.error(
-					`SVELTHREE > ${this.c_name} > PointerEventManager > add_shadow_dom_pointer_listener : Cannot add 'PointerEvent' ShadowDOM-Listener, Listener not available!`,
+					`SVELTHREE > ${this.c_name} > PointerEventManager > add_shadow_dom_listener : Cannot add 'PointerEvent' ShadowDOM-Listener, Listener not available!`,
 					{ listener }
 				)
 			}
 		} else {
 			console.error(
-				`SVELTHREE > ${this.c_name} > PointerEventManager > add_shadow_dom_pointer_listener : Cannot add 'PointerEvent' ShadowDOM-Listener, ShadowDOM-Element not available!`,
+				`SVELTHREE > ${this.c_name} > PointerEventManager > add_shadow_dom_listener : Cannot add 'PointerEvent' ShadowDOM-Listener, ShadowDOM-Element not available!`,
 				{ shadow_dom_enabled: this.shadow_dom_enabled, shadow_dom_el: this.shadow_dom_el }
 			)
 		}
 	}
 
 	/** Listen to internal `PointerEvent` related Events dispatched by the `Canvas` component. */
-	private add_canvas_pointer_listener(event_name: SvelthreeSupportedInteractionEvent): void {
+	private add_canvas_listener(event_name: SvelthreeSupportedInteractionEvent): void {
 		switch (event_name) {
 			case "click":
 				if (!this.canvas_click_off) this.canvas_click_on()
@@ -215,7 +215,7 @@ export default class PointerEventManager {
 				break
 			default:
 				console.error(
-					`SVELTHREE > ${this.c_name} > PointerEventManager > add_canvas_pointer_listener : PointerEvent '${event_name}' not implemented!`
+					`SVELTHREE > ${this.c_name} > PointerEventManager > add_canvas_listener : PointerEvent '${event_name}' not implemented!`
 				)
 				break
 		}
