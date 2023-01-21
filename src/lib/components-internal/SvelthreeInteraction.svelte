@@ -26,12 +26,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		MapPropModifiers
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
-	import {
-		KEYBOARD_EVENTS,
-		FOCUS_EVENTS,
-		WHEEL_EVENTS,
-		DEFAULT_DOM_LISTENER_OPTIONS
-	} from "../constants/Interaction.js"
+	import { KEYBOARD_EVENTS, WHEEL_EVENTS, DEFAULT_DOM_LISTENER_OPTIONS } from "../constants/Interaction.js"
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
@@ -48,13 +43,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
 	import PointerEventManager from "../utils/interaction/PointerEventManager.js"
+	import FocusEventManager from "../utils/interaction/FocusEventManager.js"
 	import { invoke_queued_events, invoke_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 	import { has_on_directive, using_event, not_using_event } from "../utils/interaction/parent_comp_utils.js"
 	import {
 		event_not_registered,
 		event_is_registered,
 		register_event,
-		unregister_focus_event,
 		unregister_keyboard_event,
 		unregister_wheel_event,
 		cancel_or_stop_propagation
@@ -298,62 +293,42 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	}
 
 	//  FOCUS Event  //
+	/*
+	 ⚠️ `FocusEvent`s will work only if `shadow_dom_enabled: true`, since a `FocusEvent` can only occur on a document-appended DOM-Element.
+	*/
 
-	const focus_events_queue: (() => void)[] = []
 	let used_focus_events = new Set<string>([])
 
-	function add_focus_listener(event_name: SvelthreeSupportedFocusEvent): void {
-		if (has_on_directive(event_name, parent)) {
-			if (shadow_dom_enabled) {
-				if (event_not_registered(event_name, used_focus_events)) {
-					const listener_options =
-						get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop) ||
-						DEFAULT_DOM_LISTENER_OPTIONS
+	/**
+	 * **Adds / removes** the **ShadowDOM**-Event-**Listener** -> _`on_focus(evt)`_ for all `FocusEvent`s.
+	 */
+	const m_focus = new FocusEventManager(
+		shadow_dom_el,
+		user_modifiers_prop,
+		used_focus_events,
+		on_focus,
+		parent,
+		canvas_component,
+		shadow_dom_enabled,
+		c_name
+	)
 
-					set_focus_listener(event_name, listener_options)
-					register_event(event_name, used_focus_events, canvas_component)
-				} else {
-					//console.warn(`'${event_name}' already registered!`)
-				}
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > add_focus_listener > Cannot add 'FocusEvent' ShadowDOM-Listener, ShadowDOM disabled / ShadowDOM-Element not available!`,
-					{ shadow_dom_enabled, shadow_dom_el }
-				)
-			}
-		}
-	}
+	const focus_events_queue: (() => void)[] = []
 
-	function set_focus_listener(
-		event_name: SvelthreeSupportedFocusEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean }
-	) {
-		add_shadow_dom_focus_listeners(event_name, listener_options, on_focus)
-	}
-
-	function add_shadow_dom_focus_listeners(
-		event_name: SvelthreeSupportedInteractionEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
-		listener: ((evt: FocusEvent) => void) | undefined
-	): void {
-		if (shadow_dom_el) {
-			if (listener) {
-				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > add_shadow_dom_focus_listeners > Cannot add 'FocusEvent' ShadowDOM-Listener, Listener not available!`,
-					{ listener }
-				)
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > add_shadow_dom_focus_listeners > Cannot add 'FocusEvent' ShadowDOM-Listener, ShadowDOM-Element not available!`,
-				{ shadow_dom_enabled, shadow_dom_el }
-			)
-		}
-	}
-
-	/** ### +++  FOCUS Event   Shadow DOM Listener  +++ */
+	/** ### +++  FOCUS Event   Shadow DOM Listener  +++
+	 *
+	 * ☝️ _How / when this function is being invoked is controlled by the `FocusEventManager`._
+	 *
+	 * **Manages** Event-**processing** via `comp_interaction_dispatcher`:
+	 * - **queued** (`mode: 'always'`) or **immediate** (`mode: 'auto'`)
+	 * - `FocusEvent`s are **intersection independendant**
+	 *
+	 * Acts as:
+	 * - **ShadowDOM**-Event-**Listener** **only**
+	 *
+	 * ⚠️ `evt` is the **original** `FocusEvent`.
+	 *
+	 */
 	function on_focus(evt: FocusEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
@@ -361,13 +336,17 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		switch (render_mode) {
 			case "always": {
-				// QUEUED EVENT DISPATCHING: dispatch our CustomEvent / invoke callback on next render (raf aligned)
+				// QUEUED COMPONENT EVENT DISPATCHING
+				// dispatch `CustomEvent` -> invoke `on:<event_name>`-callback on next render (raf aligned)
+
 				const queued_focus_event = () => process_focusevent_intersection_indep(evt)
 				focus_events_queue.push(queued_focus_event)
 				break
 			}
 			case "auto":
-				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
+				// IMMEDIATE COMPONENT EVENT DISPATCHING
+				// immediatelly dispatch `CustomEvent` -> invoke `on:<event_name>`-callback immediatelly
+
 				process_focusevent_intersection_indep(evt)
 				break
 			default:
@@ -847,11 +826,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (using_event("keypress", parent)) add_keyboard_listener("keypress")
 		if (using_event("keyup", parent)) add_keyboard_listener("keyup")
 
-		// focus events
-		if (using_event("focus", parent)) add_focus_listener("focus") // doesn't bubble
-		if (using_event("blur", parent)) add_focus_listener("blur") // doesn't bubble
-		if (using_event("focusin", parent)) add_focus_listener("focusin") // bubbles
-		if (using_event("focusout", parent)) add_focus_listener("focusout") // bubbles
+		m_focus.check_adding_listeners()
 
 		// wheel event
 		if (using_event("wheel", parent)) add_wheel_listener("wheel")
@@ -865,11 +840,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (not_using_event("keypress", parent)) completely_remove_keyboard_listener("keypress")
 		if (not_using_event("keyup", parent)) completely_remove_keyboard_listener("keyup")
 
-		// focus events
-		if (not_using_event("focus", parent)) completely_remove_focus_listener("focus")
-		if (not_using_event("blur", parent)) completely_remove_focus_listener("blur")
-		if (not_using_event("focusin", parent)) completely_remove_focus_listener("focusin")
-		if (not_using_event("focusout", parent)) completely_remove_focus_listener("focusout")
+		m_focus.check_removing_listeners()
 
 		// wheel event
 		if (not_using_event("wheel", parent)) completely_remove_wheel_listener("wheel")
@@ -998,7 +969,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			wheel_events_queue.length = 0
 		}
 
-		remove_all_focus_listeners()
+		m_focus.remove_all_listeners()
 		focus_events_queue.length = 0
 	}
 
@@ -1077,30 +1048,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			}
 
 			unregister_wheel_event(event_name, used_wheel_events, canvas_component)
-		}
-	}
-
-	function remove_all_focus_listeners(): void {
-		for (let i = 0; i < FOCUS_EVENTS.length; i++) {
-			completely_remove_focus_listener(FOCUS_EVENTS[i])
-		}
-	}
-
-	// remove unused but registered (were used) listeners
-	function completely_remove_focus_listener(event_name: SvelthreeSupportedInteractionEvent): void {
-		if (event_is_registered(event_name, used_focus_events)) {
-			if (shadow_dom_enabled) {
-				if (shadow_dom_el) {
-					shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, true)
-					shadow_dom_el.removeEventListener(event_name, on_focus as EventListener, false)
-				} else {
-					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_focus_listener : Cannot remove '${event_name}' Listener from unavailable 'shadow_dom_el'!`,
-						{ shadow_dom_el }
-					)
-				}
-			}
-			unregister_focus_event(event_name, used_focus_events)
 		}
 	}
 
