@@ -872,7 +872,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		if (not_using_event("focusout", parent)) completely_remove_focus_listener("focusout")
 
 		// wheel event
-		if (not_using_event("wheel", parent)) completely_remove_focus_listener("wheel")
+		if (not_using_event("wheel", parent)) completely_remove_wheel_listener("wheel")
 
 		set_block_status()
 
