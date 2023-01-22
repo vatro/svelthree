@@ -17,7 +17,6 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		AllIntersections,
 		SvelthreeInteractableComponent,
 		SvelthreeInteractionEventDispatcher,
-		CanvasComponentEvent,
 		SvelthreeKeyboardEventDetail,
 		SvelthreePointerEventDetail,
 		SvelthreeFocusEventDetail,
@@ -26,7 +25,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		MapPropModifiers
 	} from "../types/types-extra.js"
 	import type { Writable } from "svelte/store"
-	import { KEYBOARD_EVENTS, WHEEL_EVENTS, DEFAULT_DOM_LISTENER_OPTIONS } from "../constants/Interaction.js"
+	import { WHEEL_EVENTS, DEFAULT_DOM_LISTENER_OPTIONS } from "../constants/Interaction.js"
 	import type {
 		SvelthreeSupportedInteractionEvent,
 		SupportedAddEventListenerOption,
@@ -44,13 +43,13 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	import { get_intersects_and_set_raycaster_data } from "../utils/interaction/intersection.js"
 	import PointerEventManager from "../utils/interaction/PointerEventManager.js"
 	import FocusEventManager from "../utils/interaction/FocusEventManager.js"
+	import KeyboardEventManager from "../utils/interaction/KeyboardEventManager.js"
 	import { invoke_queued_events, invoke_last_queued_event } from "../utils/interaction/eventqueue_utils.js"
 	import { has_on_directive, using_event, not_using_event } from "../utils/interaction/parent_comp_utils.js"
 	import {
 		event_not_registered,
 		event_is_registered,
 		register_event,
-		unregister_keyboard_event,
 		unregister_wheel_event,
 		cancel_or_stop_propagation
 	} from "../utils/interaction/event_utils.js"
@@ -366,151 +365,96 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 			comp_interaction_dispatcher(evt.type as SvelthreeSupportedFocusEvent, detail)
 	}
 
-	/*  KEYBOARD Event   NATIVE DOM / SHADOW DOM Event  -->  SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
+	//  KEYBOARD Event  //
+	/*
+		The default `KeyboardEvent`-Listener-host*, which can be either `document`, `window` or the `canvas`-DOM-Element, will invoke the standard `Canvas.on_keyboard_event_listener(evt)` `KeyboardEvent`-Listener.
+		The standard `Canvas.on_keyboard_event_listener(evt)` `KeyboardEvent`-Listener will dispatch an internal `canvas_<keyboard_event_name>` Event.
+		The `canvas_componet.$on('canvas_<keyboard_event_name>' ...)`-Listeners will invoke `this.on_keyboard(evt)` as a callback for further Event-processing (queued / immediate component-`CustomEvent` dispatching)
+		 
+		*_The default `KeyboardEvent`-Listener-host can be specified by the `Canvas.defaultKeyboardEventListenerHost` prop._
+		 TODO  RECONSIDER  In fact, we could let the user set anything as `KeyboardEvent`-Listener-host.
+			
+		In case `Canvas.defaultKeyboardEventListenerHost` was set to:
+			- ⚠️ 'canvas': the `<canvas>`-DOM-Element **has to have focus** in order to dispatch internal `'canvas_<keyboard_event_name>''`-Events for further Event-processing (queued / immediate component-`CustomEvent` dispatching).
+			- 'document' / 'window': the `<canvas>`-DOM-Element **doesn't have to have focus** in order to fire internal Events.
+	
+		⚠️ SPECIAL CASE 'selfhost' -> `Canvas.useShadowDom = true` + `'selfhost'`-modifier was specified (_`Canvas.defaultKeyboardEventListenerHost` is irrelevant_):
 
-	/*  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  -->  DISPATCH Component Event IMMEDIATELY / QUEUE  */
+				The `KeyboardEvent`-Listener will be added directly to the **ShadowDOM-Element** -> it **has to have focus** in order to invoke the
+				`on_keyboard(evt)` function (_Listener_) for further Event-processing (queued / immediate component-`CustomEvent` dispatching).
 
-	/*  KEYBOARD Event   SHADOW DOM Event LISTENER -> SHADOW DOM Event HANDLER  */
+		Concerning component-`CustomEvent` callbacks usage, especially using `<component_custom_event>.detail.evt.preventDefault()` / `<component_custom_event>.detail.evt.stopPropagation()`:
 
-	const keyboard_events_queue: (() => void)[] = []
+			- mode `auto`: will work!
+			- mode `always`: queued / will not work! (original event was already fired) ->  IMPORTANT  RULE use `modifiers` prop with mode `always`!
+			
+			GENERALLY RECOMMENDED -> use `onKeyboardEvent` prop, `window` / `document` global hosts or the `modifiers` prop:
+
+			-  BEST  use `onKeyboardEvent` `Canvas`-prop -> works for any `Canvas.defaultKeyboardEventListenerHost` and any render-mode!:
+				e.g. `<Canvas onKeyboardEvent={ (e) => { e.preventDefault() }}>`
+
+			-  BEST  use `window` / `document` global hosts -> works for any `Canvas.defaultKeyboardEventListenerHost` (`<canvas>` DOM-Element needs to have focus) and any render-mode!:
+				e.g. `window.addEventListener("keydown", (e) => { e.preventDefault() })`
+
+			-  GOOD  use `modifiers` prop -> works for any `Canvas.defaultKeyboardEventListenerHost` (`<canvas>` DOM-Element needs to have focus) and any render-mode:
+				e.g. `<Mesh modifiers={keydown: ["preventDefault", "nonpassive"]}} />`
+
+				⚠️ REMARK: using the `modifiers` prop can lead to confusion if `window` / `document` was set as `Canvas.defaultKeyboardEventListenerHost` (bad practice):
+				`preventDefault` inside any `modifiers` prop will affect all Events of the specified type globaly.
+				The confusing thing about this: user has set modifiers on a single component in a tree, but they'll be applied globally.
+	*/
+
 	let used_keyboard_events = new Set<string>([])
 
-	function add_keyboard_listener(event_name: SvelthreeSupportedKeyboardEvent): void {
-		if (has_on_directive(event_name, parent)) {
-			if (event_not_registered(event_name, used_keyboard_events)) {
-				const listener_options =
-					get_listener_options_from_modifiers_prop(event_name, user_modifiers_prop) ||
-					DEFAULT_DOM_LISTENER_OPTIONS
+	/**
+	 * **Adds / removes** `KeyboardEvent` related Listeners.
+	 */
+	const m_keyboard = new KeyboardEventManager(
+		shadow_dom_el,
+		user_modifiers_prop,
+		used_keyboard_events,
+		on_keyboard,
+		parent,
+		canvas_component,
+		shadow_dom_enabled,
+		c_name
+	)
 
-				set_keyboard_listener(event_name, listener_options)
+	const keyboard_events_queue: (() => void)[] = []
 
-				register_event(event_name, used_keyboard_events, canvas_component)
-			} else {
-				//console.warn(`'${event_name}' already registered!`)
-			}
-		}
-	}
-
-	function set_keyboard_listener(
-		event_name: SvelthreeSupportedKeyboardEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean }
-	) {
-		let modifiers_map: MapPropModifiers | undefined = undefined
-		modifiers_map = user_modifiers_prop
-
-		if (modifiers_map?.get(event_name)?.has("self")) {
-			// ShadowDOM-Element is directly listening to either `window` or `document` keyboard Event -> NOT managed by canvas!
-
-			// Listener is added to the corresponding ShadowDOM-Element.
-			// The shadow dom element has to have focus in order to react to keyboard input.
-			//  IMPORTANT  MODIFIERS possible! e.g. `preventDefault` modifier will have 'local' effect.
-			//  IMPORTANT  This won't work if 'defaultKeyboardEventListenerHost' was set to 'canvas' -->
-			//  IMPORTANT  this is only possible because ShadowDOM-Element can have focus! + keyboard events are pointer / mouse independant!
-			//  IMPORTANT  if would e.g. do the same wit wheel Event nothing will happen, because we cannot put the pointer over it! focus doesn't matter for wheel events!
-			if (shadow_dom_el) {
-				add_shadow_dom_keyboard_listener(event_name, listener_options, on_keyboard)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > set_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener (using the 'self'-modifier), ShadowDOM-Element not available!`,
-					{ shadow_dom_enabled, shadow_dom_el }
-				)
-			}
-		} else {
-			// <canvas> element is listening (listener attached to `window` or `document`) and spreading Keyboard events to all interactive
-			// components via an internal event, e.g. `canvas_keydown`, just like pointer events.
-			//  IMPORTANT  NO MODIFIERS possible, e.g. `preventDefault()` has to be called from inside some user defined global listener.
-			add_canvas_keyboard_listener(event_name)
-		}
-	}
-
-	function add_shadow_dom_keyboard_listener(
-		event_name: SvelthreeSupportedInteractionEvent,
-		listener_options: { [key in SupportedAddEventListenerOption]?: boolean },
-		listener: ((evt: KeyboardEvent) => void) | undefined
-	): void {
-		if (shadow_dom_el) {
-			if (listener) {
-				shadow_dom_el.addEventListener(event_name, listener as EventListener, listener_options)
-			} else {
-				console.error(
-					`SVELTHREE > ${c_name} > add_shadow_dom_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener, Listener not available!`,
-					{ listener }
-				)
-			}
-		} else {
-			console.error(
-				`SVELTHREE > ${c_name} > add_shadow_dom_keyboard_listener > Cannot add 'KeyboardEvent' ShadowDOM-Listener while using the 'self'-modifier, ShadowDOM-Element not available!`,
-				{ shadow_dom_enabled, shadow_dom_el }
-			)
-		}
-	}
-
-	/** Keyboard events are also being provided (re-dispatched) by the Canvas component. */
-	function add_canvas_keyboard_listener(event_name: SvelthreeSupportedInteractionEvent): void {
-		switch (event_name) {
-			case "keydown":
-				if (!remove_canvas_keydown_listener_on_directive) add_canvas_keydown_listener_on_directive()
-				break
-			case "keyup":
-				if (!remove_canvas_keyup_listener_on_directive) add_canvas_keyup_listener_on_directive()
-				break
-			case "keypress":
-				if (!remove_canvas_keypress_listener_on_directive) add_canvas_keypress_listener_on_directive()
-				break
-			default:
-				console.error(`SVELTHREE > ${c_name} : KeyboardEvent '${event_name}' not implemented!`)
-				break
-		}
-	}
-
-	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_keydown` -> `keydown`
-
-	let remove_canvas_keydown_listener_on_directive: (() => void) | undefined
-	function add_canvas_keydown_listener_on_directive(): void {
-		remove_canvas_keydown_listener_on_directive = canvas_component?.$on(
-			"canvas_keydown",
-			(evt: CanvasComponentEvent) =>
-				// global keyboard Listener -> we cancel nothing! so we can use the standard callback directly!
-				on_keyboard(evt.detail.event as KeyboardEvent, false)
-		)
-	}
-
-	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_keyup` -> `keyup`
-
-	let remove_canvas_keyup_listener_on_directive: (() => void) | undefined
-	function add_canvas_keyup_listener_on_directive(): void {
-		remove_canvas_keyup_listener_on_directive = canvas_component?.$on("canvas_keyup", (evt: CanvasComponentEvent) =>
-			// global keyboard Listener -> we cancel nothing! so we can use the standard callback directly!
-			on_keyboard(evt.detail.event as KeyboardEvent, false)
-		)
-	}
-
-	//  KEYBOARD Event   GLOBAL KeyboardEvent -> CANVAS Component KeyboardEvent  `canvas_press` -> `keypress`
-
-	let remove_canvas_keypress_listener_on_directive: (() => void) | undefined
-	function add_canvas_keypress_listener_on_directive(): void {
-		remove_canvas_keypress_listener_on_directive = canvas_component?.$on(
-			"canvas_keypress",
-			(evt: CanvasComponentEvent) => on_keyboard(evt.detail.event as KeyboardEvent, false)
-		)
-	}
-
-	/*  KEYBOARD Event   DISPATCH Component Event IMMEDIATELY / QUEUE  */
-
-	function on_keyboard(evt: KeyboardEvent, can_cancel_or_stop_propagation = true): void {
+	/**
+	 * ### +++  KEYBOARD Event   internal callback / Shadow DOM Listener  +++
+	 *
+	 * ☝️ _How / when this function is being invoked is controlled by the `KeyboardEventManager`._
+	 *
+	 * **Manages** Event-**processing** via `comp_interaction_dispatcher`:
+	 * - **queued** (`mode: 'always'`) or **immediate** (`mode: 'auto'`)
+	 * - `KeyboardEvent`s are **intersection independendant**
+	 *
+	 * Acts as:
+	 * - internal `canvas_component.$on`-**callback**
+	 * - ShadowDOM-Event-**Listener**
+	 *
+	 * ⚠️ `evt` is the **original** `KeyboardEvent` fired.
+	 */
+	function on_keyboard(evt: KeyboardEvent): void {
 		const render_mode = store?.rendererComponent?.get_mode()
 
-		if (can_cancel_or_stop_propagation) cancel_or_stop_propagation(evt, user_modifiers_prop)
+		cancel_or_stop_propagation(evt, user_modifiers_prop)
 
 		switch (render_mode) {
 			case "always": {
-				// QUEUED EVENT DISPATCHING: dispatch our CustomEvent / invoke callback on next render (raf aligned)
+				// QUEUED COMPONENT EVENT DISPATCHING
+				// dispatch `CustomEvent` -> invoke `on:<event_name>`-callback on next render (raf aligned)
+
 				const queued_keyboard_event = () => process_keyboardevent_intersection_indep(evt)
 				keyboard_events_queue.push(queued_keyboard_event)
 				break
 			}
 			case "auto":
-				// IMMEDIATE EVENT DISPATCHING (not raf aligned) / any changes will schedule a new render (raf aligned)
+				// IMMEDIATE COMPONENT EVENT DISPATCHING
+				// immediatelly dispatch `CustomEvent` -> invoke `on:<event_name>`-callback immediatelly
+
 				process_keyboardevent_intersection_indep(evt)
 				break
 			default:
@@ -821,10 +765,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		m_pointer.check_adding_listeners()
 
-		// keyboard events
-		if (using_event("keydown", parent)) add_keyboard_listener("keydown")
-		if (using_event("keypress", parent)) add_keyboard_listener("keypress")
-		if (using_event("keyup", parent)) add_keyboard_listener("keyup")
+		m_keyboard.check_adding_listeners()
 
 		m_focus.check_adding_listeners()
 
@@ -835,10 +776,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		m_pointer.check_removing_listeners()
 
-		// keyboard events (listener added to window)
-		if (not_using_event("keydown", parent)) completely_remove_keyboard_listener("keydown")
-		if (not_using_event("keypress", parent)) completely_remove_keyboard_listener("keypress")
-		if (not_using_event("keyup", parent)) completely_remove_keyboard_listener("keyup")
+		m_keyboard.check_removing_listeners()
 
 		m_focus.check_removing_listeners()
 
@@ -962,7 +900,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 
 		//  SVELTEKIT  CSR ONLY  keyboard Event listeners are being added to `window`.
 		if (browser) {
-			remove_all_keyboard_listeners()
+			m_keyboard.remove_all_listeners()
 			keyboard_events_queue.length = 0
 
 			remove_all_wheel_listeners()
@@ -973,50 +911,9 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 		focus_events_queue.length = 0
 	}
 
-	function remove_all_keyboard_listeners(): void {
-		for (let i = 0; i < KEYBOARD_EVENTS.length; i++) {
-			completely_remove_keyboard_listener(KEYBOARD_EVENTS[i])
-		}
-	}
-
 	function remove_all_wheel_listeners(): void {
 		for (let i = 0; i < WHEEL_EVENTS.length; i++) {
 			completely_remove_wheel_listener(WHEEL_EVENTS[i])
-		}
-	}
-
-	function completely_remove_keyboard_listener(event_name: SvelthreeSupportedInteractionEvent): void {
-		if (event_is_registered(event_name, used_keyboard_events)) {
-			switch (event_name) {
-				case "keydown":
-					if (remove_canvas_keydown_listener_on_directive) remove_canvas_keydown_listener_on_directive()
-					break
-				case "keyup":
-					if (remove_canvas_keyup_listener_on_directive) remove_canvas_keyup_listener_on_directive()
-					break
-				case "keypress":
-					if (remove_canvas_keypress_listener_on_directive) remove_canvas_keypress_listener_on_directive()
-					break
-				default:
-					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : KeyboardEvent '${event_name}' not implemented!`
-					)
-					break
-			}
-
-			if (shadow_dom_enabled) {
-				if (shadow_dom_el) {
-					shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, false)
-					shadow_dom_el.removeEventListener(event_name, on_keyboard as EventListener, true)
-				} else {
-					console.error(
-						`SVELTHREE > ${c_name} > completely_remove_keyboard_listener : Cannot remove Listener from unavailable 'shadow_dom_el'!`,
-						{ shadow_dom_el }
-					)
-				}
-			}
-
-			unregister_keyboard_event(event_name, used_keyboard_events, canvas_component)
 		}
 	}
 
