@@ -14,12 +14,12 @@ const event_is_registered = (event_name: SvelthreeSupportedInteractionEvent, tar
 const register_event = (
 	event_name: SvelthreeSupportedInteractionEvent,
 	target_set: Set<string>,
-	canvas_component: CanvasComponent | undefined
+	canvas_component?: CanvasComponent | undefined
 ) => {
-	if (canvas_component) {
-		if (!target_set.has(event_name)) {
-			target_set.add(event_name)
+	if (!target_set.has(event_name)) {
+		target_set.add(event_name)
 
+		if (canvas_component) {
 			// register specific events on the <canvas> element (some pointer, all keyboard events and wheel event)
 			switch (event_name) {
 				case "click":
@@ -35,11 +35,6 @@ const register_event = (
 					break
 			}
 		}
-	} else {
-		console.error(
-			`SVELTHREE > > ${c_name} > register_event : Cannot register '${event_name}' Event on 'Canvas' component, 'canvas_component' not available!`,
-			{ canvas_component }
-		)
 	}
 }
 
