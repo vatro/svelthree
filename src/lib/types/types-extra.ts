@@ -645,7 +645,7 @@ export type SvelthreeFocusEventModifier = SvelthreeStandardEventModifier
 export type SvelthreeKeyboardEvent = {
 	[P in keyof SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>]: SvelthreeInteractionEvent<SvelthreeKeyboardEventDetail>[P]
 }
-export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier
+export type SvelthreeKeyboardEventModifier = SvelthreeStandardEventModifier | "selfhost"
 
 export type SvelthreeWheelEvent = {
 	[P in keyof SvelthreeInteractionEvent<SvelthreeWheelEventDetail>]: SvelthreeInteractionEvent<SvelthreeWheelEventDetail>[P]

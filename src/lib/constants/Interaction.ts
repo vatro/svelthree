@@ -23,7 +23,7 @@ export const STANDARD_MODIFIERS_SET = new Set([...STANDARD_MODIFIERS])
 
 export const ALL_MODIFIERS = [
 	...STANDARD_MODIFIERS,
-	"self", // -> keyboard event only ->  TODO  still not sure if the name is ok or how to name it alternatively -> ???
+	"selfhost", // -> `KeyboardEvent` only -> add a `KeyboardEvent` Listener to the ShadowDOM-Element directly (not using internal Event via `Canvas`-component)
 	"intersect", // -> extra: atm  wheel event only
 	"global:document", // extra: atm wheel event only -> add listener directly to `document` -> should still redispatch event via shadow DOM, basically using `document` as canvas!
 	"global:window", // -> extra: atm wheel event only ->  add listener directly to `window` -> should still redispatch event via shadow DOM, basically using `window` as canvas!
