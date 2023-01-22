@@ -216,7 +216,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * - internal `canvas_component.$on`-**callback**
 	 * - ShadowDOM-Event-**Listener**
 	 *
-	 * ⚠️ `evt` can be a **synthetic** Event or the **original** Event.
+	 * ⚠️ `evt` can be a **synthetic** Event or the **original** Event fired.
 	 * In BOTH cases any `preventDefault` / `stopPropagation` modifiers have already been applied (_see `PointerEventManager.hybrid_dispatch(...)`_):
 	 * the original Event has been canceled and/or propagation stopped.
 	 */
@@ -325,7 +325,7 @@ This is a **svelthree** _SvelthreeInteraction_ Component.
 	 * Acts as:
 	 * - **ShadowDOM**-Event-**Listener** **only**
 	 *
-	 * ⚠️ `evt` is the **original** `FocusEvent`.
+	 * ⚠️ `evt` is the **original** `FocusEvent` fired.
 	 *
 	 */
 	function on_focus(evt: FocusEvent): void {
