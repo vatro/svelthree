@@ -103,7 +103,7 @@ export const postprocess_package = async (target_folder, using_accessors) => {
 			for (const file of files) {
 				//console.log(file)
 				if (file.includes(`.d.ts`)) {
-					all_files.push(`${folder_components}\\${file}`)
+					all_files.push(`${folder_components}/${file}`)
 				}
 			}
 		} catch (err) {
@@ -120,7 +120,7 @@ export const postprocess_package = async (target_folder, using_accessors) => {
 				for (const file of files) {
 					//console.log(file)
 					if (file.includes(`.d.ts`)) {
-						all_files.push(`${folder_components_internal}\\${file}`)
+						all_files.push(`${folder_components_internal}/${file}`)
 					}
 				}
 			} catch (err) {
@@ -203,7 +203,7 @@ export const postprocess_package = async (target_folder, using_accessors) => {
 							)
 						} else {
 							const str_getter = `get ${prop_name}`
-							const regex_getter = new RegExp("\\b" + str_getter + "\\b")
+							const regex_getter = new RegExp("/b" + str_getter + "/b")
 							const test_getter = content.match(regex_getter)
 
 							if (test_getter) {
