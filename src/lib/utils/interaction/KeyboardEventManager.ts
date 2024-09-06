@@ -24,11 +24,13 @@ export default class KeyboardEventManager {
 	private canvas_keyup_off: (() => void) | undefined | null
 	private canvas_keypress_off: (() => void) | undefined | null
 
+	private shadow_dom_listener_selfhost: EventListener | undefined
+
 	constructor(
 		private shadow_dom_el: SvelthreeShadowDOMElement | undefined | null,
 		private user_modifiers_prop: MapPropModifiers,
 		private used_keyboard_events: Set<string>,
-		private on_keyboard: (evt: KeyboardEvent, can_cancel_or_stop_propagation?: boolean) => void,
+		private on_keyboard: (evt: KeyboardEvent, selfhost?: boolean) => void,
 		private parent: SvelthreeInteractableComponent,
 		private canvas_component: CanvasComponent | undefined,
 		private shadow_dom_enabled: boolean | undefined,
@@ -65,8 +67,13 @@ export default class KeyboardEventManager {
 			// ⚠️ The ShadowDOM-Element has to have focus in order to react to keyboard input.
 
 			if (this.shadow_dom_el) {
-				this.shadow_dom_el.addEventListener(event_name, this.on_keyboard as EventListener, listener_options)
-				// ⚠️ we're adding the listener directly to ShadowDOM-Element, so we don't have to register it in the `canvas_component`
+				this.shadow_dom_el.addEventListener(
+					event_name,
+					(this.shadow_dom_listener_selfhost = ((evt: KeyboardEvent) =>
+						this.on_keyboard(evt, true)) as EventListener),
+					listener_options
+				)
+				// ⚠️ for modifier 'selfhost' we have to try to invoke `onKeyboardEvent` manually! See `SvelthreeInteraction.on_keyboard(...)`!
 				register_event(event_name, this.used_keyboard_events)
 			} else {
 				const message_1 = `Cannot add 'KeyboardEvent' ShadowDOM-Listener (using the 'selfhost'-modifier), ShadowDOM-Element not available!`
@@ -171,6 +178,18 @@ export default class KeyboardEventManager {
 				if (this.shadow_dom_el) {
 					this.shadow_dom_el.removeEventListener(event_name, this.on_keyboard as EventListener, false)
 					this.shadow_dom_el.removeEventListener(event_name, this.on_keyboard as EventListener, true)
+					if (this.shadow_dom_listener_selfhost) {
+						this.shadow_dom_el.removeEventListener(
+							event_name,
+							this.shadow_dom_listener_selfhost as EventListener,
+							false
+						)
+						this.shadow_dom_el.removeEventListener(
+							event_name,
+							this.shadow_dom_listener_selfhost as EventListener,
+							true
+						)
+					}
 				} else {
 					console.error(
 						`SVELTHREE > ${this.c_name} > KeyboardEventManager > remove_listener : Cannot remove Listener from unavailable 'shadow_dom_el'!`,

@@ -32,6 +32,7 @@ export type {
 
 // Interaction related
 export type {
+	DefaultKeyboardEventListenerHost,
 	SvelthreeInteractableComponent,
 	SvelthreePointerEvent,
 	SvelthreePointerEventDetail,
@@ -84,7 +85,8 @@ export type {
 	TargetableSvelthreeComponent,
 	SvelthreeLifecycleCallback,
 	SvelthreeLifecycleCallbackAsync,
-	SvelthreeLifecycleCallbackSync
+	SvelthreeLifecycleCallbackSync,
+	WebGLRendererMode
 } from "./types/types-extra.js"
 
 // Animation related

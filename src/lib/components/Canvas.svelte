@@ -4,8 +4,6 @@ This is a **svelthree** _Canvas_ Component.
 [ tbd ]  Link to Docs.
 -->
 <script context="module" lang="ts">
-	type PropKeyboardEventListenerHost = "canvas" | "document" | "window" | undefined
-	type PropWheelEventListenerHost = "canvas" | "document" | "window" | undefined
 	type CurrentComponentType = import("./Canvas.svelte").default
 
 	export interface IStateCanvas {
@@ -13,16 +11,19 @@ This is a **svelthree** _Canvas_ Component.
 		readonly log_dev: { [P in keyof LogDEV]: LogDEV[P] } | undefined
 		readonly log_rs: boolean
 		readonly log_lc: { [P in keyof LogLC]: LogLC[P] } | undefined
+		readonly w: number
+		readonly h: number
 		readonly id: string
 		readonly style: string | undefined
+		readonly class: string | undefined
 		readonly useShadowDom: boolean
 		readonly changeCursor: boolean
 		readonly interactive: boolean | undefined
 		readonly onPointerEvent: ((e: PointerEvent) => void) | undefined
-		readonly defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost
+		readonly defaultKeyboardEventListenerHost: DefaultKeyboardEventListenerHost
 		readonly onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined
-		readonly defaultWheelEventListenerHost: PropWheelEventListenerHost
 		readonly onWheelEvent: ((e: WheelEvent) => void) | undefined
+		readonly onFocusEvent: ((e: FocusEvent) => void) | undefined
 		readonly raycast: RaycastArray
 		readonly recursive: boolean
 		readonly tabindex: number | undefined
@@ -58,7 +59,12 @@ This is a **svelthree** _Canvas_ Component.
 	import { RaycastArray } from "../utils/RaycastArray.js"
 	import { writable } from "svelte/store"
 	import type { Writable } from "svelte/store"
-	import type { SvelthreeSupportedInteractionEvent, SvelthreeLifecycleCallback } from "../types/types-extra.js"
+	import type {
+		SvelthreeSupportedInteractionEvent,
+		SvelthreeLifecycleCallback,
+		DefaultKeyboardEventListenerHost,
+		DefaultWheelEventListenerHost
+	} from "../types/types-extra.js"
 
 	/**
 	 * SVELTEKIT  SSR
@@ -121,43 +127,64 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/**
-	 *  TODO  new description
+	 *  TODO  expose & new description
 	 * */
 	const default_pointerevent_listener_options: { capture: boolean } = { capture: true }
 	const pointer_capture = default_pointerevent_listener_options.capture
 
 	/**
-	 *  TODO  new description
+	 * Default `PointerEvent`-callback (_alternative to using the `modifiers` prop_) -> will be invoked (_**first**_) at every **`click`-related** `PointerEvent` (_click on the `<canvas>`-DOM Element_).
+	 * Best suited for canceling and/or stopping propagation, e.g. `<Canvas onPointerEvent={(e) => { e.preventDefault(); e.stopPropagation() }}`.
+	 *
+	 * ⚠️ **Has no effect** for **`pointermove`-related** Events: `pointermove`, `pointerover`, `pointerout` and `pointermoveover`
+	 *
+	 * * _`e: PointerEvent` is the **orginal** Event fired._
 	 */
 	export let onPointerEvent: ((e: PointerEvent) => void) | undefined = undefined
 
 	/**
 	 *  TODO  new description
 	 */
-	export let defaultKeyboardEventListenerHost: PropKeyboardEventListenerHost = "window"
+	export let defaultKeyboardEventListenerHost: DefaultKeyboardEventListenerHost = "window"
 	let keyboard_listener_host: Window | Document | HTMLCanvasElement | undefined
 
 	/**
-	 *  TODO  new description
+	 *  TODO  expose & new description
 	 */
 	const default_keyboardevent_listener_options: { capture: boolean } = { capture: true }
 	const keyboard_capture = default_keyboardevent_listener_options.capture
 
 	/**
-	 *  TODO  new description
+	 * Default `KeyboardEvent`-callback (_alternative to adding Listeners directly to `window`/`document` or using the `modifiers` prop_) -> will be invoked (_**first**_) on every `KeyboardEvent`.
+	 * Best suited for canceling and/or stopping propagation, e.g. `<Canvas onKeyboardEvent={(e) => { if (e.code === "ArrowDown") { e.preventDefault() }}`.
+	 *
+	 * _`e: KeyboardEvent` is the **orginal** Event fired._
 	 */
 	export let onKeyboardEvent: ((e: KeyboardEvent) => void) | undefined = undefined
 
 	/**  TODO  description */
-	export let defaultWheelEventListenerHost: PropWheelEventListenerHost = undefined
+	let defaultWheelEventListenerHost: DefaultWheelEventListenerHost = "canvas"
 	let wheel_listener_host: Window | Document | HTMLCanvasElement | undefined
 
-	/**  TODO  description */
+	/**  TODO  expose & description */
 	const default_wheelevent_listener_options: { capture: boolean } = { capture: true }
 	const wheel_capture = default_wheelevent_listener_options.capture
 
-	/**  TODO  description */
+	/**
+	 * Default `WheelEvent`-callback (_alternative to adding Listeners directly to `window`/`document` or using the `modifiers` prop_) -> will be invoked (_**first**_) on every `WheelEvent`.
+	 * Best suited for canceling and/or stopping propagation, e.g. `<Canvas onWheelEvent={(e) => { e.preventDefault() }}`.
+	 *
+	 * _`e: WheelEvent` is the **orginal** Event fired._
+	 */
 	export let onWheelEvent: ((e: WheelEvent) => void) | undefined = undefined
+
+	/**
+	 * Default `WheelEvent`-callback (_alternative to adding Listeners directly to `window`/`document` or using the `modifiers` prop_) -> will be invoked (_**first**_) on every `WheelEvent`.
+	 * Best suited for canceling and/or stopping propagation, e.g. `<Canvas onWheelEvent={(e) => { e.preventDefault() }}`.
+	 *
+	 * _`e: WheelEvent` is the **orginal** Event fired._
+	 */
+	export let onFocusEvent: ((e: FocusEvent) => void) | undefined = undefined
 
 	const canvas_interactivity: Writable<{ enabled: boolean | undefined }> = writable({ enabled: interactive })
 	setContext("canvas_interactivity", canvas_interactivity)
@@ -478,7 +505,7 @@ This is a **svelthree** _Canvas_ Component.
 	}
 
 	/** An array which accepts **svelthree components** or any Object3D to be checked for **intersection** with the ray -> see [`Raycaster`](https://threejs.org/docs/#api/en/core/Raycaster). */
-	export let raycast: RaycastArray = new RaycastArray()
+	export const raycast: RaycastArray = new RaycastArray()
 	// IMPORTANT  not reactive!
 	setContext("raycast", raycast)
 
@@ -601,6 +628,7 @@ This is a **svelthree** _Canvas_ Component.
 
 		if (!canvas_listeners.has(event_name)) {
 			switch (event_name) {
+				// ⚠️ `pointermove` related Events won't trigger `onPointerEvent`
 				case "click":
 				case "pointerdown":
 				case "pointerup":
@@ -617,6 +645,7 @@ This is a **svelthree** _Canvas_ Component.
 					)
 
 					break
+				// All `KeyboardEvent`s will trigger `onKeyboardEvent`
 				case "keydown":
 				case "keyup":
 				case "keypress":
@@ -637,6 +666,7 @@ This is a **svelthree** _Canvas_ Component.
 						)
 					}
 					break
+				// All `WheelEvent`s will trigger `onWheelEvent`
 				case "wheel":
 					canvas_listeners.set(event_name, {
 						total: 1
@@ -660,6 +690,7 @@ This is a **svelthree** _Canvas_ Component.
 
 				// IMPORTANT   FOCUS Event  Listeners not being registered / handled by the `Canvas` component.
 				//  FOCUS Event  Listeners are being added to the corresponding Shadow DOM element and dispatched immediatelly (mode:'auto') or queued (mode:'always') via Shadow DOM
+				// ⚠️ TODO  currently there's no `Canvas.onFocusEvent`! -> implement, should be registering-independant!
 			}
 		} else {
 			// update event usage count.
@@ -790,6 +821,34 @@ This is a **svelthree** _Canvas_ Component.
 				canvas_listeners.delete(event_name)
 			}
 		}
+	}
+
+	export const eventsOfTypeRegistered = (e: PointerEvent | KeyboardEvent | WheelEvent | FocusEvent): boolean => {
+		const evt_constructor = e.constructor.name
+
+		switch (evt_constructor) {
+			case "PointerEvent":
+				return (
+					canvas_listeners.has("click") ||
+					canvas_listeners.has("pointerdown") ||
+					canvas_listeners.has("pointerup")
+				)
+			case "KeyboardEvent":
+				return (
+					canvas_listeners.has("keydown") || canvas_listeners.has("keyup") || canvas_listeners.has("keypress")
+				)
+			case "WheelEvent":
+				return canvas_listeners.has("wheel")
+			case "FocusEvent":
+				return false
+			default:
+				console.error(`SVELTHREE > ${c_name} > eventsOfTypeRegistered : unsupported Event constructor!`, {
+					evt_constructor
+				})
+				break
+		}
+
+		return false
 	}
 
 	// --- Accessabilty ---
@@ -1073,16 +1132,19 @@ This is a **svelthree** _Canvas_ Component.
 					log_dev,
 					log_rs,
 					log_lc,
+					w,
+					h,
 					id,
 					style,
+					class: clazz,
 					useShadowDom,
 					changeCursor,
 					interactive,
 					onPointerEvent,
 					defaultKeyboardEventListenerHost,
 					onKeyboardEvent,
-					defaultWheelEventListenerHost,
 					onWheelEvent,
+					onFocusEvent,
 					raycast,
 					recursive,
 					tabindex,

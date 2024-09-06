@@ -47,15 +47,16 @@ export const POINTER_EVENTS = [
 	//"pointercancel"       ->  RECONSIDER  implement?
 ] as const
 
+// TODO  clean up
 export const KEYBOARD_EVENTS = ["keydown", "keypress", "keyup"] as const
-
+// TODO  clean up
 export const KEYBOARD_LISTENER_TARGETS = ["window", "document", "self"] as const
-
+// TODO  clean up
 export const FOCUS_EVENTS = ["focus", "blur", "focusin", "focusout"] as const
 
 // TODO  implement wheel events
 export const WHEEL_EVENTS = ["wheel"] as const
-
+// TODO  clean up
 export const WHEEL_LISTENER_TARGETS = ["window", "document", "self"] as const
 
 export const DEFAULT_DOM_LISTENER_OPTIONS: { [key in SupportedAddEventListenerOption]: boolean } = {
@@ -63,3 +64,5 @@ export const DEFAULT_DOM_LISTENER_OPTIONS: { [key in SupportedAddEventListenerOp
 	passive: true, // IMPORTANT  `svelthree` default value
 	once: false
 }
+
+export const DEFAULT_HOST = { WINDOW: "window", DOCUMENT: "document", CANVAS: "canvas" }

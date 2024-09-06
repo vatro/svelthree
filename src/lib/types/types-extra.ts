@@ -722,3 +722,7 @@ export type SvelthreeOnXFunction = <T extends SvelthreeSupportedInteractionEvent
 	type?: T,
 	callback?: CallbackMapAllEvents[T extends keyof CallbackMapAllEvents ? T : never]
 ) => Promise<boolean>
+
+export type StandardListenerHost = "canvas" | "document" | "window"
+export type DefaultKeyboardEventListenerHost = StandardListenerHost | undefined
+export type DefaultWheelEventListenerHost = StandardListenerHost | undefined

@@ -1,7 +1,7 @@
 {
 	"name": "svelthree",
 	"description": "Create three.js content with Svelte components.",
-	"version": "1.0.0-next.0.98",
+	"version": "1.0.0-next.0.99.66",
 	"author": "Vatroslav Vrbanic <hello@svelthree.dev> (https://svelthree.dev)",
 	"license": "MIT",
 	"scripts": {
@@ -13,7 +13,8 @@
 		"lint : quiet": "prettier --check . && eslint --quiet .",
 		"format": "prettier --write .",
 		"prebuild": "npm run format && npm run check && npm run lint && node ./prebuild.js",
-		"postbuild": "node ./postprocess_package.js && rimraf src/lib/acc"
+		"postbuild": "node ./postprocess_package.js && rm -rf src/lib/acc",
+		"publish:__my_npm": "cd ./package && npm pack --pack-destination ../../__my_npm/ ."
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^1.0.0",

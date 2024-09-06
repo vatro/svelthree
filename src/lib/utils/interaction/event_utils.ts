@@ -20,6 +20,7 @@ const register_event = (
 		target_set.add(event_name)
 
 		if (canvas_component) {
+			// TODO  why not register all events? -> see default callback triggering! (e.g. `onPointerEvent` or `onFocusEvent`)
 			// register specific events on the <canvas> element (some pointer, all keyboard events and wheel event)
 			switch (event_name) {
 				case "click":
@@ -136,6 +137,50 @@ const stop_propagation = (evt: PointerEvent | FocusEvent | KeyboardEvent | Wheel
 	evt.stopPropagation()
 }
 
+/**
+ * Invoke `Canvas.on<*>Event` default callback if specified and no `<*>Event`s were registered in `canvas_component`.
+ */
+const invoke_default_callback = (
+	evt: PointerEvent | KeyboardEvent | WheelEvent | FocusEvent,
+	callback_name: string,
+	canvas_component: CanvasComponent | undefined,
+	source: string
+) => {
+	const fn_name = `invoke_default_callback`
+	const cback_path = `canvas_comp_state.${callback_name}`
+
+	if (canvas_component) {
+		if (!canvas_component.eventsOfTypeRegistered(evt)) {
+			const canvas_comp_state = canvas_component.state()
+
+			if (canvas_comp_state) {
+				const default_callback = canvas_comp_state[callback_name as keyof typeof canvas_comp_state] as
+					| ((e: typeof evt) => void)
+					| undefined
+				if (default_callback) {
+					if (typeof default_callback === "function") {
+						default_callback(evt)
+					} else {
+						console.error(`SVELTHREE > ${source} > ${fn_name} : ${cback_path}' is not a function!`, {
+							default_callback
+						})
+					}
+				} else {
+					// nothing, silent
+				}
+			} else {
+				console.error(`SVELTHREE > ${source} > ${fn_name} : 'canvas_comp_state' value is invalid!`, {
+					canvas_comp_state
+				})
+			}
+		}
+	} else {
+		console.error(`SVELTHREE > ${source} > ${fn_name} : 'canvas_component' value is invalid!`, {
+			canvas_component
+		})
+	}
+}
+
 export {
 	event_not_registered,
 	event_is_registered,
@@ -144,5 +189,6 @@ export {
 	unregister_pointer_event,
 	unregister_keyboard_event,
 	unregister_focus_event,
-	unregister_wheel_event
+	unregister_wheel_event,
+	invoke_default_callback
 }

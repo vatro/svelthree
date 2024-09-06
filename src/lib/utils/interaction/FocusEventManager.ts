@@ -39,12 +39,15 @@ export default class PointerEventManager {
 						DEFAULT_DOM_LISTENER_OPTIONS
 
 					this.add_shadow_dom_listener(event_name, listener_options, this.on_focus)
-					register_event(event_name, this.used_focus_events, this.canvas_component)
+
+					// for `FocusEvent`s we have to invoke `Canvas.onFocusEvent` manually!
+					// no need for registered-check, `FocusEvent` will never be registered on the `Canvas`)! See `SvelthreeInteraction.on_focus`
+					register_event(event_name, this.used_focus_events)
 				} else {
 					//console.warn(`'${event_name}' already registered!`)
 				}
 			} else {
-				console.error(
+				console.warn(
 					`SVELTHREE > ${this.c_name} > FocusEventManager > add_listener > Cannot add 'FocusEvent' ShadowDOM-Listener, ShadowDOM disabled / ShadowDOM-Element not available!`,
 					{ shadow_dom_enabled: this.shadow_dom_enabled, shadow_dom_el: this.shadow_dom_el }
 				)
