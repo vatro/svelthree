@@ -400,6 +400,24 @@
 			"borderRadius": "6px"
 		},
 		{
+			"text": " internal callback / Shadow DOM Listener ",
+			"border": "2px solid #a3e635",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px"
+		},
+		{
+			"text": " Shadow DOM Listener ",
+			"border": "2px solid #a3e635",
+			"fontWeight": "normal",
+			"color": "#ffffff",
+			"backgroundColor": "none",
+			"overviewRulerColor": "grey",
+			"borderRadius": "6px"
+		},
+		{
 			"text": " RENDER EVENT interaction_2 ",
 			"border": "2px solid #ff3e00",
 			"fontWeight": "normal",
@@ -548,6 +566,15 @@
 			"backgroundColor": "none",
 			"overviewRulerColor": "grey",
 			"borderRadius": "6px"
+		},
+		{
+			"text": " RULE ",
+			"border": "3px solid #ffffff",
+			"fontWeight": "bold",
+			"color": "#ffffff",
+			"backgroundColor": "#ff0000",
+			"overviewRulerColor": "grey",
+			"borderRadius": "4px"
 		}
 	]
 }
