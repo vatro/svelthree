@@ -28,5 +28,5 @@
 		"./tests/**/*.ts",
 		"./tests/**/*.svelte"
 	],
-	"exclude": ["./node_modules/**", "./.svelte-kit/[!ambient.d.ts]**", "./src/routes/error_tests/**"]
+	"exclude": ["./node_modules/**", "./.svelte-kit/[!ambient.d.ts]**", "./src/routes/**"]
 }
