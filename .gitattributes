@@ -1,2 +1,19 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Fix 'LF' to 'CRLF' warning in Github Desktop, should apply to all repo users, see https://github.com/desktop/desktop/issues/18225
+* text eol=lf
+
+# ... unless the name matches the following
+# overriding patterns
+
+# Definitively text files 
+*.txt text
+*.c text
+*.h text
+
+# Ensure those won't be messed up with
+*.jpg binary
+*.png binary
+*.data binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
